@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MEGA": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}
