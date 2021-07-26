@@ -15,6 +15,7 @@ namespace CreamInstaller
         {
             InitializeComponent();
             Program.InstallForm = this;
+            Text = Program.ApplicationName;
         }
 
         public void UpdateProgress(int progress)

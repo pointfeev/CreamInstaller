@@ -128,7 +128,7 @@ namespace CreamInstaller
             this.MinimumSize = new System.Drawing.Size(500, 300);
             this.Name = "InstallForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "CreamAPI Downloader & Installer";
+            this.Text = "InstallForm";
             this.TopMost = true;
             this.Load += new System.EventHandler(this.OnLoad);
             this.ResumeLayout(false);

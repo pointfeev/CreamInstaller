@@ -11,9 +11,8 @@ namespace CreamInstaller
 {
     public static class Program
     {
-        /// <summary>
-        ///  The main entry point for the application.
-        /// </summary>
+        public static string ApplicationName = "CreamInstaller v" + Application.ProductVersion + ": CreamAPI Downloader & Installer";
+
         [STAThread]
         static void Main()
         {

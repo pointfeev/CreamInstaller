@@ -17,6 +17,7 @@ namespace CreamInstaller
         {
             InitializeComponent();
             Program.SelectForm = this;
+            Text = Program.ApplicationName;
         }
 
         private List<string> gameLibraryDirectories;

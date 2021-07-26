@@ -78,6 +78,7 @@ namespace CreamInstaller
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.allCheckBox);
             this.groupBox1.Controls.Add(this.flowLayoutPanel1);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
@@ -88,11 +89,12 @@ namespace CreamInstaller
             // 
             // allCheckBox
             // 
+            this.allCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.allCheckBox.AutoSize = true;
             this.allCheckBox.Checked = true;
             this.allCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.allCheckBox.Enabled = false;
-            this.allCheckBox.Location = new System.Drawing.Point(276, 257);
+            this.allCheckBox.Location = new System.Drawing.Point(414, 0);
             this.allCheckBox.Name = "allCheckBox";
             this.allCheckBox.Size = new System.Drawing.Size(40, 19);
             this.allCheckBox.TabIndex = 0;
@@ -135,7 +137,6 @@ namespace CreamInstaller
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.cancelButton;
             this.ClientSize = new System.Drawing.Size(484, 289);
-            this.Controls.Add(this.allCheckBox);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.progressBar1);
@@ -149,12 +150,12 @@ namespace CreamInstaller
             this.MinimumSize = new System.Drawing.Size(500, 328);
             this.Name = "SelectForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "CreamAPI Downloader & Installer";
+            this.Text = "SelectForm";
             this.TopMost = true;
             this.Load += new System.EventHandler(this.OnLoad);
             this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
