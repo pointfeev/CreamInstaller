@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
+using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using Onova;
@@ -46,7 +48,7 @@ namespace CreamInstaller
 
             GithubPackageResolver resolver = new GithubPackageResolver("pointfeev", "CreamInstaller", "CreamInstaller.zip");
             ZipPackageExtractor extractor = new ZipPackageExtractor();
-            updateManager = new UpdateManager(resolver, extractor);
+            updateManager = new UpdateManager(AssemblyMetadata.FromAssembly(Assembly.GetEntryAssembly(), Process.GetCurrentProcess().MainModule.FileName), resolver, extractor);
 
             if (latestVersion is null)
             {
