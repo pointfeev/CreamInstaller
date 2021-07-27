@@ -20,7 +20,7 @@ namespace CreamInstaller
 
         public void UpdateProgress(int progress)
         {
-            userProgressBar.Value = progress;
+            Program.UpdateProgressInstantly(userProgressBar, progress);
         }
 
         public void UpdateUser(string text, bool log = true)

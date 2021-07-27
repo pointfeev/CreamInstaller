@@ -52,6 +52,14 @@ namespace CreamInstaller
         public static Task OutputTask;
         public static string OutputFile;
 
+        public static void UpdateProgressInstantly(ProgressBar progressBar, int progress)
+        {
+            progressBar.Maximum++;
+            progressBar.Value = progress + 1;
+            progressBar.Value = progress;
+            progressBar.Maximum--;
+        }
+
         private static void UpdateProgress(int progress)
         {
             if (InstallForm != null)

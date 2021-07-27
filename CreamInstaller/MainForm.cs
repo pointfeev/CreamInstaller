@@ -99,8 +99,8 @@ namespace CreamInstaller
             Progress<double> progress = new Progress<double>();
             progress.ProgressChanged += new EventHandler<double>(delegate (object sender, double _progress)
             {
-                progressBar1.Value = (int)_progress;
                 label1.Text = $"Updating . . . {(int)_progress}%";
+                Program.UpdateProgressInstantly(progressBar1, (int)_progress);
             });
 
             label1.Text = "Updating . . . ";
