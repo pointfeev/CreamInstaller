@@ -109,7 +109,10 @@ namespace CreamInstaller
                 {
                     File.Delete(OutputFile);
                 }
-                catch (UnauthorizedAccessException) { }
+                catch (UnauthorizedAccessException)
+                {
+                    UpdateUser($"WARNING: Couldn't clean up downloaded archive ({OutputFile})");
+                }
                 OutputFile = null;
             }
             UpdateProgress(100);

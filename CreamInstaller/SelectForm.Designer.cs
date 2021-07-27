@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Windows.Forms;
 
 namespace CreamInstaller
@@ -50,7 +51,7 @@ namespace CreamInstaller
             this.acceptButton.Location = new System.Drawing.Point(322, 254);
             this.acceptButton.Name = "acceptButton";
             this.acceptButton.Size = new System.Drawing.Size(150, 23);
-            this.acceptButton.TabIndex = 0;
+            this.acceptButton.TabIndex = 101;
             this.acceptButton.Text = "Download and Install";
             this.acceptButton.UseVisualStyleBackColor = true;
             this.acceptButton.Click += new System.EventHandler(this.OnAccept);
@@ -61,7 +62,7 @@ namespace CreamInstaller
             this.cancelButton.Location = new System.Drawing.Point(12, 254);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 5;
+            this.cancelButton.TabIndex = 100;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.OnCancel);
@@ -97,10 +98,10 @@ namespace CreamInstaller
             this.allCheckBox.Location = new System.Drawing.Point(414, 0);
             this.allCheckBox.Name = "allCheckBox";
             this.allCheckBox.Size = new System.Drawing.Size(40, 19);
-            this.allCheckBox.TabIndex = 0;
+            this.allCheckBox.TabIndex = 1;
             this.allCheckBox.Text = "All";
             this.allCheckBox.UseVisualStyleBackColor = true;
-            this.allCheckBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.OnAllCheckBoxMouseClick);
+            this.allCheckBox.CheckedChanged += new System.EventHandler(this.OnAllCheckBoxChanged);
             // 
             // flowLayoutPanel1
             // 
@@ -128,7 +129,7 @@ namespace CreamInstaller
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(460, 15);
             this.label2.TabIndex = 10;
-            this.label2.Text = "Finding CreamAPI-applicable programs . . .";
+            this.label2.Text = "Loading . . .";
             // 
             // SelectForm
             // 

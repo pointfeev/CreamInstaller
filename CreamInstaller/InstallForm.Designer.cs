@@ -70,7 +70,7 @@ namespace CreamInstaller
             this.logTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.logTextBox.Size = new System.Drawing.Size(460, 164);
             this.logTextBox.TabIndex = 3;
-            this.logTextBox.Text = "Loading . . . ";
+            this.logTextBox.TabStop = false;
             this.logTextBox.WordWrap = false;
             // 
             // acceptButton
@@ -80,7 +80,7 @@ namespace CreamInstaller
             this.acceptButton.Location = new System.Drawing.Point(397, 226);
             this.acceptButton.Name = "acceptButton";
             this.acceptButton.Size = new System.Drawing.Size(75, 23);
-            this.acceptButton.TabIndex = 0;
+            this.acceptButton.TabIndex = 3;
             this.acceptButton.Text = "OK";
             this.acceptButton.UseVisualStyleBackColor = true;
             this.acceptButton.Click += new System.EventHandler(this.OnAccept);
@@ -92,7 +92,7 @@ namespace CreamInstaller
             this.retryButton.Location = new System.Drawing.Point(316, 226);
             this.retryButton.Name = "retryButton";
             this.retryButton.Size = new System.Drawing.Size(75, 23);
-            this.retryButton.TabIndex = 4;
+            this.retryButton.TabIndex = 2;
             this.retryButton.Text = "Retry";
             this.retryButton.UseVisualStyleBackColor = true;
             this.retryButton.Click += new System.EventHandler(this.OnRetry);
@@ -103,17 +103,15 @@ namespace CreamInstaller
             this.cancelButton.Location = new System.Drawing.Point(12, 226);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 5;
+            this.cancelButton.TabIndex = 1;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.OnCancel);
             // 
             // InstallForm
             // 
-            this.AcceptButton = this.acceptButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this.cancelButton;
             this.ClientSize = new System.Drawing.Size(484, 261);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.retryButton);

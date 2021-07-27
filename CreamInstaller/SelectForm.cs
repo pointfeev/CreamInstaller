@@ -158,6 +158,8 @@ namespace CreamInstaller
                             checkBox.Text = node.Name;
                             checkBox.Checked = true;
                             checkBox.Enabled = false;
+                            checkBox.TabStop = true;
+                            checkBox.TabIndex = 1 + checkBoxes.Count;
 
                             checkBox.CheckedChanged += (sender, e) =>
                             {
@@ -171,12 +173,10 @@ namespace CreamInstaller
                                 }
 
                                 acceptButton.Enabled = Program.ProgramSelections.Count > 0;
-                                if (acceptButton.Enabled)
-                                    acceptButton.Focus();
-                                else
-                                    cancelButton.Focus();
 
+                                allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
                                 allCheckBox.Checked = checkBoxes.TrueForAll(checkBox => checkBox.Checked);
+                                allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
                             };
                         });
                     }
@@ -187,7 +187,7 @@ namespace CreamInstaller
 
         private async void OnLoad(object sender, EventArgs e)
         {
-            label2.Text = "Finding CreamAPI-applicable programs . . . 0%";
+            label2.Text = "Finding CreamAPI-applicable programs on your computer . . . ";
             int maxProgress = 0;
             Progress<int> progress = new();
             progress.ProgressChanged += (sender, _progress) =>
@@ -199,7 +199,7 @@ namespace CreamInstaller
                 else
                 {
                     int p = (int)((float)((float)_progress / (float)maxProgress) * 100);
-                    label2.Text = "Finding CreamAPI-applicable programs . . . " + p + "% (" + _progress + "/" + maxProgress + ")";
+                    label2.Text = "Finding CreamAPI-applicable programs on your computer . . . " + p + "% (" + _progress + "/" + maxProgress + ")";
                     progressBar1.Value = p;
                 }
             };
@@ -215,7 +215,6 @@ namespace CreamInstaller
                 checkBox.Enabled = true;
 
             acceptButton.Enabled = true;
-            acceptButton.Focus();
         }
 
         private void OnAccept(object sender, EventArgs e)
@@ -233,13 +232,15 @@ namespace CreamInstaller
             Close();
         }
 
-        private bool allCheckBoxChecked = true;
-        private void OnAllCheckBoxMouseClick(object sender, EventArgs e)
+        private void OnAllCheckBoxChanged(object sender, EventArgs e)
         {
-            allCheckBoxChecked = !allCheckBoxChecked;
-            allCheckBox.Checked = allCheckBoxChecked;
+            bool shouldCheck = false;
             foreach (CheckBox checkBox in checkBoxes)
-                checkBox.Checked = allCheckBoxChecked;
+                if (!checkBox.Checked)
+                    shouldCheck = true;
+            foreach (CheckBox checkBox in checkBoxes)
+                checkBox.Checked = shouldCheck;
+            allCheckBox.Checked = shouldCheck;
         }
     }
 }

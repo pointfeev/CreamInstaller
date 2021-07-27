@@ -23,24 +23,27 @@ namespace CreamInstaller
             userProgressBar.Value = progress;
         }
 
-        public void UpdateUser(string text)
+        public void UpdateUser(string text, bool log = true)
         {
             userInfoLabel.Text = text;
-            if (logTextBox.IsDisposed == false)
+            if (log && !logTextBox.IsDisposed)
             {
-                logTextBox.AppendText(Environment.NewLine);
+                if (logTextBox.Text.Length > 0)
+                {
+                    logTextBox.AppendText(Environment.NewLine);
+                }
                 logTextBox.AppendText(userInfoLabel.Text);
             }
         }
 
         private async Task Install()
         {
-            foreach (ProgramSelection selection in Program.ProgramSelections)
+            foreach (ProgramSelection selection in Program.ProgramSelections.ToList())
             {
                 if (Program.Canceled)
-                    return;
+                    break;
 
-                Program.Cleanup(false, false);
+                Program.Cleanup(cancel: false, logout: false);
 
                 UpdateProgress(0);
                 UpdateUser("Downloading CreamAPI files for " + selection.ProgramName + " . . . ");
@@ -53,14 +56,14 @@ namespace CreamInstaller
                     }
                     catch (UnauthorizedAccessException)
                     {
-                        throw new Exception("Unable to delete old CreamAPI archive file for " + selection.ProgramName + "!");
+                        throw new Exception("Unable to delete old archive file for " + selection.ProgramName);
                     }
                 }
                 Progress<double> progress = new Progress<double>(delegate (double progress)
                 {
                     if (!Program.Canceled)
                     {
-                        UpdateUser($"Downloading CreamAPI files from MEGA . . . {(int)progress}%");
+                        UpdateUser($"Downloading CreamAPI files for {selection.ProgramName} . . . {(int)progress}%", log: false);
                         UpdateProgress((int)progress);
                     }
                 });
@@ -81,7 +84,7 @@ namespace CreamInstaller
                     if (entry.Name == "steam_api64.dll")
                     {
                         resourcePath = Path.GetDirectoryName(entry.FullName);
-                        UpdateUser("CreamAPI file path: " + resourcePath);
+                        UpdateUser("Got CreamAPI file path: " + resourcePath);
                     }
                     UpdateProgress((currentEntryCount / (Program.OutputArchive.Entries.Count * 2)) * 100);
                 }
@@ -97,12 +100,12 @@ namespace CreamInstaller
                 }
                 if (resources.Count < 1)
                 {
-                    throw new Exception("Unable to find CreamAPI files in downloaded archive for " + selection.ProgramName + "!");
+                    throw new Exception("Unable to find CreamAPI files in downloaded archive for " + selection.ProgramName);
                 }
                 UpdateProgress(100);
 
                 UpdateProgress(0);
-                UpdateUser("Extracting CreamAPI files for " + selection.ProgramName + " . . . ");
+                UpdateUser("Installing CreamAPI files for " + selection.ProgramName + " . . . ");
                 int currentFileCount = 0;
                 foreach (string directory in selection.SteamApiDllDirectories)
                 {
@@ -119,7 +122,7 @@ namespace CreamInstaller
                             }
                             catch (UnauthorizedAccessException)
                             {
-                                throw new Exception(selection.ProgramName + " is currently running!");
+                                throw new Exception("Unable to delete Steam API files for " + selection.ProgramName);
                             }
                         }
                         entry.ExtractToFile(file);
@@ -127,8 +130,13 @@ namespace CreamInstaller
                     }
                 }
                 UpdateProgress(100);
+
+                UpdateUser("CreamAPI successfully downloaded and installed for " + selection.ProgramName);
+                Program.ProgramSelections.Remove(selection);
             }
         }
+
+        private int ProgramCount = Program.ProgramSelections.Count;
 
         private async void Start()
         {
@@ -137,23 +145,19 @@ namespace CreamInstaller
             retryButton.Enabled = false;
             cancelButton.Enabled = true;
             userInfoLabel.Text = "Loading . . . ";
-            logTextBox.Text = "Loading . . . ";
-            string output;
+            logTextBox.Text = string.Empty;
             try
             {
                 await Install();
-                if (Program.ProgramSelections.Count > 1)
-                    output = "CreamAPI successfully installed for " + Program.ProgramSelections.Count + " programs!";
-                else
-                    output = "CreamAPI successfully installed for " + Program.ProgramSelections.First().ProgramName + "!";
+                Program.Cleanup();
+                UpdateUser("CreamAPI successfully downloaded and installed for " + ProgramCount + " program(s)");
             }
             catch (Exception exception)
             {
-                output = "Installation failed: " + exception.Message;
+                Program.Cleanup(logout: false);
+                UpdateUser("Operation failed: " + exception.Message);
                 retryButton.Enabled = true;
             }
-            Program.Cleanup();
-            UpdateUser(output);
             acceptButton.Enabled = true;
             cancelButton.Enabled = false;
         }
@@ -170,13 +174,13 @@ namespace CreamInstaller
 
         private void OnRetry(object sender, EventArgs e)
         {
-            Program.Cleanup(true, false);
+            Program.Cleanup(logout: false);
             Start();
         }
 
         private void OnCancel(object sender, EventArgs e)
         {
-            Program.Cleanup(true, false);
+            Program.Cleanup(logout: false);
         }
     }
 }
