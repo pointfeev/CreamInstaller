@@ -133,10 +133,8 @@ namespace CreamInstaller
             // 
             // SelectForm
             // 
-            this.AcceptButton = this.acceptButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this.cancelButton;
             this.ClientSize = new System.Drawing.Size(484, 289);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.groupBox1);
@@ -150,6 +148,7 @@ namespace CreamInstaller
             this.MinimizeBox = false;
             this.MinimumSize = new System.Drawing.Size(500, 328);
             this.Name = "SelectForm";
+            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "SelectForm";
             this.TopMost = true;

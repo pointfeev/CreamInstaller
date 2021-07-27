@@ -6,7 +6,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>ini.ico</ApplicationIcon>
 	<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-	<Version>1.0.2</Version>
+	<Version>1.1.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -23,9 +23,13 @@
   <ItemGroup>
     <PackageReference Include="Gameloop.Vdf" Version="0.6.1" />
     <PackageReference Include="MegaApiClient" Version="1.9.0" />
+    <PackageReference Include="Onova" Version="2.6.2" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="SelectForm.cs">
       <SubType>Form</SubType>
     </Compile>

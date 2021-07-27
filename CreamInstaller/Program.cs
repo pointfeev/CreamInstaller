@@ -23,7 +23,7 @@ namespace CreamInstaller
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.ApplicationExit += new EventHandler(OnApplicationExit);
-            Application.Run(new SelectForm());
+            Application.Run(new MainForm());
         }
 
         public static bool IsFilePathLocked(this string filePath)
