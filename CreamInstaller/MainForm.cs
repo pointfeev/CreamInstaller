@@ -118,8 +118,7 @@ namespace CreamInstaller
                 label1.Text = "Updating . . . 100%";
                 progressBar1.Value = 100;
                 updateManager.LaunchUpdater(latestVersion);
-                updateManager.Dispose();
-                Close();
+                Application.Exit();
             }
             else
             {
