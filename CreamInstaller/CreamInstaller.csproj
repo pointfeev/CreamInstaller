@@ -6,7 +6,23 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>ini.ico</ApplicationIcon>
 	<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-	<Version>1.0.0</Version>
+	<Version>1.0.1</Version>
+	<PackageIcon>ini.ico</PackageIcon>
+	<PackageIconUrl />
+	<Description>Automatically downloads and installs CreamAPI files for programs/games.</Description>
+	<PackageLicenseFile>LICENSE</PackageLicenseFile>
+	<Copyright>2021, pointfeev (https://github.com/pointfeev)</Copyright>
+	<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+	<PackageProjectUrl>https://github.com/pointfeev/CreamInstaller</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/pointfeev/CreamInstaller</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+	<PackageReleaseNotes>Automatically downloads and installs CreamAPI files for programs/games.</PackageReleaseNotes>
+	<PackageTags>steam, dlc</PackageTags>
+	<AssemblyName>CreamInstaller v$(Version)</AssemblyName>
+	<Company>CreamInstaller</Company>
+	<Product>CreamAPI Downloader &amp; Installer</Product>
+	<Authors>pointfeev</Authors>
+	<PackageId>pointfeev.creaminstaller</PackageId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -45,6 +61,17 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="ini.ico">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

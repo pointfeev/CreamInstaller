@@ -1,8 +1,11 @@
 using CG.Web.MegaApiClient;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -13,9 +16,37 @@ namespace CreamInstaller
     {
         public static string ApplicationName = "CreamInstaller v" + Application.ProductVersion + ": CreamAPI Downloader & Installer";
 
+        public static Assembly EntryAssembly = Assembly.GetEntryAssembly();
+        public static Process CurrentProcess = Process.GetCurrentProcess();
+        public static string CurrentProcessFilePath = CurrentProcess.MainModule.FileName;
+        public static string CurrentProcessDirectory = CurrentProcessFilePath.Substring(0, CurrentProcessFilePath.LastIndexOf("\\"));
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool AllocConsole();
+
         [STAThread]
         static void Main()
         {
+            Console.WriteLine(CurrentProcessDirectory);
+            DirectoryInfo directoryInfo = new DirectoryInfo(CurrentProcessDirectory);
+            FileInfo[] files = directoryInfo.GetFiles("CreamInstaller*.exe");
+            if (files.Length > 0)
+            {
+                foreach (FileInfo file in files)
+                {
+                    if (file.FullName != CurrentProcessFilePath)
+                    {
+                        try
+                        {
+                            File.Delete(file.FullName);
+                        }
+                        catch { }
+                    }
+
+                }
+            }
+
             MegaApiClient = new MegaApiClient();
             MegaApiClient.Login();
 
@@ -60,39 +91,24 @@ namespace CreamInstaller
             progressBar.Maximum--;
         }
 
-        private static void UpdateProgress(int progress)
-        {
-            if (InstallForm != null)
-            {
-                InstallForm.UpdateProgress(progress);
-            }
-        }
-        private static void UpdateUser(string text)
-        {
-            if (InstallForm != null)
-            {
-                InstallForm.UpdateUser(text);
-            }
-        }
-
         public static void Cleanup(bool cancel = true, bool logout = true)
         {
             Canceled = cancel;
             if (OutputArchive != null || CancellationTokenSource != null || OutputTask != null || OutputFile != null)
             {
-                UpdateProgress(0);
-                UpdateUser("Cleaning up . . . ");
+                InstallForm?.UpdateProgress(0);
+                InstallForm?.UpdateUser("Cleaning up . . . ");
             }
             if (OutputArchive != null)
             {
                 OutputArchive.Dispose();
                 OutputArchive = null;
-                UpdateProgress(25);
+                InstallForm?.UpdateProgress(25);
             }
             if (CancellationTokenSource != null)
             {
                 CancellationTokenSource.Cancel();
-                UpdateProgress(40);
+                InstallForm?.UpdateProgress(40);
             }
             if (OutputTask != null)
             {
@@ -103,13 +119,13 @@ namespace CreamInstaller
                 catch (AggregateException) { }
                 OutputTask.Dispose();
                 OutputTask = null;
-                UpdateProgress(50);
+                InstallForm?.UpdateProgress(50);
             }
             if (CancellationTokenSource != null)
             {
                 CancellationTokenSource.Dispose();
                 CancellationTokenSource = null;
-                UpdateProgress(75);
+                InstallForm?.UpdateProgress(75);
             }
             if (OutputFile != null && File.Exists(OutputFile))
             {
@@ -119,17 +135,17 @@ namespace CreamInstaller
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    UpdateUser($"WARNING: Couldn't clean up downloaded archive ({OutputFile})");
+                    InstallForm?.UpdateUser($"WARNING: Couldn't clean up downloaded archive ({OutputFile})");
                 }
                 OutputFile = null;
             }
-            UpdateProgress(100);
+            InstallForm?.UpdateProgress(100);
             if (logout && MegaApiClient != null && MegaApiClient.IsLoggedIn)
             {
-                UpdateProgress(0);
-                UpdateUser("Logging out of MEGA . . . ");
+                InstallForm?.UpdateProgress(0);
+                InstallForm?.UpdateUser("Logging out of MEGA . . . ");
                 MegaApiClient.Logout();
-                UpdateProgress(100);
+                InstallForm?.UpdateProgress(100);
             }
         }
 
