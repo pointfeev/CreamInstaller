@@ -126,7 +126,7 @@ namespace CreamInstaller
             this.MinimumSize = new System.Drawing.Size(500, 300);
             this.Name = "InstallForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "InstallForm";
             this.TopMost = true;
             this.Load += new System.EventHandler(this.OnLoad);

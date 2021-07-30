@@ -13,8 +13,9 @@ namespace CreamInstaller
 {
     public partial class SelectForm : Form
     {
-        public SelectForm()
+        public SelectForm(IWin32Window owner)
         {
+            Owner = owner as Form;
             InitializeComponent();
             Program.SelectForm = this;
             Text = Program.ApplicationName;
@@ -222,7 +223,7 @@ namespace CreamInstaller
             if (Program.ProgramSelections.Count > 0)
             {
                 Hide();
-                new InstallForm().ShowDialog();
+                new InstallForm(this).ShowDialog();
                 Close();
             }
         }

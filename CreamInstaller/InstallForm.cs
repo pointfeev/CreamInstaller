@@ -11,8 +11,9 @@ namespace CreamInstaller
 {
     public partial class InstallForm : Form
     {
-        public InstallForm()
+        public InstallForm(IWin32Window owner)
         {
+            Owner = owner as Form;
             InitializeComponent();
             Program.InstallForm = this;
             Text = Program.ApplicationName;

@@ -32,7 +32,7 @@ namespace CreamInstaller
             }
             
             Hide();
-            new SelectForm().ShowDialog();
+            new SelectForm(this).ShowDialog();
             Close();
         }
 
@@ -86,7 +86,7 @@ namespace CreamInstaller
             string FileName = Path.GetFileName(Program.CurrentProcessFilePath);
             if (FileName != "CreamInstaller.exe")
             {
-                if (new DialogForm().Show(Program.ApplicationName, SystemIcons.Warning,
+                if (new DialogForm(this).Show(Program.ApplicationName, SystemIcons.Warning,
                     "WARNING: CreamInstaller.exe was renamed!" +
                     "\n\nThis will cause unwanted behavior when updating the program!",
                     "Ignore", "Abort") == DialogResult.Cancel)
@@ -104,7 +104,7 @@ namespace CreamInstaller
                 }
                 catch (ApiException)
                 {
-                    if (new DialogForm().Show(Program.ApplicationName, SystemIcons.Warning,
+                    if (new DialogForm(this).Show(Program.ApplicationName, SystemIcons.Warning,
                         $"ERROR: Failed logging into MEGA!" +
                         "\n\nMEGA is likely offline, please try again later. . .",
                         "Retry", "Cancel") == DialogResult.OK)

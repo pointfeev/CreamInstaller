@@ -6,8 +6,9 @@ namespace CreamInstaller
 {
     public partial class DialogForm : Form
     {
-        public DialogForm()
+        public DialogForm(IWin32Window owner)
         {
+            Owner = owner as Form;
             InitializeComponent();
         }
 

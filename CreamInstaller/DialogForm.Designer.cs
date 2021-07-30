@@ -131,7 +131,7 @@ namespace CreamInstaller
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "DialogForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "DialogForm";
             this.TopMost = true;
             ((System.ComponentModel.ISupportInitialize)(this.icon)).EndInit();
