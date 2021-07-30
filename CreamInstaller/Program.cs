@@ -115,7 +115,6 @@ namespace CreamInstaller
                 {
                     InstallForm?.UpdateUser($"WARNING: Couldn't clean up downloaded archive ({OutputFile})", LogColor.Warning);
                 }
-                InstallForm?.UpdateUser($"WARNING: Couldn't clean up downloaded archive ({OutputFile})", LogColor.Warning);
                 OutputFile = null;
             }
             InstallForm?.UpdateProgress(100);
