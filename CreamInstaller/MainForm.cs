@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
+using CG.Web.MegaApiClient;
 using Onova;
 using Onova.Models;
 using Onova.Services;
@@ -81,6 +83,42 @@ namespace CreamInstaller
 
         private void OnLoad(object sender, EventArgs e)
         {
+            string FileName = Path.GetFileName(Program.CurrentProcessFilePath);
+            if (FileName != "CreamInstaller.exe")
+            {
+                if (new DialogForm().Show(Program.ApplicationName, SystemIcons.Warning,
+                    "WARNING: CreamInstaller.exe was renamed!" +
+                    "\n\nThis will cause unwanted behavior when updating the program!",
+                    "Ignore", "Abort") == DialogResult.Cancel)
+                {
+                    Environment.Exit(0);
+                }
+            }
+
+            Program.MegaApiClient = new MegaApiClient();
+            void Login()
+            {
+                try
+                {
+                    Program.MegaApiClient.Login();
+                }
+                catch (ApiException)
+                {
+                    if (new DialogForm().Show(Program.ApplicationName, SystemIcons.Warning,
+                        $"ERROR: Failed logging into MEGA!" +
+                        "\n\nMEGA is likely offline, please try again later. . .",
+                        "Retry", "Cancel") == DialogResult.OK)
+                    {
+                        Login();
+                    }
+                    else
+                    {
+                        Environment.Exit(0);
+                    }
+                }
+            }
+            Login();
+
             OnLoad();
         }
 
@@ -117,8 +155,6 @@ namespace CreamInstaller
 
             if (!(updateManager is null) && updateManager.IsUpdatePrepared(latestVersion))
             {
-                label1.Text = "Updating . . . 100%";
-                progressBar1.Value = 100;
                 updateManager.LaunchUpdater(latestVersion);
                 Application.Exit();
             }

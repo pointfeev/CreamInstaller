@@ -14,6 +14,10 @@ namespace CreamInstaller
 {
     public static class Program
     {
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool AllocConsole();
+
         public static string ApplicationName = "CreamInstaller v" + Application.ProductVersion + ": CreamAPI Downloader & Installer";
 
         public static Assembly EntryAssembly = Assembly.GetEntryAssembly();
@@ -21,35 +25,9 @@ namespace CreamInstaller
         public static string CurrentProcessFilePath = CurrentProcess.MainModule.FileName;
         public static string CurrentProcessDirectory = CurrentProcessFilePath.Substring(0, CurrentProcessFilePath.LastIndexOf("\\"));
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool AllocConsole();
-
         [STAThread]
         static void Main()
         {
-            Console.WriteLine(CurrentProcessDirectory);
-            DirectoryInfo directoryInfo = new DirectoryInfo(CurrentProcessDirectory);
-            FileInfo[] files = directoryInfo.GetFiles("CreamInstaller*.exe");
-            if (files.Length > 0)
-            {
-                foreach (FileInfo file in files)
-                {
-                    if (file.FullName != CurrentProcessFilePath)
-                    {
-                        try
-                        {
-                            File.Delete(file.FullName);
-                        }
-                        catch { }
-                    }
-
-                }
-            }
-
-            MegaApiClient = new MegaApiClient();
-            MegaApiClient.Login();
-
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

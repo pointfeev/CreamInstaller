@@ -18,7 +18,7 @@
 	<RepositoryType>git</RepositoryType>
 	<PackageReleaseNotes>Automatically downloads and installs CreamAPI files for programs/games.</PackageReleaseNotes>
 	<PackageTags>steam, dlc</PackageTags>
-	<AssemblyName>CreamInstaller v$(Version)</AssemblyName>
+	<AssemblyName>CreamInstaller</AssemblyName>
 	<Company>CreamInstaller</Company>
 	<Product>CreamAPI Downloader &amp; Installer</Product>
 	<Authors>pointfeev</Authors>
