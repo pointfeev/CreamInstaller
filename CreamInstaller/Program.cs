@@ -75,7 +75,7 @@ namespace CreamInstaller
             if (OutputArchive != null || CancellationTokenSource != null || OutputTask != null || OutputFile != null)
             {
                 InstallForm?.UpdateProgress(0);
-                InstallForm?.UpdateUser("Cleaning up . . . ");
+                InstallForm?.UpdateUser("Cleaning up . . . ", LogColor.Cleanup);
             }
             if (OutputArchive != null)
             {
@@ -113,15 +113,16 @@ namespace CreamInstaller
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    InstallForm?.UpdateUser($"WARNING: Couldn't clean up downloaded archive ({OutputFile})");
+                    InstallForm?.UpdateUser($"WARNING: Couldn't clean up downloaded archive ({OutputFile})", LogColor.Warning);
                 }
+                InstallForm?.UpdateUser($"WARNING: Couldn't clean up downloaded archive ({OutputFile})", LogColor.Warning);
                 OutputFile = null;
             }
             InstallForm?.UpdateProgress(100);
             if (logout && MegaApiClient != null && MegaApiClient.IsLoggedIn)
             {
                 InstallForm?.UpdateProgress(0);
-                InstallForm?.UpdateUser("Logging out of MEGA . . . ");
+                InstallForm?.UpdateUser("Logging out of MEGA . . . ", LogColor.Cleanup);
                 MegaApiClient.Logout();
                 InstallForm?.UpdateProgress(100);
             }

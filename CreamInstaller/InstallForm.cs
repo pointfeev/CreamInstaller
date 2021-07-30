@@ -6,6 +6,7 @@ using System.Threading;
 using System.IO.Compression;
 using System.Collections.Generic;
 using System.Linq;
+using System.Drawing;
 
 namespace CreamInstaller
 {
@@ -17,6 +18,7 @@ namespace CreamInstaller
             InitializeComponent();
             Program.InstallForm = this;
             Text = Program.ApplicationName;
+            logTextBox.BackColor = LogColor.Background;
         }
 
         public void UpdateProgress(int progress)
@@ -24,16 +26,14 @@ namespace CreamInstaller
             Program.UpdateProgressInstantly(userProgressBar, progress);
         }
 
-        public void UpdateUser(string text, bool log = true)
+        public void UpdateUser(string text, Color color, bool log = true)
         {
             userInfoLabel.Text = text;
             if (log && !logTextBox.IsDisposed)
             {
                 if (logTextBox.Text.Length > 0)
-                {
-                    logTextBox.AppendText(Environment.NewLine);
-                }
-                logTextBox.AppendText(userInfoLabel.Text);
+                    logTextBox.AppendText(Environment.NewLine, color);
+                logTextBox.AppendText(userInfoLabel.Text, color);
             }
         }
 
@@ -47,7 +47,7 @@ namespace CreamInstaller
                 Program.Cleanup(cancel: false, logout: false);
 
                 UpdateProgress(0);
-                UpdateUser("Downloading CreamAPI files for " + selection.ProgramName + " . . . ");
+                UpdateUser("Downloading CreamAPI files for " + selection.ProgramName + " . . . ", LogColor.Operation);
                 Program.OutputFile = selection.ProgramDirectory + "\\" + selection.DownloadNode.Name;
                 if (File.Exists(Program.OutputFile))
                 {
@@ -64,7 +64,7 @@ namespace CreamInstaller
                 {
                     if (!Program.Canceled)
                     {
-                        UpdateUser($"Downloading CreamAPI files for {selection.ProgramName} . . . {(int)progress}%", log: false);
+                        UpdateUser($"Downloading CreamAPI files for {selection.ProgramName} . . . {(int)progress}%", LogColor.Operation, log: false);
                         UpdateProgress((int)progress);
                     }
                 });
@@ -74,7 +74,7 @@ namespace CreamInstaller
                 UpdateProgress(100);
 
                 UpdateProgress(0);
-                UpdateUser("Searching for CreamAPI files in downloaded archive . . . ");
+                UpdateUser("Searching for CreamAPI files in downloaded archive . . . ", LogColor.Operation);
                 string resourcePath = null;
                 List<ZipArchiveEntry> resources = new List<ZipArchiveEntry>();
                 Program.OutputArchive = ZipFile.OpenRead(Program.OutputFile);
@@ -85,7 +85,7 @@ namespace CreamInstaller
                     if (entry.Name == "steam_api64.dll")
                     {
                         resourcePath = Path.GetDirectoryName(entry.FullName);
-                        UpdateUser("Got CreamAPI file path: " + resourcePath);
+                        UpdateUser("Got CreamAPI file path: " + resourcePath, LogColor.Resource);
                     }
                     UpdateProgress((currentEntryCount / (Program.OutputArchive.Entries.Count * 2)) * 100);
                 }
@@ -95,7 +95,7 @@ namespace CreamInstaller
                     if (!string.IsNullOrEmpty(entry.Name) && Path.GetDirectoryName(entry.FullName) == resourcePath)
                     {
                         resources.Add(entry);
-                        UpdateUser("Found CreamAPI file: " + entry.Name);
+                        UpdateUser("Found CreamAPI file: " + entry.Name, LogColor.Resource);
                     }
                     UpdateProgress((currentEntryCount / (Program.OutputArchive.Entries.Count * 2)) * 100);
                 }
@@ -106,7 +106,7 @@ namespace CreamInstaller
                 UpdateProgress(100);
 
                 UpdateProgress(0);
-                UpdateUser("Installing CreamAPI files for " + selection.ProgramName + " . . . ");
+                UpdateUser("Installing CreamAPI files for " + selection.ProgramName + " . . . ", LogColor.Operation);
                 int currentFileCount = 0;
                 foreach (string directory in selection.SteamApiDllDirectories)
                 {
@@ -114,7 +114,7 @@ namespace CreamInstaller
                     {
                         currentFileCount++;
                         string file = directory + "\\" + entry.Name;
-                        UpdateUser(file);
+                        UpdateUser(file, LogColor.Resource);
                         if (File.Exists(file))
                         {
                             try
@@ -132,7 +132,7 @@ namespace CreamInstaller
                 }
                 UpdateProgress(100);
 
-                UpdateUser("CreamAPI successfully downloaded and installed for " + selection.ProgramName);
+                UpdateUser("CreamAPI successfully downloaded and installed for " + selection.ProgramName, LogColor.Success);
                 Program.ProgramSelections.Remove(selection);
             }
         }
@@ -149,12 +149,12 @@ namespace CreamInstaller
             {
                 await Install();
                 Program.Cleanup();
-                UpdateUser("CreamAPI successfully downloaded and installed for " + ProgramCount + " program(s)");
+                UpdateUser("CreamAPI successfully downloaded and installed for " + ProgramCount + " program(s)", LogColor.Success);
             }
             catch (Exception exception)
             {
                 Program.Cleanup(logout: false);
-                UpdateUser("Operation failed: " + exception.Message);
+                UpdateUser("Operation failed: " + exception.Message, LogColor.Error);
                 retryButton.Enabled = true;
             }
             acceptButton.Enabled = true;

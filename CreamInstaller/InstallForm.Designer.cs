@@ -32,10 +32,10 @@ namespace CreamInstaller
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(InstallForm));
             this.userProgressBar = new System.Windows.Forms.ProgressBar();
             this.userInfoLabel = new System.Windows.Forms.Label();
-            this.logTextBox = new System.Windows.Forms.TextBox();
             this.acceptButton = new System.Windows.Forms.Button();
             this.retryButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
+            this.logTextBox = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
             // 
             // userProgressBar
@@ -56,22 +56,6 @@ namespace CreamInstaller
             this.userInfoLabel.Size = new System.Drawing.Size(460, 15);
             this.userInfoLabel.TabIndex = 2;
             this.userInfoLabel.Text = "Loading . . . ";
-            // 
-            // logTextBox
-            // 
-            this.logTextBox.AcceptsReturn = true;
-            this.logTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.logTextBox.Location = new System.Drawing.Point(12, 56);
-            this.logTextBox.Multiline = true;
-            this.logTextBox.Name = "logTextBox";
-            this.logTextBox.ReadOnly = true;
-            this.logTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.logTextBox.Size = new System.Drawing.Size(460, 164);
-            this.logTextBox.TabIndex = 3;
-            this.logTextBox.TabStop = false;
-            this.logTextBox.WordWrap = false;
             // 
             // acceptButton
             // 
@@ -108,14 +92,30 @@ namespace CreamInstaller
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.OnCancel);
             // 
+            // logTextBox
+            // 
+            this.logTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.logTextBox.HideSelection = false;
+            this.logTextBox.Location = new System.Drawing.Point(12, 56);
+            this.logTextBox.Name = "logTextBox";
+            this.logTextBox.ReadOnly = true;
+            this.logTextBox.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedBoth;
+            this.logTextBox.Size = new System.Drawing.Size(460, 164);
+            this.logTextBox.TabIndex = 4;
+            this.logTextBox.TabStop = false;
+            this.logTextBox.Text = "";
+            this.logTextBox.WordWrap = false;
+            // 
             // InstallForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(484, 261);
+            this.Controls.Add(this.logTextBox);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.retryButton);
-            this.Controls.Add(this.logTextBox);
             this.Controls.Add(this.acceptButton);
             this.Controls.Add(this.userProgressBar);
             this.Controls.Add(this.userInfoLabel);
@@ -131,17 +131,16 @@ namespace CreamInstaller
             this.TopMost = true;
             this.Load += new System.EventHandler(this.OnLoad);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
         private System.Windows.Forms.ProgressBar userProgressBar;
         private System.Windows.Forms.Label userInfoLabel;
-        private System.Windows.Forms.TextBox logTextBox;
         private System.Windows.Forms.Button acceptButton;
         private System.Windows.Forms.Button retryButton;
         private System.Windows.Forms.Button cancelButton;
+        private System.Windows.Forms.RichTextBox logTextBox;
     }
 }
 
