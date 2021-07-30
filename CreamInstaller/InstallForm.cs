@@ -55,7 +55,7 @@ namespace CreamInstaller
                     {
                         File.Delete(Program.OutputFile);
                     }
-                    catch (UnauthorizedAccessException)
+                    catch
                     {
                         throw new Exception("Unable to delete old archive file for " + selection.ProgramName);
                     }
@@ -121,7 +121,7 @@ namespace CreamInstaller
                             {
                                 File.Delete(file);
                             }
-                            catch (UnauthorizedAccessException)
+                            catch
                             {
                                 throw new Exception("Unable to delete Steam API files for " + selection.ProgramName);
                             }

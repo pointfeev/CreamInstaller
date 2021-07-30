@@ -18,6 +18,9 @@ namespace CreamInstaller
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
 
+        [DllImport("user32.dll")]
+        static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
         public static string ApplicationName = "CreamInstaller v" + Application.ProductVersion + ": CreamAPI Downloader & Installer";
 
         public static Assembly EntryAssembly = Assembly.GetEntryAssembly();
@@ -28,11 +31,17 @@ namespace CreamInstaller
         [STAThread]
         static void Main()
         {
-            Application.SetHighDpiMode(HighDpiMode.SystemAware);
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.ApplicationExit += new EventHandler(OnApplicationExit);
-            Application.Run(new MainForm());
+            bool createdNew = true;
+            Mutex mutex = new Mutex(true, "CreamInstaller", out createdNew);
+            if (createdNew)
+            {
+                Application.SetHighDpiMode(HighDpiMode.SystemAware);
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.ApplicationExit += new EventHandler(OnApplicationExit);
+                Application.Run(new MainForm());
+            }
+            mutex.Close();
         }
 
         public static bool IsFilePathLocked(this string filePath)
@@ -111,7 +120,7 @@ namespace CreamInstaller
                 {
                     File.Delete(OutputFile);
                 }
-                catch (UnauthorizedAccessException)
+                catch
                 {
                     InstallForm?.UpdateUser($"WARNING: Couldn't clean up downloaded archive ({OutputFile})", LogColor.Warning);
                 }
