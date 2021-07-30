@@ -145,8 +145,6 @@ namespace CreamInstaller
             acceptButton.Enabled = false;
             retryButton.Enabled = false;
             cancelButton.Enabled = true;
-            userInfoLabel.Text = "Loading . . . ";
-            logTextBox.Text = string.Empty;
             try
             {
                 await Install();
@@ -165,6 +163,8 @@ namespace CreamInstaller
 
         private void OnLoad(object sender, EventArgs e)
         {
+            userInfoLabel.Text = "Loading . . . ";
+            logTextBox.Text = string.Empty;
             Start();
         }
 
