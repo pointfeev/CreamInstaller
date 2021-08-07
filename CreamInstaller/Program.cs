@@ -24,10 +24,9 @@ namespace CreamInstaller
         public static string BackupFileExtension = ".creaminstaller.backup";
 
         [STAThread]
-        static void Main()
+        private static void Main()
         {
-            bool createdNew = true;
-            Mutex mutex = new Mutex(true, "CreamInstaller", out createdNew);
+            Mutex mutex = new Mutex(true, "CreamInstaller", out bool createdNew);
             if (createdNew)
             {
                 Application.SetHighDpiMode(HighDpiMode.SystemAware);
@@ -47,7 +46,9 @@ namespace CreamInstaller
                 $"ERROR: {selection.ProgramName} is currently running!" +
                 "\n\nPlease close the program/game to continue . . .",
                 "Retry", "Cancel") == DialogResult.OK)
+                {
                     return IsProgramRunningDialog(form, selection);
+                }
             }
             else
             {

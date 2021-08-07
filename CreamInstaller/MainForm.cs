@@ -1,12 +1,12 @@
-﻿using System;
+﻿using CG.Web.MegaApiClient;
+using Onova;
+using Onova.Models;
+using Onova.Services;
+using System;
 using System.Drawing;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
-using CG.Web.MegaApiClient;
-using Onova;
-using Onova.Models;
-using Onova.Services;
 
 namespace CreamInstaller
 {
@@ -28,7 +28,7 @@ namespace CreamInstaller
                 cancellationTokenSource.Dispose();
                 cancellationTokenSource = null;
             }
-            
+
             Hide();
             new SelectForm(this).ShowDialog();
             Close();
@@ -60,7 +60,9 @@ namespace CreamInstaller
                     cancellationTokenSource.Dispose();
                     cancellationTokenSource = null;
                     if (checkForUpdatesResult.CanUpdate)
+                    {
                         latestVersion = checkForUpdatesResult.LastVersion;
+                    }
                 }
                 catch { }
             }

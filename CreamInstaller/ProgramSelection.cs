@@ -18,7 +18,9 @@ namespace CreamInstaller
                 {
                     string file = directory + "\\steam_api64.dll";
                     if (file.IsFilePathLocked())
+                    {
                         return true;
+                    }
                 }
                 return false;
             }
@@ -32,13 +34,17 @@ namespace CreamInstaller
         public void Add()
         {
             if (!Program.ProgramSelections.Contains(this))
+            {
                 Program.ProgramSelections.Add(this);
+            }
         }
 
         public void Remove()
         {
             if (Program.ProgramSelections.Contains(this))
+            {
                 Program.ProgramSelections.Remove(this);
+            }
         }
     }
 }

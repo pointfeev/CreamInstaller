@@ -1,14 +1,14 @@
-﻿using System;
-using System.Windows.Forms;
-using CG.Web.MegaApiClient;
-using System.Collections.Generic;
-using System.IO;
-using Microsoft.Win32;
+﻿using CG.Web.MegaApiClient;
 using Gameloop.Vdf;
 using Gameloop.Vdf.Linq;
-using System.Threading.Tasks;
+using Microsoft.Win32;
+using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace CreamInstaller
 {
@@ -59,16 +59,25 @@ namespace CreamInstaller
         private List<string> GetSteamApiDllDirectoriesFromGameDirectory(string gameDirectory, List<string> steamApiDllDirectories = null)
         {
             if (steamApiDllDirectories is null)
+            {
                 steamApiDllDirectories = new();
+            }
+
             string file = gameDirectory + "\\steam_api64.dll";
             if (File.Exists(file))
+            {
                 steamApiDllDirectories.Add(gameDirectory);
+            }
+
             foreach (string _directory in Directory.GetDirectories(gameDirectory))
             {
                 GetSteamApiDllDirectoriesFromGameDirectory(_directory, steamApiDllDirectories);
             }
             if (!steamApiDllDirectories.Any())
+            {
                 return null;
+            }
+
             return steamApiDllDirectories;
         }
 
@@ -93,7 +102,7 @@ namespace CreamInstaller
             return null;
         }
 
-        private List<CheckBox> checkBoxes = new();
+        private readonly List<CheckBox> checkBoxes = new();
         private void GetCreamApiApplicablePrograms(IProgress<int> progress)
         {
             int maxProgress = 0;
@@ -120,7 +129,9 @@ namespace CreamInstaller
                         rootDirectory = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
                         string launcherDirectory = rootDirectory + "\\Programs\\Paradox Interactive";
                         if (Directory.Exists(launcherDirectory))
+                        {
                             directories = GetSteamApiDllDirectoriesFromGameDirectory(launcherDirectory);
+                        }
                     }
                     else
                     {
@@ -138,51 +149,51 @@ namespace CreamInstaller
                     }
                     if (!(directories is null))
                     {
-                        flowLayoutPanel1.Invoke((MethodInvoker) delegate
-                        {
-                            ProgramSelection selection = new();
-                            selection.ProgramName = node.Name;
-                            selection.ProgramDirectory = rootDirectory;
-                            selection.SteamApiDllDirectories = new();
-                            selection.SteamApiDllDirectories.AddRange(directories);
+                        flowLayoutPanel1.Invoke((MethodInvoker)delegate
+                       {
+                           ProgramSelection selection = new();
+                           selection.ProgramName = node.Name;
+                           selection.ProgramDirectory = rootDirectory;
+                           selection.SteamApiDllDirectories = new();
+                           selection.SteamApiDllDirectories.AddRange(directories);
 
-                            foreach (INode _node in fileNodes)
-                            {
-                                if (_node.Type == NodeType.File && _node.ParentId == node.Id)
-                                {
-                                    selection.DownloadNode = _node;
-                                    break;
-                                }
-                            }
+                           foreach (INode _node in fileNodes)
+                           {
+                               if (_node.Type == NodeType.File && _node.ParentId == node.Id)
+                               {
+                                   selection.DownloadNode = _node;
+                                   break;
+                               }
+                           }
 
-                            CheckBox checkBox = new();
-                            checkBoxes.Add(checkBox);
-                            checkBox.AutoSize = true;
-                            checkBox.Parent = flowLayoutPanel1;
-                            checkBox.Text = node.Name;
-                            checkBox.Checked = true;
-                            checkBox.Enabled = false;
-                            checkBox.TabStop = true;
-                            checkBox.TabIndex = 1 + checkBoxes.Count;
+                           CheckBox checkBox = new();
+                           checkBoxes.Add(checkBox);
+                           checkBox.AutoSize = true;
+                           checkBox.Parent = flowLayoutPanel1;
+                           checkBox.Text = node.Name;
+                           checkBox.Checked = true;
+                           checkBox.Enabled = false;
+                           checkBox.TabStop = true;
+                           checkBox.TabIndex = 1 + checkBoxes.Count;
 
-                            checkBox.CheckedChanged += (sender, e) =>
-                            {
-                                if (checkBox.Checked)
-                                {
-                                    selection.Add();
-                                }
-                                else
-                                {
-                                    selection.Remove();
-                                }
+                           checkBox.CheckedChanged += (sender, e) =>
+                           {
+                               if (checkBox.Checked)
+                               {
+                                   selection.Add();
+                               }
+                               else
+                               {
+                                   selection.Remove();
+                               }
 
-                                acceptButton.Enabled = Program.ProgramSelections.Count > 0;
+                               acceptButton.Enabled = Program.ProgramSelections.Count > 0;
 
-                                allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
-                                allCheckBox.Checked = checkBoxes.TrueForAll(checkBox => checkBox.Checked);
-                                allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
-                            };
-                        });
+                               allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
+                               allCheckBox.Checked = checkBoxes.TrueForAll(checkBox => checkBox.Checked);
+                               allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
+                           };
+                       });
                     }
                 }
             }
@@ -202,7 +213,7 @@ namespace CreamInstaller
                 }
                 else
                 {
-                    int p = (int)((float)((float)_progress / (float)maxProgress) * 100);
+                    int p = (int)((float)(_progress / (float)maxProgress) * 100);
                     label2.Text = "Finding CreamAPI-applicable programs on your computer . . . " + p + "% (" + _progress + "/" + maxProgress + ")";
                     progressBar1.Value = p;
                 }
@@ -218,7 +229,9 @@ namespace CreamInstaller
             {
                 allCheckBox.Enabled = true;
                 foreach (CheckBox checkBox in checkBoxes)
+                {
                     checkBox.Enabled = true;
+                }
 
                 acceptButton.Enabled = true;
             }
@@ -226,7 +239,7 @@ namespace CreamInstaller
             {
                 noneFoundLabel.Visible = true;
             }
-            
+
         }
 
         private void OnAccept(object sender, EventArgs e)
@@ -236,7 +249,9 @@ namespace CreamInstaller
                 foreach (ProgramSelection selection in Program.ProgramSelections)
                 {
                     if (!Program.IsProgramRunningDialog(this, selection))
+                    {
                         return;
+                    }
                 }
 
                 Hide();
@@ -254,7 +269,10 @@ namespace CreamInstaller
                     Location = new Point(X, Y);
                     Show();
                 }
-                else Close();
+                else
+                {
+                    Close();
+                }
             }
         }
 
@@ -267,10 +285,18 @@ namespace CreamInstaller
         {
             bool shouldCheck = false;
             foreach (CheckBox checkBox in checkBoxes)
+            {
                 if (!checkBox.Checked)
+                {
                     shouldCheck = true;
+                }
+            }
+
             foreach (CheckBox checkBox in checkBoxes)
+            {
                 checkBox.Checked = shouldCheck;
+            }
+
             allCheckBox.Checked = shouldCheck;
         }
     }

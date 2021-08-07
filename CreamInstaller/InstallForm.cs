@@ -1,12 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Threading;
-using System.IO.Compression;
-using System.Collections.Generic;
-using System.Linq;
-using System.Drawing;
 
 namespace CreamInstaller
 {
@@ -34,7 +34,10 @@ namespace CreamInstaller
             if (log && !logTextBox.IsDisposed)
             {
                 if (logTextBox.Text.Length > 0)
+                {
                     logTextBox.AppendText(Environment.NewLine, color);
+                }
+
                 logTextBox.AppendText(userInfoLabel.Text, color);
             }
         }
@@ -102,7 +105,9 @@ namespace CreamInstaller
             UpdateProgress(100);
 
             if (!Program.IsProgramRunningDialog(this, selection))
+            {
                 throw new OperationCanceledException();
+            }
 
             UpdateProgress(0);
             UpdateUser("Installing CreamAPI files for " + selection.ProgramName + " . . . ", LogColor.Operation);
@@ -159,7 +164,9 @@ namespace CreamInstaller
                     string file = keyValuePair.Key;
                     string backup = keyValuePair.Value;
                     if (!string.IsNullOrEmpty(backup))
+                    {
                         File.Delete(backup);
+                    }
                 }
             }
             UpdateProgress(100);
@@ -170,12 +177,16 @@ namespace CreamInstaller
             foreach (ProgramSelection selection in Program.ProgramSelections.ToList())
             {
                 if (Program.Canceled)
+                {
                     break;
+                }
 
                 Program.Cleanup(cancel: false, logout: false);
 
                 if (!Program.IsProgramRunningDialog(this, selection))
+                {
                     throw new OperationCanceledException();
+                }
 
                 try
                 {
@@ -202,7 +213,7 @@ namespace CreamInstaller
             }
         }
 
-        private int ProgramCount = Program.ProgramSelections.Count;
+        private readonly int ProgramCount = Program.ProgramSelections.Count;
 
         private async void Start()
         {
