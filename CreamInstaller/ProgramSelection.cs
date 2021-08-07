@@ -10,6 +10,20 @@ namespace CreamInstaller
         public List<string> SteamApiDllDirectories;
         public INode DownloadNode;
 
+        public bool ProgramIsRunning
+        {
+            get
+            {
+                foreach (string directory in SteamApiDllDirectories)
+                {
+                    string file = directory + "\\steam_api64.dll";
+                    if (file.IsFilePathLocked())
+                        return true;
+                }
+                return false;
+            }
+        }
+
         public ProgramSelection()
         {
             Program.ProgramSelections.Add(this);

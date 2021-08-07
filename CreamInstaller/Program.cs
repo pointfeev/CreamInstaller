@@ -28,6 +28,8 @@ namespace CreamInstaller
         public static string CurrentProcessFilePath = CurrentProcess.MainModule.FileName;
         public static string CurrentProcessDirectory = CurrentProcessFilePath.Substring(0, CurrentProcessFilePath.LastIndexOf("\\"));
 
+        public static string BackupFileExtension = ".creaminstaller.backup";
+
         [STAThread]
         static void Main()
         {

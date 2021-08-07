@@ -8,6 +8,7 @@ using Gameloop.Vdf;
 using Gameloop.Vdf.Linq;
 using System.Threading.Tasks;
 using System.Drawing;
+using System.Linq;
 
 namespace CreamInstaller
 {
@@ -60,14 +61,14 @@ namespace CreamInstaller
             if (steamApiDllDirectories is null)
                 steamApiDllDirectories = new();
             string file = gameDirectory + "\\steam_api64.dll";
-            if (File.Exists(file) && !file.IsFilePathLocked())
-            {
+            if (File.Exists(file))
                 steamApiDllDirectories.Add(gameDirectory);
-            }
             foreach (string _directory in Directory.GetDirectories(gameDirectory))
             {
                 GetSteamApiDllDirectoriesFromGameDirectory(_directory, steamApiDllDirectories);
             }
+            if (!steamApiDllDirectories.Any())
+                return null;
             return steamApiDllDirectories;
         }
 
@@ -113,11 +114,13 @@ namespace CreamInstaller
                 {
                     progress.Report(++curProgress);
                     string rootDirectory;
-                    List<string> directories;
+                    List<string> directories = null;
                     if (node.Name == "Paradox Launcher")
                     {
                         rootDirectory = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                        directories = GetSteamApiDllDirectoriesFromGameDirectory(rootDirectory + "\\Programs\\Paradox Interactive");
+                        string launcherDirectory = rootDirectory + "\\Programs\\Paradox Interactive";
+                        if (Directory.Exists(launcherDirectory))
+                            directories = GetSteamApiDllDirectoriesFromGameDirectory(launcherDirectory);
                     }
                     else
                     {
@@ -211,20 +214,63 @@ namespace CreamInstaller
             label2.Hide();
             progressBar1.Hide();
 
-            allCheckBox.Enabled = true;
-            foreach (CheckBox checkBox in checkBoxes)
-                checkBox.Enabled = true;
+            if (Program.ProgramSelections.Any())
+            {
+                allCheckBox.Enabled = true;
+                foreach (CheckBox checkBox in checkBoxes)
+                    checkBox.Enabled = true;
 
-            acceptButton.Enabled = true;
+                acceptButton.Enabled = true;
+            }
+            else
+            {
+                noneFoundLabel.Visible = true;
+            }
+            
         }
 
         private void OnAccept(object sender, EventArgs e)
         {
             if (Program.ProgramSelections.Count > 0)
             {
+                foreach (ProgramSelection selection in Program.ProgramSelections)
+                {
+                    bool Check()
+                    {
+                        if (selection.ProgramIsRunning)
+                        {
+                            if (new DialogForm(this).Show(Program.ApplicationName, SystemIcons.Error,
+                            $"ERROR: {selection.ProgramName} is currently running!" +
+                            "\n\nPlease close the program/game to continue . . .",
+                            "Retry", "Cancel") == DialogResult.OK)
+                                return Check();
+                        }
+                        else
+                        {
+                            return true;
+                        }    
+                        return false;
+                    }
+                    if (!Check())
+                        return;
+                }
+
                 Hide();
-                new InstallForm(this).ShowDialog();
-                Close();
+                InstallForm installForm = new InstallForm(this);
+                installForm.ShowDialog();
+                if (installForm.Reselecting)
+                {
+                    foreach (CheckBox checkBox in checkBoxes)
+                    {
+                        checkBox.Checked = !checkBox.Checked;
+                        checkBox.Checked = !checkBox.Checked; // to fire CheckChanged
+                    }
+                    int X = (installForm.Location.X + installForm.Size.Width / 2) - Size.Width / 2;
+                    int Y = (installForm.Location.Y + installForm.Size.Height / 2) - Size.Height / 2;
+                    Location = new Point(X, Y);
+                    Show();
+                }
+                else Close();
             }
         }
 

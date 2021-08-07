@@ -36,6 +36,7 @@ namespace CreamInstaller
             this.retryButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
             this.logTextBox = new System.Windows.Forms.RichTextBox();
+            this.reselectButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // userProgressBar
@@ -44,7 +45,7 @@ namespace CreamInstaller
             | System.Windows.Forms.AnchorStyles.Right)));
             this.userProgressBar.Location = new System.Drawing.Point(12, 27);
             this.userProgressBar.Name = "userProgressBar";
-            this.userProgressBar.Size = new System.Drawing.Size(460, 23);
+            this.userProgressBar.Size = new System.Drawing.Size(500, 23);
             this.userProgressBar.TabIndex = 1;
             // 
             // userInfoLabel
@@ -53,7 +54,7 @@ namespace CreamInstaller
             | System.Windows.Forms.AnchorStyles.Right)));
             this.userInfoLabel.Location = new System.Drawing.Point(12, 9);
             this.userInfoLabel.Name = "userInfoLabel";
-            this.userInfoLabel.Size = new System.Drawing.Size(460, 15);
+            this.userInfoLabel.Size = new System.Drawing.Size(500, 15);
             this.userInfoLabel.TabIndex = 2;
             this.userInfoLabel.Text = "Loading . . . ";
             // 
@@ -61,7 +62,7 @@ namespace CreamInstaller
             // 
             this.acceptButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.acceptButton.Enabled = false;
-            this.acceptButton.Location = new System.Drawing.Point(397, 226);
+            this.acceptButton.Location = new System.Drawing.Point(437, 286);
             this.acceptButton.Name = "acceptButton";
             this.acceptButton.Size = new System.Drawing.Size(75, 23);
             this.acceptButton.TabIndex = 3;
@@ -73,7 +74,7 @@ namespace CreamInstaller
             // 
             this.retryButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.retryButton.Enabled = false;
-            this.retryButton.Location = new System.Drawing.Point(316, 226);
+            this.retryButton.Location = new System.Drawing.Point(356, 286);
             this.retryButton.Name = "retryButton";
             this.retryButton.Size = new System.Drawing.Size(75, 23);
             this.retryButton.TabIndex = 2;
@@ -84,7 +85,7 @@ namespace CreamInstaller
             // cancelButton
             // 
             this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.cancelButton.Location = new System.Drawing.Point(12, 226);
+            this.cancelButton.Location = new System.Drawing.Point(12, 286);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
             this.cancelButton.TabIndex = 1;
@@ -102,17 +103,29 @@ namespace CreamInstaller
             this.logTextBox.Name = "logTextBox";
             this.logTextBox.ReadOnly = true;
             this.logTextBox.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedBoth;
-            this.logTextBox.Size = new System.Drawing.Size(460, 164);
+            this.logTextBox.Size = new System.Drawing.Size(500, 224);
             this.logTextBox.TabIndex = 4;
             this.logTextBox.TabStop = false;
             this.logTextBox.Text = "";
             this.logTextBox.WordWrap = false;
             // 
+            // reselectButton
+            // 
+            this.reselectButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.reselectButton.Location = new System.Drawing.Point(135, 286);
+            this.reselectButton.Name = "reselectButton";
+            this.reselectButton.Size = new System.Drawing.Size(175, 23);
+            this.reselectButton.TabIndex = 5;
+            this.reselectButton.Text = "Reselect Programs / Games";
+            this.reselectButton.UseVisualStyleBackColor = true;
+            this.reselectButton.Click += new System.EventHandler(this.OnReselect);
+            // 
             // InstallForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(484, 261);
+            this.ClientSize = new System.Drawing.Size(524, 321);
+            this.Controls.Add(this.reselectButton);
             this.Controls.Add(this.logTextBox);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.retryButton);
@@ -123,7 +136,7 @@ namespace CreamInstaller
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(500, 300);
+            this.MinimumSize = new System.Drawing.Size(540, 360);
             this.Name = "InstallForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -141,6 +154,7 @@ namespace CreamInstaller
         private System.Windows.Forms.Button retryButton;
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.RichTextBox logTextBox;
+        private System.Windows.Forms.Button reselectButton;
     }
 }
 

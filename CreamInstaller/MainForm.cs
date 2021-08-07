@@ -104,7 +104,7 @@ namespace CreamInstaller
                 }
                 catch (ApiException)
                 {
-                    if (new DialogForm(this).Show(Program.ApplicationName, SystemIcons.Warning,
+                    if (new DialogForm(this).Show(Program.ApplicationName, SystemIcons.Error,
                         $"ERROR: Failed logging into MEGA!" +
                         "\n\nMEGA is likely offline, please try again later. . .",
                         "Retry", "Cancel") == DialogResult.OK)

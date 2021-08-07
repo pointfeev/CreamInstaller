@@ -38,6 +38,7 @@ namespace CreamInstaller
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.allCheckBox = new System.Windows.Forms.CheckBox();
+            this.noneFoundLabel = new System.Windows.Forms.Label();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.label2 = new System.Windows.Forms.Label();
@@ -80,6 +81,7 @@ namespace CreamInstaller
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.allCheckBox);
+            this.groupBox1.Controls.Add(this.noneFoundLabel);
             this.groupBox1.Controls.Add(this.flowLayoutPanel1);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
@@ -102,6 +104,18 @@ namespace CreamInstaller
             this.allCheckBox.Text = "All";
             this.allCheckBox.UseVisualStyleBackColor = true;
             this.allCheckBox.CheckedChanged += new System.EventHandler(this.OnAllCheckBoxChanged);
+            // 
+            // noneFoundLabel
+            // 
+            this.noneFoundLabel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.noneFoundLabel.Enabled = false;
+            this.noneFoundLabel.Location = new System.Drawing.Point(3, 19);
+            this.noneFoundLabel.Name = "noneFoundLabel";
+            this.noneFoundLabel.Size = new System.Drawing.Size(454, 170);
+            this.noneFoundLabel.TabIndex = 0;
+            this.noneFoundLabel.Text = "No CreamAPI-applicable programs or games were found on your computer!";
+            this.noneFoundLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.noneFoundLabel.Visible = false;
             // 
             // flowLayoutPanel1
             // 
@@ -169,6 +183,7 @@ namespace CreamInstaller
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox allCheckBox;
+        private Label noneFoundLabel;
     }
 }
 
