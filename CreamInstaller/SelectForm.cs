@@ -235,23 +235,7 @@ namespace CreamInstaller
             {
                 foreach (ProgramSelection selection in Program.ProgramSelections)
                 {
-                    bool Check()
-                    {
-                        if (selection.ProgramIsRunning)
-                        {
-                            if (new DialogForm(this).Show(Program.ApplicationName, SystemIcons.Error,
-                            $"ERROR: {selection.ProgramName} is currently running!" +
-                            "\n\nPlease close the program/game to continue . . .",
-                            "Retry", "Cancel") == DialogResult.OK)
-                                return Check();
-                        }
-                        else
-                        {
-                            return true;
-                        }    
-                        return false;
-                    }
-                    if (!Check())
+                    if (!Program.IsProgramRunningDialog(this, selection))
                         return;
                 }
 

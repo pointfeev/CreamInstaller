@@ -10,7 +10,7 @@ namespace CreamInstaller
         public List<string> SteamApiDllDirectories;
         public INode DownloadNode;
 
-        public bool ProgramIsRunning
+        public bool IsProgramRunning
         {
             get
             {

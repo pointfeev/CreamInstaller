@@ -2,6 +2,7 @@ using CG.Web.MegaApiClient;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 using System.Reflection;
@@ -44,6 +45,23 @@ namespace CreamInstaller
                 Application.Run(new MainForm());
             }
             mutex.Close();
+        }
+
+        public static bool IsProgramRunningDialog(Form form, ProgramSelection selection)
+        {
+            if (selection.IsProgramRunning)
+            {
+                if (new DialogForm(form).Show(ApplicationName, SystemIcons.Error,
+                $"ERROR: {selection.ProgramName} is currently running!" +
+                "\n\nPlease close the program/game to continue . . .",
+                "Retry", "Cancel") == DialogResult.OK)
+                    return IsProgramRunningDialog(form, selection);
+            }
+            else
+            {
+                return true;
+            }
+            return false;
         }
 
         public static bool IsFilePathLocked(this string filePath)

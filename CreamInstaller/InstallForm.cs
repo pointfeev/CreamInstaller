@@ -101,6 +101,9 @@ namespace CreamInstaller
             }
             UpdateProgress(100);
 
+            if (!Program.IsProgramRunningDialog(this, selection))
+                throw new OperationCanceledException();
+
             UpdateProgress(0);
             UpdateUser("Installing CreamAPI files for " + selection.ProgramName + " . . . ", LogColor.Operation);
             int currentFileCount = 0;
@@ -171,26 +174,8 @@ namespace CreamInstaller
 
                 Program.Cleanup(cancel: false, logout: false);
 
-                bool Check()
-                {
-                    if (selection.ProgramIsRunning)
-                    {
-                        if (new DialogForm(this).Show(Program.ApplicationName, SystemIcons.Error,
-                        $"ERROR: {selection.ProgramName} is currently running!" +
-                        "\n\nPlease close the program/game to continue . . .",
-                        "Retry", "Cancel") == DialogResult.OK)
-                            return Check();
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                    return false;
-                }
-                if (!Check())
-                {
-                    throw new Exception("The operation was canceled.");
-                }
+                if (!Program.IsProgramRunningDialog(this, selection))
+                    throw new OperationCanceledException();
 
                 try
                 {
