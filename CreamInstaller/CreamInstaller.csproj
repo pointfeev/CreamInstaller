@@ -6,7 +6,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>ini.ico</ApplicationIcon>
 	<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-	<Version>1.0.5.1</Version>
+	<Version>1.0.5.2</Version>
 	<PackageIcon>ini.ico</PackageIcon>
 	<PackageIconUrl />
 	<Description>Automatically downloads and installs CreamAPI files for programs/games.</Description>
