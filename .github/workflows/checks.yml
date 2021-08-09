@@ -9,12 +9,8 @@ on:
 jobs:
 
   build:
-
+    name: Build
     runs-on: windows-latest
-
-    env:
-      Solution_Name: CreamInstaller.sln
-      Test_Project_Path: CreamInstaller\CreamInstaller.csproj
 
     steps:
     - name: Checkout
@@ -40,7 +36,7 @@ jobs:
       uses: microsoft/setup-msbuild@v1.0.2
 
     - name: Restore Solution
-      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=Release
+      run: msbuild CreamInstaller.sln /t:Restore /p:Configuration=Release
         
     - name: Build Solution
-      run: msbuild $env:Solution_Name /t:Build /p:Configuration=Release
+      run: msbuild CreamInstaller.sln /t:Build /p:Configuration=Release
