@@ -1,4 +1,4 @@
-name: checks.yml
+name: Checks
 
 on:
   push:
