@@ -1,0 +1,27 @@
+name: MSBuild
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+      
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Restore Solution
+      run: msbuild CreamInstaller.sln /t:Restore /p:Configuration=Release
+        
+    - name: Build Solution
+      run: msbuild CreamInstaller.sln /t:Build /p:Configuration=Release
