@@ -154,13 +154,13 @@ namespace CreamInstaller
                         flowLayoutPanel1.Invoke((MethodInvoker)delegate
                         {
                             if (Program.Canceled) { return; }
-                        
+
                             ProgramSelection selection = new();
                             selection.ProgramName = node.Name;
                             selection.ProgramDirectory = rootDirectory;
                             selection.SteamApiDllDirectories = new();
                             selection.SteamApiDllDirectories.AddRange(directories);
-                        
+
                             foreach (INode _node in fileNodes)
                             {
                                 if (_node.Type == NodeType.File && _node.ParentId == node.Id)
@@ -169,7 +169,7 @@ namespace CreamInstaller
                                     break;
                                 }
                             }
-                        
+
                             CheckBox checkBox = new();
                             checkBoxes.Add(checkBox);
                             checkBox.AutoSize = true;
@@ -179,7 +179,7 @@ namespace CreamInstaller
                             checkBox.Enabled = false;
                             checkBox.TabStop = true;
                             checkBox.TabIndex = 1 + checkBoxes.Count;
-                        
+
                             checkBox.CheckedChanged += (sender, e) =>
                             {
                                 selection.Toggle(checkBox.Checked);
