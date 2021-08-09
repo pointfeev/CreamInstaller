@@ -27,7 +27,7 @@ namespace CreamInstaller
         private int CompleteOperationsCount;
         public void UpdateProgress(int progress)
         {
-            int value = (int)((float)((float)CompleteOperationsCount / (float)OperationsCount) * 100) + (progress / OperationsCount);
+            int value = (int)((float)(CompleteOperationsCount / (float)OperationsCount) * 100) + (progress / OperationsCount);
             if (value < userProgressBar.Value) { return; }
             userProgressBar.Value = value;
         }
@@ -45,7 +45,7 @@ namespace CreamInstaller
                 logTextBox.AppendText(userInfoLabel.Text, color);
             }
         }
-        
+
         private async Task OperateFor(ProgramSelection selection)
         {
             UpdateProgress(0);
