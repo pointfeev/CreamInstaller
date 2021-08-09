@@ -5,6 +5,8 @@ namespace CreamInstaller
 {
     public class ProgramSelection
     {
+        public bool Enabled = true;
+
         public string ProgramName;
         public string ProgramDirectory;
         public List<string> SteamApiDllDirectories;
@@ -31,20 +33,9 @@ namespace CreamInstaller
             Program.ProgramSelections.Add(this);
         }
 
-        public void Add()
+        public void Toggle(bool Enabled)
         {
-            if (!Program.ProgramSelections.Contains(this))
-            {
-                Program.ProgramSelections.Add(this);
-            }
-        }
-
-        public void Remove()
-        {
-            if (Program.ProgramSelections.Contains(this))
-            {
-                Program.ProgramSelections.Remove(this);
-            }
+            this.Enabled = Enabled;
         }
     }
 }

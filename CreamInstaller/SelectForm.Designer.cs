@@ -42,6 +42,7 @@ namespace CreamInstaller
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.label2 = new System.Windows.Forms.Label();
+            this.scanButton = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -52,7 +53,7 @@ namespace CreamInstaller
             this.acceptButton.Location = new System.Drawing.Point(322, 254);
             this.acceptButton.Name = "acceptButton";
             this.acceptButton.Size = new System.Drawing.Size(150, 23);
-            this.acceptButton.TabIndex = 101;
+            this.acceptButton.TabIndex = 102;
             this.acceptButton.Text = "Download and Install";
             this.acceptButton.UseVisualStyleBackColor = true;
             this.acceptButton.Click += new System.EventHandler(this.OnAccept);
@@ -85,7 +86,7 @@ namespace CreamInstaller
             this.groupBox1.Controls.Add(this.flowLayoutPanel1);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(460, 192);
+            this.groupBox1.Size = new System.Drawing.Size(460, 236);
             this.groupBox1.TabIndex = 8;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Programs / Games";
@@ -111,7 +112,7 @@ namespace CreamInstaller
             this.noneFoundLabel.Enabled = false;
             this.noneFoundLabel.Location = new System.Drawing.Point(3, 19);
             this.noneFoundLabel.Name = "noneFoundLabel";
-            this.noneFoundLabel.Size = new System.Drawing.Size(454, 170);
+            this.noneFoundLabel.Size = new System.Drawing.Size(454, 214);
             this.noneFoundLabel.TabIndex = 0;
             this.noneFoundLabel.Text = "No CreamAPI-applicable programs or games were found on your computer!";
             this.noneFoundLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -123,7 +124,7 @@ namespace CreamInstaller
             this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 19);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(454, 170);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(454, 214);
             this.flowLayoutPanel1.TabIndex = 1000;
             // 
             // progressBar1
@@ -145,17 +146,30 @@ namespace CreamInstaller
             this.label2.TabIndex = 10;
             this.label2.Text = "Loading . . .";
             // 
+            // scanButton
+            // 
+            this.scanButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.scanButton.Enabled = false;
+            this.scanButton.Location = new System.Drawing.Point(110, 254);
+            this.scanButton.Name = "scanButton";
+            this.scanButton.Size = new System.Drawing.Size(190, 23);
+            this.scanButton.TabIndex = 101;
+            this.scanButton.Text = "Rescan for Programs / Games";
+            this.scanButton.UseVisualStyleBackColor = true;
+            this.scanButton.Click += new System.EventHandler(this.OnScan);
+            // 
             // SelectForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(484, 289);
-            this.Controls.Add(this.label2);
+            this.Controls.Add(this.scanButton);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.acceptButton);
+            this.Controls.Add(this.label2);
             this.DoubleBuffered = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
@@ -184,6 +198,7 @@ namespace CreamInstaller
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox allCheckBox;
         private Label noneFoundLabel;
+        private Button scanButton;
     }
 }
 

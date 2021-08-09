@@ -65,7 +65,7 @@ namespace CreamInstaller
             this.acceptButton.Location = new System.Drawing.Point(437, 286);
             this.acceptButton.Name = "acceptButton";
             this.acceptButton.Size = new System.Drawing.Size(75, 23);
-            this.acceptButton.TabIndex = 3;
+            this.acceptButton.TabIndex = 4;
             this.acceptButton.Text = "OK";
             this.acceptButton.UseVisualStyleBackColor = true;
             this.acceptButton.Click += new System.EventHandler(this.OnAccept);
@@ -77,7 +77,7 @@ namespace CreamInstaller
             this.retryButton.Location = new System.Drawing.Point(356, 286);
             this.retryButton.Name = "retryButton";
             this.retryButton.Size = new System.Drawing.Size(75, 23);
-            this.retryButton.TabIndex = 2;
+            this.retryButton.TabIndex = 3;
             this.retryButton.Text = "Retry";
             this.retryButton.UseVisualStyleBackColor = true;
             this.retryButton.Click += new System.EventHandler(this.OnRetry);
@@ -115,7 +115,7 @@ namespace CreamInstaller
             this.reselectButton.Location = new System.Drawing.Point(135, 286);
             this.reselectButton.Name = "reselectButton";
             this.reselectButton.Size = new System.Drawing.Size(175, 23);
-            this.reselectButton.TabIndex = 5;
+            this.reselectButton.TabIndex = 2;
             this.reselectButton.Text = "Reselect Programs / Games";
             this.reselectButton.UseVisualStyleBackColor = true;
             this.reselectButton.Click += new System.EventHandler(this.OnReselect);

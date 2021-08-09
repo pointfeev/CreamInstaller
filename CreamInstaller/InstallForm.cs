@@ -181,6 +181,8 @@ namespace CreamInstaller
                     break;
                 }
 
+                if (!selection.Enabled) { continue; }
+
                 Program.Cleanup(cancel: false, logout: false);
 
                 if (!Program.IsProgramRunningDialog(this, selection))
@@ -193,7 +195,7 @@ namespace CreamInstaller
                     await OperateFor(selection);
 
                     UpdateUser($"Operation succeeded for {selection.ProgramName}.", LogColor.Success);
-                    selection.Remove();
+                    selection.Toggle(false);
                 }
                 catch (Exception exception)
                 {
@@ -203,17 +205,21 @@ namespace CreamInstaller
 
             Program.Cleanup(logout: false);
 
-            if (Program.ProgramSelections.Count == 1)
+            List<ProgramSelection> FailedSelections = Program.ProgramSelections.FindAll(selection => selection.Enabled);
+            if (FailedSelections.Any())
             {
-                throw new Exception($"Operation failed for {Program.ProgramSelections.First().ProgramName}.");
-            }
-            else if (Program.ProgramSelections.Count > 1)
-            {
-                throw new Exception($"Operation failed for {Program.ProgramSelections.Count} programs.");
+                if (FailedSelections.Count == 1)
+                {
+                    throw new Exception($"Operation failed for {FailedSelections.First().ProgramName}.");
+                }
+                else
+                {
+                    throw new Exception($"Operation failed for {FailedSelections.Count} programs.");
+                }
             }
         }
 
-        private readonly int ProgramCount = Program.ProgramSelections.Count;
+        private readonly int ProgramCount = Program.ProgramSelections.FindAll(selection => selection.Enabled).Count;
 
         private async void Start()
         {
