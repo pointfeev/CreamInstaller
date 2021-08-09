@@ -44,7 +44,7 @@ namespace CreamInstaller
             {
                 if (new DialogForm(form).Show(ApplicationName, SystemIcons.Error,
                 $"ERROR: {selection.ProgramName} is currently running!" +
-                "\n\nPlease close the program/game to continue . . .",
+                "\n\nPlease close the program/game to continue . . . ",
                 "Retry", "Cancel") == DialogResult.OK)
                 {
                     return IsProgramRunningDialog(form, selection);
