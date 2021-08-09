@@ -7,8 +7,8 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-    name: Build
+  restore:
+    name: Restore
     runs-on: windows-latest
 
     steps:
@@ -22,6 +22,3 @@ jobs:
 
     - name: Restore Solution
       run: msbuild CreamInstaller.sln /t:Restore /p:Configuration=Release
-        
-    - name: Build Solution
-      run: msbuild CreamInstaller.sln /t:Build /p:Configuration=Release
