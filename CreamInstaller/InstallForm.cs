@@ -23,9 +23,13 @@ namespace CreamInstaller
             logTextBox.BackColor = LogColor.Background;
         }
 
+        private int OperationsCount;
+        private int CompleteOperationsCount;
         public void UpdateProgress(int progress)
         {
-            Program.UpdateProgressInstantly(userProgressBar, progress);
+            int value = (int)((float)((float)CompleteOperationsCount / (float)OperationsCount) * 100) + (progress / OperationsCount);
+            if (value < userProgressBar.Value) { return; }
+            userProgressBar.Value = value;
         }
 
         public void UpdateUser(string text, Color color, bool log = true)
@@ -41,7 +45,7 @@ namespace CreamInstaller
                 logTextBox.AppendText(userInfoLabel.Text, color);
             }
         }
-
+        
         private async Task OperateFor(ProgramSelection selection)
         {
             UpdateProgress(0);
@@ -70,9 +74,6 @@ namespace CreamInstaller
             Program.OutputTask = Program.MegaApiClient.DownloadFileAsync(selection.DownloadNode, Program.OutputFile, progress, Program.CancellationTokenSource.Token);
             await Program.OutputTask;
             UpdateUser($"Downloaded file: {Program.OutputFile}", LogColor.Resource);
-            UpdateProgress(100);
-
-            UpdateProgress(0);
             UpdateUser("Searching for CreamAPI files in downloaded archive . . . ", LogColor.Operation);
             string resourcePath = null;
             List<ZipArchiveEntry> resources = new List<ZipArchiveEntry>();
@@ -102,14 +103,10 @@ namespace CreamInstaller
             {
                 throw new Exception($"Unable to find CreamAPI files in downloaded archive: {Program.OutputFile}");
             }
-            UpdateProgress(100);
-
             if (!Program.IsProgramRunningDialog(this, selection))
             {
                 throw new OperationCanceledException();
             }
-
-            UpdateProgress(0);
             UpdateUser("Installing CreamAPI files for " + selection.ProgramName + " . . . ", LogColor.Operation);
             int currentFileCount = 0;
             foreach (string directory in selection.SteamApiDllDirectories)
@@ -174,6 +171,9 @@ namespace CreamInstaller
 
         private async Task Operate()
         {
+            OperationsCount = Program.ProgramSelections.FindAll(selection => selection.Enabled).Count;
+            CompleteOperationsCount = 0;
+
             foreach (ProgramSelection selection in Program.ProgramSelections.ToList())
             {
                 if (Program.Canceled)
@@ -201,6 +201,8 @@ namespace CreamInstaller
                 {
                     UpdateUser($"Operation failed for {selection.ProgramName}: " + exception.Message, LogColor.Error);
                 }
+
+                ++CompleteOperationsCount;
             }
 
             Program.Cleanup(logout: false);
@@ -228,6 +230,7 @@ namespace CreamInstaller
             retryButton.Enabled = false;
             cancelButton.Enabled = true;
             reselectButton.Enabled = false;
+            userProgressBar.Value = userProgressBar.Minimum;
             try
             {
                 await Operate();
@@ -238,6 +241,7 @@ namespace CreamInstaller
                 UpdateUser("CreamAPI download and/or installation failed: " + exception.Message, LogColor.Error);
                 retryButton.Enabled = true;
             }
+            userProgressBar.Value = userProgressBar.Maximum;
             acceptButton.Enabled = true;
             cancelButton.Enabled = false;
             reselectButton.Enabled = true;

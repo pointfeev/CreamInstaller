@@ -83,32 +83,21 @@ namespace CreamInstaller
         public static Task OutputTask;
         public static string OutputFile;
 
-        public static void UpdateProgressInstantly(ProgressBar progressBar, int progress)
-        {
-            progressBar.Maximum++;
-            progressBar.Value = progress + 1;
-            progressBar.Value = progress;
-            progressBar.Maximum--;
-        }
-
         public static void Cleanup(bool cancel = true, bool logout = true)
         {
             Canceled = cancel;
             if (OutputArchive != null || CancellationTokenSource != null || OutputTask != null || OutputFile != null)
             {
-                InstallForm?.UpdateProgress(0);
                 InstallForm?.UpdateUser("Cleaning up . . . ", LogColor.Cleanup);
             }
             if (OutputArchive != null)
             {
                 OutputArchive.Dispose();
                 OutputArchive = null;
-                InstallForm?.UpdateProgress(25);
             }
             if (CancellationTokenSource != null)
             {
                 CancellationTokenSource.Cancel();
-                InstallForm?.UpdateProgress(40);
             }
             if (OutputTask != null)
             {
@@ -119,13 +108,11 @@ namespace CreamInstaller
                 catch (AggregateException) { }
                 OutputTask.Dispose();
                 OutputTask = null;
-                InstallForm?.UpdateProgress(50);
             }
             if (CancellationTokenSource != null)
             {
                 CancellationTokenSource.Dispose();
                 CancellationTokenSource = null;
-                InstallForm?.UpdateProgress(75);
             }
             if (OutputFile != null && File.Exists(OutputFile))
             {
@@ -139,13 +126,10 @@ namespace CreamInstaller
                 }
                 OutputFile = null;
             }
-            InstallForm?.UpdateProgress(100);
             if (logout && MegaApiClient != null && MegaApiClient.IsLoggedIn)
             {
-                InstallForm?.UpdateProgress(0);
                 InstallForm?.UpdateUser("Logging out of MEGA . . . ", LogColor.Cleanup);
                 MegaApiClient.Logout();
-                InstallForm?.UpdateProgress(100);
             }
         }
 
