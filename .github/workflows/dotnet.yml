@@ -1,4 +1,4 @@
-name: Checks
+name: .NET
 
 on:
   push:
@@ -7,8 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-
-  build:
+  Build:
     name: Build
     runs-on: windows-latest
 
@@ -31,12 +30,3 @@ jobs:
 
     - name: Test Project
       run: dotnet test --no-build --verbosity normal --configuration Release
-      
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1.0.2
-
-    - name: Restore Solution
-      run: msbuild CreamInstaller.sln /t:Restore /p:Configuration=Release
-        
-    - name: Build Solution
-      run: msbuild CreamInstaller.sln /t:Build /p:Configuration=Release
