@@ -10,10 +10,6 @@ jobs:
 
   build:
 
-    strategy:
-      matrix:
-        configuration: [Debug, Release]
-
     runs-on: windows-latest
 
     env:
@@ -35,25 +31,16 @@ jobs:
       run: dotnet restore
 
     - name: Build Project
-      run: dotnet build --no-restore --configuration $env:Configuration
-      env:
-        Configuration: ${{ matrix.configuration }}
+      run: dotnet build --no-restore --configuration Release
 
     - name: Test Project
-      run: dotnet test --no-build --verbosity normal --configuration $env:Configuration
-      env:
-        Configuration: ${{ matrix.configuration }}
+      run: dotnet test --no-build --verbosity normal --configuration Release
       
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.0.2
 
     - name: Restore Solution
-      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
-      env:
-        Configuration: ${{ matrix.configuration }}
+      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=Release
         
     - name: Build Solution
-      run: msbuild $env:Solution_Name /t:Build /p:Configuration=$env:Configuration
-      env:
-        Configuration: ${{ matrix.configuration }}
-
+      run: msbuild $env:Solution_Name /t:Build /p:Configuration=Release
