@@ -122,7 +122,7 @@ namespace CreamInstaller
                 }
                 catch
                 {
-                    InstallForm?.UpdateUser($"WARNING: Couldn't clean up downloaded archive ({OutputFile})", LogColor.Warning);
+                    InstallForm?.UpdateUser($"WARNING: Failed to clean up downloaded archive: {OutputFile}", LogColor.Warning);
                 }
                 OutputFile = null;
             }
