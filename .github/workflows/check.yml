@@ -1,4 +1,4 @@
-name: .NET Core Desktop
+name: Check
 
 on:
   push:
@@ -26,18 +26,30 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Install .NET
+    - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
 
+    - name: Restore Project
+      run: dotnet restore
+
+    - name: Build Project
+      run: dotnet build --no-restore
+
+    - name: Test Project
+      run: dotnet test --no-build --verbosity normal
+      
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.0.2
 
-    - name: Execute Unit Tests
-      run: dotnet test
-
-    - name: Restore Application
+    - name: Restore Solution
       run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
       env:
         Configuration: ${{ matrix.configuration }}
+        
+    - name: Build Solution
+      run: msbuild $env:Solution_Name /t:Build /p:Configuration=$env:Configuration
+      env:
+        Configuration: ${{ matrix.configuration }}
+
