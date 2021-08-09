@@ -14,7 +14,7 @@ namespace CreamInstaller
 {
     public static class Program
     {
-        public static string ApplicationName = "CreamInstaller v" + Application.ProductVersion + ": CreamAPI Downloader & Installer"
+        public static string ApplicationName = "CreamInstaller v" + Application.ProductVersion + ": CreamAPI Downloader & Installer";
 
         public static Assembly EntryAssembly = Assembly.GetEntryAssembly();
         public static Process CurrentProcess = Process.GetCurrentProcess();
