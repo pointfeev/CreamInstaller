@@ -122,26 +122,23 @@ namespace CreamInstaller
                 {
                     progress.Report(++curProgress);
                     if (Program.ProgramSelections.Any(selection => selection.ProgramName == node.Name)) { continue; }
-                    string rootDirectory;
+                    string rootDirectory = null;
                     List<string> directories = null;
                     if (node.Name == "Paradox Launcher")
                     {
-                        rootDirectory = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                        string launcherDirectory = rootDirectory + "\\Programs\\Paradox Interactive";
-                        if (Directory.Exists(launcherDirectory))
+                        rootDirectory = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Programs\\Paradox Interactive";
+                        if (Directory.Exists(rootDirectory))
                         {
-                            directories = GetSteamApiDllDirectoriesFromGameDirectory(launcherDirectory);
+                            directories = GetSteamApiDllDirectoriesFromGameDirectory(rootDirectory);
                         }
                     }
                     else
                     {
-                        rootDirectory = null;
-                        directories = null;
                         foreach (string libraryDirectory in GameLibraryDirectories)
                         {
                             if (Program.Canceled) { return; }
                             rootDirectory = GetGameDirectoryFromLibraryDirectory(node.Name, libraryDirectory);
-                            if (rootDirectory != null)
+                            if (Directory.Exists(rootDirectory))
                             {
                                 directories = GetSteamApiDllDirectoriesFromGameDirectory(rootDirectory);
                                 break;
