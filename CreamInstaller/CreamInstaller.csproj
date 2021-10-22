@@ -26,7 +26,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>full</DebugType>
+    <DebugType>embedded</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 
