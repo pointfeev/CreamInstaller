@@ -99,6 +99,7 @@ namespace CreamInstaller
         }
 
         private readonly List<CheckBox> checkBoxes = new();
+
         private void GetCreamApiApplicablePrograms(IProgress<int> progress)
         {
             if (Program.Canceled) { return; }
@@ -152,20 +153,23 @@ namespace CreamInstaller
                         {
                             if (Program.Canceled) { return; }
 
-                            ProgramSelection selection = new();
-                            selection.ProgramName = node.Name;
-                            selection.ProgramDirectory = rootDirectory;
-                            selection.SteamApiDllDirectories = new();
-                            selection.SteamApiDllDirectories.AddRange(directories);
-
+                            INode downloadNode = null;
                             foreach (INode _node in fileNodes)
                             {
                                 if (_node.Type == NodeType.File && _node.ParentId == node.Id)
                                 {
-                                    selection.DownloadNode = _node;
+                                    downloadNode = _node;
                                     break;
                                 }
                             }
+
+                            if (downloadNode is null) return;
+                            ProgramSelection selection = new();
+                            selection.DownloadNode = downloadNode;
+                            selection.ProgramName = node.Name;
+                            selection.ProgramDirectory = rootDirectory;
+                            selection.SteamApiDllDirectories = new();
+                            selection.SteamApiDllDirectories.AddRange(directories);
 
                             CheckBox checkBox = new();
                             checkBoxes.Add(checkBox);

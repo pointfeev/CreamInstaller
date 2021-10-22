@@ -10,6 +10,19 @@ using System.Windows.Forms;
 
 namespace CreamInstaller
 {
+    public class CustomMessageException : Exception
+    {
+        private string message;
+        public override string Message => message ?? "CustomMessageException";
+
+        public override string ToString() => Message;
+
+        public CustomMessageException(string message)
+        {
+            this.message = message;
+        }
+    }
+
     public partial class InstallForm : Form
     {
         public bool Reselecting = false;
@@ -25,6 +38,7 @@ namespace CreamInstaller
 
         private int OperationsCount;
         private int CompleteOperationsCount;
+
         public void UpdateProgress(int progress)
         {
             int value = (int)((float)(CompleteOperationsCount / (float)OperationsCount) * 100) + (progress / OperationsCount);
@@ -59,7 +73,7 @@ namespace CreamInstaller
                 }
                 catch
                 {
-                    throw new Exception($"Unable to delete old archive file: {Program.OutputFile}");
+                    throw new CustomMessageException($"Unable to delete old archive file: {Program.OutputFile}");
                 }
             }
             Progress<double> progress = new Progress<double>(delegate (double progress)
@@ -101,7 +115,7 @@ namespace CreamInstaller
             }
             if (resources.Count < 1)
             {
-                throw new Exception($"Unable to find CreamAPI files in downloaded archive: {Program.OutputFile}");
+                throw new CustomMessageException($"Unable to find CreamAPI files in downloaded archive: {Program.OutputFile}");
             }
             if (!Program.IsProgramRunningDialog(this, selection))
             {
@@ -151,7 +165,7 @@ namespace CreamInstaller
                                 UpdateUser("Reversed changes to Steam API file: " + file, LogColor.Warning);
                             }
                         }
-                        throw new Exception($"Unable to overwrite Steam API file: {file}");
+                        throw new CustomMessageException($"Unable to overwrite Steam API file: {file}");
                     }
                     UpdateUser("Installed file: " + file, LogColor.Resource);
                     UpdateProgress((currentFileCount / (resources.Count * selection.SteamApiDllDirectories.Count)) * 100);
@@ -199,7 +213,7 @@ namespace CreamInstaller
                 }
                 catch (Exception exception)
                 {
-                    UpdateUser($"Operation failed for {selection.ProgramName}: " + exception.Message, LogColor.Error);
+                    UpdateUser($"Operation failed for {selection.ProgramName}: " + exception.ToString(), LogColor.Error);
                 }
 
                 ++CompleteOperationsCount;
@@ -212,11 +226,11 @@ namespace CreamInstaller
             {
                 if (FailedSelections.Count == 1)
                 {
-                    throw new Exception($"Operation failed for {FailedSelections.First().ProgramName}.");
+                    throw new CustomMessageException($"Operation failed for {FailedSelections.First().ProgramName}.");
                 }
                 else
                 {
-                    throw new Exception($"Operation failed for {FailedSelections.Count} programs.");
+                    throw new CustomMessageException($"Operation failed for {FailedSelections.Count} programs.");
                 }
             }
         }
@@ -238,7 +252,7 @@ namespace CreamInstaller
             }
             catch (Exception exception)
             {
-                UpdateUser("CreamAPI download and/or installation failed: " + exception.Message, LogColor.Error);
+                UpdateUser("CreamAPI download and/or installation failed: " + exception.ToString(), LogColor.Error);
                 retryButton.Enabled = true;
             }
             userProgressBar.Value = userProgressBar.Maximum;
