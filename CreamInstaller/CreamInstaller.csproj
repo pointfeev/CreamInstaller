@@ -23,11 +23,13 @@
 	<Product>CreamAPI Downloader &amp; Installer</Product>
 	<Authors>pointfeev</Authors>
 	<PackageId>pointfeev.creaminstaller</PackageId>
+	<StartupObject>CreamInstaller.Program</StartupObject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DebugType>embedded</DebugType>
     <DebugSymbols>true</DebugSymbols>
+    <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

@@ -10,19 +10,6 @@ using System.Windows.Forms;
 
 namespace CreamInstaller
 {
-    public class CustomMessageException : Exception
-    {
-        private string message;
-        public override string Message => message ?? "CustomMessageException";
-
-        public override string ToString() => Message;
-
-        public CustomMessageException(string message)
-        {
-            this.message = message;
-        }
-    }
-
     public partial class InstallForm : Form
     {
         public bool Reselecting = false;
