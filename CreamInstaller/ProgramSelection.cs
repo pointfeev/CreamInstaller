@@ -19,23 +19,14 @@ namespace CreamInstaller
                 foreach (string directory in SteamApiDllDirectories)
                 {
                     string file = directory + "\\steam_api64.dll";
-                    if (file.IsFilePathLocked())
-                    {
-                        return true;
-                    }
+                    if (file.IsFilePathLocked()) return true;
                 }
                 return false;
             }
         }
 
-        public ProgramSelection()
-        {
-            Program.ProgramSelections.Add(this);
-        }
+        public ProgramSelection() => Program.ProgramSelections.Add(this);
 
-        public void Toggle(bool Enabled)
-        {
-            this.Enabled = Enabled;
-        }
+        public void Toggle(bool Enabled) => this.Enabled = Enabled;
     }
 }

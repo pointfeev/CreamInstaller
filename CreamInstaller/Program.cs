@@ -41,34 +41,18 @@ namespace CreamInstaller
         public static bool IsProgramRunningDialog(Form form, ProgramSelection selection)
         {
             if (selection.IsProgramRunning)
-            {
-                if (new DialogForm(form).Show(ApplicationName, SystemIcons.Error,
-                $"ERROR: {selection.ProgramName} is currently running!" +
-                "\n\nPlease close the program/game to continue . . . ",
-                "Retry", "Cancel") == DialogResult.OK)
-                {
+                if (new DialogForm(form).Show(ApplicationName, SystemIcons.Error, $"ERROR: {selection.ProgramName} is currently running!" +
+                    $"\n\nPlease close the program/game to continue . . . ", "Retry", "Cancel") == DialogResult.OK)
                     return IsProgramRunningDialog(form, selection);
-                }
-            }
-            else
-            {
-                return true;
-            }
-            return false;
+                else return true;
+            else return false;
         }
 
         public static bool IsFilePathLocked(this string filePath)
         {
-            bool Locked = false;
-            try
-            {
-                File.Open(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None).Close();
-            }
-            catch (IOException)
-            {
-                Locked = true;
-            }
-            return Locked;
+            try { File.Open(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None).Close(); }
+            catch (IOException) { return true; }
+            return false;
         }
 
         public static SelectForm SelectForm;
@@ -87,25 +71,16 @@ namespace CreamInstaller
         {
             Canceled = cancel;
             if (OutputArchive != null || CancellationTokenSource != null || OutputTask != null || OutputFile != null)
-            {
                 InstallForm?.UpdateUser("Cleaning up . . . ", LogColor.Cleanup);
-            }
             if (OutputArchive != null)
             {
                 OutputArchive.Dispose();
                 OutputArchive = null;
             }
-            if (CancellationTokenSource != null)
-            {
-                CancellationTokenSource.Cancel();
-            }
+            if (CancellationTokenSource != null) CancellationTokenSource.Cancel();
             if (OutputTask != null)
             {
-                try
-                {
-                    OutputTask.Wait();
-                }
-                catch (AggregateException) { }
+                try { OutputTask.Wait(); } catch (AggregateException) { }
                 OutputTask.Dispose();
                 OutputTask = null;
             }
@@ -116,14 +91,8 @@ namespace CreamInstaller
             }
             if (OutputFile != null && File.Exists(OutputFile))
             {
-                try
-                {
-                    File.Delete(OutputFile);
-                }
-                catch
-                {
-                    InstallForm?.UpdateUser($"WARNING: Failed to clean up downloaded archive: {OutputFile}", LogColor.Warning);
-                }
+                try { File.Delete(OutputFile); }
+                catch { InstallForm?.UpdateUser($"WARNING: Failed to clean up downloaded archive: {OutputFile}", LogColor.Warning); }
                 OutputFile = null;
             }
             if (logout && MegaApiClient != null && MegaApiClient.IsLoggedIn)
@@ -133,9 +102,6 @@ namespace CreamInstaller
             }
         }
 
-        private static void OnApplicationExit(object s, EventArgs e)
-        {
-            Cleanup();
-        }
+        private static void OnApplicationExit(object s, EventArgs e) => Cleanup();
     }
 }
