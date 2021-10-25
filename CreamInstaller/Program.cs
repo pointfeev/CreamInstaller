@@ -119,10 +119,11 @@ namespace CreamInstaller
                 try
                 {
                     File.Delete(OutputFile);
+                    InstallForm?.UpdateUser($"Deleted archive: {OutputFile}", LogColor.Cleanup);
                 }
                 catch
                 {
-                    InstallForm?.UpdateUser($"WARNING: Failed to clean up downloaded archive: {OutputFile}", LogColor.Warning);
+                    InstallForm?.UpdateUser($"WARNING: Failed to clean up archive: {OutputFile}", LogColor.Warning);
                 }
                 OutputFile = null;
             }

@@ -74,7 +74,7 @@ namespace CreamInstaller
             Program.CancellationTokenSource = new CancellationTokenSource();
             Program.OutputTask = Program.MegaApiClient.DownloadFileAsync(selection.DownloadNode, Program.OutputFile, progress, Program.CancellationTokenSource.Token);
             await Program.OutputTask;
-            UpdateUser($"Downloaded file: {Program.OutputFile}", LogColor.Resource);
+            UpdateUser($"Downloaded archive: {Program.OutputFile}", LogColor.Resource);
             UpdateUser("Searching for CreamAPI files in downloaded archive . . . ", LogColor.Operation);
             string resourcePath = null;
             List<ZipArchiveEntry> resources = new List<ZipArchiveEntry>();
