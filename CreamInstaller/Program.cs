@@ -1,4 +1,3 @@
-using CG.Web.MegaApiClient;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,21 +6,18 @@ using System.IO;
 using System.IO.Compression;
 using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CreamInstaller
 {
     public static class Program
     {
-        public static string ApplicationName = "CreamInstaller v" + Application.ProductVersion + ": CreamAPI Downloader & Installer";
-
-        public static Assembly EntryAssembly = Assembly.GetEntryAssembly();
-        public static Process CurrentProcess = Process.GetCurrentProcess();
-        public static string CurrentProcessFilePath = CurrentProcess.MainModule.FileName;
-        public static string CurrentProcessDirectory = CurrentProcessFilePath.Substring(0, CurrentProcessFilePath.LastIndexOf("\\"));
-
-        public static string BackupFileExtension = ".creaminstaller.backup";
+        public static readonly string ApplicationName = "CreamInstaller v" + Application.ProductVersion + ": CreamAPI Downloader & Installer";
+        public static readonly Assembly EntryAssembly = Assembly.GetEntryAssembly();
+        public static readonly Process CurrentProcess = Process.GetCurrentProcess();
+        public static readonly string CurrentProcessFilePath = CurrentProcess.MainModule.FileName;
+        public static readonly string CurrentProcessDirectory = CurrentProcessFilePath.Substring(0, CurrentProcessFilePath.LastIndexOf("\\"));
+        public static readonly string BackupFileExtension = ".creaminstaller.backup";
 
         [STAThread]
         private static void Main()
@@ -43,7 +39,7 @@ namespace CreamInstaller
             if (selection.IsProgramRunning)
             {
                 if (new DialogForm(form).Show(ApplicationName, SystemIcons.Error,
-                $"ERROR: {selection.ProgramName} is currently running!" +
+                $"ERROR: {selection.DisplayName} is currently running!" +
                 "\n\nPlease close the program/game to continue . . . ",
                 "Retry", "Cancel") == DialogResult.OK)
                 {
@@ -77,66 +73,15 @@ namespace CreamInstaller
         public static List<ProgramSelection> ProgramSelections = new();
 
         public static bool Canceled = false;
-        public static MegaApiClient MegaApiClient;
-        public static ZipArchive OutputArchive;
-        public static CancellationTokenSource CancellationTokenSource;
-        public static Task OutputTask;
-        public static string OutputFile;
+        public static string OutputFile = null; // placeholder, won't exist in new system
+        public static ZipArchive OutputArchive = null; // placeholder, won't exist in new system
 
-        public static void Cleanup(bool cancel = true, bool logout = true)
+        public static void Cleanup(bool cancel = true)
         {
             Canceled = cancel;
-            if (OutputArchive != null || CancellationTokenSource != null || OutputTask != null || OutputFile != null)
-            {
-                InstallForm?.UpdateUser("Cleaning up . . . ", LogColor.Cleanup);
-            }
-            if (OutputArchive != null)
-            {
-                OutputArchive.Dispose();
-                OutputArchive = null;
-            }
-            if (CancellationTokenSource != null)
-            {
-                CancellationTokenSource.Cancel();
-            }
-            if (OutputTask != null)
-            {
-                try
-                {
-                    OutputTask.Wait();
-                }
-                catch (AggregateException) { }
-                OutputTask.Dispose();
-                OutputTask = null;
-            }
-            if (CancellationTokenSource != null)
-            {
-                CancellationTokenSource.Dispose();
-                CancellationTokenSource = null;
-            }
-            if (OutputFile != null && File.Exists(OutputFile))
-            {
-                try
-                {
-                    File.Delete(OutputFile);
-                    InstallForm?.UpdateUser($"Deleted archive: {OutputFile}", LogColor.Cleanup);
-                }
-                catch
-                {
-                    InstallForm?.UpdateUser($"WARNING: Failed to clean up archive: {OutputFile}", LogColor.Warning);
-                }
-                OutputFile = null;
-            }
-            if (logout && MegaApiClient != null && MegaApiClient.IsLoggedIn)
-            {
-                InstallForm?.UpdateUser("Logging out of MEGA . . . ", LogColor.Cleanup);
-                MegaApiClient.Logout();
-            }
+            SteamCMD.Kill();
         }
 
-        private static void OnApplicationExit(object s, EventArgs e)
-        {
-            Cleanup();
-        }
+        private static void OnApplicationExit(object s, EventArgs e) => Cleanup();
     }
 }

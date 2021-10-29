@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "MEGA": {
+    "CreamInstaller": {
       "commandName": "Project",
       "nativeDebugging": false
     }

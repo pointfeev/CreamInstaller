@@ -4,8 +4,6 @@ using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CreamInstaller
@@ -47,33 +45,10 @@ namespace CreamInstaller
             }
         }
 
-        private async Task OperateFor(ProgramSelection selection)
+        private void OperateFor(ProgramSelection selection)
         {
             UpdateProgress(0);
-            UpdateUser("Downloading CreamAPI files for " + selection.ProgramName + " . . . ", LogColor.Operation);
-            Program.OutputFile = selection.ProgramDirectory + "\\" + selection.DownloadNode.Name;
-            if (File.Exists(Program.OutputFile))
-            {
-                try
-                {
-                    File.Delete(Program.OutputFile);
-                }
-                catch
-                {
-                    throw new CustomMessageException($"Unable to delete old archive file: {Program.OutputFile}");
-                }
-            }
-            Progress<double> progress = new Progress<double>(delegate (double progress)
-            {
-                if (!Program.Canceled)
-                {
-                    UpdateUser($"Downloading CreamAPI files for {selection.ProgramName} . . . {(int)progress}%", LogColor.Operation, log: false);
-                    UpdateProgress((int)progress);
-                }
-            });
-            Program.CancellationTokenSource = new CancellationTokenSource();
-            Program.OutputTask = Program.MegaApiClient.DownloadFileAsync(selection.DownloadNode, Program.OutputFile, progress, Program.CancellationTokenSource.Token);
-            await Program.OutputTask;
+            UpdateUser("Downloading CreamAPI files for " + selection.DisplayName + " . . . ", LogColor.Operation);
             UpdateUser($"Downloaded archive: {Program.OutputFile}", LogColor.Resource);
             UpdateUser("Searching for CreamAPI files in downloaded archive . . . ", LogColor.Operation);
             string resourcePath = null;
@@ -88,7 +63,7 @@ namespace CreamInstaller
                     resourcePath = Path.GetDirectoryName(entry.FullName);
                     UpdateUser("Got CreamAPI file path: " + resourcePath, LogColor.Resource);
                 }
-                UpdateProgress((currentEntryCount / (Program.OutputArchive.Entries.Count * 2)) * 100);
+                UpdateProgress(currentEntryCount / (Program.OutputArchive.Entries.Count * 2) * 100);
             }
             foreach (ZipArchiveEntry entry in Program.OutputArchive.Entries)
             {
@@ -98,7 +73,7 @@ namespace CreamInstaller
                     resources.Add(entry);
                     UpdateUser("Found CreamAPI file: " + entry.Name, LogColor.Resource);
                 }
-                UpdateProgress((currentEntryCount / (Program.OutputArchive.Entries.Count * 2)) * 100);
+                UpdateProgress(currentEntryCount / (Program.OutputArchive.Entries.Count * 2) * 100);
             }
             if (resources.Count < 1)
             {
@@ -108,7 +83,7 @@ namespace CreamInstaller
             {
                 throw new OperationCanceledException();
             }
-            UpdateUser("Installing CreamAPI files for " + selection.ProgramName + " . . . ", LogColor.Operation);
+            UpdateUser("Installing CreamAPI files for " + selection.DisplayName + " . . . ", LogColor.Operation);
             int currentFileCount = 0;
             foreach (string directory in selection.SteamApiDllDirectories)
             {
@@ -155,7 +130,7 @@ namespace CreamInstaller
                         throw new CustomMessageException($"Unable to overwrite Steam API file: {file}");
                     }
                     UpdateUser("Installed file: " + file, LogColor.Resource);
-                    UpdateProgress((currentFileCount / (resources.Count * selection.SteamApiDllDirectories.Count)) * 100);
+                    UpdateProgress(currentFileCount / (resources.Count * selection.SteamApiDllDirectories.Count) * 100);
                 }
                 foreach (KeyValuePair<string, string> keyValuePair in changesToRevert)
                 {
@@ -170,21 +145,14 @@ namespace CreamInstaller
             UpdateProgress(100);
         }
 
-        private async Task Operate()
+        private void Operate()
         {
             OperationsCount = Program.ProgramSelections.FindAll(selection => selection.Enabled).Count;
             CompleteOperationsCount = 0;
 
             foreach (ProgramSelection selection in Program.ProgramSelections.ToList())
             {
-                if (Program.Canceled)
-                {
-                    break;
-                }
-
                 if (!selection.Enabled) { continue; }
-
-                Program.Cleanup(cancel: false, logout: false);
 
                 if (!Program.IsProgramRunningDialog(this, selection))
                 {
@@ -193,27 +161,26 @@ namespace CreamInstaller
 
                 try
                 {
-                    await OperateFor(selection);
-
-                    UpdateUser($"Operation succeeded for {selection.ProgramName}.", LogColor.Success);
+                    OperateFor(selection);
+                    UpdateUser($"Operation succeeded for {selection.DisplayName}.", LogColor.Success);
                     selection.Toggle(false);
                 }
                 catch (Exception exception)
                 {
-                    UpdateUser($"Operation failed for {selection.ProgramName}: " + exception.ToString(), LogColor.Error);
+                    UpdateUser($"Operation failed for {selection.DisplayName}: " + exception.ToString(), LogColor.Error);
                 }
 
                 ++CompleteOperationsCount;
             }
 
-            Program.Cleanup(logout: false);
+            Program.Cleanup();
 
             List<ProgramSelection> FailedSelections = Program.ProgramSelections.FindAll(selection => selection.Enabled);
             if (FailedSelections.Any())
             {
                 if (FailedSelections.Count == 1)
                 {
-                    throw new CustomMessageException($"Operation failed for {FailedSelections.First().ProgramName}.");
+                    throw new CustomMessageException($"Operation failed for {FailedSelections.First().DisplayName}.");
                 }
                 else
                 {
@@ -224,9 +191,8 @@ namespace CreamInstaller
 
         private readonly int ProgramCount = Program.ProgramSelections.FindAll(selection => selection.Enabled).Count;
 
-        private async void Start()
+        private void Start()
         {
-            Program.Canceled = false;
             acceptButton.Enabled = false;
             retryButton.Enabled = false;
             cancelButton.Enabled = true;
@@ -234,7 +200,7 @@ namespace CreamInstaller
             userProgressBar.Value = userProgressBar.Minimum;
             try
             {
-                await Operate();
+                Operate();
                 UpdateUser("CreamAPI successfully downloaded and installed for " + ProgramCount + " program(s).", LogColor.Success);
             }
             catch (Exception exception)
@@ -257,24 +223,24 @@ namespace CreamInstaller
 
         private void OnAccept(object sender, EventArgs e)
         {
-            Program.Cleanup(logout: false);
+            Program.Cleanup();
             Close();
         }
 
         private void OnRetry(object sender, EventArgs e)
         {
-            Program.Cleanup(logout: false);
+            Program.Cleanup();
             Start();
         }
 
         private void OnCancel(object sender, EventArgs e)
         {
-            Program.Cleanup(logout: false);
+            Program.Cleanup();
         }
 
         private void OnReselect(object sender, EventArgs e)
         {
-            Program.Cleanup(logout: false);
+            Program.Cleanup();
             Reselecting = true;
             Close();
         }

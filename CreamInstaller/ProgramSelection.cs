@@ -1,5 +1,4 @@
-﻿using CG.Web.MegaApiClient;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace CreamInstaller
 {
@@ -7,10 +6,11 @@ namespace CreamInstaller
     {
         public bool Enabled = true;
 
-        public string ProgramName;
-        public string ProgramDirectory;
+        public string Name;
+        public string DisplayName;
+        public string RootDirectory;
+        public int SteamAppId;
         public List<string> SteamApiDllDirectories;
-        public INode DownloadNode;
 
         public bool IsProgramRunning
         {

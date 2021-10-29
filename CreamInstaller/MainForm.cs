@@ -1,5 +1,4 @@
-﻿using CG.Web.MegaApiClient;
-using Onova;
+﻿using Onova;
 using Onova.Models;
 using Onova.Services;
 using System;
@@ -94,31 +93,6 @@ namespace CreamInstaller
                     Environment.Exit(0);
                 }
             }
-
-            Program.MegaApiClient = new MegaApiClient();
-            void Login()
-            {
-                try
-                {
-                    Program.MegaApiClient.Login();
-                }
-                catch (ApiException)
-                {
-                    if (new DialogForm(this).Show(Program.ApplicationName, SystemIcons.Error,
-                        $"ERROR: Failed logging into MEGA!" +
-                        "\n\nMEGA is likely offline, please try again later . . .",
-                        "Retry", "Cancel") == DialogResult.OK)
-                    {
-                        Login();
-                    }
-                    else
-                    {
-                        Environment.Exit(0);
-                    }
-                }
-            }
-            Login();
-
             OnLoad();
         }
 

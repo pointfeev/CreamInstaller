@@ -6,7 +6,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>ini.ico</ApplicationIcon>
 	<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-	<Version>1.0.6.4</Version>
+	<Version>2.0.0.0</Version>
 	<PackageIcon>ini.ico</PackageIcon>
 	<PackageIconUrl />
 	<Description>Automatically downloads and installs CreamAPI files for programs/games.</Description>
@@ -34,7 +34,7 @@
 
   <ItemGroup>
     <PackageReference Include="Gameloop.Vdf" Version="0.6.1" />
-    <PackageReference Include="MegaApiClient" Version="1.9.0" />
+    <PackageReference Include="koskit.SteamCmdFluentApi" Version="1.0.4" />
     <PackageReference Include="Onova" Version="2.6.2" />
   </ItemGroup>
 
