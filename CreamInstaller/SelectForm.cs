@@ -308,21 +308,21 @@ namespace CreamInstaller
             scanButton.Enabled = true;
         }
 
-        private void OnChange(object sender, TreeViewEventArgs e)
+        private void OnTreeViewNodeCheckedChanged(object sender, TreeViewEventArgs e)
         {
             ProgramSelection selection = Program.ProgramSelections.ToList().Find(selection => selection.DisplayName == e.Node.Text);
             if (selection is null)
             {
-                treeView1.AfterCheck -= OnChange;
+                treeView1.AfterCheck -= OnTreeViewNodeCheckedChanged;
                 e.Node.Parent.Checked = e.Node.Parent.Nodes.Cast<TreeNode>().ToList().Any(treeNode => treeNode.Checked);
-                treeView1.AfterCheck += OnChange;
+                treeView1.AfterCheck += OnTreeViewNodeCheckedChanged;
             }
             else
             {
                 selection.Toggle(e.Node.Checked);
-                treeView1.AfterCheck -= OnChange;
+                treeView1.AfterCheck -= OnTreeViewNodeCheckedChanged;
                 e.Node.Nodes.Cast<TreeNode>().ToList().ForEach(treeNode => treeNode.Checked = e.Node.Checked);
-                treeView1.AfterCheck += OnChange;
+                treeView1.AfterCheck += OnTreeViewNodeCheckedChanged;
                 acceptButton.Enabled = Program.ProgramSelections.ToList().Any(selection => selection.Enabled);
                 allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
                 allCheckBox.Checked = treeNodes.TrueForAll(treeNode => treeNode.Checked);
@@ -333,7 +333,7 @@ namespace CreamInstaller
         private void OnLoad(object sender, EventArgs e)
         {
             treeView1.BeforeCollapse += (sender, e) => e.Cancel = true;
-            treeView1.AfterCheck += OnChange;
+            treeView1.AfterCheck += OnTreeViewNodeCheckedChanged;
             OnLoad();
         }
 
