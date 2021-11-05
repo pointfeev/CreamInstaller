@@ -147,18 +147,13 @@ namespace CreamInstaller
 
         private void Operate()
         {
-            OperationsCount = Program.ProgramSelections.FindAll(selection => selection.Enabled).Count;
+            OperationsCount = Program.ProgramSelections.ToList().FindAll(selection => selection.Enabled).Count;
             CompleteOperationsCount = 0;
 
             foreach (ProgramSelection selection in Program.ProgramSelections.ToList())
             {
-                if (!selection.Enabled) { continue; }
-
-                if (!Program.IsProgramRunningDialog(this, selection))
-                {
-                    throw new OperationCanceledException();
-                }
-
+                if (!selection.Enabled) continue;
+                if (!Program.IsProgramRunningDialog(this, selection)) throw new OperationCanceledException();
                 try
                 {
                     OperateFor(selection);
@@ -169,13 +164,10 @@ namespace CreamInstaller
                 {
                     UpdateUser($"Operation failed for {selection.DisplayName}: " + exception.ToString(), LogColor.Error);
                 }
-
                 ++CompleteOperationsCount;
             }
-
             Program.Cleanup();
-
-            List<ProgramSelection> FailedSelections = Program.ProgramSelections.FindAll(selection => selection.Enabled);
+            List<ProgramSelection> FailedSelections = Program.ProgramSelections.ToList().FindAll(selection => selection.Enabled);
             if (FailedSelections.Any())
             {
                 if (FailedSelections.Count == 1)
@@ -189,7 +181,7 @@ namespace CreamInstaller
             }
         }
 
-        private readonly int ProgramCount = Program.ProgramSelections.FindAll(selection => selection.Enabled).Count;
+        private readonly int ProgramCount = Program.ProgramSelections.ToList().FindAll(selection => selection.Enabled).Count;
 
         private void Start()
         {

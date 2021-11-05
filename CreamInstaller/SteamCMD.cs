@@ -1,5 +1,4 @@
-﻿using SteamCmdFluentApi;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -11,43 +10,68 @@ namespace CreamInstaller
     public static class SteamCMD
     {
         public static string DirectoryPath = Path.GetTempPath() + "CreamInstaller";
-        public static string FilePath = DirectoryPath + "\\steamcmd.exe";
-        public static string ArchivePath = DirectoryPath + "\\steamcmd.zip";
-        public static string DllPath = DirectoryPath + "\\steamclient.dll";
+        public static string FilePath = DirectoryPath + @"\steamcmd.exe";
+        public static string ArchivePath = DirectoryPath + @"\steamcmd.zip";
+        public static string DllPath = DirectoryPath + @"\steamclient.dll";
+        public static string AppUpdatePath = DirectoryPath + @"\appupdate";
 
-        private static SteamCmd current = null;
-
-        public static SteamCmd Current
+        public static bool Run(string command, out string output)
         {
-            get
+            bool success = true;
+            List<string> logs = new();
+            ProcessStartInfo processStartInfo = new()
             {
-                if (current is null) current = SteamCmd.WithExecutable(FilePath);
-                return current;
+                FileName = FilePath,
+                RedirectStandardOutput = true,
+                RedirectStandardInput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                Arguments = command,
+                CreateNoWindow = true
+            };
+            using (Process process = Process.Start(processStartInfo))
+            {
+                process.OutputDataReceived += (object sender, DataReceivedEventArgs e) => logs.Add(e.Data);
+                process.BeginOutputReadLine();
+                process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => logs.Add(e.Data);
+                process.BeginErrorReadLine();
+                process.WaitForExit();
             }
+            output = string.Join("\r\n", logs);
+            return success;
         }
 
         public static void Setup()
         {
             Kill();
-            if (!Directory.Exists(DirectoryPath)) Directory.CreateDirectory(DirectoryPath);
             if (!File.Exists(FilePath))
             {
-                using (WebClient webClient = new WebClient()) webClient.DownloadFile("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip", ArchivePath);
+                using (WebClient webClient = new()) webClient.DownloadFile("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip", ArchivePath);
                 ZipFile.ExtractToDirectory(ArchivePath, DirectoryPath);
                 File.Delete(ArchivePath);
             }
-            if (!File.Exists(DllPath)) Current.TryToExecuteCommand($@"+login anonymous +app_info_update 1 +quit", out _);
+            if (!File.Exists(DllPath)) Run($@"+quit", out _);
         }
 
         public static bool GetAppInfo(int steamAppId, out Dictionary<string, string> appInfo)
         {
             appInfo = new();
             if (Program.Canceled) return false;
-            // need to find a way to request app info, currently it won't work from the command line like below
-            bool success = Current.TryToExecuteCommand($@"+login anonymous +app_info_update 1 +app_info_request {steamAppId} +app_info_print {steamAppId} +quit", out string output);
-            if (!success) return false;
+            string output = null;
+            string appUpdatePath = $@"{AppUpdatePath}\{steamAppId}";
+            string appUpdateFile = $@"{appUpdatePath}\appinfo.txt";
+            if (Directory.Exists(appUpdatePath) && File.Exists(appUpdateFile)) output = File.ReadAllText(appUpdateFile);
+            else
+            {
+                Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {steamAppId} +force_install_dir {appUpdatePath} +app_update 4 +quit", out _);
+                if (Program.Canceled) return false;
+                Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {steamAppId} +quit", out output);
+                File.WriteAllText(appUpdateFile, output);
+            }
+            if (Program.Canceled || output is null) return false;
             foreach (string s in output.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries))
             {
+                if (Program.Canceled) return false;
                 int first = s.IndexOf("\"");
                 int second = 1 + first + s.Substring(first + 1).IndexOf("\"");
                 int third = 1 + second + s.Substring(second + 1).IndexOf("\"");
@@ -65,7 +89,7 @@ namespace CreamInstaller
 
         public static void Kill()
         {
-            foreach (Process process in Process.GetProcessesByName("steamcmd")) { process.Kill(); process.WaitForExit(); }
+            foreach (Process process in Process.GetProcessesByName("steamcmd")) process.Kill();
         }
 
         public static void Dispose()

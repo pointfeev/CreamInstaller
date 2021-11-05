@@ -1,5 +1,4 @@
 ﻿
-using System;
 using System.Windows.Forms;
 
 namespace CreamInstaller
@@ -37,9 +36,9 @@ namespace CreamInstaller
             this.cancelButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.allCheckBox = new System.Windows.Forms.CheckBox();
             this.noneFoundLabel = new System.Windows.Forms.Label();
-            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.treeView1 = new System.Windows.Forms.TreeView();
+            this.allCheckBox = new System.Windows.Forms.CheckBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.label2 = new System.Windows.Forms.Label();
             this.scanButton = new System.Windows.Forms.Button();
@@ -81,15 +80,41 @@ namespace CreamInstaller
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox1.Controls.Add(this.allCheckBox);
             this.groupBox1.Controls.Add(this.noneFoundLabel);
-            this.groupBox1.Controls.Add(this.flowLayoutPanel1);
+            this.groupBox1.Controls.Add(this.treeView1);
+            this.groupBox1.Controls.Add(this.allCheckBox);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(460, 236);
             this.groupBox1.TabIndex = 8;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Programs / Games";
+            // 
+            // noneFoundLabel
+            // 
+            this.noneFoundLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.noneFoundLabel.Location = new System.Drawing.Point(6, 22);
+            this.noneFoundLabel.Name = "noneFoundLabel";
+            this.noneFoundLabel.Size = new System.Drawing.Size(448, 208);
+            this.noneFoundLabel.TabIndex = 1002;
+            this.noneFoundLabel.Text = "No CreamAPI-applicable programs were found on your computer!";
+            this.noneFoundLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.noneFoundLabel.Visible = false;
+            // 
+            // treeView1
+            // 
+            this.treeView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.treeView1.CheckBoxes = true;
+            this.treeView1.Location = new System.Drawing.Point(6, 22);
+            this.treeView1.Name = "treeView1";
+            this.treeView1.ShowPlusMinus = false;
+            this.treeView1.ShowRootLines = false;
+            this.treeView1.Size = new System.Drawing.Size(448, 208);
+            this.treeView1.TabIndex = 1001;
             // 
             // allCheckBox
             // 
@@ -105,27 +130,6 @@ namespace CreamInstaller
             this.allCheckBox.Text = "All";
             this.allCheckBox.UseVisualStyleBackColor = true;
             this.allCheckBox.CheckedChanged += new System.EventHandler(this.OnAllCheckBoxChanged);
-            // 
-            // noneFoundLabel
-            // 
-            this.noneFoundLabel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.noneFoundLabel.Enabled = false;
-            this.noneFoundLabel.Location = new System.Drawing.Point(3, 19);
-            this.noneFoundLabel.Name = "noneFoundLabel";
-            this.noneFoundLabel.Size = new System.Drawing.Size(454, 214);
-            this.noneFoundLabel.TabIndex = 0;
-            this.noneFoundLabel.Text = "No CreamAPI-applicable programs or games were found on your computer!";
-            this.noneFoundLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.noneFoundLabel.Visible = false;
-            // 
-            // flowLayoutPanel1
-            // 
-            this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 19);
-            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(454, 214);
-            this.flowLayoutPanel1.TabIndex = 1000;
             // 
             // progressBar1
             // 
@@ -193,12 +197,12 @@ namespace CreamInstaller
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox allCheckBox;
-        private Label noneFoundLabel;
         private Button scanButton;
+        private TreeView treeView1;
+        private Label noneFoundLabel;
     }
 }
 

@@ -1,69 +1,67 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
-    <UseWindowsForms>true</UseWindowsForms>
-    <ApplicationIcon>ini.ico</ApplicationIcon>
-	<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-	<Version>2.0.0.0</Version>
-	<PackageIcon>ini.ico</PackageIcon>
-	<PackageIconUrl />
-	<Description>Automatically downloads and installs CreamAPI files for programs/games.</Description>
-	<PackageLicenseFile>LICENSE</PackageLicenseFile>
-	<Copyright>2021, pointfeev (https://github.com/pointfeev)</Copyright>
-	<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-	<PackageProjectUrl>https://github.com/pointfeev/CreamInstaller</PackageProjectUrl>
-	<RepositoryUrl>https://github.com/pointfeev/CreamInstaller</RepositoryUrl>
-	<RepositoryType>git</RepositoryType>
-	<PackageReleaseNotes>Automatically downloads and installs CreamAPI files for programs/games.</PackageReleaseNotes>
-	<PackageTags>steam, dlc</PackageTags>
-	<AssemblyName>CreamInstaller</AssemblyName>
-	<Company>CreamInstaller</Company>
-	<Product>CreamAPI Downloader &amp; Installer</Product>
-	<Authors>pointfeev</Authors>
-	<PackageId>pointfeev.creaminstaller</PackageId>
-	<StartupObject>CreamInstaller.Program</StartupObject>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net5.0-windows</TargetFramework>
+		<UseWindowsForms>true</UseWindowsForms>
+		<ApplicationIcon>ini.ico</ApplicationIcon>
+		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+		<Version>2.0.0.0</Version>
+		<PackageIcon>ini.ico</PackageIcon>
+		<PackageIconUrl />
+		<Description>Automatically downloads and installs CreamAPI files for programs/games.</Description>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<Copyright>2021, pointfeev (https://github.com/pointfeev)</Copyright>
+		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<PackageProjectUrl>https://github.com/pointfeev/CreamInstaller</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/pointfeev/CreamInstaller</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageReleaseNotes>Automatically downloads and installs CreamAPI files for programs/games.</PackageReleaseNotes>
+		<PackageTags>steam, dlc</PackageTags>
+		<AssemblyName>CreamInstaller</AssemblyName>
+		<Company>CreamInstaller</Company>
+		<Product>CreamAPI Downloader &amp; Installer</Product>
+		<Authors>pointfeev</Authors>
+		<PackageId>pointfeev.creaminstaller</PackageId>
+		<StartupObject>CreamInstaller.Program</StartupObject>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>embedded</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-    <DefineConstants>TRACE</DefineConstants>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<DebugType>embedded</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+		<DefineConstants>TRACE</DefineConstants>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Gameloop.Vdf" Version="0.6.1" />
-    <PackageReference Include="koskit.SteamCmdFluentApi" Version="1.0.4" />
-    <PackageReference Include="Onova" Version="2.6.2" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Gameloop.Vdf" Version="0.6.1" />
+		<PackageReference Include="Onova" Version="2.6.2" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="MainForm.cs" />
-    <Compile Update="SelectForm.cs" />
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Update="MainForm.cs" />
+		<Compile Update="SelectForm.cs" />
+		<Compile Update="Properties\Resources.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Resources.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Update="Properties\Resources.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-    <None Include="ini.ico">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
-
+	<ItemGroup>
+		<None Include="..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+		<None Include="ini.ico">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+	</ItemGroup>
 </Project>

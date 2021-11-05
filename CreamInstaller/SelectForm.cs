@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -48,7 +47,7 @@ namespace CreamInstaller
         {
             steamApiDllDirectories = new();
             if (Program.Canceled) return false;
-            string api = "";//gameDirectory + "\\steam_api.dll";
+            string api = gameDirectory + "\\steam_api.dll";
             string api64 = gameDirectory + "\\steam_api64.dll";
             if (File.Exists(api) || File.Exists(api64)) steamApiDllDirectories.Add(gameDirectory);
             foreach (string _directory in Directory.GetDirectories(gameDirectory))
@@ -92,15 +91,15 @@ namespace CreamInstaller
             return true;
         }
 
-        private readonly List<CheckBox> checkBoxes = new();
+        private readonly List<TreeNode> treeNodes = new();
 
-        private readonly Dictionary<int, string> dlc = new();
+        internal readonly Dictionary<int, List<Tuple<int, string>>> DLC = new();
 
-        [DllImport("kernel32")]
-        private static extern bool AllocConsole();
+        internal List<Task> RunningTasks = null;
 
         private void GetCreamApiApplicablePrograms(IProgress<int> progress)
         {
+            int cur = 0;
             if (Program.Canceled) return;
             List<Tuple<string, string>> applicablePrograms = new();
             string launcherRootDirectory = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Programs\\Paradox Interactive";
@@ -109,85 +108,122 @@ namespace CreamInstaller
                 if (GetGameDirectoriesFromLibraryDirectory(libraryDirectory, out List<string> gameDirectories))
                     foreach (string gameDirectory in gameDirectories)
                         applicablePrograms.Add(new Tuple<string, string>(Path.GetFileName(gameDirectory) ?? "unknown_" + applicablePrograms.Count, gameDirectory));
-            List<Task> tasks = new();
+            RunningTasks = new();
             foreach (Tuple<string, string> program in applicablePrograms)
             {
-                string name = program.Item1;
+                string identifier = program.Item1;
                 string rootDirectory = program.Item2;
                 if (Program.Canceled) return;
-                Task task = new Task(() =>
+                Task task = new(() =>
                 {
-                    int steamAppId = 0;
-                    if (Program.Canceled || Program.ProgramSelections.Any(s => s.Name == name)
-                    || (name != "Paradox Launcher" && !GetSteamAppIdFromGameDirectory(rootDirectory, out steamAppId))
-                    || !GetSteamApiDllDirectoriesFromGameDirectory(rootDirectory, out List<string> steamApiDllDirectories))
-                        return;
-
-                    Dictionary<string, string> appInfo = null;
-                    if (Program.Canceled || (name != "Paradox Launcher" && !SteamCMD.GetAppInfo(steamAppId, out appInfo))) return;
-                    string list = null;
-                    if (!(appInfo is null) && appInfo.TryGetValue("listofdlc", out list))
+                    try
                     {
+                        int steamAppId = 0;
+                        if (Program.Canceled
+                        || (identifier != "Paradox Launcher" && !GetSteamAppIdFromGameDirectory(rootDirectory, out steamAppId))
+                        || !GetSteamApiDllDirectoriesFromGameDirectory(rootDirectory, out List<string> steamApiDllDirectories))
+                            return;
+
+                        Dictionary<string, string> appInfo = null;
+                        if (Program.Canceled || (identifier != "Paradox Launcher" && !SteamCMD.GetAppInfo(steamAppId, out appInfo))) return;
+                        string list = null;
+                        List<Tuple<int, string>> dlc = null;
+                        if (!DLC.TryGetValue(steamAppId, out dlc))
+                        {
+                            dlc = new();
+                            DLC.Add(steamAppId, dlc);
+                        }
                         if (Program.Canceled) return;
-                        string[] nums = list.Split(",");
-                        List<int> ids = new();
-                        foreach (string s in nums) ids.Add(int.Parse(s));
-                        foreach (int id in ids)
+                        List<Task> dlcTasks = new();
+                        if (!(appInfo is null) && appInfo.TryGetValue("listofdlc", out list))
                         {
                             if (Program.Canceled) return;
-                            string dlcName = null;
-                            Dictionary<string, string> dlcAppInfo = null;
-                            //if (SteamCMD.GetAppInfo(id, out dlcAppInfo)) dlcAppInfo.TryGetValue("name", out dlcName);
-                            dlc.Add(id, dlcName);
-                            Console.WriteLine(id + " = " + dlcName);
+                            Task task = new(() =>
+                            {
+                                try
+                                {
+                                    string[] nums = list.Split(",");
+                                    List<int> ids = new();
+                                    foreach (string s in nums)
+                                    {
+                                        if (Program.Canceled) return;
+                                        ids.Add(int.Parse(s));
+                                    }
+                                    foreach (int id in ids)
+                                    {
+                                        if (Program.Canceled) return;
+                                        string dlcName = null;
+                                        Dictionary<string, string> dlcAppInfo = null;
+                                        if (SteamCMD.GetAppInfo(id, out dlcAppInfo)) dlcAppInfo.TryGetValue("name", out dlcName);
+                                        if (Program.Canceled) return;
+                                        if (string.IsNullOrWhiteSpace(dlcName)) continue;
+                                        dlc.Add(new Tuple<int, string>(id, dlcName));
+                                    }
+                                }
+                                catch { }
+                            });
+                            dlcTasks.Add(task);
+                            RunningTasks.Add(task);
+                            task.Start();
+                            progress.Report(-RunningTasks.Count);
                         }
-                    }
-                    else if (name != "Paradox Launcher") return;
+                        else if (identifier != "Paradox Launcher") return;
+                        if (Program.Canceled) return;
 
-                    ProgramSelection selection = new();
-                    selection.Name = name;
-                    string displayName = name;
-                    if (!(appInfo is null)) appInfo.TryGetValue("name", out displayName);
-                    selection.DisplayName = displayName;
-                    selection.RootDirectory = rootDirectory;
-                    selection.SteamAppId = steamAppId;
-                    selection.SteamApiDllDirectories = steamApiDllDirectories;
+                        string displayName = identifier;
+                        if (!(appInfo is null)) appInfo.TryGetValue("name", out displayName);
+                        if (string.IsNullOrWhiteSpace(displayName)) return;
+                        if (Program.Canceled) return;
 
-                    flowLayoutPanel1.Invoke((MethodInvoker)delegate
-                    {
-                        CheckBox checkBox = new();
-                        checkBoxes.Add(checkBox);
-                        checkBox.AutoSize = true;
-                        checkBox.Parent = flowLayoutPanel1;
-                        checkBox.Text = selection.DisplayName;
-                        checkBox.Checked = true;
-                        checkBox.Enabled = false;
-                        checkBox.TabStop = true;
-                        checkBox.TabIndex = 1 + checkBoxes.Count;
+                        ProgramSelection selection = Program.ProgramSelections.Find(s => s.Identifier == identifier) ?? new();
+                        selection.Identifier = identifier;
+                        selection.DisplayName = displayName;
+                        selection.RootDirectory = rootDirectory;
+                        selection.SteamAppId = steamAppId;
+                        selection.SteamApiDllDirectories = steamApiDllDirectories;
 
-                        checkBox.CheckedChanged += (sender, e) =>
+                        foreach (Task task in dlcTasks.ToList())
                         {
-                            selection.Toggle(checkBox.Checked);
-                            acceptButton.Enabled = Program.ProgramSelections.Any(selection => selection.Enabled);
-                            allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
-                            allCheckBox.Checked = checkBoxes.TrueForAll(checkBox => checkBox.Checked);
-                            allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
-                        };
-                    });
+                            if (Program.Canceled) return;
+                            progress.Report(cur++);
+                            task.Wait();
+                        }
+                        if (Program.Canceled) return;
+                        treeView1.Invoke((MethodInvoker)delegate
+                        {
+                            if (Program.Canceled) return;
+                            TreeNode programNode = treeNodes.Find(s => s.Text == displayName) ?? new();
+                            programNode.Text = displayName;
+                            programNode.Remove();
+                            treeView1.Nodes.Add(programNode);
+                            treeNodes.Remove(programNode);
+                            treeNodes.Add(programNode);
+                            foreach (Tuple<int, string> dlcApp in dlc.ToList())
+                            {
+                                if (Program.Canceled || programNode is null) return;
+                                TreeNode dlcNode = treeNodes.Find(s => s.Text == dlcApp.Item2) ?? new();
+                                dlcNode.Text = dlcApp.Item2;
+                                dlcNode.Remove();
+                                programNode.Nodes.Add(dlcNode);
+                                treeNodes.Remove(dlcNode);
+                                treeNodes.Add(dlcNode);
+                            }
+                        });
+                    }
+                    catch { }
                 });
-                tasks.Add(task);
+                RunningTasks.Add(task);
                 task.Start();
             }
-            int max = tasks.Count;
-            progress.Report(max);
-            int cur = 0;
+            progress.Report(-RunningTasks.Count);
             progress.Report(cur);
-            foreach (Task task in tasks)
+            foreach (Task task in RunningTasks.ToList())
             {
+                if (Program.Canceled) return;
                 progress.Report(cur++);
                 task.Wait();
             }
-            progress.Report(max);
+            progress.Report(RunningTasks.Count);
         }
 
         private async void OnLoad()
@@ -198,57 +234,52 @@ namespace CreamInstaller
             noneFoundLabel.Visible = false;
             allCheckBox.Enabled = false;
             acceptButton.Enabled = false;
-            checkBoxes.ForEach(checkBox => checkBox.Enabled = false);
+            treeView1.CheckBoxes = false;
 
             label2.Visible = true;
             progressBar1.Visible = true;
             progressBar1.Value = 0;
             groupBox1.Size = new Size(groupBox1.Size.Width, groupBox1.Size.Height - 44);
 
-            AllocConsole();
-
             bool setup = true;
             int maxProgress = 0;
+            int curProgress = 0;
             Progress<int> progress = new();
             IProgress<int> iProgress = progress;
             progress.ProgressChanged += (sender, _progress) =>
             {
-                if (maxProgress == 0) maxProgress = _progress;
-                else
-                {
-                    int p = Math.Max(Math.Min((int)((float)(_progress / (float)maxProgress) * 100), 100), 0);
-                    if (setup) label2.Text = "Setting up SteamCMD . . . " + p + "% (" + _progress + "/" + maxProgress + ")";
-                    else label2.Text = "Scanning for CreamAPI-applicable programs on your computer . . . " + p + "% (" + _progress + "/" + maxProgress + ")";
-                    progressBar1.Value = p;
-                }
+                if (_progress < 0) maxProgress = -_progress;
+                else curProgress = _progress;
+                int p = Math.Max(Math.Min((int)((float)(curProgress / (float)maxProgress) * 100), 100), 0);
+                if (setup) label2.Text = "Setting up SteamCMD . . . " + p + "%";
+                else label2.Text = "Gathering your CreamAPI-applicable games and their DLCs . . . " + p + "%";
+                progressBar1.Value = p;
             };
 
-            int max = 1660; // not exact, number varies
-            iProgress.Report(max);
+            iProgress.Report(-1660); // not exact, number varies
             int cur = 0;
             iProgress.Report(cur);
             label2.Text = "Setting up SteamCMD . . . ";
-            FileSystemWatcher watcher = new FileSystemWatcher(SteamCMD.DirectoryPath);
+            if (!Directory.Exists(SteamCMD.DirectoryPath)) Directory.CreateDirectory(SteamCMD.DirectoryPath);
+            FileSystemWatcher watcher = new(SteamCMD.DirectoryPath);
             watcher.Changed += (sender, e) => iProgress.Report(++cur);
             watcher.Filter = "*";
             watcher.IncludeSubdirectories = true;
             watcher.EnableRaisingEvents = true;
             await Task.Run(() => SteamCMD.Setup());
             watcher.Dispose();
-            Clipboard.SetText(cur.ToString());
 
-            maxProgress = 0;
             setup = false;
-            label2.Text = "Scanning for CreamAPI-applicable programs on your computer . . . ";
+            label2.Text = "Gathering your CreamAPI-applicable games and their DLCs . . . ";
             await Task.Run(() => GetCreamApiApplicablePrograms(iProgress));
 
             Program.ProgramSelections.ForEach(selection => selection.SteamApiDllDirectories.RemoveAll(directory => !Directory.Exists(directory)));
             Program.ProgramSelections.RemoveAll(selection => !Directory.Exists(selection.RootDirectory) || !selection.SteamApiDllDirectories.Any());
-            foreach (CheckBox checkBox in checkBoxes)
+            foreach (TreeNode treeNode in treeNodes)
             {
-                if (!Program.ProgramSelections.Any(selection => selection.DisplayName == checkBox.Text))
+                if (treeNode.Parent is null && !Program.ProgramSelections.Any(selection => selection.DisplayName == treeNode.Text))
                 {
-                    checkBox.Dispose();
+                    treeNode.Remove();
                 }
             }
 
@@ -260,7 +291,9 @@ namespace CreamInstaller
             if (Program.ProgramSelections.Any())
             {
                 allCheckBox.Enabled = true;
-                checkBoxes.ForEach(checkBox => checkBox.Enabled = true);
+                treeView1.CheckBoxes = true;
+                treeView1.ExpandAll();
+                treeNodes.ForEach(node => node.Checked = true);
                 if (Program.ProgramSelections.Any(selection => selection.Enabled))
                 {
                     acceptButton.Enabled = true;
@@ -275,8 +308,32 @@ namespace CreamInstaller
             scanButton.Enabled = true;
         }
 
+        private void OnChange(object sender, TreeViewEventArgs e)
+        {
+            ProgramSelection selection = Program.ProgramSelections.ToList().Find(selection => selection.DisplayName == e.Node.Text);
+            if (selection is null)
+            {
+                treeView1.AfterCheck -= OnChange;
+                e.Node.Parent.Checked = e.Node.Parent.Nodes.Cast<TreeNode>().ToList().Any(treeNode => treeNode.Checked);
+                treeView1.AfterCheck += OnChange;
+            }
+            else
+            {
+                selection.Toggle(e.Node.Checked);
+                treeView1.AfterCheck -= OnChange;
+                e.Node.Nodes.Cast<TreeNode>().ToList().ForEach(treeNode => treeNode.Checked = e.Node.Checked);
+                treeView1.AfterCheck += OnChange;
+                acceptButton.Enabled = Program.ProgramSelections.ToList().Any(selection => selection.Enabled);
+                allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
+                allCheckBox.Checked = treeNodes.TrueForAll(treeNode => treeNode.Checked);
+                allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
+            }
+        }
+
         private void OnLoad(object sender, EventArgs e)
         {
+            treeView1.BeforeCollapse += (sender, e) => e.Cancel = true;
+            treeView1.AfterCheck += OnChange;
             OnLoad();
         }
 
@@ -284,7 +341,7 @@ namespace CreamInstaller
         {
             if (Program.ProgramSelections.Count > 0)
             {
-                foreach (ProgramSelection selection in Program.ProgramSelections)
+                foreach (ProgramSelection selection in Program.ProgramSelections.ToList())
                 {
                     if (!Program.IsProgramRunningDialog(this, selection))
                     {
@@ -297,11 +354,11 @@ namespace CreamInstaller
                 installForm.ShowDialog();
                 if (installForm.Reselecting)
                 {
-                    foreach (CheckBox checkBox in checkBoxes)
-                    {
-                        checkBox.Checked = !checkBox.Checked;
-                        checkBox.Checked = !checkBox.Checked; // to fire CheckChanged
-                    }
+                    //foreach (TreeNode treeNode in treeNodes)
+                    //{
+                    //    treeNode.Checked = !treeNode.Checked;
+                    //    treeNode.Checked = !treeNode.Checked; // to fire checked event
+                    //}
                     int X = installForm.Location.X + installForm.Size.Width / 2 - Size.Width / 2;
                     int Y = installForm.Location.Y + installForm.Size.Height / 2 - Size.Height / 2;
                     Location = new Point(X, Y);
@@ -327,17 +384,12 @@ namespace CreamInstaller
         private void OnAllCheckBoxChanged(object sender, EventArgs e)
         {
             bool shouldCheck = false;
-            foreach (CheckBox checkBox in checkBoxes)
-            {
-                if (!checkBox.Checked)
-                {
+            foreach (TreeNode treeNode in treeNodes)
+                if (treeNode.Parent is null && !treeNode.Checked)
                     shouldCheck = true;
-                }
-            }
-            foreach (CheckBox checkBox in checkBoxes)
-            {
-                checkBox.Checked = shouldCheck;
-            }
+            foreach (TreeNode treeNode in treeNodes)
+                if (treeNode.Parent is null)
+                    treeNode.Checked = shouldCheck;
             allCheckBox.Checked = shouldCheck;
         }
     }
