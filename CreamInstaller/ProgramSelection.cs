@@ -51,7 +51,7 @@ namespace CreamInstaller
                     break;
                 }
             }
-            if (!SelectedSteamDlc.Any()) this.Enabled = false;
+            this.Enabled = SelectedSteamDlc.Any();
         }
 
         public ProgramSelection() => All.Add(this);

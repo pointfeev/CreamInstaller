@@ -100,7 +100,7 @@ namespace CreamInstaller
 
         private readonly List<TreeNode> treeNodes = new();
 
-        internal readonly Dictionary<int, List<Tuple<int, string>>> DLC = new();
+        internal readonly Dictionary<int, Dictionary<int, string>> DLC = new();
 
         internal List<Task> RunningTasks = null;
 
@@ -129,7 +129,7 @@ namespace CreamInstaller
                     if (Program.Canceled || !GetDllDirectoriesFromGameDirectory(directory, out List<string> dllDirectories)) return;
                     VProperty appInfo = null;
                     if (Program.Canceled || (name != "Paradox Launcher" && !SteamCMD.GetAppInfo(appId, buildId, out appInfo))) return;
-                    List<Tuple<int, string>> dlc = null;
+                    Dictionary<int, string> dlc = null;
                     if (!DLC.TryGetValue(appId, out dlc))
                     {
                         dlc = new();
@@ -168,7 +168,7 @@ namespace CreamInstaller
                                     dlcName = dlcAppInfo?.Value?["common"]?["name"]?.ToString();
                                 if (Program.Canceled) return;
                                 if (string.IsNullOrWhiteSpace(dlcName)) dlcName = $"Unnamed DLC ({id})";
-                                dlc.Add(new Tuple<int, string>(id, dlcName));
+                                dlc[id] = dlcName;
                             });
                             dlcTasks.Add(task);
                             RunningTasks.Add(task);
@@ -205,17 +205,18 @@ namespace CreamInstaller
                         treeView1.Nodes.Add(programNode);
                         treeNodes.Remove(programNode);
                         treeNodes.Add(programNode);
-                        foreach (Tuple<int, string> dlcApp in dlc.ToList())
+                        foreach (KeyValuePair<int, string> dlcApp in dlc.ToList())
                         {
                             if (Program.Canceled || programNode is null) return;
-                            TreeNode dlcNode = treeNodes.Find(s => s.Text == dlcApp.Item2) ?? new();
-                            dlcNode.Text = dlcApp.Item2;
+                            TreeNode dlcNode = treeNodes.Find(s => s.Text == dlcApp.Value) ?? new();
+                            dlcNode.Text = dlcApp.Value;
                             dlcNode.Remove();
                             programNode.Nodes.Add(dlcNode);
                             treeNodes.Remove(dlcNode);
                             treeNodes.Add(dlcNode);
-                            selection.AllSteamDlc.Add(dlcApp);
-                            selection.SelectedSteamDlc.Add(dlcApp);
+                            Tuple<int, string> app = new(dlcApp.Key, dlcApp.Value);
+                            if (!selection.AllSteamDlc.Contains(app)) selection.AllSteamDlc.Add(app);
+                            if (!selection.SelectedSteamDlc.Contains(app)) selection.SelectedSteamDlc.Add(app);
                         }
                     });
                 });
@@ -283,12 +284,8 @@ namespace CreamInstaller
             ProgramSelection.All.ForEach(selection => selection.SteamApiDllDirectories.RemoveAll(directory => !Directory.Exists(directory)));
             ProgramSelection.All.RemoveAll(selection => !Directory.Exists(selection.RootDirectory) || !selection.SteamApiDllDirectories.Any());
             foreach (TreeNode treeNode in treeNodes)
-            {
                 if (treeNode.Parent is null && ProgramSelection.FromName(treeNode.Text) is null)
-                {
                     treeNode.Remove();
-                }
-            }
 
             progressBar1.Value = 100;
             groupBox1.Size = new Size(groupBox1.Size.Width, groupBox1.Size.Height + 44);
@@ -320,10 +317,10 @@ namespace CreamInstaller
             if (selection is null)
             {
                 selection = ProgramSelection.FromName(e.Node.Parent.Text);
+                selection.ToggleDlc(e.Node.Text, e.Node.Checked);
                 treeView1.AfterCheck -= OnTreeViewNodeCheckedChanged;
                 e.Node.Parent.Checked = e.Node.Parent.Nodes.Cast<TreeNode>().ToList().Any(treeNode => treeNode.Checked);
                 treeView1.AfterCheck += OnTreeViewNodeCheckedChanged;
-                selection.ToggleDlc(e.Node.Text, e.Node.Checked);
             }
             else
             {
@@ -331,10 +328,10 @@ namespace CreamInstaller
                 treeView1.AfterCheck -= OnTreeViewNodeCheckedChanged;
                 e.Node.Nodes.Cast<TreeNode>().ToList().ForEach(treeNode => treeNode.Checked = e.Node.Checked);
                 treeView1.AfterCheck += OnTreeViewNodeCheckedChanged;
-                acceptButton.Enabled = ProgramSelection.AllSafeEnabled.Any();
                 allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
                 allCheckBox.Checked = treeNodes.TrueForAll(treeNode => treeNode.Checked);
                 allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
+                acceptButton.Enabled = ProgramSelection.AllSafeEnabled.Any();
             }
         }
 
