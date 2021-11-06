@@ -140,25 +140,17 @@ namespace CreamInstaller
                     List<int> dlcIds = new();
                     if (!(appInfo is null))
                     {
-                        try
-                        {
-                            if (!(appInfo.Value["extended"] is null))
-                                foreach (VProperty property in appInfo.Value["extended"])
-                                    if (property.Key.ToString() == "listofdlc")
-                                        foreach (string id in property.Value.ToString().Split(","))
-                                            if (!dlcIds.Contains(int.Parse(id)))
-                                                dlcIds.Add(int.Parse(id));
-                        }
-                        catch { }
-                        try
-                        {
-                            if (!(appInfo.Value["depots"] is null))
-                                foreach (VProperty _property in appInfo.Value["depots"])
-                                    if (int.TryParse(_property.Key.ToString(), out int _))
-                                        if (int.TryParse(_property.Value?["dlcappid"]?.ToString(), out int appid) && !dlcIds.Contains(appid))
-                                            dlcIds.Add(appid);
-                        }
-                        catch { }
+                        if (!(appInfo.Value["extended"] is null))
+                            foreach (VProperty property in appInfo.Value["extended"])
+                                if (property.Key.ToString() == "listofdlc")
+                                    foreach (string id in property.Value.ToString().Split(","))
+                                        if (!dlcIds.Contains(int.Parse(id)))
+                                            dlcIds.Add(int.Parse(id));
+                        if (!(appInfo.Value["depots"] is null))
+                            foreach (VProperty _property in appInfo.Value["depots"])
+                                if (int.TryParse(_property.Key.ToString(), out int _) && !(_property.Value is VValue))
+                                    if (int.TryParse(_property.Value?["dlcappid"]?.ToString(), out int appid) && !dlcIds.Contains(appid))
+                                        dlcIds.Add(appid);
                     }
                     if (!(dlcIds is null) && dlcIds.Count > 0)
                     {
@@ -170,7 +162,7 @@ namespace CreamInstaller
                                 if (Program.Canceled) return;
                                 string dlcName = null;
                                 VProperty dlcAppInfo = null;
-                                if (SteamCMD.GetAppInfo(id, 0, out dlcAppInfo)) try { dlcName = dlcAppInfo?.Value?["common"]?["name"]?.ToString(); } catch { }
+                                if (SteamCMD.GetAppInfo(id, 0, out dlcAppInfo)) dlcName = dlcAppInfo?.Value?["common"]?["name"]?.ToString();
                                 if (Program.Canceled) return;
                                 if (string.IsNullOrWhiteSpace(dlcName)) dlcName = $"Unnamed DLC ({id})";
                                 dlc.Add(new Tuple<int, string>(id, dlcName));
