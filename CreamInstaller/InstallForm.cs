@@ -52,7 +52,7 @@ namespace CreamInstaller
             int cur = 0;
             foreach (string directory in selection.SteamApiDllDirectories)
             {
-                UpdateUser("Installing CreamAPI for " + selection.DisplayName + $" in directory \"{directory}\" . . . ", LogColor.Operation);
+                UpdateUser("Installing CreamAPI for " + selection.Name + $" in directory \"{directory}\" . . . ", LogColor.Operation);
                 if (!Program.IsProgramRunningDialog(this, selection)) throw new OperationCanceledException();
                 string api = directory + @"\steam_api.dll";
                 string api_o = directory + @"\steam_api_o.dll";
@@ -89,7 +89,7 @@ namespace CreamInstaller
                     writer.WriteLine($"appid = {selection.SteamAppId}");
                     writer.WriteLine();
                     writer.WriteLine("[dlc]");
-                    UpdateUser($"Added game to cream_api.ini with appid {selection.SteamAppId} ({selection.DisplayName})", LogColor.Resource);
+                    UpdateUser($"Added game to cream_api.ini with appid {selection.SteamAppId} ({selection.Name})", LogColor.Resource);
                     foreach (Tuple<int, string> dlcApp in selection.SelectedSteamDlc)
                     {
                         writer.WriteLine($"{dlcApp.Item1} = {dlcApp.Item2}");
@@ -129,12 +129,12 @@ namespace CreamInstaller
                 try
                 {
                     await OperateFor(selection);
-                    UpdateUser($"Operation succeeded for {selection.DisplayName}.", LogColor.Success);
+                    UpdateUser($"Operation succeeded for {selection.Name}.", LogColor.Success);
                     selection.Enabled = false;
                 }
                 catch (Exception exception)
                 {
-                    UpdateUser($"Operation failed for {selection.DisplayName}: " + exception.ToString(), LogColor.Error);
+                    UpdateUser($"Operation failed for {selection.Name}: " + exception.ToString(), LogColor.Error);
                 }
                 ++CompleteOperationsCount;
             }
@@ -144,7 +144,7 @@ namespace CreamInstaller
             {
                 if (FailedSelections.Count == 1)
                 {
-                    throw new CustomMessageException($"Operation failed for {FailedSelections.First().DisplayName}.");
+                    throw new CustomMessageException($"Operation failed for {FailedSelections.First().Name}.");
                 }
                 else
                 {

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -32,63 +31,70 @@ namespace CreamInstaller
                 if (steamInstallPath == null) steamInstallPath = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Valve\\Steam", "InstallPath", null) as string;
                 if (steamInstallPath != null)
                 {
-                    string mainLibraryFolder = steamInstallPath + "\\steamapps\\common";
-                    gameDirectories.Add(mainLibraryFolder);
-                    string libraryFolders = steamInstallPath + "\\steamapps\\libraryfolders.vdf";
-                    VProperty property = VdfConvert.Deserialize(File.ReadAllText(libraryFolders));
-                    foreach (VProperty _property in property.Value)
-                        if (int.TryParse(_property.Key, out _) && Directory.Exists(_property.Value.ToString()))
-                            gameDirectories.Add(_property.Value.ToString());
+                    string libraryFolder = steamInstallPath + @"\steamapps";
+                    gameDirectories.Add(libraryFolder);
+                    string libraryFolders = libraryFolder + @"\libraryfolders.vdf";
+                    dynamic property = VdfConvert.Deserialize(File.ReadAllText(libraryFolders));
+                    foreach (dynamic _property in property.Value)
+                    {
+                        if (int.TryParse(_property.Key, out int _))
+                        {
+                            string path = _property.Value.path.ToString() + @"\steamapps";
+                            if (string.IsNullOrWhiteSpace(path)) continue;
+                            if (!gameDirectories.Contains(path)) gameDirectories.Add(path);
+                        }
+                    }
                 }
                 return gameDirectories;
             }
         }
 
-        private bool GetSteamApiDllDirectoriesFromGameDirectory(string gameDirectory, out List<string> steamApiDllDirectories)
+        private bool GetDllDirectoriesFromGameDirectory(string gameDirectory, out List<string> dllDirectories)
         {
-            steamApiDllDirectories = new();
+            dllDirectories = new();
             if (Program.Canceled) return false;
             string api = gameDirectory + @"\steam_api.dll";
             string api64 = gameDirectory + @"\steam_api64.dll";
-            if (File.Exists(api) || File.Exists(api64)) steamApiDllDirectories.Add(gameDirectory);
+            if (File.Exists(api) || File.Exists(api64)) dllDirectories.Add(gameDirectory);
             foreach (string _directory in Directory.GetDirectories(gameDirectory))
             {
                 if (Program.Canceled) return false;
                 try
                 {
-                    if (GetSteamApiDllDirectoriesFromGameDirectory(_directory, out List<string> _steamApiDllDirectories))
-                        steamApiDllDirectories.AddRange(_steamApiDllDirectories);
+                    if (GetDllDirectoriesFromGameDirectory(_directory, out List<string> _dllDirectories))
+                        dllDirectories.AddRange(_dllDirectories);
                 }
                 catch { }
             }
-            if (!steamApiDllDirectories.Any()) return false;
+            if (!dllDirectories.Any()) return false;
             return true;
         }
 
-        private bool GetSteamAppIdFromGameDirectory(string gameDirectory, out int appId)
+        private bool GetGamesFromLibraryDirectory(string libraryDirectory, out List<Tuple<int, string, int, string>> games)
         {
-            appId = 0;
+            games = new();
             if (Program.Canceled) return false;
-            string file = gameDirectory + "\\steam_appid.txt";
-            if (File.Exists(file) && int.TryParse(File.ReadAllText(file), out appId)) return true;
-            foreach (string _directory in Directory.GetDirectories(gameDirectory))
+            foreach (string directory in Directory.GetFiles(libraryDirectory))
             {
                 if (Program.Canceled) return false;
-                if (GetSteamAppIdFromGameDirectory(_directory, out appId)) return true;
+                if (Path.GetExtension(directory) == ".acf")
+                {
+                    dynamic property = VdfConvert.Deserialize(File.ReadAllText(directory));
+                    string _appid = property.Value.appid.ToString();
+                    string installdir = property.Value.installdir.ToString();
+                    string name = property.Value.name.ToString();
+                    string _buildid = property.Value.buildid.ToString();
+                    if (string.IsNullOrWhiteSpace(_appid)
+                        || string.IsNullOrWhiteSpace(installdir)
+                        || string.IsNullOrWhiteSpace(name)
+                        || string.IsNullOrWhiteSpace(_buildid)) continue;
+                    string gameDirectory = libraryDirectory + @"\common\" + installdir;
+                    if (!int.TryParse(_appid, out int appid)) continue;
+                    if (!int.TryParse(_buildid, out int buildid)) continue;
+                    games.Add(new(appid, name, buildid, gameDirectory));
+                }
             }
-            return false;
-        }
-
-        private bool GetGameDirectoriesFromLibraryDirectory(string libraryDirectory, out List<string> gameDirectories)
-        {
-            gameDirectories = new();
-            if (Program.Canceled) return false;
-            foreach (string _directory in Directory.GetDirectories(libraryDirectory))
-            {
-                if (Program.Canceled) return false;
-                if (Directory.Exists(_directory)) gameDirectories.Add(_directory);
-            }
-            if (!gameDirectories.Any()) return false;
+            if (!games.Any()) return false;
             return true;
         }
 
@@ -102,120 +108,121 @@ namespace CreamInstaller
         {
             int cur = 0;
             if (Program.Canceled) return;
-            List<Tuple<string, string>> applicablePrograms = new();
+            List<Tuple<int, string, int, string>> applicablePrograms = new();
             string launcherRootDirectory = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Programs\\Paradox Interactive";
-            if (Directory.Exists(launcherRootDirectory)) applicablePrograms.Add(new Tuple<string, string>("Paradox Launcher", launcherRootDirectory));
+            if (Directory.Exists(launcherRootDirectory)) applicablePrograms.Add(new(0, "Paradox Launcher", 0, launcherRootDirectory));
             foreach (string libraryDirectory in GameLibraryDirectories)
-                if (GetGameDirectoriesFromLibraryDirectory(libraryDirectory, out List<string> gameDirectories))
-                    foreach (string gameDirectory in gameDirectories)
-                        applicablePrograms.Add(new Tuple<string, string>(Path.GetFileName(gameDirectory) ?? "unknown_" + applicablePrograms.Count, gameDirectory));
+                if (GetGamesFromLibraryDirectory(libraryDirectory, out List<Tuple<int, string, int, string>> games))
+                    foreach (Tuple<int, string, int, string> game in games)
+                        applicablePrograms.Add(game);
             RunningTasks = new();
-            foreach (Tuple<string, string> program in applicablePrograms)
+            foreach (Tuple<int, string, int, string> program in applicablePrograms)
             {
-                string identifier = program.Item1;
-                string rootDirectory = program.Item2;
+                int appId = program.Item1;
+                string name = program.Item2;
+                int buildId = program.Item3;
+                string directory = program.Item4;
                 if (Program.Canceled) return;
+                if (Directory.Exists(directory + @"\EasyAntiCheat")) continue;
                 Task task = new(() =>
                 {
-                    try
+                    if (Program.Canceled || !GetDllDirectoriesFromGameDirectory(directory, out List<string> dllDirectories)) return;
+                    VProperty appInfo = null;
+                    if (Program.Canceled || (name != "Paradox Launcher" && !SteamCMD.GetAppInfo(appId, buildId, out appInfo))) return;
+                    List<Tuple<int, string>> dlc = null;
+                    if (!DLC.TryGetValue(appId, out dlc))
                     {
-                        int steamAppId = 0;
-                        if (Program.Canceled
-                        || (identifier != "Paradox Launcher" && !GetSteamAppIdFromGameDirectory(rootDirectory, out steamAppId))
-                        || !GetSteamApiDllDirectoriesFromGameDirectory(rootDirectory, out List<string> steamApiDllDirectories))
-                            return;
-
-                        Dictionary<string, string> appInfo = null;
-                        if (Program.Canceled || (identifier != "Paradox Launcher" && !SteamCMD.GetAppInfo(steamAppId, out appInfo))) return;
-                        string list = null;
-                        List<Tuple<int, string>> dlc = null;
-                        if (!DLC.TryGetValue(steamAppId, out dlc))
+                        dlc = new();
+                        DLC.Add(appId, dlc);
+                    }
+                    if (Program.Canceled) return;
+                    List<Task> dlcTasks = new();
+                    List<int> dlcIds = new();
+                    if (!(appInfo is null))
+                    {
+                        try
                         {
-                            dlc = new();
-                            DLC.Add(steamAppId, dlc);
+                            if (!(appInfo.Value["extended"] is null))
+                                foreach (VProperty property in appInfo.Value["extended"])
+                                    if (property.Key.ToString() == "listofdlc")
+                                        foreach (string id in property.Value.ToString().Split(","))
+                                            if (!dlcIds.Contains(int.Parse(id)))
+                                                dlcIds.Add(int.Parse(id));
                         }
-                        if (Program.Canceled) return;
-                        List<Task> dlcTasks = new();
-                        if (!(appInfo is null) && appInfo.TryGetValue("listofdlc", out list))
+                        catch { }
+                        try
+                        {
+                            if (!(appInfo.Value["depots"] is null))
+                                foreach (VProperty _property in appInfo.Value["depots"])
+                                    if (int.TryParse(_property.Key.ToString(), out int _))
+                                        if (int.TryParse(_property.Value?["dlcappid"]?.ToString(), out int appid) && !dlcIds.Contains(appid))
+                                            dlcIds.Add(appid);
+                        }
+                        catch { }
+                    }
+                    if (!(dlcIds is null) && dlcIds.Count > 0)
+                    {
+                        foreach (int id in dlcIds)
                         {
                             if (Program.Canceled) return;
-                            string[] nums = Regex.Replace(list, "[^0-9,]+", "").Split(",");
-                            List<int> ids = new();
-                            foreach (string s in nums)
-                            {
-                                if (Program.Canceled) return;
-                                ids.Add(int.Parse(s));
-                            }
                             Task task = new(() =>
                             {
-                                try
-                                {
-                                    foreach (int id in ids)
-                                    {
-                                        if (Program.Canceled) return;
-                                        string dlcName = null;
-                                        Dictionary<string, string> dlcAppInfo = null;
-                                        if (SteamCMD.GetAppInfo(id, out dlcAppInfo)) dlcAppInfo.TryGetValue("name", out dlcName);
-                                        if (Program.Canceled) return;
-                                        if (string.IsNullOrWhiteSpace(dlcName)) dlcName = "Unknown DLC";
-                                        dlc.Add(new Tuple<int, string>(id, dlcName));
-                                    }
-                                }
-                                catch { }
+                                if (Program.Canceled) return;
+                                string dlcName = null;
+                                VProperty dlcAppInfo = null;
+                                if (SteamCMD.GetAppInfo(id, 0, out dlcAppInfo)) try { dlcName = dlcAppInfo?.Value?["common"]?["name"]?.ToString(); } catch { }
+                                if (Program.Canceled) return;
+                                if (string.IsNullOrWhiteSpace(dlcName)) dlcName = $"Unnamed DLC ({id})";
+                                dlc.Add(new Tuple<int, string>(id, dlcName));
                             });
                             dlcTasks.Add(task);
                             RunningTasks.Add(task);
                             task.Start();
                             progress.Report(-RunningTasks.Count);
                         }
-                        else if (identifier != "Paradox Launcher") return;
-                        if (Program.Canceled) return;
-
-                        if (string.IsNullOrWhiteSpace(identifier)) return;
-                        string displayName = identifier;
-                        if (!(appInfo is null)) appInfo.TryGetValue("name", out displayName);
-                        if (string.IsNullOrWhiteSpace(displayName)) displayName = "Unknown Game";
-                        if (Program.Canceled) return;
-
-                        ProgramSelection selection = ProgramSelection.FromIdentifier(identifier) ?? new();
-                        selection.Identifier = identifier;
-                        selection.DisplayName = displayName;
-                        selection.RootDirectory = rootDirectory;
-                        selection.SteamAppId = steamAppId;
-                        selection.SteamApiDllDirectories = steamApiDllDirectories;
-                        selection.AppInfo = appInfo;
-
-                        foreach (Task task in dlcTasks.ToList())
-                        {
-                            if (Program.Canceled) return;
-                            progress.Report(cur++);
-                            task.Wait();
-                        }
-                        if (Program.Canceled) return;
-                        treeView1.Invoke((MethodInvoker)delegate
-                        {
-                            if (Program.Canceled) return;
-                            TreeNode programNode = treeNodes.Find(s => s.Text == displayName) ?? new();
-                            programNode.Text = displayName;
-                            programNode.Remove();
-                            treeView1.Nodes.Add(programNode);
-                            treeNodes.Remove(programNode);
-                            treeNodes.Add(programNode);
-                            foreach (Tuple<int, string> dlcApp in dlc.ToList())
-                            {
-                                if (Program.Canceled || programNode is null) return;
-                                TreeNode dlcNode = treeNodes.Find(s => s.Text == dlcApp.Item2) ?? new();
-                                dlcNode.Text = dlcApp.Item2;
-                                dlcNode.Remove();
-                                programNode.Nodes.Add(dlcNode);
-                                treeNodes.Remove(dlcNode);
-                                treeNodes.Add(dlcNode);
-                                selection.AllSteamDlc.Add(dlcApp);
-                                selection.SelectedSteamDlc.Add(dlcApp);
-                            }
-                        });
                     }
-                    catch { }
+                    else if (name != "Paradox Launcher") return;
+                    if (Program.Canceled) return;
+
+                    if (string.IsNullOrWhiteSpace(name)) return;
+                    if (Program.Canceled) return;
+
+                    ProgramSelection selection = ProgramSelection.FromName(name) ?? new();
+                    selection.Name = name;
+                    selection.RootDirectory = directory;
+                    selection.SteamAppId = appId;
+                    selection.SteamApiDllDirectories = dllDirectories;
+                    selection.AppInfo = appInfo;
+
+                    foreach (Task task in dlcTasks.ToList())
+                    {
+                        if (Program.Canceled) return;
+                        progress.Report(cur++);
+                        task.Wait();
+                    }
+                    if (Program.Canceled) return;
+                    treeView1.Invoke((MethodInvoker)delegate
+                    {
+                        if (Program.Canceled) return;
+                        TreeNode programNode = treeNodes.Find(s => s.Text == name) ?? new();
+                        programNode.Text = name;
+                        programNode.Remove();
+                        treeView1.Nodes.Add(programNode);
+                        treeNodes.Remove(programNode);
+                        treeNodes.Add(programNode);
+                        foreach (Tuple<int, string> dlcApp in dlc.ToList())
+                        {
+                            if (Program.Canceled || programNode is null) return;
+                            TreeNode dlcNode = treeNodes.Find(s => s.Text == dlcApp.Item2) ?? new();
+                            dlcNode.Text = dlcApp.Item2;
+                            dlcNode.Remove();
+                            programNode.Nodes.Add(dlcNode);
+                            treeNodes.Remove(dlcNode);
+                            treeNodes.Add(dlcNode);
+                            selection.AllSteamDlc.Add(dlcApp);
+                            selection.SelectedSteamDlc.Add(dlcApp);
+                        }
+                    });
                 });
                 RunningTasks.Add(task);
                 task.Start();
@@ -282,7 +289,7 @@ namespace CreamInstaller
             ProgramSelection.All.RemoveAll(selection => !Directory.Exists(selection.RootDirectory) || !selection.SteamApiDllDirectories.Any());
             foreach (TreeNode treeNode in treeNodes)
             {
-                if (treeNode.Parent is null && ProgramSelection.FromDisplayName(treeNode.Text) is null)
+                if (treeNode.Parent is null && ProgramSelection.FromName(treeNode.Text) is null)
                 {
                     treeNode.Remove();
                 }
@@ -297,7 +304,6 @@ namespace CreamInstaller
             {
                 allCheckBox.Enabled = true;
                 treeView1.CheckBoxes = true;
-                treeView1.ExpandAll();
                 treeNodes.ForEach(node => node.Checked = true);
                 if (ProgramSelection.AllSafeEnabled.Any())
                 {
@@ -315,10 +321,10 @@ namespace CreamInstaller
 
         private void OnTreeViewNodeCheckedChanged(object sender, TreeViewEventArgs e)
         {
-            ProgramSelection selection = ProgramSelection.FromDisplayName(e.Node.Text);
+            ProgramSelection selection = ProgramSelection.FromName(e.Node.Text);
             if (selection is null)
             {
-                selection = ProgramSelection.FromDisplayName(e.Node.Parent.Text);
+                selection = ProgramSelection.FromName(e.Node.Parent.Text);
                 treeView1.AfterCheck -= OnTreeViewNodeCheckedChanged;
                 e.Node.Parent.Checked = e.Node.Parent.Nodes.Cast<TreeNode>().ToList().Any(treeNode => treeNode.Checked);
                 treeView1.AfterCheck += OnTreeViewNodeCheckedChanged;
@@ -339,30 +345,29 @@ namespace CreamInstaller
 
         private void OnLoad(object sender, EventArgs e)
         {
-            treeView1.BeforeCollapse += (sender, e) => e.Cancel = true;
             treeView1.AfterCheck += OnTreeViewNodeCheckedChanged;
             OnLoad();
         }
 
         private static bool ParadoxLauncherDlcDialog(Form form)
         {
-            ProgramSelection paradoxLauncher = ProgramSelection.FromIdentifier("Paradox Launcher");
+            ProgramSelection paradoxLauncher = ProgramSelection.FromName("Paradox Launcher");
             if (!(paradoxLauncher is null) && paradoxLauncher.Enabled)
             {
                 paradoxLauncher.ExtraSteamAppIdDlc = new();
                 foreach (ProgramSelection selection in ProgramSelection.AllSafeEnabled)
                 {
-                    if (selection.Identifier == paradoxLauncher.Identifier) continue;
-                    if (!selection.AppInfo.TryGetValue("publisher", out string publisher) || publisher != "Paradox Interactive") continue;
-                    paradoxLauncher.ExtraSteamAppIdDlc.Add(new(selection.SteamAppId, selection.DisplayName, selection.SelectedSteamDlc));
+                    if (selection.Name == paradoxLauncher.Name) continue;
+                    if (selection.AppInfo.Value["extended"]["publisher"].ToString() != "Paradox Interactive") continue;
+                    paradoxLauncher.ExtraSteamAppIdDlc.Add(new(selection.SteamAppId, selection.Name, selection.SelectedSteamDlc));
                 }
                 if (!paradoxLauncher.ExtraSteamAppIdDlc.Any())
                 {
                     foreach (ProgramSelection selection in ProgramSelection.AllSafe)
                     {
-                        if (selection.Identifier == paradoxLauncher.Identifier) continue;
-                        if (!selection.AppInfo.TryGetValue("publisher", out string publisher) || publisher != "Paradox Interactive") continue;
-                        paradoxLauncher.ExtraSteamAppIdDlc.Add(new(selection.SteamAppId, selection.DisplayName, selection.AllSteamDlc));
+                        if (selection.Name == paradoxLauncher.Name) continue;
+                        if (selection.AppInfo.Value["extended"]["publisher"].ToString() != "Paradox Interactive") continue;
+                        paradoxLauncher.ExtraSteamAppIdDlc.Add(new(selection.SteamAppId, selection.Name, selection.AllSteamDlc));
                     }
                 }
                 if (!paradoxLauncher.ExtraSteamAppIdDlc.Any())

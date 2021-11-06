@@ -39,7 +39,7 @@ namespace CreamInstaller
             if (selection.AreSteamApiDllsLocked)
             {
                 if (new DialogForm(form).Show(ApplicationName, SystemIcons.Error,
-                $"ERROR: {selection.DisplayName} is currently running!" +
+                $"ERROR: {selection.Name} is currently running!" +
                 "\n\nPlease close the program/game to continue . . . ",
                 "Retry", "Cancel") == DialogResult.OK)
                 {

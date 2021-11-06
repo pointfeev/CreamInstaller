@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Gameloop.Vdf.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,13 +9,13 @@ namespace CreamInstaller
     {
         public bool Enabled = true;
 
-        public string Identifier;
-        public string DisplayName;
+        public string Name;
         public string RootDirectory;
         public int SteamAppId;
         public List<string> SteamApiDllDirectories;
 
-        public Dictionary<string, string> AppInfo = new();
+        public VProperty AppInfo = null;
+
         public List<Tuple<int, string>> AllSteamDlc = new();
         public List<Tuple<int, string>> SelectedSteamDlc = new();
         public List<Tuple<int, string, List<Tuple<int, string>>>> ExtraSteamAppIdDlc = new();
@@ -47,9 +48,10 @@ namespace CreamInstaller
                         }
                     }
                     else SelectedSteamDlc.Remove(dlcApp);
-                    return;
+                    break;
                 }
             }
+            if (!SelectedSteamDlc.Any()) this.Enabled = false;
         }
 
         public ProgramSelection() => All.Add(this);
@@ -60,8 +62,6 @@ namespace CreamInstaller
 
         public static List<ProgramSelection> AllSafeEnabled => AllSafe.FindAll(s => s.Enabled);
 
-        public static ProgramSelection FromIdentifier(string identifier) => AllSafe.Find(s => s.Identifier == identifier);
-
-        public static ProgramSelection FromDisplayName(string displayName) => AllSafe.Find(s => s.DisplayName == displayName);
+        public static ProgramSelection FromName(string displayName) => AllSafe.Find(s => s.Name == displayName);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Gameloop.Vdf;
+using Gameloop.Vdf.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -53,37 +54,48 @@ namespace CreamInstaller
             if (!File.Exists(DllPath)) Run($@"+quit", out _);
         }
 
-        public static bool GetAppInfo(int steamAppId, out Dictionary<string, string> appInfo)
+        private static Dictionary<int, int> retries = new();
+
+        public static bool GetAppInfo(int appId, int buildId, out VProperty appInfo)
         {
-            appInfo = new();
+            appInfo = null;
             if (Program.Canceled) return false;
             string output;
-            string appUpdatePath = $@"{AppInfoCachePath}\{steamAppId}";
+            string appUpdatePath = $@"{AppInfoCachePath}\{appId}";
             string appUpdateFile = $@"{appUpdatePath}\appinfo.txt";
-            // need a fast way to make sure the cached info is up-to-date and correct
-            //if (Directory.Exists(appUpdatePath) && File.Exists(appUpdateFile)) output = File.ReadAllText(appUpdateFile);
-            //else
-            //{
-            Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {steamAppId} +force_install_dir {appUpdatePath} +app_update 4 +quit", out _);
-            Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {steamAppId} +quit", out output);
-            File.WriteAllText(appUpdateFile, output);
-            //}
-            if (Program.Canceled || output is null) return false;
-            foreach (string s in output.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries))
+            if (Directory.Exists(appUpdatePath) && File.Exists(appUpdateFile)) output = File.ReadAllText(appUpdateFile);
+            else
             {
-                if (Program.Canceled) return false;
-                int first = s.IndexOf("\"");
-                int second = 1 + first + s.Substring(first + 1).IndexOf("\"");
-                int third = 1 + second + s.Substring(second + 1).IndexOf("\"");
-                int fourth = 1 + third + s.Substring(third + 1).IndexOf("\"");
-                if (first > -1 && second > 0 && third > 0 && fourth > 0)
+                Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {appId} +force_install_dir {appUpdatePath} +app_update 4 +quit", out _);
+                Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {appId} +quit", out output);
+                int openBracket = output.IndexOf("{");
+                int closeBracket = output.LastIndexOf("}");
+                output = $"\"{appId}\"\n" + output.Substring(openBracket, 1 + closeBracket - openBracket);
+                File.WriteAllText(appUpdateFile, output);
+            }
+            if (Program.Canceled || output is null) return false;
+            appInfo = VdfConvert.Deserialize(output);
+            try
+            {
+                VToken type = appInfo?.Value?["common"]?["type"];
+                if (type is null || type.ToString() == "Game")
                 {
-                    string a = s.Substring(first + 1, Math.Max(second - first - 1, 0));
-                    string b = s.Substring(third + 1, Math.Max(fourth - third - 1, 0));
-                    if (string.IsNullOrWhiteSpace(a) || string.IsNullOrWhiteSpace(b)) continue;
-                    if (!appInfo.TryGetValue(a, out _)) appInfo.Add(a, b);
+                    string buildid = appInfo.Value["depots"]?["public"]?["buildid"]?.ToString();
+                    buildid = buildid ?? appInfo.Value["depots"]?["branches"]?["public"]?["buildid"]?.ToString();
+                    if (type is null || int.Parse(buildid) < buildId
+                        || appInfo.Value["extended"] is null
+                        || appInfo.Value["depots"] is null)
+                    {
+                        if (retries.TryGetValue(appId, out int count)) retries[appId] = ++count;
+                        else retries.Add(appId, 1);
+                        if (count > 3) return false;
+                        File.Delete(appUpdateFile);
+                        bool success = GetAppInfo(appId, buildId, out appInfo);
+                        return success;
+                    }
                 }
             }
+            catch { }
             return true;
         }
 
