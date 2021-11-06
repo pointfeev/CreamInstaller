@@ -77,15 +77,14 @@ namespace CreamInstaller
             }
             if (Program.Canceled || output is null) return false;
             appInfo = VdfConvert.Deserialize(output);
-            if (appInfo?.Value is VValue || appInfo?.Value?["common"] is VValue) return true;
-            VToken type = appInfo?.Value?["common"]?["type"];
+            if (appInfo?.Value?.Children()?.ToList()?.Count > 0) return true;
+            VToken type = null;
+            try { type = appInfo?.Value?["common"]?["type"]; } catch { }
             if (type is null || type.ToString() == "Game")
             {
-                if (appInfo?.Value?["depots"] is VValue) return true;
-                if (appInfo?.Value?["depots"]?["public"] is VValue) return true;
-                string buildid = appInfo?.Value?["depots"]?["public"]?["buildid"]?.ToString();
+                string buildid = null;
+                try { buildid = appInfo.Value["depots"]["public"]["buildid"].ToString(); } catch { }
                 if (buildid is null && !(type is null)) return true;
-                if (appInfo?.Value?.Children()?.ToList()?.Count > 0) return true;
                 if (type is null || int.Parse(buildid?.ToString()) < buildId || appInfo.Value["extended"] is null || appInfo.Value["depots"] is null)
                 {
                     File.Delete(appUpdateFile);
