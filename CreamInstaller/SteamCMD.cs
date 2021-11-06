@@ -13,7 +13,7 @@ namespace CreamInstaller
         public static string FilePath = DirectoryPath + @"\steamcmd.exe";
         public static string ArchivePath = DirectoryPath + @"\steamcmd.zip";
         public static string DllPath = DirectoryPath + @"\steamclient.dll";
-        public static string AppUpdatePath = DirectoryPath + @"\appupdate";
+        public static string AppInfoCachePath = DirectoryPath + @"\appinfocache";
 
         public static bool Run(string command, out string output)
         {
@@ -57,17 +57,16 @@ namespace CreamInstaller
         {
             appInfo = new();
             if (Program.Canceled) return false;
-            string output = null;
-            string appUpdatePath = $@"{AppUpdatePath}\{steamAppId}";
+            string output;
+            string appUpdatePath = $@"{AppInfoCachePath}\{steamAppId}";
             string appUpdateFile = $@"{appUpdatePath}\appinfo.txt";
-            if (Directory.Exists(appUpdatePath) && File.Exists(appUpdateFile)) output = File.ReadAllText(appUpdateFile);
-            else
-            {
-                Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {steamAppId} +force_install_dir {appUpdatePath} +app_update 4 +quit", out _);
-                if (Program.Canceled) return false;
-                Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {steamAppId} +quit", out output);
-                File.WriteAllText(appUpdateFile, output);
-            }
+            //if (Directory.Exists(appUpdatePath) && File.Exists(appUpdateFile)) output = File.ReadAllText(appUpdateFile);
+            //else
+            //{
+            Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {steamAppId} +force_install_dir {appUpdatePath} +app_update 4 +quit", out _);
+            Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {steamAppId} +quit", out output);
+            File.WriteAllText(appUpdateFile, output);
+            //}
             if (Program.Canceled || output is null) return false;
             foreach (string s in output.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries))
             {

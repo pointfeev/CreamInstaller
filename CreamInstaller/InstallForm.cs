@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CreamInstaller
@@ -27,7 +28,7 @@ namespace CreamInstaller
         public void UpdateProgress(int progress)
         {
             int value = (int)((float)(CompleteOperationsCount / (float)OperationsCount) * 100) + (progress / OperationsCount);
-            if (value < userProgressBar.Value) { return; }
+            if (value < userProgressBar.Value) return;
             userProgressBar.Value = value;
         }
 
@@ -40,125 +41,96 @@ namespace CreamInstaller
                 {
                     logTextBox.AppendText(Environment.NewLine, color);
                 }
-
                 logTextBox.AppendText(userInfoLabel.Text, color);
             }
         }
 
-        private void OperateFor(ProgramSelection selection)
+        private async Task OperateFor(ProgramSelection selection)
         {
             UpdateProgress(0);
-            UpdateUser("Downloading CreamAPI files for " + selection.DisplayName + " . . . ", LogColor.Operation);
-            UpdateUser($"Downloaded archive: {Program.OutputFile}", LogColor.Resource);
-            UpdateUser("Searching for CreamAPI files in downloaded archive . . . ", LogColor.Operation);
-            string resourcePath = null;
-            List<ZipArchiveEntry> resources = new List<ZipArchiveEntry>();
-            Program.OutputArchive = ZipFile.OpenRead(Program.OutputFile);
-            int currentEntryCount = 0;
-            foreach (ZipArchiveEntry entry in Program.OutputArchive.Entries)
-            {
-                currentEntryCount++;
-                if (entry.Name == "steam_api64.dll")
-                {
-                    resourcePath = Path.GetDirectoryName(entry.FullName);
-                    UpdateUser("Got CreamAPI file path: " + resourcePath, LogColor.Resource);
-                }
-                UpdateProgress(currentEntryCount / (Program.OutputArchive.Entries.Count * 2) * 100);
-            }
-            foreach (ZipArchiveEntry entry in Program.OutputArchive.Entries)
-            {
-                currentEntryCount++;
-                if (!string.IsNullOrEmpty(entry.Name) && Path.GetDirectoryName(entry.FullName) == resourcePath)
-                {
-                    resources.Add(entry);
-                    UpdateUser("Found CreamAPI file: " + entry.Name, LogColor.Resource);
-                }
-                UpdateProgress(currentEntryCount / (Program.OutputArchive.Entries.Count * 2) * 100);
-            }
-            if (resources.Count < 1)
-            {
-                throw new CustomMessageException($"Unable to find CreamAPI files in downloaded archive: {Program.OutputFile}");
-            }
-            if (!Program.IsProgramRunningDialog(this, selection))
-            {
-                throw new OperationCanceledException();
-            }
-            UpdateUser("Installing CreamAPI files for " + selection.DisplayName + " . . . ", LogColor.Operation);
-            int currentFileCount = 0;
+            int count = selection.SteamApiDllDirectories.Count;
+            int cur = 0;
             foreach (string directory in selection.SteamApiDllDirectories)
             {
-                Dictionary<string, string> changesToRevert = new();
-                foreach (ZipArchiveEntry entry in resources)
+                UpdateUser("Installing CreamAPI for " + selection.DisplayName + $" in directory \"{directory}\" . . . ", LogColor.Operation);
+                if (!Program.IsProgramRunningDialog(this, selection)) throw new OperationCanceledException();
+                string api = directory + @"\steam_api.dll";
+                string api_o = directory + @"\steam_api_o.dll";
+                if (File.Exists(api) && !File.Exists(api_o))
                 {
-                    currentFileCount++;
-                    string file = directory + "\\" + entry.Name;
-                    if (File.Exists(file))
-                    {
-                        string backup = file + Program.BackupFileExtension;
-                        File.Copy(file, backup, true);
-                        changesToRevert.Add(file, backup);
-                    }
-                    else
-                    {
-                        changesToRevert.Add(file, string.Empty);
-                    }
-                    try
-                    {
-                        entry.ExtractToFile(file, true);
-                    }
-                    catch
-                    {
-                        foreach (KeyValuePair<string, string> keyValuePair in changesToRevert)
-                        {
-                            file = keyValuePair.Key;
-                            string backup = keyValuePair.Value;
-                            if (string.IsNullOrEmpty(backup))
-                            {
-                                File.Delete(file);
-                                UpdateUser("Deleted CreamAPI file: " + file, LogColor.Warning);
-                            }
-                            else if (file.IsFilePathLocked())
-                            {
-                                File.Delete(backup);
-                            }
-                            else
-                            {
-                                File.Move(backup, file, true);
-                                UpdateUser("Reversed changes to Steam API file: " + file, LogColor.Warning);
-                            }
-                        }
-                        throw new CustomMessageException($"Unable to overwrite Steam API file: {file}");
-                    }
-                    UpdateUser("Installed file: " + file, LogColor.Resource);
-                    UpdateProgress(currentFileCount / (resources.Count * selection.SteamApiDllDirectories.Count) * 100);
+                    File.Move(api, api_o);
+                    UpdateUser($"Renamed file: {api} -> steam_api_o.dll", LogColor.Resource);
                 }
-                foreach (KeyValuePair<string, string> keyValuePair in changesToRevert)
+                if (File.Exists(api_o))
                 {
-                    string file = keyValuePair.Key;
-                    string backup = keyValuePair.Value;
-                    if (!string.IsNullOrEmpty(backup))
+                    Resources.WriteResourceToFile("steam_api.dll", api);
+                    UpdateUser($"Wrote resource to file: {api}", LogColor.Resource);
+                }
+                string api64 = directory + @"\steam_api64.dll";
+                string api64_o = directory + @"\steam_api64_o.dll";
+                if (File.Exists(api64) && !File.Exists(api64_o))
+                {
+                    File.Move(api64, api64_o);
+                    UpdateUser($"Renamed file: {api64} -> steam_api64_o.dll", LogColor.Resource);
+                }
+                if (File.Exists(api64_o))
+                {
+                    Resources.WriteResourceToFile("steam_api64.dll", api64);
+                    UpdateUser($"Wrote resource to file: {api64}", LogColor.Resource);
+                }
+                string cApi = directory + @"\cream_api.ini";
+                File.Create(cApi).Close();
+                StreamWriter writer = File.AppendText(cApi);
+                writer.WriteLine(";Created with CreamInstaller by pointfeev#4538");
+                if (selection.SteamAppId > 0)
+                {
+                    writer.WriteLine();
+                    writer.WriteLine("[steam]");
+                    writer.WriteLine($"appid = {selection.SteamAppId}");
+                    writer.WriteLine();
+                    writer.WriteLine("[dlc]");
+                    UpdateUser($"Added game to cream_api.ini with appid {selection.SteamAppId} ({selection.DisplayName})", LogColor.Resource);
+                    foreach (Tuple<int, string> dlcApp in selection.SelectedSteamDlc)
                     {
-                        File.Delete(backup);
+                        writer.WriteLine($"{dlcApp.Item1} = {dlcApp.Item2}");
+                        UpdateUser($"Added DLC to cream_api.ini with appid {dlcApp.Item1} ({dlcApp.Item2})", LogColor.Resource);
                     }
                 }
+                foreach (Tuple<int, string, List<Tuple<int, string>>> extraAppDlc in selection.ExtraSteamAppIdDlc)
+                {
+                    writer.WriteLine();
+                    writer.WriteLine("[steam]");
+                    writer.WriteLine($"appid = {extraAppDlc.Item1}");
+                    writer.WriteLine();
+                    writer.WriteLine("[dlc]");
+                    UpdateUser($"Added game to cream_api.ini with appid {extraAppDlc.Item1} ({extraAppDlc.Item2})", LogColor.Resource);
+                    foreach (Tuple<int, string> dlcApp in extraAppDlc.Item3)
+                    {
+                        writer.WriteLine($"{dlcApp.Item1} = {dlcApp.Item2}");
+                        UpdateUser($"Added DLC to cream_api.ini with appid {dlcApp.Item1} ({dlcApp.Item2})", LogColor.Resource);
+                    }
+                }
+                writer.Flush();
+                writer.Close();
+                await Task.Run(() => Thread.Sleep(0)); // to keep the text box control from glitching
+                UpdateProgress(++cur / count * 100);
             }
             UpdateProgress(100);
         }
 
-        private void Operate()
+        private async Task Operate()
         {
-            OperationsCount = Program.ProgramSelections.ToList().FindAll(selection => selection.Enabled).Count;
+            OperationsCount = ProgramSelection.AllSafeEnabled.Count;
             CompleteOperationsCount = 0;
-
-            foreach (ProgramSelection selection in Program.ProgramSelections.ToList())
+            foreach (ProgramSelection selection in ProgramSelection.AllSafe)
             {
                 if (!selection.Enabled) continue;
                 if (!Program.IsProgramRunningDialog(this, selection)) throw new OperationCanceledException();
                 try
                 {
-                    OperateFor(selection);
+                    await OperateFor(selection);
                     UpdateUser($"Operation succeeded for {selection.DisplayName}.", LogColor.Success);
-                    selection.Toggle(false);
+                    selection.Enabled = false;
                 }
                 catch (Exception exception)
                 {
@@ -167,7 +139,7 @@ namespace CreamInstaller
                 ++CompleteOperationsCount;
             }
             Program.Cleanup();
-            List<ProgramSelection> FailedSelections = Program.ProgramSelections.ToList().FindAll(selection => selection.Enabled);
+            List<ProgramSelection> FailedSelections = ProgramSelection.AllSafeEnabled;
             if (FailedSelections.Any())
             {
                 if (FailedSelections.Count == 1)
@@ -181,9 +153,9 @@ namespace CreamInstaller
             }
         }
 
-        private readonly int ProgramCount = Program.ProgramSelections.ToList().FindAll(selection => selection.Enabled).Count;
+        private readonly int ProgramCount = ProgramSelection.AllSafeEnabled.Count;
 
-        private void Start()
+        private async void Start()
         {
             acceptButton.Enabled = false;
             retryButton.Enabled = false;
@@ -192,12 +164,12 @@ namespace CreamInstaller
             userProgressBar.Value = userProgressBar.Minimum;
             try
             {
-                Operate();
-                UpdateUser("CreamAPI successfully downloaded and installed for " + ProgramCount + " program(s).", LogColor.Success);
+                await Operate();
+                UpdateUser("CreamAPI successfully installed for " + ProgramCount + " program(s).", LogColor.Success);
             }
             catch (Exception exception)
             {
-                UpdateUser("CreamAPI download and/or installation failed: " + exception.ToString(), LogColor.Error);
+                UpdateUser("CreamAPI installation failed: " + exception.ToString(), LogColor.Error);
                 retryButton.Enabled = true;
             }
             userProgressBar.Value = userProgressBar.Maximum;

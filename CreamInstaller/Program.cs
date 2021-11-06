@@ -12,7 +12,7 @@ namespace CreamInstaller
 {
     public static class Program
     {
-        public static readonly string ApplicationName = "CreamInstaller v" + Application.ProductVersion + ": CreamAPI Downloader & Installer";
+        public static readonly string ApplicationName = Application.CompanyName + " v" + Application.ProductVersion + ": " + Application.ProductName;
         public static readonly Assembly EntryAssembly = Assembly.GetEntryAssembly();
         public static readonly Process CurrentProcess = Process.GetCurrentProcess();
         public static readonly string CurrentProcessFilePath = CurrentProcess.MainModule.FileName;
@@ -36,7 +36,7 @@ namespace CreamInstaller
 
         public static bool IsProgramRunningDialog(Form form, ProgramSelection selection)
         {
-            if (selection.IsProgramRunning)
+            if (selection.AreSteamApiDllsLocked)
             {
                 if (new DialogForm(form).Show(ApplicationName, SystemIcons.Error,
                 $"ERROR: {selection.DisplayName} is currently running!" +
@@ -55,6 +55,7 @@ namespace CreamInstaller
 
         public static bool IsFilePathLocked(this string filePath)
         {
+            if (!File.Exists(filePath)) return false;
             bool Locked = false;
             try
             {
