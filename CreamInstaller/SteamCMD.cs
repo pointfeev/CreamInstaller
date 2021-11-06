@@ -60,6 +60,7 @@ namespace CreamInstaller
             string output;
             string appUpdatePath = $@"{AppInfoCachePath}\{steamAppId}";
             string appUpdateFile = $@"{appUpdatePath}\appinfo.txt";
+            // need a fast way to make sure the cached info is up-to-date and correct
             //if (Directory.Exists(appUpdatePath) && File.Exists(appUpdateFile)) output = File.ReadAllText(appUpdateFile);
             //else
             //{
