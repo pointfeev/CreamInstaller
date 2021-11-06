@@ -344,6 +344,42 @@ namespace CreamInstaller
             OnLoad();
         }
 
+        private static bool ParadoxLauncherDlcDialog(Form form)
+        {
+            ProgramSelection paradoxLauncher = ProgramSelection.FromIdentifier("Paradox Launcher");
+            if (!(paradoxLauncher is null) && paradoxLauncher.Enabled)
+            {
+                paradoxLauncher.ExtraSteamAppIdDlc = new();
+                foreach (ProgramSelection selection in ProgramSelection.AllSafeEnabled)
+                {
+                    if (selection.Identifier == paradoxLauncher.Identifier) continue;
+                    if (!selection.AppInfo.TryGetValue("publisher", out string publisher) || publisher != "Paradox Interactive") continue;
+                    paradoxLauncher.ExtraSteamAppIdDlc.Add(new(selection.SteamAppId, selection.DisplayName, selection.SelectedSteamDlc));
+                }
+                if (!paradoxLauncher.ExtraSteamAppIdDlc.Any())
+                {
+                    foreach (ProgramSelection selection in ProgramSelection.AllSafe)
+                    {
+                        if (selection.Identifier == paradoxLauncher.Identifier) continue;
+                        if (!selection.AppInfo.TryGetValue("publisher", out string publisher) || publisher != "Paradox Interactive") continue;
+                        paradoxLauncher.ExtraSteamAppIdDlc.Add(new(selection.SteamAppId, selection.DisplayName, selection.AllSteamDlc));
+                    }
+                }
+                if (!paradoxLauncher.ExtraSteamAppIdDlc.Any())
+                {
+                    if (new DialogForm(form).Show(Program.ApplicationName, SystemIcons.Warning,
+                    $"WARNING: There are no installed games with DLC that can be added to the Paradox Launcher!" +
+                    "\n\nInstalling CreamAPI for the Paradox Launcher is pointless, since no DLC will be added to the configuration!",
+                    "Ignore", "Cancel") == DialogResult.OK)
+                    {
+                        return false;
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private void OnAccept(object sender, EventArgs e)
         {
             if (ProgramSelection.All.Count > 0)
@@ -355,21 +391,9 @@ namespace CreamInstaller
                         return;
                     }
                 }
-
-                ProgramSelection paradoxLauncher = ProgramSelection.FromIdentifier("Paradox Launcher");
-                if (!(paradoxLauncher is null))
-                {
-                    paradoxLauncher.ExtraSteamAppIdDlc = new();
-                    foreach (ProgramSelection selection in ProgramSelection.AllSafeEnabled)
-                    {
-                        if (selection.Identifier == paradoxLauncher.Identifier) continue;
-                        if (!selection.AppInfo.TryGetValue("publisher", out string publisher) || publisher != "Paradox Interactive") continue;
-                        paradoxLauncher.ExtraSteamAppIdDlc.Add(new(selection.SteamAppId, selection.DisplayName, selection.SelectedSteamDlc));
-                    }
-                }
-
+                if (ParadoxLauncherDlcDialog(this)) return;
                 Hide();
-                InstallForm installForm = new InstallForm(this);
+                InstallForm installForm = new(this);
                 installForm.ShowDialog();
                 if (installForm.Reselecting)
                 {
