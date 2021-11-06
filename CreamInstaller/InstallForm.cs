@@ -81,7 +81,7 @@ namespace CreamInstaller
                 string cApi = directory + @"\cream_api.ini";
                 File.Create(cApi).Close();
                 StreamWriter writer = File.AppendText(cApi);
-                writer.WriteLine(";Created with CreamInstaller by pointfeev#4538");
+                writer.WriteLine("; CreamInstaller");
                 if (selection.SteamAppId > 0)
                 {
                     writer.WriteLine();
