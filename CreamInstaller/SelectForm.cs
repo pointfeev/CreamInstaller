@@ -124,7 +124,11 @@ namespace CreamInstaller
                 int buildId = program.Item3;
                 string directory = program.Item4;
                 if (Program.Canceled) return;
+                // easy anti cheat detects DLL changes, so skip those games
                 if (Directory.Exists(directory + @"\EasyAntiCheat")) continue;
+                // battleye in DayZ detects DLL changes, but not in Arma3?
+                //if (Directory.Exists(directory + @"\BattlEye")) continue;
+                if (name == "DayZ") continue;
                 Task task = new(() =>
                 {
                     if (Program.Canceled || !GetDllDirectoriesFromGameDirectory(directory, out List<string> dllDirectories)) return;
