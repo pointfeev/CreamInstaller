@@ -9,7 +9,7 @@
 		<Version>2.0.0.0</Version>
 		<PackageIcon>ini.ico</PackageIcon>
 		<PackageIconUrl />
-		<Description>Automatically generates and installs CreamAPI files for programs/games.</Description>
+		<Description>Automatically installs and generates CreamAPI files for programs/games on the user's computer.</Description>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<Copyright>2021, pointfeev (https://github.com/pointfeev)</Copyright>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
@@ -20,7 +20,7 @@
 		<PackageTags>steam, dlc</PackageTags>
 		<AssemblyName>CreamInstaller</AssemblyName>
 		<Company>CreamInstaller</Company>
-		<Product>CreamAPI Generator &amp; Installer</Product>
+		<Product>CreamAPI Installer &amp; Generator</Product>
 		<Authors>pointfeev</Authors>
 		<PackageId>pointfeev.creaminstaller</PackageId>
 		<StartupObject>CreamInstaller.Program</StartupObject>

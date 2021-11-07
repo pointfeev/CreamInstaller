@@ -78,10 +78,11 @@ namespace CreamInstaller
                     Resources.WriteResourceToFile("steam_api64.dll", api64);
                     UpdateUser($"Wrote resource to file: {api64}", LogColor.Resource);
                 }
+                UpdateUser("Generating CreamAPI for " + selection.Name + $" in directory \"{directory}\" . . . ", LogColor.Operation);
                 string cApi = directory + @"\cream_api.ini";
                 File.Create(cApi).Close();
                 StreamWriter writer = File.AppendText(cApi);
-                writer.WriteLine("; CreamInstaller");
+                writer.WriteLine("; " + Application.CompanyName + " v" + Application.ProductVersion);
                 if (selection.SteamAppId > 0)
                 {
                     writer.WriteLine();
@@ -165,11 +166,11 @@ namespace CreamInstaller
             try
             {
                 await Operate();
-                UpdateUser("CreamAPI successfully installed for " + ProgramCount + " program(s).", LogColor.Success);
+                UpdateUser("CreamAPI successfully installed and generated for " + ProgramCount + " program(s).", LogColor.Success);
             }
             catch (Exception exception)
             {
-                UpdateUser("CreamAPI installation failed: " + exception.ToString(), LogColor.Error);
+                UpdateUser("CreamAPI installation and/or generation failed: " + exception.ToString(), LogColor.Error);
                 retryButton.Enabled = true;
             }
             userProgressBar.Value = userProgressBar.Maximum;

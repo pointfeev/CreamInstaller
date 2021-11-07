@@ -63,5 +63,20 @@ namespace CreamInstaller
         public static List<ProgramSelection> AllSafeEnabled => AllSafe.FindAll(s => s.Enabled);
 
         public static ProgramSelection FromName(string displayName) => AllSafe.Find(s => s.Name == displayName);
+
+        public static Tuple<int, string> GetDlc(string displayName)
+        {
+            foreach (ProgramSelection selection in AllSafe)
+            {
+                foreach (Tuple<int, string> app in selection.AllSteamDlc)
+                {
+                    if (app.Item2 == displayName)
+                    {
+                        return app;
+                    }
+                }
+            }
+            return null;
+        }
     }
 }

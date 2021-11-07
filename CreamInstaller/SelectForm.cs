@@ -3,6 +3,7 @@ using Gameloop.Vdf.Linq;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -162,10 +163,7 @@ namespace CreamInstaller
                                 if (Program.Canceled) return;
                                 string dlcName = null;
                                 VProperty dlcAppInfo = null;
-                                if (SteamCMD.GetAppInfo(id, 0, out dlcAppInfo)
-                                    && !(dlcAppInfo?.Value is VValue)
-                                    && !(dlcAppInfo?.Value?["common"] is VValue))
-                                    dlcName = dlcAppInfo?.Value?["common"]?["name"]?.ToString();
+                                if (SteamCMD.GetAppInfo(id, 0, out dlcAppInfo)) dlcName = dlcAppInfo?.Value?["common"]?["name"]?.ToString();
                                 if (Program.Canceled) return;
                                 if (string.IsNullOrWhiteSpace(dlcName)) dlcName = $"Unnamed DLC ({id})";
                                 dlc[id] = dlcName;
@@ -201,6 +199,7 @@ namespace CreamInstaller
                         if (Program.Canceled) return;
                         TreeNode programNode = treeNodes.Find(s => s.Text == name) ?? new();
                         programNode.Text = name;
+                        programNode.Checked = true;
                         programNode.Remove();
                         treeView1.Nodes.Add(programNode);
                         treeNodes.Remove(programNode);
@@ -210,6 +209,7 @@ namespace CreamInstaller
                             if (Program.Canceled || programNode is null) return;
                             TreeNode dlcNode = treeNodes.Find(s => s.Text == dlcApp.Value) ?? new();
                             dlcNode.Text = dlcApp.Value;
+                            dlcNode.Checked = true;
                             dlcNode.Remove();
                             programNode.Nodes.Add(dlcNode);
                             treeNodes.Remove(dlcNode);
@@ -242,7 +242,7 @@ namespace CreamInstaller
             noneFoundLabel.Visible = false;
             allCheckBox.Enabled = false;
             acceptButton.Enabled = false;
-            treeView1.CheckBoxes = false;
+            treeView1.Enabled = false;
 
             label2.Visible = true;
             progressBar1.Visible = true;
@@ -259,8 +259,8 @@ namespace CreamInstaller
                 if (_progress < 0) maxProgress = -_progress;
                 else curProgress = _progress;
                 int p = Math.Max(Math.Min((int)((float)(curProgress / (float)maxProgress) * 100), 100), 0);
-                if (setup) label2.Text = "Setting up SteamCMD . . . " + p + "%";
-                else label2.Text = "Gathering your CreamAPI-applicable games and their DLCs . . . " + p + "%";
+                if (setup) label2.Text = $"Setting up SteamCMD . . . {p}% ({curProgress}/{maxProgress})";
+                else label2.Text = $"Gathering and caching your applicable games and their DLCs . . . {p}% ({curProgress}/{maxProgress})";
                 progressBar1.Value = p;
             };
 
@@ -278,7 +278,7 @@ namespace CreamInstaller
             watcher.Dispose();
 
             setup = false;
-            label2.Text = "Gathering your CreamAPI-applicable games and their DLCs . . . ";
+            label2.Text = "Gathering and caching your applicable games and their DLCs . . . ";
             await Task.Run(() => GetCreamApiApplicablePrograms(iProgress));
 
             ProgramSelection.All.ForEach(selection => selection.SteamApiDllDirectories.RemoveAll(directory => !Directory.Exists(directory)));
@@ -295,7 +295,7 @@ namespace CreamInstaller
             if (ProgramSelection.All.Any())
             {
                 allCheckBox.Enabled = true;
-                treeView1.CheckBoxes = true;
+                treeView1.Enabled = true;
                 treeNodes.ForEach(node => node.Checked = true);
                 if (ProgramSelection.AllSafeEnabled.Any())
                 {
@@ -338,6 +338,20 @@ namespace CreamInstaller
         private void OnLoad(object sender, EventArgs e)
         {
             treeView1.AfterCheck += OnTreeViewNodeCheckedChanged;
+            treeView1.NodeMouseClick += (sender, e) =>
+            {
+                if (e.Button == MouseButtons.Right)
+                {
+                    ProgramSelection selection = ProgramSelection.FromName(e.Node.Text);
+                    Tuple<int, string> dlc = ProgramSelection.GetDlc(e.Node.Text);
+                    int appId = selection?.SteamAppId ?? dlc?.Item1 ?? 0;
+                    if (appId > 0) Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "https://steamdb.info/app/" + appId,
+                        UseShellExecute = true
+                    });
+                }
+            };
             OnLoad();
         }
 
