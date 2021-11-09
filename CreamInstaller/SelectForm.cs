@@ -34,17 +34,21 @@ namespace CreamInstaller
                 {
                     string libraryFolder = steamInstallPath + @"\steamapps";
                     gameDirectories.Add(libraryFolder);
-                    string libraryFolders = libraryFolder + @"\libraryfolders.vdf";
-                    dynamic property = VdfConvert.Deserialize(File.ReadAllText(libraryFolders));
-                    foreach (dynamic _property in property.Value)
-                    {
-                        if (int.TryParse(_property.Key, out int _))
-                        {
-                            string path = _property.Value.path.ToString() + @"\steamapps";
-                            if (string.IsNullOrWhiteSpace(path)) continue;
-                            if (!gameDirectories.Contains(path)) gameDirectories.Add(path);
-                        }
-                    }
+					try
+					{
+						string libraryFolders = libraryFolder + @"\libraryfolders.vdf";
+						dynamic property = VdfConvert.Deserialize(File.ReadAllText(libraryFolders));
+						foreach (dynamic _property in property.Value)
+						{
+							if (int.TryParse(_property.Key, out int _))
+							{
+								string path = _property.Value.path.ToString() + @"\steamapps";
+								if (string.IsNullOrWhiteSpace(path)) continue;
+								if (!gameDirectories.Contains(path)) gameDirectories.Add(path);
+							}
+						}
+					}
+					catch {}
                 }
                 return gameDirectories;
             }
@@ -80,19 +84,23 @@ namespace CreamInstaller
                 if (Program.Canceled) return false;
                 if (Path.GetExtension(directory) == ".acf")
                 {
-                    dynamic property = VdfConvert.Deserialize(File.ReadAllText(directory));
-                    string _appid = property.Value.appid.ToString();
-                    string installdir = property.Value.installdir.ToString();
-                    string name = property.Value.name.ToString();
-                    string _buildid = property.Value.buildid.ToString();
-                    if (string.IsNullOrWhiteSpace(_appid)
-                        || string.IsNullOrWhiteSpace(installdir)
-                        || string.IsNullOrWhiteSpace(name)
-                        || string.IsNullOrWhiteSpace(_buildid)) continue;
-                    string gameDirectory = libraryDirectory + @"\common\" + installdir;
-                    if (!int.TryParse(_appid, out int appid)) continue;
-                    if (!int.TryParse(_buildid, out int buildid)) continue;
-                    games.Add(new(appid, name, buildid, gameDirectory));
+					try
+					{
+						dynamic property = VdfConvert.Deserialize(File.ReadAllText(directory));
+						string _appid = property.Value.appid.ToString();
+						string installdir = property.Value.installdir.ToString();
+						string name = property.Value.name.ToString();
+						string _buildid = property.Value.buildid.ToString();
+						if (string.IsNullOrWhiteSpace(_appid)
+							|| string.IsNullOrWhiteSpace(installdir)
+							|| string.IsNullOrWhiteSpace(name)
+							|| string.IsNullOrWhiteSpace(_buildid)) continue;
+						string gameDirectory = libraryDirectory + @"\common\" + installdir;
+						if (!int.TryParse(_appid, out int appid)) continue;
+						if (!int.TryParse(_buildid, out int buildid)) continue;
+						games.Add(new(appid, name, buildid, gameDirectory));
+					}
+					catch {}
                 }
             }
             if (!games.Any()) return false;

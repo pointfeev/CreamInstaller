@@ -76,8 +76,8 @@ namespace CreamInstaller
                 }
             }
             if (Program.Canceled || output is null) return false;
-            appInfo = VdfConvert.Deserialize(output);
-            if (!(appInfo.Value is VValue) && appInfo.Value.Children().ToList().Count == 0) return true;
+            try { appInfo = VdfConvert.Deserialize(output); } catch { }
+            if (appInfo is null || (!(appInfo.Value is VValue) && appInfo.Value.Children().ToList().Count == 0)) return true;
             VToken type = appInfo.Value is VValue ? null : appInfo.Value?["common"]?["type"];
             if (type is null || type.ToString() == "Game")
             {

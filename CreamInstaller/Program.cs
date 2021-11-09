@@ -22,7 +22,7 @@ namespace CreamInstaller
         [STAThread]
         private static void Main()
         {
-            Mutex mutex = new Mutex(true, "CreamInstaller", out bool createdNew);
+            Mutex mutex = new(true, "CreamInstaller", out bool createdNew);
             if (createdNew)
             {
                 Application.SetHighDpiMode(HighDpiMode.SystemAware);
