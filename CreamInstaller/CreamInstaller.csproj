@@ -20,7 +20,7 @@
 		<PackageTags>steam, dlc</PackageTags>
 		<AssemblyName>CreamInstaller</AssemblyName>
 		<Company>CreamInstaller</Company>
-		<Product>CreamAPI Installer &amp; Generator</Product>
+		<Product>CreamAPI Generator &amp; Installer</Product>
 		<Authors>pointfeev</Authors>
 		<PackageId>pointfeev.creaminstaller</PackageId>
 		<StartupObject>CreamInstaller.Program</StartupObject>
