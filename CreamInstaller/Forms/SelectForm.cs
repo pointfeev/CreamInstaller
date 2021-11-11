@@ -242,6 +242,8 @@ namespace CreamInstaller
             progress.Report(RunningTasks.Count);
         }
 
+        private bool initialized = false;
+
         private async void OnLoad()
         {
             Program.Canceled = false;
@@ -317,6 +319,12 @@ namespace CreamInstaller
 
             cancelButton.Enabled = false;
             scanButton.Enabled = true;
+
+            if (!initialized)
+            {
+                initialized = true;
+                OnLoad();
+            }
         }
 
         private void OnTreeViewNodeCheckedChanged(object sender, TreeViewEventArgs e)
