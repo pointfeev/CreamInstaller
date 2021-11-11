@@ -86,6 +86,7 @@ namespace CreamInstaller
                 if (selection.SteamAppId > 0)
                 {
                     writer.WriteLine();
+                    writer.WriteLine($"; {selection.Name}");
                     writer.WriteLine("[steam]");
                     writer.WriteLine($"appid = {selection.SteamAppId}");
                     writer.WriteLine();
