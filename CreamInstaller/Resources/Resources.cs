@@ -7,7 +7,7 @@ namespace CreamInstaller
     {
         public static void WriteResourceToFile(string resourceName, string filePath)
         {
-            using Stream resource = Assembly.GetExecutingAssembly().GetManifestResourceStream("CreamInstaller." + resourceName);
+            using Stream resource = Assembly.GetExecutingAssembly().GetManifestResourceStream(@"CreamInstaller.Resources." + resourceName);
             using FileStream file = new(filePath, FileMode.Create, FileAccess.Write);
             resource.CopyTo(file);
         }

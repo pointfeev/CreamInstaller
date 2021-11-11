@@ -1,5 +1,6 @@
 ﻿using Gameloop.Vdf;
 using Gameloop.Vdf.Linq;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -15,7 +16,9 @@ namespace CreamInstaller
         public static string FilePath = DirectoryPath + @"\steamcmd.exe";
         public static string ArchivePath = DirectoryPath + @"\steamcmd.zip";
         public static string DllPath = DirectoryPath + @"\steamclient.dll";
-        public static string AppInfoCachePath = DirectoryPath + @"\appinfocache";
+        public static string AppCachePath = DirectoryPath + @"\appcache";
+        public static string AppCacheAppInfoPath = AppCachePath + @"\appinfo.vdf";
+        public static string AppInfoPath = DirectoryPath + @"\appinfo";
 
         public static bool Run(string command, out string output)
         {
@@ -52,16 +55,18 @@ namespace CreamInstaller
                 ZipFile.ExtractToDirectory(ArchivePath, DirectoryPath);
                 File.Delete(ArchivePath);
             }
+            if (File.Exists(AppCacheAppInfoPath)) File.Delete(AppCacheAppInfoPath);
             if (!File.Exists(DllPath)) Run($@"+quit", out _);
         }
 
-        public static bool GetAppInfo(int appId, int buildId, out VProperty appInfo)
+        public static bool GetAppInfo(int appId, out VProperty appInfo, string branch = "public", int buildId = 0)
         {
             appInfo = null;
             if (Program.Canceled) return false;
             string output;
-            string appUpdatePath = $@"{AppInfoCachePath}\{appId}";
+            string appUpdatePath = $@"{AppInfoPath}\{appId}";
             string appUpdateFile = $@"{appUpdatePath}\appinfo.txt";
+            restart:
             if (Directory.Exists(appUpdatePath) && File.Exists(appUpdateFile)) output = File.ReadAllText(appUpdateFile);
             else
             {
@@ -76,18 +81,26 @@ namespace CreamInstaller
                 }
             }
             if (Program.Canceled || output is null) return false;
-            try { appInfo = VdfConvert.Deserialize(output); } catch { }
+            try { appInfo = VdfConvert.Deserialize(output); }
+            catch
+            {
+                if (File.Exists(appUpdateFile))
+                {
+                    File.Delete(appUpdateFile);
+                    goto restart;
+                }
+            }
+            if (!(appInfo is null) && appInfo.Value is VValue) goto restart;
             if (appInfo is null || (!(appInfo.Value is VValue) && appInfo.Value.Children().ToList().Count == 0)) return true;
             VToken type = appInfo.Value is VValue ? null : appInfo.Value?["common"]?["type"];
             if (type is null || type.ToString() == "Game")
             {
-                string buildid = appInfo.Value is VValue ? null : appInfo.Value["depots"]?["public"]?["buildid"]?.ToString();
+                string buildid = appInfo.Value is VValue ? null : appInfo.Value["depots"]?["branches"]?[branch]?["buildid"]?.ToString();
                 if (buildid is null && !(type is null)) return true;
                 if (type is null || int.Parse(buildid) < buildId)
                 {
-                    File.Delete(appUpdateFile);
-                    bool success = GetAppInfo(appId, buildId, out appInfo);
-                    return success;
+                    if (File.Exists(appUpdateFile)) File.Delete(appUpdateFile);
+                    goto restart;
                 }
             }
             return true;

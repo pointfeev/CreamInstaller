@@ -2,6 +2,7 @@
 using Gameloop.Vdf.Linq;
 using Microsoft.Win32;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -75,7 +76,7 @@ namespace CreamInstaller
             return true;
         }
 
-        private bool GetGamesFromLibraryDirectory(string libraryDirectory, out List<Tuple<int, string, int, string>> games)
+        private bool GetGamesFromLibraryDirectory(string libraryDirectory, out List<Tuple<int, string, string, int, string>> games)
         {
             games = new();
             if (Program.Canceled) return false;
@@ -91,14 +92,16 @@ namespace CreamInstaller
 						string installdir = property.Value.installdir.ToString();
 						string name = property.Value.name.ToString();
 						string _buildid = property.Value.buildid.ToString();
-						if (string.IsNullOrWhiteSpace(_appid)
+                        if (string.IsNullOrWhiteSpace(_appid)
 							|| string.IsNullOrWhiteSpace(installdir)
 							|| string.IsNullOrWhiteSpace(name)
 							|| string.IsNullOrWhiteSpace(_buildid)) continue;
-						string gameDirectory = libraryDirectory + @"\common\" + installdir;
+                        string branch = property.Value.UserConfig?.betakey?.ToString();
+                        if (string.IsNullOrWhiteSpace(branch)) branch = "public";
+                        string gameDirectory = libraryDirectory + @"\common\" + installdir;
 						if (!int.TryParse(_appid, out int appid)) continue;
 						if (!int.TryParse(_buildid, out int buildid)) continue;
-						games.Add(new(appid, name, buildid, gameDirectory));
+						games.Add(new(appid, name, branch, buildid, gameDirectory));
 					}
 					catch {}
                 }
@@ -109,46 +112,39 @@ namespace CreamInstaller
 
         private readonly List<TreeNode> treeNodes = new();
 
-        internal readonly Dictionary<int, Dictionary<int, string>> DLC = new();
-
-        internal List<Task> RunningTasks = null;
+        internal List<Task> RunningTasks = new();
 
         private void GetCreamApiApplicablePrograms(IProgress<int> progress)
         {
             int cur = 0;
             if (Program.Canceled) return;
-            List<Tuple<int, string, int, string>> applicablePrograms = new();
+            List<Tuple<int, string, string, int, string>> applicablePrograms = new();
             string launcherRootDirectory = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Programs\\Paradox Interactive";
-            if (Directory.Exists(launcherRootDirectory)) applicablePrograms.Add(new(0, "Paradox Launcher", 0, launcherRootDirectory));
+            if (Directory.Exists(launcherRootDirectory)) applicablePrograms.Add(new(0, "Paradox Launcher", "", 0, launcherRootDirectory));
             foreach (string libraryDirectory in GameLibraryDirectories)
-                if (GetGamesFromLibraryDirectory(libraryDirectory, out List<Tuple<int, string, int, string>> games))
-                    foreach (Tuple<int, string, int, string> game in games)
+                if (GetGamesFromLibraryDirectory(libraryDirectory, out List<Tuple<int, string, string, int, string>> games))
+                    foreach (Tuple<int, string, string, int, string> game in games)
                         applicablePrograms.Add(game);
-            RunningTasks = new();
-            foreach (Tuple<int, string, int, string> program in applicablePrograms)
+            RunningTasks.Clear();
+            foreach (Tuple<int, string, string, int, string> program in applicablePrograms)
             {
                 int appId = program.Item1;
                 string name = program.Item2;
-                int buildId = program.Item3;
-                string directory = program.Item4;
+                string branch = program.Item3;
+                int buildId = program.Item4;
+                string directory = program.Item5;
                 if (Program.Canceled) return;
                 // easy anti cheat detects DLL changes, so skip those games
                 if (Directory.Exists(directory + @"\EasyAntiCheat")) continue;
                 // battleye in DayZ detects DLL changes, but not in Arma3?
-                //if (Directory.Exists(directory + @"\BattlEye")) continue;
-                if (name == "DayZ") continue;
+                if (name != "Arma 3" && Directory.Exists(directory + @"\BattlEye")) continue;
                 Task task = new(() =>
                 {
                     if (Program.Canceled || !GetDllDirectoriesFromGameDirectory(directory, out List<string> dllDirectories)) return;
                     VProperty appInfo = null;
-                    if (Program.Canceled || (name != "Paradox Launcher" && !SteamCMD.GetAppInfo(appId, buildId, out appInfo))) return;
-                    Dictionary<int, string> dlc = null;
-                    if (!DLC.TryGetValue(appId, out dlc))
-                    {
-                        dlc = new();
-                        DLC.Add(appId, dlc);
-                    }
+                    if (Program.Canceled || (name != "Paradox Launcher" && !SteamCMD.GetAppInfo(appId, out appInfo, branch, buildId))) return;
                     if (Program.Canceled) return;
+                    ConcurrentDictionary<int, string> dlc = new();
                     List<Task> dlcTasks = new();
                     List<int> dlcIds = new();
                     if (!(appInfo is null))
@@ -175,9 +171,9 @@ namespace CreamInstaller
                                 if (Program.Canceled) return;
                                 string dlcName = null;
                                 VProperty dlcAppInfo = null;
-                                if (SteamCMD.GetAppInfo(id, 0, out dlcAppInfo)) dlcName = dlcAppInfo?.Value?["common"]?["name"]?.ToString();
+                                if (SteamCMD.GetAppInfo(id, out dlcAppInfo)) dlcName = dlcAppInfo?.Value?["common"]?["name"]?.ToString();
                                 if (Program.Canceled) return;
-                                if (string.IsNullOrWhiteSpace(dlcName)) dlcName = $"Unnamed DLC ({id})";
+                                if (string.IsNullOrWhiteSpace(dlcName)) dlcName = $"Unknown DLC ({id})";
                                 dlc[id] = dlcName;
                             });
                             dlcTasks.Add(task);

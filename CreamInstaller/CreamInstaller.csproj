@@ -24,6 +24,7 @@
 		<Authors>pointfeev</Authors>
 		<PackageId>pointfeev.creaminstaller</PackageId>
 		<StartupObject>CreamInstaller.Program</StartupObject>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -38,11 +39,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Include="steam_api64.dll" />
+	  <EmbeddedResource Include="Resources\steam_api64.dll" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Include="steam_api.dll" />
+	  <EmbeddedResource Include="Resources\steam_api.dll" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -51,8 +52,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Update="MainForm.cs" />
-		<Compile Update="SelectForm.cs" />
+		<Compile Update="Forms\MainForm.cs" />
+		<Compile Update="Forms\SelectForm.cs" />
 		<Compile Update="Properties\Resources.Designer.cs">
 			<DesignTime>True</DesignTime>
 			<AutoGen>True</AutoGen>
