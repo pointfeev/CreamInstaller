@@ -35,21 +35,21 @@ namespace CreamInstaller
                 {
                     string libraryFolder = steamInstallPath + @"\steamapps";
                     gameDirectories.Add(libraryFolder);
-					try
-					{
-						string libraryFolders = libraryFolder + @"\libraryfolders.vdf";
-						dynamic property = VdfConvert.Deserialize(File.ReadAllText(libraryFolders));
-						foreach (dynamic _property in property.Value)
-						{
-							if (int.TryParse(_property.Key, out int _))
-							{
-								string path = _property.Value.path.ToString() + @"\steamapps";
-								if (string.IsNullOrWhiteSpace(path)) continue;
-								if (!gameDirectories.Contains(path)) gameDirectories.Add(path);
-							}
-						}
-					}
-					catch {}
+                    try
+                    {
+                        string libraryFolders = libraryFolder + @"\libraryfolders.vdf";
+                        dynamic property = VdfConvert.Deserialize(File.ReadAllText(libraryFolders));
+                        foreach (dynamic _property in property.Value)
+                        {
+                            if (int.TryParse(_property.Key, out int _))
+                            {
+                                string path = _property.Value.path.ToString() + @"\steamapps";
+                                if (string.IsNullOrWhiteSpace(path)) continue;
+                                if (!gameDirectories.Contains(path)) gameDirectories.Add(path);
+                            }
+                        }
+                    }
+                    catch { }
                 }
                 return gameDirectories;
             }
@@ -85,25 +85,25 @@ namespace CreamInstaller
                 if (Program.Canceled) return false;
                 if (Path.GetExtension(directory) == ".acf")
                 {
-					try
-					{
-						dynamic property = VdfConvert.Deserialize(File.ReadAllText(directory));
-						string _appid = property.Value.appid.ToString();
-						string installdir = property.Value.installdir.ToString();
-						string name = property.Value.name.ToString();
-						string _buildid = property.Value.buildid.ToString();
+                    try
+                    {
+                        dynamic property = VdfConvert.Deserialize(File.ReadAllText(directory));
+                        string _appid = property.Value.appid.ToString();
+                        string installdir = property.Value.installdir.ToString();
+                        string name = property.Value.name.ToString();
+                        string _buildid = property.Value.buildid.ToString();
                         if (string.IsNullOrWhiteSpace(_appid)
-							|| string.IsNullOrWhiteSpace(installdir)
-							|| string.IsNullOrWhiteSpace(name)
-							|| string.IsNullOrWhiteSpace(_buildid)) continue;
+                            || string.IsNullOrWhiteSpace(installdir)
+                            || string.IsNullOrWhiteSpace(name)
+                            || string.IsNullOrWhiteSpace(_buildid)) continue;
                         string branch = property.Value.UserConfig?.betakey?.ToString();
                         if (string.IsNullOrWhiteSpace(branch)) branch = "public";
                         string gameDirectory = libraryDirectory + @"\common\" + installdir;
-						if (!int.TryParse(_appid, out int appid)) continue;
-						if (!int.TryParse(_buildid, out int buildid)) continue;
-						games.Add(new(appid, name, branch, buildid, gameDirectory));
-					}
-					catch {}
+                        if (!int.TryParse(_appid, out int appid)) continue;
+                        if (!int.TryParse(_buildid, out int buildid)) continue;
+                        games.Add(new(appid, name, branch, buildid, gameDirectory));
+                    }
+                    catch { }
                 }
             }
             if (!games.Any()) return false;
@@ -146,22 +146,8 @@ namespace CreamInstaller
                     if (Program.Canceled) return;
                     ConcurrentDictionary<int, string> dlc = new();
                     List<Task> dlcTasks = new();
-                    List<int> dlcIds = new();
-                    if (!(appInfo is null))
-                    {
-                        if (!(appInfo.Value["extended"] is null))
-                            foreach (VProperty property in appInfo.Value["extended"])
-                                if (property.Key.ToString() == "listofdlc")
-                                    foreach (string id in property.Value.ToString().Split(","))
-                                        if (!dlcIds.Contains(int.Parse(id)))
-                                            dlcIds.Add(int.Parse(id));
-                        if (!(appInfo.Value["depots"] is null))
-                            foreach (VProperty _property in appInfo.Value["depots"])
-                                if (int.TryParse(_property.Key.ToString(), out int _))
-                                    if (int.TryParse(_property.Value?["dlcappid"]?.ToString(), out int appid) && !dlcIds.Contains(appid))
-                                        dlcIds.Add(appid);
-                    }
-                    if (!(dlcIds is null) && dlcIds.Count > 0)
+                    List<int> dlcIds = SteamCMD.ParseDlcAppIds(appInfo);
+                    if (dlcIds.Count > 0)
                     {
                         foreach (int id in dlcIds)
                         {
@@ -173,7 +159,7 @@ namespace CreamInstaller
                                 VProperty dlcAppInfo = null;
                                 if (SteamCMD.GetAppInfo(id, out dlcAppInfo)) dlcName = dlcAppInfo?.Value?["common"]?["name"]?.ToString();
                                 if (Program.Canceled) return;
-                                if (string.IsNullOrWhiteSpace(dlcName)) dlcName = $"Unknown DLC ({id})";
+                                if (string.IsNullOrWhiteSpace(dlcName)) return;
                                 dlc[id] = dlcName;
                             });
                             dlcTasks.Add(task);
@@ -242,7 +228,7 @@ namespace CreamInstaller
             progress.Report(RunningTasks.Count);
         }
 
-        private bool initialized = false;
+        private bool validated = false;
 
         private async void OnLoad()
         {
@@ -320,9 +306,9 @@ namespace CreamInstaller
             cancelButton.Enabled = false;
             scanButton.Enabled = true;
 
-            if (!initialized)
+            if (!validated && !Program.Canceled)
             {
-                initialized = true;
+                validated = true;
                 OnLoad();
             }
         }

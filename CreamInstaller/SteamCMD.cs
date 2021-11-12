@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
+using System.Windows.Forms;
 
 namespace CreamInstaller
 {
@@ -19,6 +20,7 @@ namespace CreamInstaller
         public static string AppCachePath = DirectoryPath + @"\appcache";
         public static string AppCacheAppInfoPath = AppCachePath + @"\appinfo.vdf";
         public static string AppInfoPath = DirectoryPath + @"\appinfo";
+        public static string AppInfoVersionPath = AppInfoPath + @"\version.txt";
 
         public static bool Run(string command, out string output)
         {
@@ -56,6 +58,12 @@ namespace CreamInstaller
                 File.Delete(ArchivePath);
             }
             if (File.Exists(AppCacheAppInfoPath)) File.Delete(AppCacheAppInfoPath);
+            if (!File.Exists(AppInfoVersionPath) || !Version.TryParse(File.ReadAllText(AppInfoVersionPath), out Version version) || version < Version.Parse("2.0.2.0"))
+            {
+                if (Directory.Exists(AppInfoPath)) Directory.Delete(AppInfoPath, true);
+                Directory.CreateDirectory(AppInfoPath);
+                File.WriteAllText(AppInfoVersionPath, Application.ProductVersion);
+            }
             if (!File.Exists(DllPath)) Run($@"+quit", out _);
         }
 
@@ -66,7 +74,7 @@ namespace CreamInstaller
             string output;
             string appUpdatePath = $@"{AppInfoPath}\{appId}";
             string appUpdateFile = $@"{appUpdatePath}\appinfo.txt";
-            restart:
+        restart:
             if (Directory.Exists(appUpdatePath) && File.Exists(appUpdateFile)) output = File.ReadAllText(appUpdateFile);
             else
             {
@@ -84,13 +92,13 @@ namespace CreamInstaller
             try { appInfo = VdfConvert.Deserialize(output); }
             catch
             {
-                if (File.Exists(appUpdateFile))
+                if (Directory.Exists(appUpdatePath))
                 {
-                    File.Delete(appUpdateFile);
+                    Directory.Delete(appUpdatePath, true);
                     goto restart;
                 }
             }
-            if (!(appInfo is null) && appInfo.Value is VValue) goto restart;
+            if (appInfo.Value is VValue) goto restart;
             if (appInfo is null || (!(appInfo.Value is VValue) && appInfo.Value.Children().ToList().Count == 0)) return true;
             VToken type = appInfo.Value is VValue ? null : appInfo.Value?["common"]?["type"];
             if (type is null || type.ToString() == "Game")
@@ -99,11 +107,34 @@ namespace CreamInstaller
                 if (buildid is null && !(type is null)) return true;
                 if (type is null || int.Parse(buildid) < buildId)
                 {
-                    if (File.Exists(appUpdateFile)) File.Delete(appUpdateFile);
+                    foreach (int id in ParseDlcAppIds(appInfo))
+                    {
+                        string dlcAppUpdatePath = $@"{AppInfoPath}\{id}";
+                        if (Directory.Exists(dlcAppUpdatePath)) Directory.Delete(dlcAppUpdatePath, true);
+                    }
+                    if (Directory.Exists(appUpdatePath)) Directory.Delete(appUpdatePath, true);
                     goto restart;
                 }
             }
             return true;
+        }
+
+        public static List<int> ParseDlcAppIds(VProperty appInfo)
+        {
+            List<int> dlcIds = new();
+            if (!(appInfo is VProperty)) return dlcIds;
+            if (!(appInfo.Value["extended"] is null))
+                foreach (VProperty property in appInfo.Value["extended"])
+                    if (property.Key.ToString() == "listofdlc")
+                        foreach (string id in property.Value.ToString().Split(","))
+                            if (!dlcIds.Contains(int.Parse(id)))
+                                dlcIds.Add(int.Parse(id));
+            if (!(appInfo.Value["depots"] is null))
+                foreach (VProperty _property in appInfo.Value["depots"])
+                    if (int.TryParse(_property.Key.ToString(), out int _))
+                        if (int.TryParse(_property.Value?["dlcappid"]?.ToString(), out int appid) && !dlcIds.Contains(appid))
+                            dlcIds.Add(appid);
+            return dlcIds;
         }
 
         public static void Kill()

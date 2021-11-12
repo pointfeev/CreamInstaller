@@ -29,7 +29,7 @@ namespace CreamInstaller
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Application.ApplicationExit += new EventHandler(OnApplicationExit);
-                retry:
+            retry:
                 try
                 {
                     Application.Run(new MainForm());
