@@ -13,7 +13,7 @@ namespace CreamInstaller
 {
     public static class SteamCMD
     {
-        public static string DirectoryPath = Path.GetTempPath() + "CreamInstaller";
+        public static string DirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\CreamInstaller";
         public static string FilePath = DirectoryPath + @"\steamcmd.exe";
         public static string ArchivePath = DirectoryPath + @"\steamcmd.zip";
         public static string DllPath = DirectoryPath + @"\steamclient.dll";
