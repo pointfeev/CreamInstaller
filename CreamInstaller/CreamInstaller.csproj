@@ -9,7 +9,7 @@
 		<Version>2.0.2.0</Version>
 		<PackageIcon>ini.ico</PackageIcon>
 		<PackageIconUrl />
-		<Description>Automatically installs and generates CreamAPI files for Steam games on the user's computer. The program also has special instructions that allow it to install CreamAPI to the Paradox Launcher if the user selects any Paradox games.</Description>
+		<Description>Automatically generates and installs CreamAPI files for Steam games on the user's computer. It can also generate and install CreamAPI for the Paradox Launcher should the user select a Paradox Interactive game.</Description>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<Copyright>2021, pointfeev (https://github.com/pointfeev)</Copyright>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
