@@ -53,7 +53,7 @@ namespace CreamInstaller
             this.acceptButton.Name = "acceptButton";
             this.acceptButton.Size = new System.Drawing.Size(150, 23);
             this.acceptButton.TabIndex = 102;
-            this.acceptButton.Text = "Download and Install";
+            this.acceptButton.Text = "Generate and Install";
             this.acceptButton.UseVisualStyleBackColor = true;
             this.acceptButton.Click += new System.EventHandler(this.OnAccept);
             // 
