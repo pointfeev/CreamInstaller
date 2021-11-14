@@ -13,14 +13,14 @@ namespace CreamInstaller
 {
     public static class SteamCMD
     {
-        public static string DirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\CreamInstaller";
-        public static string FilePath = DirectoryPath + @"\steamcmd.exe";
-        public static string ArchivePath = DirectoryPath + @"\steamcmd.zip";
-        public static string DllPath = DirectoryPath + @"\steamclient.dll";
-        public static string AppCachePath = DirectoryPath + @"\appcache";
-        public static string AppCacheAppInfoPath = AppCachePath + @"\appinfo.vdf";
-        public static string AppInfoPath = DirectoryPath + @"\appinfo";
-        public static string AppInfoVersionPath = AppInfoPath + @"\version.txt";
+        public static readonly string DirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\CreamInstaller";
+        public static readonly string FilePath = DirectoryPath + @"\steamcmd.exe";
+        public static readonly string ArchivePath = DirectoryPath + @"\steamcmd.zip";
+        public static readonly string DllPath = DirectoryPath + @"\steamclient.dll";
+        public static readonly string AppCachePath = DirectoryPath + @"\appcache";
+        public static readonly string AppCacheAppInfoPath = AppCachePath + @"\appinfo.vdf";
+        public static readonly string AppInfoPath = DirectoryPath + @"\appinfo";
+        public static readonly string AppInfoVersionPath = AppInfoPath + @"\version.txt";
 
         public static bool Run(string command, out string output)
         {

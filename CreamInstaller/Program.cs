@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.IO.Compression;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
@@ -28,7 +27,7 @@ namespace CreamInstaller
                 Application.SetHighDpiMode(HighDpiMode.SystemAware);
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                Application.ApplicationExit += new EventHandler(OnApplicationExit);
+                Application.ApplicationExit += new(OnApplicationExit);
             retry:
                 try
                 {
@@ -82,8 +81,6 @@ namespace CreamInstaller
         public static List<ProgramSelection> ProgramSelections = new();
 
         public static bool Canceled = false;
-        public static string OutputFile = null; // placeholder, won't exist in new system
-        public static ZipArchive OutputArchive = null; // placeholder, won't exist in new system
 
         public static void Cleanup(bool cancel = true)
         {

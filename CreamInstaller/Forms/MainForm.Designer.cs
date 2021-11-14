@@ -37,6 +37,7 @@ namespace CreamInstaller
             this.updateButton = new System.Windows.Forms.Button();
             this.ignoreButton = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.changelogTreeView = new System.Windows.Forms.TreeView();
             this.SuspendLayout();
             // 
             // label1
@@ -78,11 +79,19 @@ namespace CreamInstaller
             this.progressBar1.TabIndex = 4;
             this.progressBar1.Visible = false;
             // 
+            // changelogTreeView
+            // 
+            this.changelogTreeView.Location = new System.Drawing.Point(12, 70);
+            this.changelogTreeView.Name = "changelogTreeView";
+            this.changelogTreeView.Size = new System.Drawing.Size(380, 179);
+            this.changelogTreeView.TabIndex = 5;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(404, 46);
+            this.ClientSize = new System.Drawing.Size(404, 261);
+            this.Controls.Add(this.changelogTreeView);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.ignoreButton);
             this.Controls.Add(this.updateButton);
@@ -91,6 +100,7 @@ namespace CreamInstaller
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(420, 300);
             this.MinimizeBox = false;
             this.Name = "MainForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
@@ -108,6 +118,7 @@ namespace CreamInstaller
         private Button updateButton;
         private Button ignoreButton;
         private ProgressBar progressBar1;
+        private TreeView changelogTreeView;
     }
 }
 

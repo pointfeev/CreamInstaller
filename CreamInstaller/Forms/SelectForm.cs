@@ -23,11 +23,11 @@ namespace CreamInstaller
             Text = Program.ApplicationName;
         }
 
-        private List<string> GameLibraryDirectories
+        private static List<string> GameLibraryDirectories
         {
             get
             {
-                List<string> gameDirectories = new List<string>();
+                List<string> gameDirectories = new();
                 if (Program.Canceled) return gameDirectories;
                 string steamInstallPath = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Valve\\Steam", "InstallPath", null) as string;
                 if (steamInstallPath == null) steamInstallPath = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Valve\\Steam", "InstallPath", null) as string;
@@ -55,7 +55,7 @@ namespace CreamInstaller
             }
         }
 
-        private bool GetDllDirectoriesFromGameDirectory(string gameDirectory, out List<string> dllDirectories)
+        private static bool GetDllDirectoriesFromGameDirectory(string gameDirectory, out List<string> dllDirectories)
         {
             dllDirectories = new();
             if (Program.Canceled) return false;
@@ -76,7 +76,7 @@ namespace CreamInstaller
             return true;
         }
 
-        private bool GetGamesFromLibraryDirectory(string libraryDirectory, out List<Tuple<int, string, string, int, string>> games)
+        private static bool GetGamesFromLibraryDirectory(string libraryDirectory, out List<Tuple<int, string, string, int, string>> games)
         {
             games = new();
             if (Program.Canceled) return false;
@@ -111,7 +111,6 @@ namespace CreamInstaller
         }
 
         private readonly List<TreeNode> treeNodes = new();
-
         internal List<Task> RunningTasks = new();
 
         private void GetCreamApiApplicablePrograms(IProgress<int> progress)
@@ -134,9 +133,9 @@ namespace CreamInstaller
                 int buildId = program.Item4;
                 string directory = program.Item5;
                 if (Program.Canceled) return;
-                // easy anti cheat detects DLL changes, so skip those games
+                // EasyAntiCheat detects DLL changes, so skip those games
                 if (Directory.Exists(directory + @"\EasyAntiCheat")) continue;
-                // battleye in DayZ detects DLL changes, but not in Arma3?
+                // BattlEye in DayZ detects DLL changes, but not in Arma3?
                 if (name != "Arma 3" && Directory.Exists(directory + @"\BattlEye")) continue;
                 Task task = new(() =>
                 {
@@ -156,8 +155,7 @@ namespace CreamInstaller
                             {
                                 if (Program.Canceled) return;
                                 string dlcName = null;
-                                VProperty dlcAppInfo = null;
-                                if (SteamCMD.GetAppInfo(id, out dlcAppInfo)) dlcName = dlcAppInfo?.Value?["common"]?["name"]?.ToString();
+                                if (SteamCMD.GetAppInfo(id, out VProperty dlcAppInfo)) dlcName = dlcAppInfo?.Value?["common"]?["name"]?.ToString();
                                 if (Program.Canceled) return;
                                 if (string.IsNullOrWhiteSpace(dlcName)) return;
                                 dlc[id] = dlcName;
@@ -243,7 +241,7 @@ namespace CreamInstaller
             label2.Visible = true;
             progressBar1.Visible = true;
             progressBar1.Value = 0;
-            groupBox1.Size = new Size(groupBox1.Size.Width, groupBox1.Size.Height - 44);
+            groupBox1.Size = new(groupBox1.Size.Width, groupBox1.Size.Height - 44);
 
             bool setup = true;
             int maxProgress = 0;
@@ -284,7 +282,7 @@ namespace CreamInstaller
                     treeNode.Remove();
 
             progressBar1.Value = 100;
-            groupBox1.Size = new Size(groupBox1.Size.Width, groupBox1.Size.Height + 44);
+            groupBox1.Size = new(groupBox1.Size.Width, groupBox1.Size.Height + 44);
             label2.Visible = false;
             progressBar1.Visible = false;
 
@@ -397,7 +395,7 @@ namespace CreamInstaller
         {
             if (ProgramSelection.All.Count > 0)
             {
-                foreach (ProgramSelection selection in ProgramSelection.AllSafe)
+                foreach (ProgramSelection selection in ProgramSelection.AllSafeEnabled)
                 {
                     if (!Program.IsProgramRunningDialog(this, selection))
                     {
@@ -417,7 +415,7 @@ namespace CreamInstaller
                     }
                     int X = installForm.Location.X + installForm.Size.Width / 2 - Size.Width / 2;
                     int Y = installForm.Location.Y + installForm.Size.Height / 2 - Size.Height / 2;
-                    Location = new Point(X, Y);
+                    Location = new(X, Y);
                     Show();
                 }
                 else

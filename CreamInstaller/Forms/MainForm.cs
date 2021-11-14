@@ -1,10 +1,14 @@
-﻿using Onova;
+﻿using HtmlAgilityPack;
+using Onova;
 using Onova.Models;
 using Onova.Services;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CreamInstaller
@@ -33,26 +37,31 @@ namespace CreamInstaller
             Close();
         }
 
+        private static readonly HttpClient httpClient = new();
         private static UpdateManager updateManager = null;
         private static Version latestVersion = null;
+        private static IReadOnlyList<Version> versions;
 
         private async void OnLoad()
         {
-            Size = new Size(420, 85);
+            Size = new(420, 85);
             progressBar1.Visible = false;
             ignoreButton.Visible = true;
             updateButton.Text = "Update";
             updateButton.Click -= OnUpdateCancel;
             label1.Text = "Checking for updates . . .";
+            changelogTreeView.Visible = false;
+            changelogTreeView.Location = new(12, 41);
+            changelogTreeView.Size = new(380, 208);
 
-            GithubPackageResolver resolver = new GithubPackageResolver("pointfeev", "CreamInstaller", "CreamInstaller.zip");
-            ZipPackageExtractor extractor = new ZipPackageExtractor();
-            updateManager = new UpdateManager(AssemblyMetadata.FromAssembly(Program.EntryAssembly, Program.CurrentProcessFilePath), resolver, extractor);
+            GithubPackageResolver resolver = new("pointfeev", "CreamInstaller", "CreamInstaller.zip");
+            ZipPackageExtractor extractor = new();
+            updateManager = new(AssemblyMetadata.FromAssembly(Program.EntryAssembly, Program.CurrentProcessFilePath), resolver, extractor);
 
             if (latestVersion is null)
             {
                 CheckForUpdatesResult checkForUpdatesResult = null;
-                cancellationTokenSource = new CancellationTokenSource();
+                cancellationTokenSource = new();
                 try
                 {
                     checkForUpdatesResult = await updateManager.CheckForUpdatesAsync(cancellationTokenSource.Token);
@@ -61,6 +70,7 @@ namespace CreamInstaller
                     if (checkForUpdatesResult.CanUpdate)
                     {
                         latestVersion = checkForUpdatesResult.LastVersion;
+                        versions = checkForUpdatesResult.Versions;
                     }
                 }
                 catch { }
@@ -73,10 +83,50 @@ namespace CreamInstaller
             }
             else
             {
+                Size = new(420, 300);
                 label1.Text = $"An update is available: v{latestVersion}";
                 ignoreButton.Enabled = true;
                 updateButton.Enabled = true;
-                updateButton.Click += new EventHandler(OnUpdate);
+                updateButton.Click += new(OnUpdate);
+                changelogTreeView.Visible = true;
+                Version currentVersion = new(Application.ProductVersion);
+                foreach (Version version in versions)
+                {
+                    if (version > currentVersion && !changelogTreeView.Nodes.ContainsKey(version.ToString()))
+                    {
+                        TreeNode root = new($"v{version}");
+                        root.Name = version.ToString();
+                        changelogTreeView.Nodes.Add(root);
+                        new Task(async () =>
+                        {
+                            try
+                            {
+                                string url = $"https://github.com/pointfeev/CreamInstaller/releases/tag/v{version}";
+                                using HttpRequestMessage request = new(HttpMethod.Get, url);
+                                using HttpResponseMessage response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                                response.EnsureSuccessStatusCode();
+                                using Stream stream = await response.Content.ReadAsStreamAsync();
+                                using StreamReader reader = new(stream);
+                                HtmlAgilityPack.HtmlDocument document = new();
+                                document.LoadHtml(reader.ReadToEnd());
+                                foreach (HtmlNode node in document.DocumentNode.SelectNodes("//div[@data-test-selector='body-content']/ul/li"))
+                                {
+                                    changelogTreeView.Invoke((MethodInvoker)delegate
+                                    {
+                                        TreeNode change = new();
+                                        change.Text = $"{node.InnerText}";
+                                        root.Nodes.Add(change);
+                                        root.Expand();
+                                    });
+                                }
+                            }
+                            catch
+                            {
+                                changelogTreeView.Nodes.Remove(root);
+                            }
+                        }).Start();
+                    }
+                }
             }
         }
 
@@ -103,22 +153,23 @@ namespace CreamInstaller
 
         private async void OnUpdate(object sender, EventArgs e)
         {
-            Size = new Size(420, 115);
             progressBar1.Visible = true;
             ignoreButton.Visible = false;
             updateButton.Text = "Cancel";
             updateButton.Click -= OnUpdate;
-            updateButton.Click += new EventHandler(OnUpdateCancel);
+            updateButton.Click += new(OnUpdateCancel);
+            changelogTreeView.Location = new(12, 70);
+            changelogTreeView.Size = new(380, 179);
 
-            Progress<double> progress = new Progress<double>();
-            progress.ProgressChanged += new EventHandler<double>(delegate (object sender, double _progress)
+            Progress<double> progress = new();
+            progress.ProgressChanged += new(delegate (object sender, double _progress)
             {
                 label1.Text = $"Updating . . . {(int)_progress}%";
                 progressBar1.Value = (int)_progress;
             });
 
             label1.Text = "Updating . . . ";
-            cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource = new();
             try
             {
                 await updateManager.PrepareUpdateAsync(latestVersion, progress, cancellationTokenSource.Token);
