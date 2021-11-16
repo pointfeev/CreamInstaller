@@ -31,25 +31,31 @@ namespace CreamInstaller
                 if (Program.Canceled) return gameDirectories;
                 string steamInstallPath = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Valve\\Steam", "InstallPath", null) as string;
                 if (steamInstallPath == null) steamInstallPath = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Valve\\Steam", "InstallPath", null) as string;
-                if (steamInstallPath != null)
+                if (steamInstallPath != null && Directory.Exists(steamInstallPath))
                 {
                     string libraryFolder = steamInstallPath + @"\steamapps";
-                    gameDirectories.Add(libraryFolder);
-                    try
+                    if (Directory.Exists(libraryFolder))
                     {
-                        string libraryFolders = libraryFolder + @"\libraryfolders.vdf";
-                        dynamic property = VdfConvert.Deserialize(File.ReadAllText(libraryFolders));
-                        foreach (dynamic _property in property.Value)
+                        gameDirectories.Add(libraryFolder);
+                        try
                         {
-                            if (int.TryParse(_property.Key, out int _))
+                            string libraryFolders = libraryFolder + @"\libraryfolders.vdf";
+                            if (File.Exists(libraryFolders))
                             {
-                                string path = _property.Value.path.ToString() + @"\steamapps";
-                                if (string.IsNullOrWhiteSpace(path)) continue;
-                                if (!gameDirectories.Contains(path)) gameDirectories.Add(path);
+                                dynamic property = VdfConvert.Deserialize(File.ReadAllText(libraryFolders));
+                                foreach (dynamic _property in property.Value)
+                                {
+                                    if (int.TryParse(_property.Key, out int _))
+                                    {
+                                        string path = _property.Value.path.ToString() + @"\steamapps";
+                                        if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path)) continue;
+                                        if (!gameDirectories.Contains(path)) gameDirectories.Add(path);
+                                    }
+                                }
                             }
                         }
+                        catch { }
                     }
-                    catch { }
                 }
                 return gameDirectories;
             }
@@ -58,7 +64,7 @@ namespace CreamInstaller
         private static bool GetDllDirectoriesFromGameDirectory(string gameDirectory, out List<string> dllDirectories)
         {
             dllDirectories = new();
-            if (Program.Canceled) return false;
+            if (Program.Canceled || !Directory.Exists(gameDirectory)) return false;
             string api = gameDirectory + @"\steam_api.dll";
             string api64 = gameDirectory + @"\steam_api64.dll";
             if (File.Exists(api) || File.Exists(api64)) dllDirectories.Add(gameDirectory);
@@ -79,7 +85,7 @@ namespace CreamInstaller
         private static bool GetGamesFromLibraryDirectory(string libraryDirectory, out List<Tuple<int, string, string, int, string>> games)
         {
             games = new();
-            if (Program.Canceled) return false;
+            if (Program.Canceled || !Directory.Exists(libraryDirectory)) return false;
             foreach (string directory in Directory.GetFiles(libraryDirectory))
             {
                 if (Program.Canceled) return false;
@@ -335,7 +341,7 @@ namespace CreamInstaller
             }
         }
 
-        private void OnLoad(object sender, EventArgs e)
+        private void OnLoad(object sender, EventArgs _)
         {
             treeView1.AfterCheck += OnTreeViewNodeCheckedChanged;
             treeView1.NodeMouseClick += (sender, e) =>
@@ -352,7 +358,16 @@ namespace CreamInstaller
                     });
                 }
             };
-            OnLoad();
+        retry:
+            try
+            {
+                OnLoad();
+            }
+            catch (Exception e)
+            {
+                if (ExceptionHandler.OutputException(e)) goto retry;
+                Close();
+            }
         }
 
         private static bool ParadoxLauncherDlcDialog(Form form)

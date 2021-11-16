@@ -130,20 +130,29 @@ namespace CreamInstaller
             }
         }
 
-        private void OnLoad(object sender, EventArgs e)
+        private void OnLoad(object sender, EventArgs _)
         {
-            string FileName = Path.GetFileName(Program.CurrentProcessFilePath);
-            if (FileName != "CreamInstaller.exe")
+        retry:
+            try
             {
-                if (new DialogForm(this).Show(Program.ApplicationName, SystemIcons.Warning,
-                    "WARNING: CreamInstaller.exe was renamed!" +
-                    "\n\nThis will cause unwanted behavior when updating the program!",
-                    "Ignore", "Abort") == DialogResult.Cancel)
+                string FileName = Path.GetFileName(Program.CurrentProcessFilePath);
+                if (FileName != "CreamInstaller.exe")
                 {
-                    Environment.Exit(0);
+                    if (new DialogForm(this).Show(Program.ApplicationName, SystemIcons.Warning,
+                        "WARNING: CreamInstaller.exe was renamed!" +
+                        "\n\nThis will cause unwanted behavior when updating the program!",
+                        "Ignore", "Abort") == DialogResult.Cancel)
+                    {
+                        Environment.Exit(0);
+                    }
                 }
+                OnLoad();
             }
-            OnLoad();
+            catch (Exception e)
+            {
+                if (ExceptionHandler.OutputException(e)) goto retry;
+                Close();
+            }
         }
 
         private void OnIgnore(object sender, EventArgs e)

@@ -180,11 +180,20 @@ namespace CreamInstaller
             reselectButton.Enabled = true;
         }
 
-        private void OnLoad(object sender, EventArgs e)
+        private void OnLoad(object sender, EventArgs _)
         {
-            userInfoLabel.Text = "Loading . . . ";
-            logTextBox.Text = string.Empty;
-            Start();
+        retry:
+            try
+            {
+                userInfoLabel.Text = "Loading . . . ";
+                logTextBox.Text = string.Empty;
+                Start();
+            }
+            catch (Exception e)
+            {
+                if (ExceptionHandler.OutputException(e)) goto retry;
+                Close();
+            }
         }
 
         private void OnAccept(object sender, EventArgs e)
