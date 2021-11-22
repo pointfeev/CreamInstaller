@@ -121,7 +121,6 @@ namespace CreamInstaller
 
         private void GetCreamApiApplicablePrograms(IProgress<int> progress)
         {
-            treeView1.AfterCheck -= OnTreeViewNodeCheckedChanged;
             int cur = 0;
             if (Program.Canceled) return;
             List<Tuple<int, string, string, int, string>> applicablePrograms = new();
@@ -234,7 +233,6 @@ namespace CreamInstaller
                 task.Wait();
             }
             progress.Report(RunningTasks.Count);
-            treeView1.AfterCheck += OnTreeViewNodeCheckedChanged;
         }
 
         private bool validated = false;
@@ -314,22 +312,19 @@ namespace CreamInstaller
 
         private void OnTreeViewNodeCheckedChanged(object sender, TreeViewEventArgs e)
         {
+            if (e.Action == TreeViewAction.Unknown) return;
             ProgramSelection selection = ProgramSelection.FromName(e.Node.Text);
             if (selection is null)
             {
                 ProgramSelection.FromName(e.Node.Parent.Text).ToggleDlc(e.Node.Text, e.Node.Checked);
-                treeView1.AfterCheck -= OnTreeViewNodeCheckedChanged;
                 e.Node.Parent.Checked = e.Node.Parent.Nodes.Cast<TreeNode>().ToList().Any(treeNode => treeNode.Checked);
-                treeView1.AfterCheck += OnTreeViewNodeCheckedChanged;
             }
             else
             {
                 if (selection.AllSteamDlc.Any())
                 {
                     selection.ToggleAllDlc(e.Node.Checked);
-                    treeView1.AfterCheck -= OnTreeViewNodeCheckedChanged;
                     e.Node.Nodes.Cast<TreeNode>().ToList().ForEach(treeNode => treeNode.Checked = e.Node.Checked);
-                    treeView1.AfterCheck += OnTreeViewNodeCheckedChanged;
                 }
                 else
                 {
@@ -467,11 +462,14 @@ namespace CreamInstaller
         {
             bool shouldCheck = false;
             foreach (TreeNode treeNode in treeNodes)
-                if (treeNode.Parent is null && !treeNode.Checked)
-                    shouldCheck = true;
-            foreach (TreeNode treeNode in treeNodes)
+            {
                 if (treeNode.Parent is null)
+                {
+                    if (!treeNode.Checked) shouldCheck = true;
                     treeNode.Checked = shouldCheck;
+                    OnTreeViewNodeCheckedChanged(null, new(treeNode, TreeViewAction.ByMouse));
+                }
+            }
             allCheckBox.Checked = shouldCheck;
         }
     }
