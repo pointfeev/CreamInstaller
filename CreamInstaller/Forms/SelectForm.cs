@@ -121,6 +121,7 @@ namespace CreamInstaller
 
         private void GetCreamApiApplicablePrograms(IProgress<int> progress)
         {
+            treeView1.AfterCheck -= OnTreeViewNodeCheckedChanged;
             int cur = 0;
             if (Program.Canceled) return;
             List<Tuple<int, string, string, int, string>> applicablePrograms = new();
@@ -197,25 +198,28 @@ namespace CreamInstaller
                         if (Program.Canceled) return;
                         TreeNode programNode = treeNodes.Find(s => s.Text == name) ?? new();
                         programNode.Text = name;
-                        programNode.Checked = true;
+                        programNode.Checked = selection.Enabled;
                         programNode.Remove();
                         treeView1.Nodes.Add(programNode);
                         treeNodes.Remove(programNode);
                         treeNodes.Add(programNode);
-                        foreach (KeyValuePair<int, string> dlcApp in dlc.ToList())
+                        if (name == "Paradox Launcher")
                         {
-                            if (Program.Canceled || programNode is null) return;
-                            TreeNode dlcNode = treeNodes.Find(s => s.Text == dlcApp.Value) ?? new();
-                            dlcNode.Text = dlcApp.Value;
-                            dlcNode.Checked = true;
-                            dlcNode.Remove();
-                            programNode.Nodes.Add(dlcNode);
-                            treeNodes.Remove(dlcNode);
-                            treeNodes.Add(dlcNode);
-                            Tuple<int, string> app = new(dlcApp.Key, dlcApp.Value);
-                            if (!selection.AllSteamDlc.Contains(app)) selection.AllSteamDlc.Add(app);
-                            if (!selection.SelectedSteamDlc.Contains(app)) selection.SelectedSteamDlc.Add(app);
+                            // maybe add game and/or dlc choice here?
                         }
+                        else foreach (KeyValuePair<int, string> dlcApp in dlc.ToList())
+                            {
+                                if (Program.Canceled || programNode is null) return;
+                                Tuple<int, string> app = new(dlcApp.Key, dlcApp.Value);
+                                TreeNode dlcNode = treeNodes.Find(s => s.Text == app.Item2) ?? new();
+                                dlcNode.Text = app.Item2;
+                                dlcNode.Checked = selection.SelectedSteamDlc.Contains(app);
+                                dlcNode.Remove();
+                                programNode.Nodes.Add(dlcNode);
+                                treeNodes.Remove(dlcNode);
+                                treeNodes.Add(dlcNode);
+                                if (!selection.AllSteamDlc.Contains(app)) selection.AllSteamDlc.Add(app);
+                            }
                     });
                 });
                 RunningTasks.Add(task);
@@ -230,6 +234,7 @@ namespace CreamInstaller
                 task.Wait();
             }
             progress.Report(RunningTasks.Count);
+            treeView1.AfterCheck += OnTreeViewNodeCheckedChanged;
         }
 
         private bool validated = false;
@@ -292,21 +297,11 @@ namespace CreamInstaller
             label2.Visible = false;
             progressBar1.Visible = false;
 
-            if (ProgramSelection.All.Any())
-            {
-                allCheckBox.Enabled = true;
-                treeView1.Enabled = true;
-                treeNodes.ForEach(node => node.Checked = true);
-                if (ProgramSelection.AllSafeEnabled.Any())
-                {
-                    acceptButton.Enabled = true;
-                }
-            }
-            else
-            {
-                noneFoundLabel.Visible = true;
-            }
+            treeView1.Enabled = ProgramSelection.All.Any();
+            allCheckBox.Enabled = treeView1.Enabled;
+            noneFoundLabel.Visible = !treeView1.Enabled;
 
+            acceptButton.Enabled = ProgramSelection.AllSafeEnabled.Any();
             cancelButton.Enabled = false;
             scanButton.Enabled = true;
 
@@ -322,23 +317,29 @@ namespace CreamInstaller
             ProgramSelection selection = ProgramSelection.FromName(e.Node.Text);
             if (selection is null)
             {
-                selection = ProgramSelection.FromName(e.Node.Parent.Text);
-                selection.ToggleDlc(e.Node.Text, e.Node.Checked);
+                ProgramSelection.FromName(e.Node.Parent.Text).ToggleDlc(e.Node.Text, e.Node.Checked);
                 treeView1.AfterCheck -= OnTreeViewNodeCheckedChanged;
                 e.Node.Parent.Checked = e.Node.Parent.Nodes.Cast<TreeNode>().ToList().Any(treeNode => treeNode.Checked);
                 treeView1.AfterCheck += OnTreeViewNodeCheckedChanged;
             }
             else
             {
-                selection.Enabled = e.Node.Checked;
-                treeView1.AfterCheck -= OnTreeViewNodeCheckedChanged;
-                e.Node.Nodes.Cast<TreeNode>().ToList().ForEach(treeNode => treeNode.Checked = e.Node.Checked);
-                treeView1.AfterCheck += OnTreeViewNodeCheckedChanged;
+                if (selection.AllSteamDlc.Any())
+                {
+                    selection.ToggleAllDlc(e.Node.Checked);
+                    treeView1.AfterCheck -= OnTreeViewNodeCheckedChanged;
+                    e.Node.Nodes.Cast<TreeNode>().ToList().ForEach(treeNode => treeNode.Checked = e.Node.Checked);
+                    treeView1.AfterCheck += OnTreeViewNodeCheckedChanged;
+                }
+                else
+                {
+                    selection.Enabled = e.Node.Checked;
+                }
                 allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
                 allCheckBox.Checked = treeNodes.TrueForAll(treeNode => treeNode.Checked);
                 allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
-                acceptButton.Enabled = ProgramSelection.AllSafeEnabled.Any();
             }
+            acceptButton.Enabled = ProgramSelection.AllSafeEnabled.Any();
         }
 
         private void OnLoad(object sender, EventArgs _)
@@ -370,10 +371,10 @@ namespace CreamInstaller
             }
         }
 
-        private static bool ParadoxLauncherDlcDialog(Form form)
+        private static void PopulateParadoxLauncherDlc(ProgramSelection paradoxLauncher = null)
         {
-            ProgramSelection paradoxLauncher = ProgramSelection.FromName("Paradox Launcher");
-            if (!(paradoxLauncher is null) && paradoxLauncher.Enabled)
+            paradoxLauncher ??= ProgramSelection.FromName("Paradox Launcher");
+            if (!(paradoxLauncher is null))
             {
                 paradoxLauncher.ExtraSteamAppIdDlc = new();
                 foreach (ProgramSelection selection in ProgramSelection.AllSafeEnabled)
@@ -391,6 +392,15 @@ namespace CreamInstaller
                         paradoxLauncher.ExtraSteamAppIdDlc.Add(new(selection.SteamAppId, selection.Name, selection.AllSteamDlc));
                     }
                 }
+            }
+        }
+
+        private static bool ParadoxLauncherDlcDialog(Form form)
+        {
+            ProgramSelection paradoxLauncher = ProgramSelection.FromName("Paradox Launcher");
+            if (!(paradoxLauncher is null) && paradoxLauncher.Enabled)
+            {
+                PopulateParadoxLauncherDlc(paradoxLauncher);
                 if (!paradoxLauncher.ExtraSteamAppIdDlc.Any())
                 {
                     if (new DialogForm(form).Show(Program.ApplicationName, SystemIcons.Warning,
@@ -425,8 +435,11 @@ namespace CreamInstaller
                 {
                     foreach (TreeNode treeNode in treeNodes)
                     {
-                        treeNode.Checked = !treeNode.Checked;
-                        treeNode.Checked = !treeNode.Checked; // to fire checked event
+                        if (!(treeNode.Parent is null))
+                        {
+                            treeNode.Checked = !treeNode.Checked;
+                            treeNode.Checked = !treeNode.Checked; // to fire checked event
+                        }
                     }
                     int X = installForm.Location.X + installForm.Size.Width / 2 - Size.Width / 2;
                     int Y = installForm.Location.Y + installForm.Size.Height / 2 - Size.Height / 2;

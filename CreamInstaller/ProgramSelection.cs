@@ -7,7 +7,7 @@ namespace CreamInstaller
 {
     public class ProgramSelection
     {
-        public bool Enabled = true;
+        public bool Enabled = false;
 
         public string Name;
         public string RootDirectory;
@@ -34,24 +34,33 @@ namespace CreamInstaller
             }
         }
 
-        public void ToggleDlc(string dlcName, bool Enabled)
+        private void Toggle(Tuple<int, string> dlcApp, bool enabled)
+        {
+            if (enabled)
+            {
+                if (!SelectedSteamDlc.Contains(dlcApp)) SelectedSteamDlc.Add(dlcApp);
+            }
+            else SelectedSteamDlc.Remove(dlcApp);
+        }
+
+        public void ToggleDlc(string dlcName, bool enabled)
         {
             foreach (Tuple<int, string> dlcApp in AllSteamDlc)
             {
                 if (dlcApp.Item2 == dlcName)
                 {
-                    if (Enabled)
-                    {
-                        if (!SelectedSteamDlc.Contains(dlcApp))
-                        {
-                            SelectedSteamDlc.Add(dlcApp);
-                        }
-                    }
-                    else SelectedSteamDlc.Remove(dlcApp);
+                    Toggle(dlcApp, enabled);
                     break;
                 }
             }
-            this.Enabled = SelectedSteamDlc.Any();
+            Enabled = SelectedSteamDlc.Any();
+        }
+
+        public void ToggleAllDlc(bool enabled)
+        {
+            if (!enabled) SelectedSteamDlc.Clear();
+            else foreach (Tuple<int, string> dlcApp in AllSteamDlc) Toggle(dlcApp, enabled);
+            Enabled = SelectedSteamDlc.Any();
         }
 
         public ProgramSelection() => All.Add(this);

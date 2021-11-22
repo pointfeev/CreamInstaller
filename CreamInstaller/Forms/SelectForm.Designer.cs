@@ -123,8 +123,6 @@ namespace CreamInstaller
             // 
             this.allCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.allCheckBox.AutoSize = true;
-            this.allCheckBox.Checked = true;
-            this.allCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.allCheckBox.Enabled = false;
             this.allCheckBox.Location = new System.Drawing.Point(414, 0);
             this.allCheckBox.Name = "allCheckBox";
