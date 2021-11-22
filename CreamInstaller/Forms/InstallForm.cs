@@ -19,7 +19,8 @@ namespace CreamInstaller
             InitializeComponent();
             Program.InstallForm = this;
             Text = Program.ApplicationName;
-            logTextBox.BackColor = LogColor.Background;
+            Icon = Properties.Resources.Icon;
+            logTextBox.BackColor = InstallationLog.Background;
         }
 
         private int OperationsCount;
@@ -52,33 +53,33 @@ namespace CreamInstaller
             int cur = 0;
             foreach (string directory in selection.SteamApiDllDirectories)
             {
-                UpdateUser("Installing CreamAPI for " + selection.Name + $" in directory \"{directory}\" . . . ", LogColor.Operation);
+                UpdateUser("Installing CreamAPI for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
                 if (!Program.IsProgramRunningDialog(this, selection)) throw new OperationCanceledException();
                 string api = directory + @"\steam_api.dll";
                 string api_o = directory + @"\steam_api_o.dll";
                 if (File.Exists(api) && !File.Exists(api_o))
                 {
                     File.Move(api, api_o);
-                    UpdateUser($"Renamed file: {api} -> steam_api_o.dll", LogColor.Resource);
+                    UpdateUser($"Renamed file: {api} -> steam_api_o.dll", InstallationLog.Resource);
                 }
                 if (File.Exists(api_o))
                 {
-                    Resources.WriteResourceToFile("steam_api.dll", api);
-                    UpdateUser($"Wrote resource to file: {api}", LogColor.Resource);
+                    Properties.Resources.API.Write(api);
+                    UpdateUser($"Wrote resource to file: {api}", InstallationLog.Resource);
                 }
                 string api64 = directory + @"\steam_api64.dll";
                 string api64_o = directory + @"\steam_api64_o.dll";
                 if (File.Exists(api64) && !File.Exists(api64_o))
                 {
                     File.Move(api64, api64_o);
-                    UpdateUser($"Renamed file: {api64} -> steam_api64_o.dll", LogColor.Resource);
+                    UpdateUser($"Renamed file: {api64} -> steam_api64_o.dll", InstallationLog.Resource);
                 }
                 if (File.Exists(api64_o))
                 {
-                    Resources.WriteResourceToFile("steam_api64.dll", api64);
-                    UpdateUser($"Wrote resource to file: {api64}", LogColor.Resource);
+                    Properties.Resources.API64.Write(api64);
+                    UpdateUser($"Wrote resource to file: {api64}", InstallationLog.Resource);
                 }
-                UpdateUser("Generating CreamAPI for " + selection.Name + $" in directory \"{directory}\" . . . ", LogColor.Operation);
+                UpdateUser("Generating CreamAPI for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
                 string cApi = directory + @"\cream_api.ini";
                 File.Create(cApi).Close();
                 StreamWriter writer = File.AppendText(cApi);
@@ -91,11 +92,11 @@ namespace CreamInstaller
                     writer.WriteLine($"appid = {selection.SteamAppId}");
                     writer.WriteLine();
                     writer.WriteLine("[dlc]");
-                    UpdateUser($"Added game to cream_api.ini with appid {selection.SteamAppId} ({selection.Name})", LogColor.Resource);
+                    UpdateUser($"Added game to cream_api.ini with appid {selection.SteamAppId} ({selection.Name})", InstallationLog.Resource);
                     foreach (Tuple<int, string> dlcApp in selection.SelectedSteamDlc)
                     {
                         writer.WriteLine($"{dlcApp.Item1} = {dlcApp.Item2}");
-                        UpdateUser($"Added DLC to cream_api.ini with appid {dlcApp.Item1} ({dlcApp.Item2})", LogColor.Resource);
+                        UpdateUser($"Added DLC to cream_api.ini with appid {dlcApp.Item1} ({dlcApp.Item2})", InstallationLog.Resource);
                     }
                 }
                 foreach (Tuple<int, string, List<Tuple<int, string>>> extraAppDlc in selection.ExtraSteamAppIdDlc)
@@ -105,11 +106,11 @@ namespace CreamInstaller
                     writer.WriteLine($"appid = {extraAppDlc.Item1}");
                     writer.WriteLine();
                     writer.WriteLine("[dlc]");
-                    UpdateUser($"Added game to cream_api.ini with appid {extraAppDlc.Item1} ({extraAppDlc.Item2})", LogColor.Resource);
+                    UpdateUser($"Added game to cream_api.ini with appid {extraAppDlc.Item1} ({extraAppDlc.Item2})", InstallationLog.Resource);
                     foreach (Tuple<int, string> dlcApp in extraAppDlc.Item3)
                     {
                         writer.WriteLine($"{dlcApp.Item1} = {dlcApp.Item2}");
-                        UpdateUser($"Added DLC to cream_api.ini with appid {dlcApp.Item1} ({dlcApp.Item2})", LogColor.Resource);
+                        UpdateUser($"Added DLC to cream_api.ini with appid {dlcApp.Item1} ({dlcApp.Item2})", InstallationLog.Resource);
                     }
                 }
                 writer.Flush();
@@ -131,12 +132,12 @@ namespace CreamInstaller
                 try
                 {
                     await OperateFor(selection);
-                    UpdateUser($"Operation succeeded for {selection.Name}.", LogColor.Success);
+                    UpdateUser($"Operation succeeded for {selection.Name}.", InstallationLog.Success);
                     selection.Enabled = false;
                 }
                 catch (Exception exception)
                 {
-                    UpdateUser($"Operation failed for {selection.Name}: " + exception.ToString(), LogColor.Error);
+                    UpdateUser($"Operation failed for {selection.Name}: " + exception.ToString(), InstallationLog.Error);
                 }
                 ++CompleteOperationsCount;
             }
@@ -167,11 +168,11 @@ namespace CreamInstaller
             try
             {
                 await Operate();
-                UpdateUser("CreamAPI successfully installed and generated for " + ProgramCount + " program(s).", LogColor.Success);
+                UpdateUser("CreamAPI successfully installed and generated for " + ProgramCount + " program(s).", InstallationLog.Success);
             }
             catch (Exception exception)
             {
-                UpdateUser("CreamAPI installation and/or generation failed: " + exception.ToString(), LogColor.Error);
+                UpdateUser("CreamAPI installation and/or generation failed: " + exception.ToString(), InstallationLog.Error);
                 retryButton.Enabled = true;
             }
             userProgressBar.Value = userProgressBar.Maximum;

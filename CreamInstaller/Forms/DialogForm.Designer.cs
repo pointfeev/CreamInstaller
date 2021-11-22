@@ -29,7 +29,6 @@ namespace CreamInstaller
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DialogForm));
             this.cancelButton = new System.Windows.Forms.Button();
             this.acceptButton = new System.Windows.Forms.Button();
             this.descriptionLabel = new System.Windows.Forms.Label();
@@ -127,7 +126,6 @@ namespace CreamInstaller
             this.Controls.Add(this.descriptionPanel);
             this.Controls.Add(this.buttonPanel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "DialogForm";

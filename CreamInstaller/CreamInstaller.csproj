@@ -1,13 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net5.0-windows</TargetFramework>
 		<UseWindowsForms>true</UseWindowsForms>
-		<ApplicationIcon>ini.ico</ApplicationIcon>
+		<ApplicationIcon>Resources\ini.ico</ApplicationIcon>
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
 		<Version>2.0.3.0</Version>
-		<PackageIcon>ini.ico</PackageIcon>
+		<PackageIcon>Resources\ini.ico</PackageIcon>
 		<PackageIconUrl />
 		<Description>Automatically generates and installs CreamAPI files for Steam games on the user's computer. It can also generate and install CreamAPI for the Paradox Launcher should the user select a Paradox Interactive game.</Description>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -26,32 +25,26 @@
 		<StartupObject>CreamInstaller.Program</StartupObject>
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 	</PropertyGroup>
-
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<DebugType>embedded</DebugType>
 		<DebugSymbols>true</DebugSymbols>
 		<DefineConstants>TRACE</DefineConstants>
 	</PropertyGroup>
-
 	<ItemGroup>
-	  <None Remove="steam_api.dll" />
-	  <None Remove="steam_api64.dll" />
+		<None Remove="Resources\ini.ico" />
+		<None Remove="Resources\steam_api.dll" />
+		<None Remove="Resources\steam_api64.dll" />
 	</ItemGroup>
-
 	<ItemGroup>
-	  <EmbeddedResource Include="Resources\steam_api64.dll" />
+		<EmbeddedResource Include="Resources\ini.ico" />
+		<EmbeddedResource Include="Resources\steam_api.dll" />
+		<EmbeddedResource Include="Resources\steam_api64.dll" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <EmbeddedResource Include="Resources\steam_api.dll" />
-	</ItemGroup>
-
 	<ItemGroup>
 		<PackageReference Include="Gameloop.Vdf" Version="0.6.1" />
 		<PackageReference Include="HtmlAgilityPack" Version="1.11.38" />
 		<PackageReference Include="Onova" Version="2.6.2" />
 	</ItemGroup>
-
 	<ItemGroup>
 		<Compile Update="Forms\MainForm.cs" />
 		<Compile Update="Forms\SelectForm.cs" />
@@ -61,20 +54,14 @@
 			<DependentUpon>Resources.resx</DependentUpon>
 		</Compile>
 	</ItemGroup>
-
 	<ItemGroup>
 		<EmbeddedResource Update="Properties\Resources.resx">
 			<Generator>ResXFileCodeGenerator</Generator>
 			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
 		</EmbeddedResource>
 	</ItemGroup>
-
 	<ItemGroup>
 		<None Include="..\LICENSE">
-			<Pack>True</Pack>
-			<PackagePath></PackagePath>
-		</None>
-		<None Include="ini.ico">
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
 		</None>

@@ -9,6 +9,7 @@ namespace CreamInstaller
         {
             Owner = owner as Form;
             InitializeComponent();
+            Icon = Properties.Resources.Icon;
         }
 
         public DialogResult Show(string formName, Icon descriptionIcon, string descriptionText, string acceptButtonText, string cancelButtonText)

@@ -19,6 +19,7 @@ namespace CreamInstaller
         {
             InitializeComponent();
             Text = Program.ApplicationName;
+            Icon = Properties.Resources.Icon;
         }
 
         private static CancellationTokenSource cancellationTokenSource;

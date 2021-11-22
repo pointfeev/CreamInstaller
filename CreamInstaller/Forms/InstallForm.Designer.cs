@@ -29,7 +29,6 @@ namespace CreamInstaller
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(InstallForm));
             this.userProgressBar = new System.Windows.Forms.ProgressBar();
             this.userInfoLabel = new System.Windows.Forms.Label();
             this.acceptButton = new System.Windows.Forms.Button();
@@ -133,7 +132,6 @@ namespace CreamInstaller
             this.Controls.Add(this.userProgressBar);
             this.Controls.Add(this.userInfoLabel);
             this.DoubleBuffered = true;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.MinimumSize = new System.Drawing.Size(540, 360);

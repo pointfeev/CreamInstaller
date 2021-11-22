@@ -32,12 +32,11 @@ namespace CreamInstaller
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.label1 = new System.Windows.Forms.Label();
             this.updateButton = new System.Windows.Forms.Button();
             this.ignoreButton = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.changelogTreeView = new ProgramSelectionTreeView();
+            this.changelogTreeView = new CreamInstaller.ProgramSelectionTreeView();
             this.SuspendLayout();
             // 
             // label1
@@ -98,7 +97,6 @@ namespace CreamInstaller
             this.Controls.Add(this.label1);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(420, 300);
             this.MinimizeBox = false;

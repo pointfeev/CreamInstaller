@@ -31,13 +31,12 @@ namespace CreamInstaller
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SelectForm));
             this.acceptButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.noneFoundLabel = new System.Windows.Forms.Label();
-            this.treeView1 = new ProgramSelectionTreeView();
+            this.treeView1 = new CreamInstaller.ProgramSelectionTreeView();
             this.allCheckBox = new System.Windows.Forms.CheckBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.label2 = new System.Windows.Forms.Label();
@@ -176,7 +175,6 @@ namespace CreamInstaller
             this.Controls.Add(this.acceptButton);
             this.Controls.Add(this.label2);
             this.DoubleBuffered = true;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.MinimumSize = new System.Drawing.Size(500, 328);
@@ -202,8 +200,8 @@ namespace CreamInstaller
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox allCheckBox;
         private Button scanButton;
-        private TreeView treeView1;
         private Label noneFoundLabel;
+        private ProgramSelectionTreeView treeView1;
     }
 }
 
