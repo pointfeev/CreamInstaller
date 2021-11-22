@@ -416,12 +416,7 @@ namespace CreamInstaller
             if (ProgramSelection.All.Count > 0)
             {
                 foreach (ProgramSelection selection in ProgramSelection.AllSafeEnabled)
-                {
-                    if (!Program.IsProgramRunningDialog(this, selection))
-                    {
-                        return;
-                    }
-                }
+                    if (!Program.IsProgramRunningDialog(this, selection)) return;
                 if (ParadoxLauncherDlcDialog(this)) return;
                 Hide();
                 InstallForm installForm = new(this);
@@ -429,13 +424,8 @@ namespace CreamInstaller
                 if (installForm.Reselecting)
                 {
                     foreach (TreeNode treeNode in treeNodes)
-                    {
-                        if (!(treeNode.Parent is null))
-                        {
-                            treeNode.Checked = !treeNode.Checked;
-                            treeNode.Checked = !treeNode.Checked; // to fire checked event
-                        }
-                    }
+                        if (!(treeNode.Parent is null) || treeNode.Text == "Paradox Launcher")
+                            OnTreeViewNodeCheckedChanged(null, new(treeNode, TreeViewAction.ByMouse));
                     int X = installForm.Location.X + installForm.Size.Width / 2 - Size.Width / 2;
                     int Y = installForm.Location.Y + installForm.Size.Height / 2 - Size.Height / 2;
                     Location = new(X, Y);
