@@ -7,8 +7,10 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows.Forms;
 
 namespace CreamInstaller
@@ -107,7 +109,7 @@ namespace CreamInstaller
                                 using HttpResponseMessage response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
                                 response.EnsureSuccessStatusCode();
                                 using Stream stream = await response.Content.ReadAsStreamAsync();
-                                using StreamReader reader = new(stream);
+                                using StreamReader reader = new(stream, Encoding.UTF8);
                                 HtmlAgilityPack.HtmlDocument document = new();
                                 document.LoadHtml(reader.ReadToEnd());
                                 foreach (HtmlNode node in document.DocumentNode.SelectNodes("//div[@data-test-selector='body-content']/ul/li"))
@@ -115,7 +117,7 @@ namespace CreamInstaller
                                     changelogTreeView.Invoke((MethodInvoker)delegate
                                     {
                                         TreeNode change = new();
-                                        change.Text = $"{node.InnerText}";
+                                        change.Text = $"{HttpUtility.HtmlDecode(node.InnerText)}";
                                         root.Nodes.Add(change);
                                         root.Expand();
                                     });

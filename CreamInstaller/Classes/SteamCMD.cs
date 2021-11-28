@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Windows.Forms;
 
 namespace CreamInstaller
@@ -20,6 +21,8 @@ namespace CreamInstaller
         public static readonly string AppCachePath = DirectoryPath + @"\appcache";
         public static readonly string AppCacheAppInfoPath = AppCachePath + @"\appinfo.vdf";
         public static readonly string AppInfoPath = DirectoryPath + @"\appinfo";
+
+        public static readonly Version MinimumAppInfoVersion = Version.Parse("2.0.3.2");
         public static readonly string AppInfoVersionPath = AppInfoPath + @"\version.txt";
 
         public static bool Run(string command, out string output)
@@ -34,7 +37,10 @@ namespace CreamInstaller
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 Arguments = command,
-                CreateNoWindow = true
+                CreateNoWindow = true,
+                StandardInputEncoding = Encoding.UTF8,
+                StandardOutputEncoding = Encoding.UTF8,
+                StandardErrorEncoding = Encoding.UTF8
             };
             using (Process process = Process.Start(processStartInfo))
             {
@@ -58,11 +64,11 @@ namespace CreamInstaller
                 File.Delete(ArchivePath);
             }
             if (File.Exists(AppCacheAppInfoPath)) File.Delete(AppCacheAppInfoPath);
-            if (!File.Exists(AppInfoVersionPath) || !Version.TryParse(File.ReadAllText(AppInfoVersionPath), out Version version) || version < Version.Parse("2.0.2.0"))
+            if (!File.Exists(AppInfoVersionPath) || !Version.TryParse(File.ReadAllText(AppInfoVersionPath, Encoding.UTF8), out Version version) || version < MinimumAppInfoVersion)
             {
                 if (Directory.Exists(AppInfoPath)) Directory.Delete(AppInfoPath, true);
                 Directory.CreateDirectory(AppInfoPath);
-                File.WriteAllText(AppInfoVersionPath, Application.ProductVersion);
+                File.WriteAllText(AppInfoVersionPath, Application.ProductVersion, Encoding.UTF8);
             }
             if (!File.Exists(DllPath)) Run($@"+quit", out _);
         }
@@ -75,7 +81,7 @@ namespace CreamInstaller
             string appUpdatePath = $@"{AppInfoPath}\{appId}";
             string appUpdateFile = $@"{appUpdatePath}\appinfo.txt";
         restart:
-            if (Directory.Exists(appUpdatePath) && File.Exists(appUpdateFile)) output = File.ReadAllText(appUpdateFile);
+            if (Directory.Exists(appUpdatePath) && File.Exists(appUpdateFile)) output = File.ReadAllText(appUpdateFile, Encoding.UTF8);
             else
             {
                 Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {appId} +force_install_dir {appUpdatePath} +app_update 4 +quit", out _);
@@ -84,8 +90,8 @@ namespace CreamInstaller
                 int closeBracket = output.LastIndexOf("}");
                 if (openBracket != -1 && closeBracket != -1)
                 {
-                    output = $"\"{appId}\"\n" + output.Substring(openBracket, 1 + closeBracket - openBracket);
-                    File.WriteAllText(appUpdateFile, output);
+                    output = $"\"{appId}\"\n" + output[openBracket..(1 + closeBracket)];
+                    File.WriteAllText(appUpdateFile, output, Encoding.UTF8);
                 }
             }
             if (Program.Canceled || output is null) return false;

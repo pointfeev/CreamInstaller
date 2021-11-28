@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -82,7 +83,7 @@ namespace CreamInstaller
                 UpdateUser("Generating CreamAPI for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
                 string cApi = directory + @"\cream_api.ini";
                 File.Create(cApi).Close();
-                StreamWriter writer = File.AppendText(cApi);
+                StreamWriter writer = new(cApi, true, Encoding.UTF8);
                 writer.WriteLine("; " + Application.CompanyName + " v" + Application.ProductVersion);
                 if (selection.SteamAppId > 0)
                 {
@@ -93,13 +94,13 @@ namespace CreamInstaller
                     writer.WriteLine();
                     writer.WriteLine("[dlc]");
                     UpdateUser($"Added game to cream_api.ini with appid {selection.SteamAppId} ({selection.Name})", InstallationLog.Resource);
-                    foreach (Tuple<int, string> dlcApp in selection.SelectedSteamDlc)
+                    foreach (KeyValuePair<int, string> dlcApp in selection.SelectedSteamDlc)
                     {
-                        writer.WriteLine($"{dlcApp.Item1} = {dlcApp.Item2}");
-                        UpdateUser($"Added DLC to cream_api.ini with appid {dlcApp.Item1} ({dlcApp.Item2})", InstallationLog.Resource);
+                        writer.WriteLine($"{dlcApp.Key} = {dlcApp.Value}");
+                        UpdateUser($"Added DLC to cream_api.ini with appid {dlcApp.Key} ({dlcApp.Value})", InstallationLog.Resource);
                     }
                 }
-                foreach (Tuple<int, string, List<Tuple<int, string>>> extraAppDlc in selection.ExtraSteamAppIdDlc)
+                foreach (Tuple<int, string, SortedList<int, string>> extraAppDlc in selection.ExtraSteamAppIdDlc)
                 {
                     writer.WriteLine();
                     writer.WriteLine("[steam]");
@@ -107,15 +108,15 @@ namespace CreamInstaller
                     writer.WriteLine();
                     writer.WriteLine("[dlc]");
                     UpdateUser($"Added game to cream_api.ini with appid {extraAppDlc.Item1} ({extraAppDlc.Item2})", InstallationLog.Resource);
-                    foreach (Tuple<int, string> dlcApp in extraAppDlc.Item3)
+                    foreach (KeyValuePair<int, string> dlcApp in extraAppDlc.Item3)
                     {
-                        writer.WriteLine($"{dlcApp.Item1} = {dlcApp.Item2}");
-                        UpdateUser($"Added DLC to cream_api.ini with appid {dlcApp.Item1} ({dlcApp.Item2})", InstallationLog.Resource);
+                        writer.WriteLine($"{dlcApp.Key} = {dlcApp.Value}");
+                        UpdateUser($"Added DLC to cream_api.ini with appid {dlcApp.Key} ({dlcApp.Value})", InstallationLog.Resource);
                     }
                 }
                 writer.Flush();
                 writer.Close();
-                await Task.Run(() => Thread.Sleep(0)); // to keep the text box control from glitching
+                await Task.Run(() => Thread.Sleep(10)); // to keep the text box control from glitching
                 UpdateProgress(++cur / count * 100);
             }
             UpdateProgress(100);

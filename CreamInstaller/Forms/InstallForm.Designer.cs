@@ -106,7 +106,6 @@ namespace CreamInstaller
             this.logTextBox.TabIndex = 4;
             this.logTextBox.TabStop = false;
             this.logTextBox.Text = "";
-            this.logTextBox.WordWrap = false;
             // 
             // reselectButton
             // 

@@ -16,9 +16,9 @@ namespace CreamInstaller
 
         public VProperty AppInfo = null;
 
-        public List<Tuple<int, string>> AllSteamDlc = new();
-        public List<Tuple<int, string>> SelectedSteamDlc = new();
-        public List<Tuple<int, string, List<Tuple<int, string>>>> ExtraSteamAppIdDlc = new();
+        public readonly SortedList<int, string> AllSteamDlc = new();
+        public readonly SortedList<int, string> SelectedSteamDlc = new();
+        public readonly List<Tuple<int, string, SortedList<int, string>>> ExtraSteamAppIdDlc = new();
 
         public bool AreSteamApiDllsLocked
         {
@@ -34,20 +34,13 @@ namespace CreamInstaller
             }
         }
 
-        private void Toggle(Tuple<int, string> dlcApp, bool enabled)
-        {
-            if (enabled)
-            {
-                if (!SelectedSteamDlc.Contains(dlcApp)) SelectedSteamDlc.Add(dlcApp);
-            }
-            else SelectedSteamDlc.Remove(dlcApp);
-        }
+        private void Toggle(KeyValuePair<int, string> dlcApp, bool enabled) => SelectedSteamDlc[dlcApp.Key] = enabled ? dlcApp.Value : null;
 
         public void ToggleDlc(string dlcName, bool enabled)
         {
-            foreach (Tuple<int, string> dlcApp in AllSteamDlc)
+            foreach (KeyValuePair<int, string> dlcApp in AllSteamDlc)
             {
-                if (dlcApp.Item2 == dlcName)
+                if (dlcApp.Value == dlcName)
                 {
                     Toggle(dlcApp, enabled);
                     break;
@@ -59,7 +52,7 @@ namespace CreamInstaller
         public void ToggleAllDlc(bool enabled)
         {
             if (!enabled) SelectedSteamDlc.Clear();
-            else foreach (Tuple<int, string> dlcApp in AllSteamDlc) Toggle(dlcApp, enabled);
+            else foreach (KeyValuePair<int, string> dlcApp in AllSteamDlc) Toggle(dlcApp, enabled);
             Enabled = SelectedSteamDlc.Any();
         }
 
@@ -73,18 +66,11 @@ namespace CreamInstaller
 
         public static ProgramSelection FromName(string displayName) => AllSafe.Find(s => s.Name == displayName);
 
-        public static Tuple<int, string> GetDlc(string displayName)
+        public static KeyValuePair<int, string>? GetDlc(string displayName)
         {
             foreach (ProgramSelection selection in AllSafe)
-            {
-                foreach (Tuple<int, string> app in selection.AllSteamDlc)
-                {
-                    if (app.Item2 == displayName)
-                    {
-                        return app;
-                    }
-                }
-            }
+                foreach (KeyValuePair<int, string> app in selection.AllSteamDlc)
+                    if (app.Value == displayName) return app;
             return null;
         }
     }

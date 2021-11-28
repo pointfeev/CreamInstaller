@@ -18,7 +18,7 @@ namespace CreamInstaller
                     string line = stackTrace[i];
                     if (!(line is null))
                     {
-                        output += "\n    " + line.Substring(line.IndexOf("at"));
+                        output += "\n    " + line[line.IndexOf("at")..];
                     }
                 }
             }

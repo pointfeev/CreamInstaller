@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -43,7 +44,7 @@ namespace CreamInstaller
                             string libraryFolders = libraryFolder + @"\libraryfolders.vdf";
                             if (File.Exists(libraryFolders))
                             {
-                                dynamic property = VdfConvert.Deserialize(File.ReadAllText(libraryFolders));
+                                dynamic property = VdfConvert.Deserialize(File.ReadAllText(libraryFolders, Encoding.UTF8));
                                 foreach (dynamic _property in property.Value)
                                 {
                                     if (int.TryParse(_property.Key, out int _))
@@ -94,7 +95,7 @@ namespace CreamInstaller
                 {
                     try
                     {
-                        dynamic property = VdfConvert.Deserialize(File.ReadAllText(directory));
+                        dynamic property = VdfConvert.Deserialize(File.ReadAllText(directory, Encoding.UTF8));
                         string _appid = property.Value.appid.ToString();
                         string installdir = property.Value.installdir.ToString();
                         string name = property.Value.name.ToString();
@@ -144,7 +145,7 @@ namespace CreamInstaller
                 if (Directory.Exists(directory + @"\EasyAntiCheat")) continue;
                 // BattlEye in DayZ detects DLL changes, but not in Arma3?
                 if (name != "Arma 3" && Directory.Exists(directory + @"\BattlEye")) continue;
-                Task task = new(() =>
+                Task task = Task.Run(() =>
                 {
                     if (Program.Canceled || !GetDllDirectoriesFromGameDirectory(directory, out List<string> dllDirectories)) return;
                     VProperty appInfo = null;
@@ -158,7 +159,7 @@ namespace CreamInstaller
                         foreach (int id in dlcIds)
                         {
                             if (Program.Canceled) return;
-                            Task task = new(() =>
+                            Task task = Task.Run(() =>
                             {
                                 if (Program.Canceled) return;
                                 string dlcName = null;
@@ -166,12 +167,12 @@ namespace CreamInstaller
                                 if (Program.Canceled) return;
                                 if (string.IsNullOrWhiteSpace(dlcName)) return;
                                 dlc[id] = dlcName;
+                                progress.Report(++cur);
                             });
                             dlcTasks.Add(task);
                             RunningTasks.Add(task);
-                            task.Start();
-                            progress.Report(-RunningTasks.Count);
                         }
+                        progress.Report(-RunningTasks.Count);
                     }
                     else if (name != "Paradox Launcher") return;
                     if (Program.Canceled) return;
@@ -189,7 +190,6 @@ namespace CreamInstaller
                     foreach (Task task in dlcTasks.ToList())
                     {
                         if (Program.Canceled) return;
-                        progress.Report(cur++);
                         task.Wait();
                     }
                     if (Program.Canceled) return;
@@ -210,27 +210,25 @@ namespace CreamInstaller
                         else foreach (KeyValuePair<int, string> dlcApp in dlc.ToList())
                             {
                                 if (Program.Canceled || programNode is null) return;
-                                Tuple<int, string> app = new(dlcApp.Key, dlcApp.Value);
-                                TreeNode dlcNode = treeNodes.Find(s => s.Text == app.Item2) ?? new();
-                                dlcNode.Text = app.Item2;
-                                dlcNode.Checked = selection.SelectedSteamDlc.Contains(app);
+                                TreeNode dlcNode = treeNodes.Find(s => s.Text == dlcApp.Value) ?? new();
+                                dlcNode.Text = dlcApp.Value;
+                                dlcNode.Checked = selection.SelectedSteamDlc.Contains(dlcApp);
                                 dlcNode.Remove();
                                 programNode.Nodes.Add(dlcNode);
                                 treeNodes.Remove(dlcNode);
                                 treeNodes.Add(dlcNode);
-                                if (!selection.AllSteamDlc.Contains(app)) selection.AllSteamDlc.Add(app);
+                                selection.AllSteamDlc[dlcApp.Key] = dlcApp.Value;
                             }
                     });
+                    progress.Report(++cur);
                 });
                 RunningTasks.Add(task);
-                task.Start();
             }
             progress.Report(-RunningTasks.Count);
             progress.Report(cur);
             foreach (Task task in RunningTasks.ToList())
             {
                 if (Program.Canceled) return;
-                progress.Report(cur++);
                 task.Wait();
             }
             progress.Report(RunningTasks.Count);
@@ -346,8 +344,8 @@ namespace CreamInstaller
                 if (e.Button == MouseButtons.Right)
                 {
                     ProgramSelection selection = ProgramSelection.FromName(e.Node.Text);
-                    Tuple<int, string> dlc = ProgramSelection.GetDlc(e.Node.Text);
-                    int appId = selection?.SteamAppId ?? dlc?.Item1 ?? 0;
+                    KeyValuePair<int, string>? dlc = ProgramSelection.GetDlc(e.Node.Text);
+                    int appId = selection?.SteamAppId ?? dlc?.Key ?? 0;
                     if (appId > 0) Process.Start(new ProcessStartInfo
                     {
                         FileName = "https://steamdb.info/app/" + appId,
@@ -372,7 +370,7 @@ namespace CreamInstaller
             paradoxLauncher ??= ProgramSelection.FromName("Paradox Launcher");
             if (!(paradoxLauncher is null))
             {
-                paradoxLauncher.ExtraSteamAppIdDlc = new();
+                paradoxLauncher.ExtraSteamAppIdDlc.Clear();
                 foreach (ProgramSelection selection in ProgramSelection.AllSafeEnabled)
                 {
                     if (selection.Name == paradoxLauncher.Name) continue;
