@@ -36,7 +36,7 @@ namespace CreamInstaller
             this.updateButton = new System.Windows.Forms.Button();
             this.ignoreButton = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.changelogTreeView = new CreamInstaller.ProgramSelectionTreeView();
+            this.changelogTreeView = new CreamInstaller.CustomTreeView();
             this.SuspendLayout();
             // 
             // label1
@@ -116,7 +116,7 @@ namespace CreamInstaller
         private Button updateButton;
         private Button ignoreButton;
         private ProgressBar progressBar1;
-        private ProgramSelectionTreeView changelogTreeView;
+        private CustomTreeView changelogTreeView;
     }
 }
 

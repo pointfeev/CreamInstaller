@@ -36,7 +36,7 @@ namespace CreamInstaller
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.noneFoundLabel = new System.Windows.Forms.Label();
-            this.treeView1 = new CreamInstaller.ProgramSelectionTreeView();
+            this.treeView1 = new CreamInstaller.CustomTreeView();
             this.allCheckBox = new System.Windows.Forms.CheckBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.label2 = new System.Windows.Forms.Label();
@@ -201,7 +201,7 @@ namespace CreamInstaller
         private System.Windows.Forms.CheckBox allCheckBox;
         private Button scanButton;
         private Label noneFoundLabel;
-        private ProgramSelectionTreeView treeView1;
+        private CustomTreeView treeView1;
     }
 }
 

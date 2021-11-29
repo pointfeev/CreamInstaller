@@ -325,10 +325,7 @@ namespace CreamInstaller
                     selection.ToggleAllDlc(e.Node.Checked);
                     e.Node.Nodes.Cast<TreeNode>().ToList().ForEach(treeNode => treeNode.Checked = e.Node.Checked);
                 }
-                else
-                {
-                    selection.Enabled = e.Node.Checked;
-                }
+                else selection.Enabled = e.Node.Checked;
                 allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
                 allCheckBox.Checked = treeNodes.TrueForAll(treeNode => treeNode.Checked);
                 allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
