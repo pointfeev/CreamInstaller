@@ -2,6 +2,7 @@
 using Gameloop.Vdf.Linq;
 using Microsoft.Win32;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -197,6 +198,7 @@ namespace CreamInstaller
                     {
                         if (Program.Canceled) return;
                         TreeNode programNode = treeNodes.Find(s => s.Text == name) ?? new();
+                        programNode.Name = "" + appId;
                         programNode.Text = name;
                         programNode.Checked = selection.Enabled;
                         programNode.Remove();
@@ -211,6 +213,7 @@ namespace CreamInstaller
                             {
                                 if (Program.Canceled || programNode is null) return;
                                 TreeNode dlcNode = treeNodes.Find(s => s.Text == dlcApp.Value) ?? new();
+                                dlcNode.Name = "" + dlcApp.Key;
                                 dlcNode.Text = dlcApp.Value;
                                 dlcNode.Checked = selection.SelectedSteamDlc.Contains(dlcApp);
                                 dlcNode.Remove();
@@ -233,8 +236,6 @@ namespace CreamInstaller
             }
             progress.Report(RunningTasks.Count);
         }
-
-        private bool validated = false;
 
         private async void OnLoad()
         {
@@ -282,6 +283,7 @@ namespace CreamInstaller
             setup = false;
             label2.Text = "Gathering and caching your applicable games and their DLCs . . . ";
             await Task.Run(() => GetCreamApiApplicablePrograms(iProgress));
+            treeView1.Sort();
 
             ProgramSelection.All.ForEach(selection => selection.SteamApiDllDirectories.RemoveAll(directory => !Directory.Exists(directory)));
             ProgramSelection.All.RemoveAll(selection => !Directory.Exists(selection.RootDirectory) || !selection.SteamApiDllDirectories.Any());
@@ -301,12 +303,6 @@ namespace CreamInstaller
             acceptButton.Enabled = ProgramSelection.AllSafeEnabled.Any();
             cancelButton.Enabled = false;
             scanButton.Enabled = true;
-
-            if (!validated && !Program.Canceled)
-            {
-                validated = true;
-                OnLoad();
-            }
         }
 
         private void OnTreeViewNodeCheckedChanged(object sender, TreeViewEventArgs e)
@@ -333,8 +329,19 @@ namespace CreamInstaller
             acceptButton.Enabled = ProgramSelection.AllSafeEnabled.Any();
         }
 
+        private class TreeNodeSorter : IComparer
+        {
+            public int Compare(object a, object b)
+            {
+                TreeNode A = a as TreeNode;
+                TreeNode B = b as TreeNode;
+                return int.Parse(A.Name) > int.Parse(B.Name) ? 1 : 0;
+            }
+        }
+
         private void OnLoad(object sender, EventArgs _)
         {
+            treeView1.TreeViewNodeSorter = new TreeNodeSorter();
             treeView1.AfterCheck += OnTreeViewNodeCheckedChanged;
             treeView1.NodeMouseClick += (sender, e) =>
             {
