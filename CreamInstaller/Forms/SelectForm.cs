@@ -9,7 +9,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -236,11 +235,6 @@ namespace CreamInstaller
                 task.Wait();
             }
             progress.Report(RunningTasks.Count);
-            ProgramSelection.All.ForEach(selection => selection.SteamApiDllDirectories.RemoveAll(directory => !Directory.Exists(directory)));
-            ProgramSelection.All.RemoveAll(selection => !Directory.Exists(selection.RootDirectory) || !selection.SteamApiDllDirectories.Any());
-            foreach (TreeNode treeNode in treeNodes)
-                if (treeNode.Parent is null && ProgramSelection.FromAppId(int.Parse(treeNode.Name)) is null)
-                    treeNode.Remove();
         }
 
         private async void OnLoad()
@@ -289,6 +283,11 @@ namespace CreamInstaller
             setup = false;
             label2.Text = "Gathering and caching your applicable games and their DLCs . . . ";
             await Task.Run(() => GetCreamApiApplicablePrograms(iProgress));
+            ProgramSelection.All.ForEach(selection => selection.SteamApiDllDirectories.RemoveAll(directory => !Directory.Exists(directory)));
+            ProgramSelection.All.RemoveAll(selection => !Directory.Exists(selection.RootDirectory) || !selection.SteamApiDllDirectories.Any());
+            foreach (TreeNode treeNode in treeNodes)
+                if (treeNode.Parent is null && ProgramSelection.FromAppId(int.Parse(treeNode.Name)) is null)
+                    treeNode.Remove();
             //SetMinimumSizeFromTreeView();
 
             progressBar1.Value = 100;
