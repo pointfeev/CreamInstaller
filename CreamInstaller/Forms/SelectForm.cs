@@ -378,7 +378,7 @@ namespace CreamInstaller
                 if (e.Button == MouseButtons.Right)
                 {
                     ProgramSelection selection = ProgramSelection.FromAppId(int.Parse(e.Node.Name));
-                    KeyValuePair<int, string>? dlc = ProgramSelection.GetAllSteamDlc(int.Parse(e.Node.Name));
+                    KeyValuePair<int, string>? dlc = ProgramSelection.GetDlcFromAppId(int.Parse(e.Node.Name));
                     int appId = selection?.SteamAppId ?? dlc?.Key ?? 0;
                     if (appId > 0) Process.Start(new ProcessStartInfo
                     {
