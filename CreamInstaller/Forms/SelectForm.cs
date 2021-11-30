@@ -177,9 +177,7 @@ namespace CreamInstaller
                     }
                     else if (appId > 0) return;
                     if (Program.Canceled) return;
-
                     if (string.IsNullOrWhiteSpace(name)) return;
-                    if (Program.Canceled) return;
 
                     ProgramSelection selection = ProgramSelection.FromAppId(appId) ?? new();
                     selection.Name = name;
