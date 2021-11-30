@@ -36,11 +36,11 @@ namespace CreamInstaller
 
         private void Toggle(KeyValuePair<int, string> dlcApp, bool enabled) => SelectedSteamDlc[dlcApp.Key] = enabled ? dlcApp.Value : null;
 
-        public void ToggleDlc(string dlcName, bool enabled)
+        public void ToggleDlc(int dlcAppId, bool enabled)
         {
             foreach (KeyValuePair<int, string> dlcApp in AllSteamDlc)
             {
-                if (dlcApp.Value == dlcName)
+                if (dlcApp.Key == dlcAppId)
                 {
                     Toggle(dlcApp, enabled);
                     break;
@@ -64,13 +64,13 @@ namespace CreamInstaller
 
         public static List<ProgramSelection> AllSafeEnabled => AllSafe.FindAll(s => s.Enabled);
 
-        public static ProgramSelection FromName(string displayName) => AllSafe.Find(s => s.Name == displayName);
+        public static ProgramSelection FromAppId(int appId) => AllSafe.Find(s => s.SteamAppId == appId);
 
-        public static KeyValuePair<int, string>? GetDlc(string displayName)
+        public static KeyValuePair<int, string>? GetAllSteamDlc(int appId)
         {
             foreach (ProgramSelection selection in AllSafe)
                 foreach (KeyValuePair<int, string> app in selection.AllSteamDlc)
-                    if (app.Value == displayName) return app;
+                    if (app.Key == appId) return app;
             return null;
         }
     }

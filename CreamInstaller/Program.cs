@@ -37,6 +37,7 @@ namespace CreamInstaller
                 {
                     if (ExceptionHandler.OutputException(e)) goto retry;
                     Application.Exit();
+                    return;
                 }
             }
             mutex.Close();
@@ -90,5 +91,12 @@ namespace CreamInstaller
         }
 
         private static void OnApplicationExit(object s, EventArgs e) => Cleanup();
+
+        internal static void InheritLocation(this Form form, Form fromForm)
+        {
+            int X = fromForm.Location.X + fromForm.Size.Width / 2 - form.Size.Width / 2;
+            int Y = fromForm.Location.Y + fromForm.Size.Height / 2 - form.Size.Height / 2;
+            form.Location = new(X, Y);
+        }
     }
 }

@@ -146,7 +146,8 @@ namespace CreamInstaller
                         "\n\nThis will cause unwanted behavior when updating the program!",
                         "Ignore", "Abort") == DialogResult.Cancel)
                     {
-                        Environment.Exit(0);
+                        Application.Exit();
+                        return;
                     }
                 }
                 OnLoad();
@@ -194,6 +195,7 @@ namespace CreamInstaller
             {
                 updateManager.LaunchUpdater(latestVersion);
                 Application.Exit();
+                return;
             }
             else
             {

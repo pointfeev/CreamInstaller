@@ -48,10 +48,10 @@ namespace CreamInstaller
             // 
             this.acceptButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.acceptButton.Enabled = false;
-            this.acceptButton.Location = new System.Drawing.Point(322, 254);
+            this.acceptButton.Location = new System.Drawing.Point(422, 326);
             this.acceptButton.Name = "acceptButton";
             this.acceptButton.Size = new System.Drawing.Size(150, 23);
-            this.acceptButton.TabIndex = 102;
+            this.acceptButton.TabIndex = 10002;
             this.acceptButton.Text = "Generate and Install";
             this.acceptButton.UseVisualStyleBackColor = true;
             this.acceptButton.Click += new System.EventHandler(this.OnAccept);
@@ -59,10 +59,10 @@ namespace CreamInstaller
             // cancelButton
             // 
             this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.cancelButton.Location = new System.Drawing.Point(12, 254);
+            this.cancelButton.Location = new System.Drawing.Point(12, 326);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 100;
+            this.cancelButton.TabIndex = 10000;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.OnCancel);
@@ -84,7 +84,7 @@ namespace CreamInstaller
             this.groupBox1.Controls.Add(this.allCheckBox);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(460, 236);
+            this.groupBox1.Size = new System.Drawing.Size(560, 308);
             this.groupBox1.TabIndex = 8;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Programs / Games";
@@ -96,7 +96,7 @@ namespace CreamInstaller
             | System.Windows.Forms.AnchorStyles.Right)));
             this.noneFoundLabel.Location = new System.Drawing.Point(6, 22);
             this.noneFoundLabel.Name = "noneFoundLabel";
-            this.noneFoundLabel.Size = new System.Drawing.Size(448, 208);
+            this.noneFoundLabel.Size = new System.Drawing.Size(548, 280);
             this.noneFoundLabel.TabIndex = 1002;
             this.noneFoundLabel.Text = "No CreamAPI-applicable programs were found on your computer!";
             this.noneFoundLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -115,7 +115,7 @@ namespace CreamInstaller
             this.treeView1.HotTracking = true;
             this.treeView1.Location = new System.Drawing.Point(6, 22);
             this.treeView1.Name = "treeView1";
-            this.treeView1.Size = new System.Drawing.Size(448, 208);
+            this.treeView1.Size = new System.Drawing.Size(548, 280);
             this.treeView1.TabIndex = 1001;
             // 
             // allCheckBox
@@ -123,7 +123,7 @@ namespace CreamInstaller
             this.allCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.allCheckBox.AutoSize = true;
             this.allCheckBox.Enabled = false;
-            this.allCheckBox.Location = new System.Drawing.Point(414, 0);
+            this.allCheckBox.Location = new System.Drawing.Point(514, 0);
             this.allCheckBox.Name = "allCheckBox";
             this.allCheckBox.Size = new System.Drawing.Size(40, 19);
             this.allCheckBox.TabIndex = 1;
@@ -135,18 +135,18 @@ namespace CreamInstaller
             // 
             this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar1.Location = new System.Drawing.Point(12, 225);
+            this.progressBar1.Location = new System.Drawing.Point(12, 297);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(460, 23);
+            this.progressBar1.Size = new System.Drawing.Size(560, 23);
             this.progressBar1.TabIndex = 9;
             // 
             // label2
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.label2.Location = new System.Drawing.Point(12, 207);
+            this.label2.Location = new System.Drawing.Point(12, 279);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(460, 15);
+            this.label2.Size = new System.Drawing.Size(760, 15);
             this.label2.TabIndex = 10;
             this.label2.Text = "Loading . . .";
             // 
@@ -154,11 +154,11 @@ namespace CreamInstaller
             // 
             this.scanButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.scanButton.Enabled = false;
-            this.scanButton.Location = new System.Drawing.Point(110, 254);
+            this.scanButton.Location = new System.Drawing.Point(236, 326);
             this.scanButton.Name = "scanButton";
-            this.scanButton.Size = new System.Drawing.Size(190, 23);
-            this.scanButton.TabIndex = 101;
-            this.scanButton.Text = "Rescan for Programs / Games";
+            this.scanButton.Size = new System.Drawing.Size(180, 23);
+            this.scanButton.TabIndex = 10001;
+            this.scanButton.Text = "Rescan Programs / Games";
             this.scanButton.UseVisualStyleBackColor = true;
             this.scanButton.Click += new System.EventHandler(this.OnScan);
             // 
@@ -166,7 +166,7 @@ namespace CreamInstaller
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(484, 289);
+            this.ClientSize = new System.Drawing.Size(584, 361);
             this.Controls.Add(this.scanButton);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.progressBar1);
@@ -177,7 +177,7 @@ namespace CreamInstaller
             this.DoubleBuffered = true;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(500, 328);
+            this.MinimumSize = new System.Drawing.Size(600, 400);
             this.Name = "SelectForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;

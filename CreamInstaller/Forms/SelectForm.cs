@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -150,7 +151,7 @@ namespace CreamInstaller
                 {
                     if (Program.Canceled || !GetDllDirectoriesFromGameDirectory(directory, out List<string> dllDirectories)) return;
                     VProperty appInfo = null;
-                    if (Program.Canceled || (name != "Paradox Launcher" && !SteamCMD.GetAppInfo(appId, out appInfo, branch, buildId))) return;
+                    if (Program.Canceled || (appId > 0 && !SteamCMD.GetAppInfo(appId, out appInfo, branch, buildId))) return;
                     if (Program.Canceled) return;
                     ConcurrentDictionary<int, string> dlc = new();
                     List<Task> dlcTasks = new();
@@ -166,8 +167,8 @@ namespace CreamInstaller
                                 string dlcName = null;
                                 if (SteamCMD.GetAppInfo(id, out VProperty dlcAppInfo)) dlcName = dlcAppInfo?.Value?["common"]?["name"]?.ToString();
                                 if (Program.Canceled) return;
-                                if (string.IsNullOrWhiteSpace(dlcName)) return;
-                                dlc[id] = dlcName;
+                                if (string.IsNullOrWhiteSpace(dlcName)) return; //dlcName = "Unknown DLC";
+                                dlc[id] = /*$"[{id}] " +*/ dlcName;
                                 progress.Report(++cur);
                             });
                             dlcTasks.Add(task);
@@ -175,13 +176,13 @@ namespace CreamInstaller
                         }
                         progress.Report(-RunningTasks.Count);
                     }
-                    else if (name != "Paradox Launcher") return;
+                    else if (appId > 0) return;
                     if (Program.Canceled) return;
 
                     if (string.IsNullOrWhiteSpace(name)) return;
                     if (Program.Canceled) return;
 
-                    ProgramSelection selection = ProgramSelection.FromName(name) ?? new();
+                    ProgramSelection selection = ProgramSelection.FromAppId(appId) ?? new();
                     selection.Name = name;
                     selection.RootDirectory = directory;
                     selection.SteamAppId = appId;
@@ -197,22 +198,22 @@ namespace CreamInstaller
                     treeView1.Invoke((MethodInvoker)delegate
                     {
                         if (Program.Canceled) return;
-                        TreeNode programNode = treeNodes.Find(s => s.Text == name) ?? new();
+                        TreeNode programNode = treeNodes.Find(s => s.Name == "" + appId) ?? new();
                         programNode.Name = "" + appId;
-                        programNode.Text = name;
+                        programNode.Text = /*(appId > 0 ? $"[{appId}] " : "") +*/ name;
                         programNode.Checked = selection.Enabled;
                         programNode.Remove();
                         treeView1.Nodes.Add(programNode);
                         treeNodes.Remove(programNode);
                         treeNodes.Add(programNode);
-                        if (name == "Paradox Launcher")
+                        if (appId == 0) // paradox launcher
                         {
                             // maybe add game and/or dlc choice here?
                         }
                         else foreach (KeyValuePair<int, string> dlcApp in dlc.ToList())
                             {
                                 if (Program.Canceled || programNode is null) return;
-                                TreeNode dlcNode = treeNodes.Find(s => s.Text == dlcApp.Value) ?? new();
+                                TreeNode dlcNode = treeNodes.Find(s => s.Name == "" + dlcApp.Key) ?? new();
                                 dlcNode.Name = "" + dlcApp.Key;
                                 dlcNode.Text = dlcApp.Value;
                                 dlcNode.Checked = selection.SelectedSteamDlc.Contains(dlcApp);
@@ -235,6 +236,11 @@ namespace CreamInstaller
                 task.Wait();
             }
             progress.Report(RunningTasks.Count);
+            ProgramSelection.All.ForEach(selection => selection.SteamApiDllDirectories.RemoveAll(directory => !Directory.Exists(directory)));
+            ProgramSelection.All.RemoveAll(selection => !Directory.Exists(selection.RootDirectory) || !selection.SteamApiDllDirectories.Any());
+            foreach (TreeNode treeNode in treeNodes)
+                if (treeNode.Parent is null && ProgramSelection.FromAppId(int.Parse(treeNode.Name)) is null)
+                    treeNode.Remove();
         }
 
         private async void OnLoad()
@@ -283,13 +289,7 @@ namespace CreamInstaller
             setup = false;
             label2.Text = "Gathering and caching your applicable games and their DLCs . . . ";
             await Task.Run(() => GetCreamApiApplicablePrograms(iProgress));
-            treeView1.Sort();
-
-            ProgramSelection.All.ForEach(selection => selection.SteamApiDllDirectories.RemoveAll(directory => !Directory.Exists(directory)));
-            ProgramSelection.All.RemoveAll(selection => !Directory.Exists(selection.RootDirectory) || !selection.SteamApiDllDirectories.Any());
-            foreach (TreeNode treeNode in treeNodes)
-                if (treeNode.Parent is null && ProgramSelection.FromName(treeNode.Text) is null)
-                    treeNode.Remove();
+            //SetMinimumSizeFromTreeView();
 
             progressBar1.Value = 100;
             groupBox1.Size = new(groupBox1.Size.Width, groupBox1.Size.Height + 44);
@@ -305,13 +305,42 @@ namespace CreamInstaller
             scanButton.Enabled = true;
         }
 
+        /*private const int GWL_STYLE = -16;
+        private const int WS_VSCROLL = 0x00200000;
+        private const int WS_HSCROLL = 0x00100000;
+
+        [DllImport("user32.dll", ExactSpelling = false, CharSet = CharSet.Auto)]
+        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
+        private const int MINIMUM_SIZE_INCREMENT = 8;
+        private void SetMinimumSizeFromTreeView()
+        {
+            Dictionary<TreeNode, bool> expansionState = new();
+            foreach (TreeNode node in treeView1.Nodes) expansionState[node] = node.IsExpanded;
+            treeView1.ExpandAll();
+            Size minimumSize = MinimumSize;
+            Point point;
+            int style = GetWindowLong(treeView1.Handle, GWL_STYLE);
+            while ((style & WS_HSCROLL) != 0)
+            {
+                minimumSize.Width += MINIMUM_SIZE_INCREMENT;
+                point = Location;
+                point.X -= MINIMUM_SIZE_INCREMENT / 2;
+                Location = point;
+                MinimumSize = minimumSize;
+                style = GetWindowLong(treeView1.Handle, GWL_STYLE);
+                Update();
+            }
+            foreach (TreeNode node in treeView1.Nodes) if (!expansionState[node]) node.Collapse();
+        }*/
+
         private void OnTreeViewNodeCheckedChanged(object sender, TreeViewEventArgs e)
         {
             if (e.Action == TreeViewAction.Unknown) return;
-            ProgramSelection selection = ProgramSelection.FromName(e.Node.Text);
+            ProgramSelection selection = ProgramSelection.FromAppId(int.Parse(e.Node.Name));
             if (selection is null)
             {
-                ProgramSelection.FromName(e.Node.Parent.Text).ToggleDlc(e.Node.Text, e.Node.Checked);
+                ProgramSelection.FromAppId(int.Parse(e.Node.Parent.Name)).ToggleDlc(int.Parse(e.Node.Name), e.Node.Checked);
                 e.Node.Parent.Checked = e.Node.Parent.Nodes.Cast<TreeNode>().ToList().Any(treeNode => treeNode.Checked);
             }
             else
@@ -347,8 +376,8 @@ namespace CreamInstaller
             {
                 if (e.Button == MouseButtons.Right)
                 {
-                    ProgramSelection selection = ProgramSelection.FromName(e.Node.Text);
-                    KeyValuePair<int, string>? dlc = ProgramSelection.GetDlc(e.Node.Text);
+                    ProgramSelection selection = ProgramSelection.FromAppId(int.Parse(e.Node.Name));
+                    KeyValuePair<int, string>? dlc = ProgramSelection.GetAllSteamDlc(int.Parse(e.Node.Name));
                     int appId = selection?.SteamAppId ?? dlc?.Key ?? 0;
                     if (appId > 0) Process.Start(new ProcessStartInfo
                     {
@@ -371,7 +400,7 @@ namespace CreamInstaller
 
         private static void PopulateParadoxLauncherDlc(ProgramSelection paradoxLauncher = null)
         {
-            paradoxLauncher ??= ProgramSelection.FromName("Paradox Launcher");
+            paradoxLauncher ??= ProgramSelection.FromAppId(0);
             if (!(paradoxLauncher is null))
             {
                 paradoxLauncher.ExtraSteamAppIdDlc.Clear();
@@ -395,7 +424,7 @@ namespace CreamInstaller
 
         private static bool ParadoxLauncherDlcDialog(Form form)
         {
-            ProgramSelection paradoxLauncher = ProgramSelection.FromName("Paradox Launcher");
+            ProgramSelection paradoxLauncher = ProgramSelection.FromAppId(0);
             if (!(paradoxLauncher is null) && paradoxLauncher.Enabled)
             {
                 PopulateParadoxLauncherDlc(paradoxLauncher);
@@ -427,11 +456,9 @@ namespace CreamInstaller
                 if (installForm.Reselecting)
                 {
                     foreach (TreeNode treeNode in treeNodes)
-                        if (!(treeNode.Parent is null) || treeNode.Text == "Paradox Launcher")
+                        if (!(treeNode.Parent is null) || int.Parse(treeNode.Name) == 0)
                             OnTreeViewNodeCheckedChanged(null, new(treeNode, TreeViewAction.ByMouse));
-                    int X = installForm.Location.X + installForm.Size.Width / 2 - Size.Width / 2;
-                    int Y = installForm.Location.Y + installForm.Size.Height / 2 - Size.Height / 2;
-                    Location = new(X, Y);
+                    this.InheritLocation(installForm);
                     Show();
                 }
                 else
