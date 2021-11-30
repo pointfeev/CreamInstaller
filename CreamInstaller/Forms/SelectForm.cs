@@ -235,7 +235,7 @@ namespace CreamInstaller
             progress.Report(RunningTasks.Count);
         }
 
-        private async void OnLoad()
+        private async void OnLoad(bool validating = false)
         {
             Program.Canceled = false;
             cancelButton.Enabled = true;
@@ -260,7 +260,8 @@ namespace CreamInstaller
                 if (_progress < 0) maxProgress = -_progress;
                 else curProgress = _progress;
                 int p = Math.Max(Math.Min((int)((float)(curProgress / (float)maxProgress) * 100), 100), 0);
-                if (setup) label2.Text = $"Setting up SteamCMD . . . {p}% ({curProgress}/{maxProgress})";
+                if (validating) label2.Text = $"Validating . . . {p}% ({curProgress}/{maxProgress})";
+                else if (setup) label2.Text = $"Setting up SteamCMD . . . {p}% ({curProgress}/{maxProgress})";
                 else label2.Text = $"Gathering and caching your applicable games and their DLCs . . . {p}% ({curProgress}/{maxProgress})";
                 progressBar1.Value = p;
             };
@@ -268,7 +269,7 @@ namespace CreamInstaller
             iProgress.Report(-1660); // not exact, number varies
             int cur = 0;
             iProgress.Report(cur);
-            label2.Text = "Setting up SteamCMD . . . ";
+            if (!validating) label2.Text = "Setting up SteamCMD . . . ";
             if (!Directory.Exists(SteamCMD.DirectoryPath)) Directory.CreateDirectory(SteamCMD.DirectoryPath);
             FileSystemWatcher watcher = new(SteamCMD.DirectoryPath);
             watcher.Changed += (sender, e) => iProgress.Report(++cur);
@@ -279,7 +280,7 @@ namespace CreamInstaller
             watcher.Dispose();
 
             setup = false;
-            label2.Text = "Gathering and caching your applicable games and their DLCs . . . ";
+            if (!validating) label2.Text = "Gathering and caching your applicable games and their DLCs . . . ";
             await Task.Run(() => GetCreamApiApplicablePrograms(iProgress));
             ProgramSelection.All.ForEach(selection => selection.SteamApiDllDirectories.RemoveAll(directory => !Directory.Exists(directory)));
             ProgramSelection.All.RemoveAll(selection => !Directory.Exists(selection.RootDirectory) || !selection.SteamApiDllDirectories.Any());
@@ -300,6 +301,9 @@ namespace CreamInstaller
             acceptButton.Enabled = ProgramSelection.AllSafeEnabled.Any();
             cancelButton.Enabled = false;
             scanButton.Enabled = true;
+
+            label2.Text = "Validating . . . ";
+            if (!validating && !Program.Canceled) OnLoad(true);
         }
 
         /*private const int GWL_STYLE = -16;
