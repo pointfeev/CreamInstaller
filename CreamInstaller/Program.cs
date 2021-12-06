@@ -64,17 +64,10 @@ namespace CreamInstaller
 
         public static bool IsFilePathLocked(this string filePath)
         {
-            if (!File.Exists(filePath)) return false;
-            bool Locked = false;
-            try
-            {
-                File.Open(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None).Close();
-            }
-            catch (IOException)
-            {
-                Locked = true;
-            }
-            return Locked;
+            try { File.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None).Close(); }
+            catch (FileNotFoundException) { return false; }
+            catch (IOException) { return true; }
+            return false;
         }
 
         public static SelectForm SelectForm;
