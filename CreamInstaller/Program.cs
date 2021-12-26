@@ -35,7 +35,11 @@ namespace CreamInstaller
                 }
                 catch (Exception e)
                 {
-                    if (ExceptionHandler.OutputException(e)) goto retry;
+                    if (ExceptionHandler.OutputException(e))
+                    {
+                        goto retry;
+                    }
+
                     Application.Exit();
                     return;
                 }
@@ -83,7 +87,10 @@ namespace CreamInstaller
             SteamCMD.Kill();
         }
 
-        private static void OnApplicationExit(object s, EventArgs e) => Cleanup();
+        private static void OnApplicationExit(object s, EventArgs e)
+        {
+            Cleanup();
+        }
 
         internal static void InheritLocation(this Form form, Form fromForm)
         {

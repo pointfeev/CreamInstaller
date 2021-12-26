@@ -7,7 +7,11 @@ namespace CreamInstaller
     {
         public static bool OutputException(Exception e)
         {
-            while (!(e.InnerException is null)) e = e.InnerException;
+            while (!(e.InnerException is null))
+            {
+                e = e.InnerException;
+            }
+
             string output = "";
             string[] stackTrace = e.StackTrace?.Split('\n');
             if (!(stackTrace is null) && stackTrace.Length > 0)
@@ -25,7 +29,11 @@ namespace CreamInstaller
             string[] messageLines = e.Message?.Split('\n');
             if (!(messageLines is null) && messageLines.Length > 0)
             {
-                if (output.Length > 0) output += "\n\n";
+                if (output.Length > 0)
+                {
+                    output += "\n\n";
+                }
+
                 output += "MESSAGE\n";
                 for (int i = 0; i < messageLines.Length; i++)
                 {
@@ -42,10 +50,13 @@ namespace CreamInstaller
 
     public class CustomMessageException : Exception
     {
-        private string message;
+        private readonly string message;
         public override string Message => message ?? "CustomMessageException";
 
-        public override string ToString() => Message;
+        public override string ToString()
+        {
+            return Message;
+        }
 
         public CustomMessageException(string message)
         {

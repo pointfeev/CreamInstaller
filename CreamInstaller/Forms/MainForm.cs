@@ -154,7 +154,11 @@ namespace CreamInstaller
             }
             catch (Exception e)
             {
-                if (ExceptionHandler.OutputException(e)) goto retry;
+                if (ExceptionHandler.OutputException(e))
+                {
+                    goto retry;
+                }
+
                 Close();
             }
         }

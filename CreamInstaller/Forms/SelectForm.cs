@@ -31,9 +31,17 @@ namespace CreamInstaller
             get
             {
                 List<string> gameDirectories = new();
-                if (Program.Canceled) return gameDirectories;
+                if (Program.Canceled)
+                {
+                    return gameDirectories;
+                }
+
                 string steamInstallPath = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Valve\\Steam", "InstallPath", null) as string;
-                if (steamInstallPath == null) steamInstallPath = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Valve\\Steam", "InstallPath", null) as string;
+                if (steamInstallPath == null)
+                {
+                    steamInstallPath = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Valve\\Steam", "InstallPath", null) as string;
+                }
+
                 if (steamInstallPath != null && Directory.Exists(steamInstallPath))
                 {
                     string libraryFolder = steamInstallPath + @"\steamapps";
@@ -51,8 +59,15 @@ namespace CreamInstaller
                                     if (int.TryParse(_property.Key, out int _))
                                     {
                                         string path = _property.Value.path.ToString() + @"\steamapps";
-                                        if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path)) continue;
-                                        if (!gameDirectories.Contains(path)) gameDirectories.Add(path);
+                                        if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (!gameDirectories.Contains(path))
+                                        {
+                                            gameDirectories.Add(path);
+                                        }
                                     }
                                 }
                             }
@@ -67,31 +82,57 @@ namespace CreamInstaller
         private static bool GetDllDirectoriesFromGameDirectory(string gameDirectory, out List<string> dllDirectories)
         {
             dllDirectories = new();
-            if (Program.Canceled || !Directory.Exists(gameDirectory)) return false;
+            if (Program.Canceled || !Directory.Exists(gameDirectory))
+            {
+                return false;
+            }
+
             string api = gameDirectory + @"\steam_api.dll";
             string api64 = gameDirectory + @"\steam_api64.dll";
-            if (File.Exists(api) || File.Exists(api64)) dllDirectories.Add(gameDirectory);
+            if (File.Exists(api) || File.Exists(api64))
+            {
+                dllDirectories.Add(gameDirectory);
+            }
+
             foreach (string _directory in Directory.GetDirectories(gameDirectory))
             {
-                if (Program.Canceled) return false;
+                if (Program.Canceled)
+                {
+                    return false;
+                }
+
                 try
                 {
                     if (GetDllDirectoriesFromGameDirectory(_directory, out List<string> _dllDirectories))
+                    {
                         dllDirectories.AddRange(_dllDirectories);
+                    }
                 }
                 catch { }
             }
-            if (!dllDirectories.Any()) return false;
+            if (!dllDirectories.Any())
+            {
+                return false;
+            }
+
             return true;
         }
 
         private static bool GetGamesFromLibraryDirectory(string libraryDirectory, out List<Tuple<int, string, string, int, string>> games)
         {
             games = new();
-            if (Program.Canceled || !Directory.Exists(libraryDirectory)) return false;
+            if (Program.Canceled || !Directory.Exists(libraryDirectory))
+            {
+                return false;
+            }
+
             foreach (string directory in Directory.GetFiles(libraryDirectory))
             {
-                if (Program.Canceled) return false;
+                if (Program.Canceled)
+                {
+                    return false;
+                }
+
                 if (Path.GetExtension(directory) == ".acf")
                 {
                     try
@@ -104,18 +145,38 @@ namespace CreamInstaller
                         if (string.IsNullOrWhiteSpace(_appid)
                             || string.IsNullOrWhiteSpace(installdir)
                             || string.IsNullOrWhiteSpace(name)
-                            || string.IsNullOrWhiteSpace(_buildid)) continue;
+                            || string.IsNullOrWhiteSpace(_buildid))
+                        {
+                            continue;
+                        }
+
                         string branch = property.Value.UserConfig?.betakey?.ToString();
-                        if (string.IsNullOrWhiteSpace(branch)) branch = "public";
+                        if (string.IsNullOrWhiteSpace(branch))
+                        {
+                            branch = "public";
+                        }
+
                         string gameDirectory = libraryDirectory + @"\common\" + installdir;
-                        if (!int.TryParse(_appid, out int appid)) continue;
-                        if (!int.TryParse(_buildid, out int buildid)) continue;
+                        if (!int.TryParse(_appid, out int appid))
+                        {
+                            continue;
+                        }
+
+                        if (!int.TryParse(_buildid, out int buildid))
+                        {
+                            continue;
+                        }
+
                         games.Add(new(appid, name, branch, buildid, gameDirectory));
                     }
                     catch { }
                 }
             }
-            if (!games.Any()) return false;
+            if (!games.Any())
+            {
+                return false;
+            }
+
             return true;
         }
 
@@ -125,14 +186,29 @@ namespace CreamInstaller
         private void GetCreamApiApplicablePrograms(IProgress<int> progress)
         {
             int cur = 0;
-            if (Program.Canceled) return;
+            if (Program.Canceled)
+            {
+                return;
+            }
+
             List<Tuple<int, string, string, int, string>> applicablePrograms = new();
             string launcherRootDirectory = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Programs\\Paradox Interactive";
-            if (Directory.Exists(launcherRootDirectory)) applicablePrograms.Add(new(0, "Paradox Launcher", "", 0, launcherRootDirectory));
+            if (Directory.Exists(launcherRootDirectory))
+            {
+                applicablePrograms.Add(new(0, "Paradox Launcher", "", 0, launcherRootDirectory));
+            }
+
             foreach (string libraryDirectory in GameLibraryDirectories)
+            {
                 if (GetGamesFromLibraryDirectory(libraryDirectory, out List<Tuple<int, string, string, int, string>> games))
+                {
                     foreach (Tuple<int, string, string, int, string> game in games)
+                    {
                         applicablePrograms.Add(game);
+                    }
+                }
+            }
+
             RunningTasks.Clear();
             foreach (Tuple<int, string, string, int, string> program in applicablePrograms)
             {
@@ -141,17 +217,39 @@ namespace CreamInstaller
                 string branch = program.Item3;
                 int buildId = program.Item4;
                 string directory = program.Item5;
-                if (Program.Canceled) return;
+                if (Program.Canceled)
+                {
+                    return;
+                }
                 // EasyAntiCheat detects DLL changes, so skip those games
-                if (Directory.Exists(directory + @"\EasyAntiCheat")) continue;
+                if (Directory.Exists(directory + @"\EasyAntiCheat"))
+                {
+                    continue;
+                }
                 // BattlEye in DayZ detects DLL changes, but not in Arma3?
-                if (name != "Arma 3" && Directory.Exists(directory + @"\BattlEye")) continue;
+                if (name != "Arma 3" && Directory.Exists(directory + @"\BattlEye"))
+                {
+                    continue;
+                }
+
                 Task task = Task.Run(() =>
                 {
-                    if (Program.Canceled || !GetDllDirectoriesFromGameDirectory(directory, out List<string> dllDirectories)) return;
+                    if (Program.Canceled || !GetDllDirectoriesFromGameDirectory(directory, out List<string> dllDirectories))
+                    {
+                        return;
+                    }
+
                     VProperty appInfo = null;
-                    if (Program.Canceled || (appId > 0 && !SteamCMD.GetAppInfo(appId, out appInfo, branch, buildId))) return;
-                    if (Program.Canceled) return;
+                    if (Program.Canceled || (appId > 0 && !SteamCMD.GetAppInfo(appId, out appInfo, branch, buildId)))
+                    {
+                        return;
+                    }
+
+                    if (Program.Canceled)
+                    {
+                        return;
+                    }
+
                     ConcurrentDictionary<int, string> dlc = new();
                     List<Task> dlcTasks = new();
                     List<int> dlcIds = SteamCMD.ParseDlcAppIds(appInfo);
@@ -159,14 +257,34 @@ namespace CreamInstaller
                     {
                         foreach (int id in dlcIds)
                         {
-                            if (Program.Canceled) return;
+                            if (Program.Canceled)
+                            {
+                                return;
+                            }
+
                             Task task = Task.Run(() =>
                             {
-                                if (Program.Canceled) return;
+                                if (Program.Canceled)
+                                {
+                                    return;
+                                }
+
                                 string dlcName = null;
-                                if (SteamCMD.GetAppInfo(id, out VProperty dlcAppInfo)) dlcName = dlcAppInfo?.Value?["common"]?["name"]?.ToString();
-                                if (Program.Canceled) return;
-                                if (string.IsNullOrWhiteSpace(dlcName)) return; //dlcName = "Unknown DLC";
+                                if (SteamCMD.GetAppInfo(id, out VProperty dlcAppInfo))
+                                {
+                                    dlcName = dlcAppInfo?.Value?["common"]?["name"]?.ToString();
+                                }
+
+                                if (Program.Canceled)
+                                {
+                                    return;
+                                }
+
+                                if (string.IsNullOrWhiteSpace(dlcName))
+                                {
+                                    return; //dlcName = "Unknown DLC";
+                                }
+
                                 dlc[id] = /*$"[{id}] " +*/ dlcName;
                                 progress.Report(++cur);
                             });
@@ -175,9 +293,20 @@ namespace CreamInstaller
                         }
                         progress.Report(-RunningTasks.Count);
                     }
-                    else if (appId > 0) return;
-                    if (Program.Canceled) return;
-                    if (string.IsNullOrWhiteSpace(name)) return;
+                    else if (appId > 0)
+                    {
+                        return;
+                    }
+
+                    if (Program.Canceled)
+                    {
+                        return;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(name))
+                    {
+                        return;
+                    }
 
                     ProgramSelection selection = ProgramSelection.FromAppId(appId) ?? new();
                     selection.Name = name;
@@ -188,13 +317,25 @@ namespace CreamInstaller
 
                     foreach (Task task in dlcTasks.ToList())
                     {
-                        if (Program.Canceled) return;
+                        if (Program.Canceled)
+                        {
+                            return;
+                        }
+
                         task.Wait();
                     }
-                    if (Program.Canceled) return;
+                    if (Program.Canceled)
+                    {
+                        return;
+                    }
+
                     treeView1.Invoke((MethodInvoker)delegate
                     {
-                        if (Program.Canceled) return;
+                        if (Program.Canceled)
+                        {
+                            return;
+                        }
+
                         TreeNode programNode = treeNodes.Find(s => s.Name == "" + appId) ?? new();
                         programNode.Name = "" + appId;
                         programNode.Text = /*(appId > 0 ? $"[{appId}] " : "") +*/ name;
@@ -207,9 +348,15 @@ namespace CreamInstaller
                         {
                             // maybe add game and/or dlc choice here?
                         }
-                        else foreach (KeyValuePair<int, string> dlcApp in dlc.ToList())
+                        else
+                        {
+                            foreach (KeyValuePair<int, string> dlcApp in dlc.ToList())
                             {
-                                if (Program.Canceled || programNode is null) return;
+                                if (Program.Canceled || programNode is null)
+                                {
+                                    return;
+                                }
+
                                 TreeNode dlcNode = treeNodes.Find(s => s.Name == "" + dlcApp.Key) ?? new();
                                 dlcNode.Name = "" + dlcApp.Key;
                                 dlcNode.Text = dlcApp.Value;
@@ -220,6 +367,7 @@ namespace CreamInstaller
                                 treeNodes.Add(dlcNode);
                                 selection.AllSteamDlc[dlcApp.Key] = dlcApp.Value;
                             }
+                        }
                     });
                     progress.Report(++cur);
                 });
@@ -229,7 +377,11 @@ namespace CreamInstaller
             progress.Report(cur);
             foreach (Task task in RunningTasks.ToList())
             {
-                if (Program.Canceled) return;
+                if (Program.Canceled)
+                {
+                    return;
+                }
+
                 task.Wait();
             }
             progress.Report(RunningTasks.Count);
@@ -257,20 +409,45 @@ namespace CreamInstaller
             IProgress<int> iProgress = progress;
             progress.ProgressChanged += (sender, _progress) =>
             {
-                if (_progress < 0) maxProgress = -_progress;
-                else curProgress = _progress;
+                if (_progress < 0)
+                {
+                    maxProgress = -_progress;
+                }
+                else
+                {
+                    curProgress = _progress;
+                }
+
                 int p = Math.Max(Math.Min((int)((float)(curProgress / (float)maxProgress) * 100), 100), 0);
-                if (validating) label2.Text = $"Validating . . . {p}% ({curProgress}/{maxProgress})";
-                else if (setup) label2.Text = $"Setting up SteamCMD . . . {p}% ({curProgress}/{maxProgress})";
-                else label2.Text = $"Gathering and caching your applicable games and their DLCs . . . {p}% ({curProgress}/{maxProgress})";
+                if (validating)
+                {
+                    label2.Text = $"Validating . . . {p}% ({curProgress}/{maxProgress})";
+                }
+                else if (setup)
+                {
+                    label2.Text = $"Setting up SteamCMD . . . {p}% ({curProgress}/{maxProgress})";
+                }
+                else
+                {
+                    label2.Text = $"Gathering and caching your applicable games and their DLCs . . . {p}% ({curProgress}/{maxProgress})";
+                }
+
                 progressBar1.Value = p;
             };
 
             iProgress.Report(-1660); // not exact, number varies
             int cur = 0;
             iProgress.Report(cur);
-            if (!validating) label2.Text = "Setting up SteamCMD . . . ";
-            if (!Directory.Exists(SteamCMD.DirectoryPath)) Directory.CreateDirectory(SteamCMD.DirectoryPath);
+            if (!validating)
+            {
+                label2.Text = "Setting up SteamCMD . . . ";
+            }
+
+            if (!Directory.Exists(SteamCMD.DirectoryPath))
+            {
+                Directory.CreateDirectory(SteamCMD.DirectoryPath);
+            }
+
             FileSystemWatcher watcher = new(SteamCMD.DirectoryPath);
             watcher.Changed += (sender, e) => iProgress.Report(++cur);
             watcher.Filter = "*";
@@ -280,13 +457,21 @@ namespace CreamInstaller
             watcher.Dispose();
 
             setup = false;
-            if (!validating) label2.Text = "Gathering and caching your applicable games and their DLCs . . . ";
+            if (!validating)
+            {
+                label2.Text = "Gathering and caching your applicable games and their DLCs . . . ";
+            }
+
             await Task.Run(() => GetCreamApiApplicablePrograms(iProgress));
             ProgramSelection.All.ForEach(selection => selection.SteamApiDllDirectories.RemoveAll(directory => !Directory.Exists(directory)));
             ProgramSelection.All.RemoveAll(selection => !Directory.Exists(selection.RootDirectory) || !selection.SteamApiDllDirectories.Any());
             foreach (TreeNode treeNode in treeNodes)
+            {
                 if (treeNode.Parent is null && ProgramSelection.FromAppId(int.Parse(treeNode.Name)) is null)
+                {
                     treeNode.Remove();
+                }
+            }
             //SetMinimumSizeFromTreeView();
 
             progressBar1.Value = 100;
@@ -303,7 +488,10 @@ namespace CreamInstaller
             scanButton.Enabled = true;
 
             label2.Text = "Validating . . . ";
-            if (!validating && !Program.Canceled) OnLoad(true);
+            if (!validating && !Program.Canceled)
+            {
+                OnLoad(true);
+            }
         }
 
         /*private const int GWL_STYLE = -16;
@@ -337,7 +525,11 @@ namespace CreamInstaller
 
         private void OnTreeViewNodeCheckedChanged(object sender, TreeViewEventArgs e)
         {
-            if (e.Action == TreeViewAction.Unknown) return;
+            if (e.Action == TreeViewAction.Unknown)
+            {
+                return;
+            }
+
             ProgramSelection selection = ProgramSelection.FromAppId(int.Parse(e.Node.Name));
             if (selection is null)
             {
@@ -351,7 +543,11 @@ namespace CreamInstaller
                     selection.ToggleAllDlc(e.Node.Checked);
                     e.Node.Nodes.Cast<TreeNode>().ToList().ForEach(treeNode => treeNode.Checked = e.Node.Checked);
                 }
-                else selection.Enabled = e.Node.Checked;
+                else
+                {
+                    selection.Enabled = e.Node.Checked;
+                }
+
                 allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
                 allCheckBox.Checked = treeNodes.TrueForAll(treeNode => treeNode.Checked);
                 allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
@@ -380,11 +576,14 @@ namespace CreamInstaller
                     ProgramSelection selection = ProgramSelection.FromAppId(int.Parse(e.Node.Name));
                     KeyValuePair<int, string>? dlc = ProgramSelection.GetDlcFromAppId(int.Parse(e.Node.Name));
                     int appId = selection?.SteamAppId ?? dlc?.Key ?? 0;
-                    if (appId > 0) Process.Start(new ProcessStartInfo
+                    if (appId > 0)
                     {
-                        FileName = "https://steamdb.info/app/" + appId,
-                        UseShellExecute = true
-                    });
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = "https://steamdb.info/app/" + appId,
+                            UseShellExecute = true
+                        });
+                    }
                 }
             };
         retry:
@@ -394,7 +593,11 @@ namespace CreamInstaller
             }
             catch (Exception e)
             {
-                if (ExceptionHandler.OutputException(e)) goto retry;
+                if (ExceptionHandler.OutputException(e))
+                {
+                    goto retry;
+                }
+
                 Close();
             }
         }
@@ -407,16 +610,32 @@ namespace CreamInstaller
                 paradoxLauncher.ExtraSteamAppIdDlc.Clear();
                 foreach (ProgramSelection selection in ProgramSelection.AllSafeEnabled)
                 {
-                    if (selection.Name == paradoxLauncher.Name) continue;
-                    if (selection.AppInfo.Value["extended"]["publisher"].ToString() != "Paradox Interactive") continue;
+                    if (selection.Name == paradoxLauncher.Name)
+                    {
+                        continue;
+                    }
+
+                    if (selection.AppInfo.Value["extended"]["publisher"].ToString() != "Paradox Interactive")
+                    {
+                        continue;
+                    }
+
                     paradoxLauncher.ExtraSteamAppIdDlc.Add(new(selection.SteamAppId, selection.Name, selection.SelectedSteamDlc));
                 }
                 if (!paradoxLauncher.ExtraSteamAppIdDlc.Any())
                 {
                     foreach (ProgramSelection selection in ProgramSelection.AllSafe)
                     {
-                        if (selection.Name == paradoxLauncher.Name) continue;
-                        if (selection.AppInfo.Value["extended"]["publisher"].ToString() != "Paradox Interactive") continue;
+                        if (selection.Name == paradoxLauncher.Name)
+                        {
+                            continue;
+                        }
+
+                        if (selection.AppInfo.Value["extended"]["publisher"].ToString() != "Paradox Interactive")
+                        {
+                            continue;
+                        }
+
                         paradoxLauncher.ExtraSteamAppIdDlc.Add(new(selection.SteamAppId, selection.Name, selection.AllSteamDlc));
                     }
                 }
@@ -449,16 +668,31 @@ namespace CreamInstaller
             if (ProgramSelection.All.Count > 0)
             {
                 foreach (ProgramSelection selection in ProgramSelection.AllSafeEnabled)
-                    if (!Program.IsProgramRunningDialog(this, selection)) return;
-                if (ParadoxLauncherDlcDialog(this)) return;
+                {
+                    if (!Program.IsProgramRunningDialog(this, selection))
+                    {
+                        return;
+                    }
+                }
+
+                if (ParadoxLauncherDlcDialog(this))
+                {
+                    return;
+                }
+
                 Hide();
                 InstallForm installForm = new(this);
                 installForm.ShowDialog();
                 if (installForm.Reselecting)
                 {
                     foreach (TreeNode treeNode in treeNodes)
+                    {
                         if (!(treeNode.Parent is null) || int.Parse(treeNode.Name) == 0)
+                        {
                             OnTreeViewNodeCheckedChanged(null, new(treeNode, TreeViewAction.ByMouse));
+                        }
+                    }
+
                     this.InheritLocation(installForm);
                     Show();
                 }
@@ -486,7 +720,11 @@ namespace CreamInstaller
             {
                 if (treeNode.Parent is null)
                 {
-                    if (!treeNode.Checked) shouldCheck = true;
+                    if (!treeNode.Checked)
+                    {
+                        shouldCheck = true;
+                    }
+
                     treeNode.Checked = shouldCheck;
                     OnTreeViewNodeCheckedChanged(null, new(treeNode, TreeViewAction.ByMouse));
                 }

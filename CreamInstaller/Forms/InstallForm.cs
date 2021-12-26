@@ -30,7 +30,11 @@ namespace CreamInstaller
         public void UpdateProgress(int progress)
         {
             int value = (int)((float)(CompleteOperationsCount / (float)OperationsCount) * 100) + (progress / OperationsCount);
-            if (value < userProgressBar.Value) return;
+            if (value < userProgressBar.Value)
+            {
+                return;
+            }
+
             userProgressBar.Value = value;
         }
 
@@ -55,7 +59,11 @@ namespace CreamInstaller
             foreach (string directory in selection.SteamApiDllDirectories)
             {
                 UpdateUser("Installing CreamAPI for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
-                if (!Program.IsProgramRunningDialog(this, selection)) throw new OperationCanceledException();
+                if (!Program.IsProgramRunningDialog(this, selection))
+                {
+                    throw new OperationCanceledException();
+                }
+
                 string api = directory + @"\steam_api.dll";
                 string api_o = directory + @"\steam_api_o.dll";
                 if (File.Exists(api) && !File.Exists(api_o))
@@ -128,8 +136,16 @@ namespace CreamInstaller
             CompleteOperationsCount = 0;
             foreach (ProgramSelection selection in ProgramSelection.AllSafe)
             {
-                if (!selection.Enabled) continue;
-                if (!Program.IsProgramRunningDialog(this, selection)) throw new OperationCanceledException();
+                if (!selection.Enabled)
+                {
+                    continue;
+                }
+
+                if (!Program.IsProgramRunningDialog(this, selection))
+                {
+                    throw new OperationCanceledException();
+                }
+
                 try
                 {
                     await OperateFor(selection);
@@ -193,7 +209,11 @@ namespace CreamInstaller
             }
             catch (Exception e)
             {
-                if (ExceptionHandler.OutputException(e)) goto retry;
+                if (ExceptionHandler.OutputException(e))
+                {
+                    goto retry;
+                }
+
                 Close();
             }
         }

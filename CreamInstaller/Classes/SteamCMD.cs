@@ -59,29 +59,51 @@ namespace CreamInstaller
             Kill();
             if (!File.Exists(FilePath))
             {
-                using (WebClient webClient = new()) webClient.DownloadFile("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip", ArchivePath);
+                using (WebClient webClient = new())
+                {
+                    webClient.DownloadFile("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip", ArchivePath);
+                }
+
                 ZipFile.ExtractToDirectory(ArchivePath, DirectoryPath);
                 File.Delete(ArchivePath);
             }
-            if (File.Exists(AppCacheAppInfoPath)) File.Delete(AppCacheAppInfoPath);
+            if (File.Exists(AppCacheAppInfoPath))
+            {
+                File.Delete(AppCacheAppInfoPath);
+            }
+
             if (!File.Exists(AppInfoVersionPath) || !Version.TryParse(File.ReadAllText(AppInfoVersionPath, Encoding.UTF8), out Version version) || version < MinimumAppInfoVersion)
             {
-                if (Directory.Exists(AppInfoPath)) Directory.Delete(AppInfoPath, true);
+                if (Directory.Exists(AppInfoPath))
+                {
+                    Directory.Delete(AppInfoPath, true);
+                }
+
                 Directory.CreateDirectory(AppInfoPath);
                 File.WriteAllText(AppInfoVersionPath, Application.ProductVersion, Encoding.UTF8);
             }
-            if (!File.Exists(DllPath)) Run($@"+quit", out _);
+            if (!File.Exists(DllPath))
+            {
+                Run($@"+quit", out _);
+            }
         }
 
         public static bool GetAppInfo(int appId, out VProperty appInfo, string branch = "public", int buildId = 0)
         {
             appInfo = null;
-            if (Program.Canceled) return false;
+            if (Program.Canceled)
+            {
+                return false;
+            }
+
             string output;
             string appUpdatePath = $@"{AppInfoPath}\{appId}";
             string appUpdateFile = $@"{appUpdatePath}\appinfo.txt";
         restart:
-            if (Directory.Exists(appUpdatePath) && File.Exists(appUpdateFile)) output = File.ReadAllText(appUpdateFile, Encoding.UTF8);
+            if (Directory.Exists(appUpdatePath) && File.Exists(appUpdateFile))
+            {
+                output = File.ReadAllText(appUpdateFile, Encoding.UTF8);
+            }
             else
             {
                 Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {appId} +force_install_dir {appUpdatePath} +app_update 4 +quit", out _);
@@ -94,7 +116,11 @@ namespace CreamInstaller
                     File.WriteAllText(appUpdateFile, output, Encoding.UTF8);
                 }
             }
-            if (Program.Canceled || output is null) return false;
+            if (Program.Canceled || output is null)
+            {
+                return false;
+            }
+
             try { appInfo = VdfConvert.Deserialize(output); }
             catch
             {
@@ -104,21 +130,40 @@ namespace CreamInstaller
                     goto restart;
                 }
             }
-            if (appInfo.Value is VValue) goto restart;
-            if (appInfo is null || (!(appInfo.Value is VValue) && appInfo.Value.Children().ToList().Count == 0)) return true;
+            if (appInfo.Value is VValue)
+            {
+                goto restart;
+            }
+
+            if (appInfo is null || (!(appInfo.Value is VValue) && appInfo.Value.Children().ToList().Count == 0))
+            {
+                return true;
+            }
+
             VToken type = appInfo.Value is VValue ? null : appInfo.Value?["common"]?["type"];
             if (type is null || type.ToString() == "Game")
             {
                 string buildid = appInfo.Value is VValue ? null : appInfo.Value["depots"]?["branches"]?[branch]?["buildid"]?.ToString();
-                if (buildid is null && !(type is null)) return true;
+                if (buildid is null && !(type is null))
+                {
+                    return true;
+                }
+
                 if (type is null || int.Parse(buildid) < buildId)
                 {
                     foreach (int id in ParseDlcAppIds(appInfo))
                     {
                         string dlcAppUpdatePath = $@"{AppInfoPath}\{id}";
-                        if (Directory.Exists(dlcAppUpdatePath)) Directory.Delete(dlcAppUpdatePath, true);
+                        if (Directory.Exists(dlcAppUpdatePath))
+                        {
+                            Directory.Delete(dlcAppUpdatePath, true);
+                        }
                     }
-                    if (Directory.Exists(appUpdatePath)) Directory.Delete(appUpdatePath, true);
+                    if (Directory.Exists(appUpdatePath))
+                    {
+                        Directory.Delete(appUpdatePath, true);
+                    }
+
                     goto restart;
                 }
             }
@@ -128,30 +173,60 @@ namespace CreamInstaller
         public static List<int> ParseDlcAppIds(VProperty appInfo)
         {
             List<int> dlcIds = new();
-            if (!(appInfo is VProperty)) return dlcIds;
+            if (!(appInfo is VProperty))
+            {
+                return dlcIds;
+            }
+
             if (!(appInfo.Value["extended"] is null))
+            {
                 foreach (VProperty property in appInfo.Value["extended"])
+                {
                     if (property.Key.ToString() == "listofdlc")
+                    {
                         foreach (string id in property.Value.ToString().Split(","))
+                        {
                             if (!dlcIds.Contains(int.Parse(id)))
+                            {
                                 dlcIds.Add(int.Parse(id));
+                            }
+                        }
+                    }
+                }
+            }
+
             if (!(appInfo.Value["depots"] is null))
+            {
                 foreach (VProperty _property in appInfo.Value["depots"])
+                {
                     if (int.TryParse(_property.Key.ToString(), out int _))
+                    {
                         if (int.TryParse(_property.Value?["dlcappid"]?.ToString(), out int appid) && !dlcIds.Contains(appid))
+                        {
                             dlcIds.Add(appid);
+                        }
+                    }
+                }
+            }
+
             return dlcIds;
         }
 
         public static void Kill()
         {
-            foreach (Process process in Process.GetProcessesByName("steamcmd")) process.Kill();
+            foreach (Process process in Process.GetProcessesByName("steamcmd"))
+            {
+                process.Kill();
+            }
         }
 
         public static void Dispose()
         {
             Kill();
-            if (Directory.Exists(DirectoryPath)) Directory.Delete(DirectoryPath, true);
+            if (Directory.Exists(DirectoryPath))
+            {
+                Directory.Delete(DirectoryPath, true);
+            }
         }
     }
 }

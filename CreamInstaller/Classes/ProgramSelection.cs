@@ -28,7 +28,10 @@ namespace CreamInstaller
                 {
                     string api = directory + @"\steam_api.dll";
                     string api64 = directory + @"\steam_api64.dll";
-                    if (api.IsFilePathLocked() || api64.IsFilePathLocked()) return true;
+                    if (api.IsFilePathLocked() || api64.IsFilePathLocked())
+                    {
+                        return true;
+                    }
                 }
                 return false;
             }
@@ -36,8 +39,14 @@ namespace CreamInstaller
 
         private void Toggle(KeyValuePair<int, string> dlcApp, bool enabled)
         {
-            if (enabled) SelectedSteamDlc[dlcApp.Key] = dlcApp.Value;
-            else SelectedSteamDlc.Remove(dlcApp.Key);
+            if (enabled)
+            {
+                SelectedSteamDlc[dlcApp.Key] = dlcApp.Value;
+            }
+            else
+            {
+                SelectedSteamDlc.Remove(dlcApp.Key);
+            }
         }
 
         public void ToggleDlc(int dlcAppId, bool enabled)
@@ -55,12 +64,25 @@ namespace CreamInstaller
 
         public void ToggleAllDlc(bool enabled)
         {
-            if (!enabled) SelectedSteamDlc.Clear();
-            else foreach (KeyValuePair<int, string> dlcApp in AllSteamDlc) Toggle(dlcApp, enabled);
+            if (!enabled)
+            {
+                SelectedSteamDlc.Clear();
+            }
+            else
+            {
+                foreach (KeyValuePair<int, string> dlcApp in AllSteamDlc)
+                {
+                    Toggle(dlcApp, enabled);
+                }
+            }
+
             Enabled = SelectedSteamDlc.Any();
         }
 
-        public ProgramSelection() => All.Add(this);
+        public ProgramSelection()
+        {
+            All.Add(this);
+        }
 
         public static List<ProgramSelection> All => Program.ProgramSelections;
 
@@ -68,13 +90,24 @@ namespace CreamInstaller
 
         public static List<ProgramSelection> AllSafeEnabled => AllSafe.FindAll(s => s.Enabled);
 
-        public static ProgramSelection FromAppId(int appId) => AllSafe.Find(s => s.SteamAppId == appId);
+        public static ProgramSelection FromAppId(int appId)
+        {
+            return AllSafe.Find(s => s.SteamAppId == appId);
+        }
 
         public static KeyValuePair<int, string>? GetDlcFromAppId(int appId)
         {
             foreach (ProgramSelection selection in AllSafe)
+            {
                 foreach (KeyValuePair<int, string> app in selection.AllSteamDlc)
-                    if (app.Key == appId) return app;
+                {
+                    if (app.Key == appId)
+                    {
+                        return app;
+                    }
+                }
+            }
+
             return null;
         }
     }
