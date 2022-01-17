@@ -36,12 +36,18 @@ namespace CreamInstaller
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.noneFoundLabel = new System.Windows.Forms.Label();
-            this.treeView1 = new CreamInstaller.CustomTreeView();
+            this.selectionTreeView = new CreamInstaller.CustomTreeView();
+            this.blockProtectedHelpButton = new System.Windows.Forms.Button();
+            this.blockedGamesCheckBox = new System.Windows.Forms.CheckBox();
             this.allCheckBox = new System.Windows.Forms.CheckBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.label2 = new System.Windows.Forms.Label();
             this.scanButton = new System.Windows.Forms.Button();
+            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.groupBox1.SuspendLayout();
+            this.flowLayoutPanel1.SuspendLayout();
+            this.flowLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // acceptButton
@@ -80,8 +86,7 @@ namespace CreamInstaller
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.noneFoundLabel);
-            this.groupBox1.Controls.Add(this.treeView1);
-            this.groupBox1.Controls.Add(this.allCheckBox);
+            this.groupBox1.Controls.Add(this.selectionTreeView);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(560, 308);
@@ -102,28 +107,58 @@ namespace CreamInstaller
             this.noneFoundLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.noneFoundLabel.Visible = false;
             // 
-            // treeView1
+            // selectionTreeView
             // 
-            this.treeView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.selectionTreeView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.treeView1.BackColor = System.Drawing.SystemColors.Control;
-            this.treeView1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.treeView1.CheckBoxes = true;
-            this.treeView1.Enabled = false;
-            this.treeView1.FullRowSelect = true;
-            this.treeView1.HotTracking = true;
-            this.treeView1.Location = new System.Drawing.Point(6, 22);
-            this.treeView1.Name = "treeView1";
-            this.treeView1.Size = new System.Drawing.Size(548, 280);
-            this.treeView1.TabIndex = 1001;
+            this.selectionTreeView.BackColor = System.Drawing.SystemColors.Control;
+            this.selectionTreeView.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.selectionTreeView.CheckBoxes = true;
+            this.selectionTreeView.Enabled = false;
+            this.selectionTreeView.FullRowSelect = true;
+            this.selectionTreeView.HotTracking = true;
+            this.selectionTreeView.Location = new System.Drawing.Point(6, 22);
+            this.selectionTreeView.Name = "selectionTreeView";
+            this.selectionTreeView.Size = new System.Drawing.Size(548, 280);
+            this.selectionTreeView.TabIndex = 1001;
+            // 
+            // blockProtectedHelpButton
+            // 
+            this.blockProtectedHelpButton.Enabled = false;
+            this.blockProtectedHelpButton.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.blockProtectedHelpButton.Location = new System.Drawing.Point(151, 3);
+            this.blockProtectedHelpButton.Margin = new System.Windows.Forms.Padding(0, 3, 3, 3);
+            this.blockProtectedHelpButton.Name = "blockProtectedHelpButton";
+            this.blockProtectedHelpButton.Size = new System.Drawing.Size(19, 19);
+            this.blockProtectedHelpButton.TabIndex = 1004;
+            this.blockProtectedHelpButton.Text = "?";
+            this.blockProtectedHelpButton.UseVisualStyleBackColor = true;
+            this.blockProtectedHelpButton.Click += new System.EventHandler(this.OnBlockProtectedGamesHelpButtonClicked);
+            // 
+            // blockedGamesCheckBox
+            // 
+            this.blockedGamesCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.blockedGamesCheckBox.AutoSize = true;
+            this.blockedGamesCheckBox.Checked = true;
+            this.blockedGamesCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.blockedGamesCheckBox.Enabled = false;
+            this.blockedGamesCheckBox.Location = new System.Drawing.Point(3, 3);
+            this.blockedGamesCheckBox.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.blockedGamesCheckBox.Name = "blockedGamesCheckBox";
+            this.blockedGamesCheckBox.Size = new System.Drawing.Size(148, 19);
+            this.blockedGamesCheckBox.TabIndex = 1003;
+            this.blockedGamesCheckBox.Text = "Block Protected Games";
+            this.blockedGamesCheckBox.UseVisualStyleBackColor = true;
+            this.blockedGamesCheckBox.CheckedChanged += new System.EventHandler(this.OnBlockProtectedGamesCheckBoxChanged);
             // 
             // allCheckBox
             // 
             this.allCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.allCheckBox.AutoSize = true;
             this.allCheckBox.Enabled = false;
-            this.allCheckBox.Location = new System.Drawing.Point(514, 0);
+            this.allCheckBox.Location = new System.Drawing.Point(3, 3);
+            this.allCheckBox.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
             this.allCheckBox.Name = "allCheckBox";
             this.allCheckBox.Size = new System.Drawing.Size(40, 19);
             this.allCheckBox.TabIndex = 1;
@@ -162,12 +197,37 @@ namespace CreamInstaller
             this.scanButton.UseVisualStyleBackColor = true;
             this.scanButton.Click += new System.EventHandler(this.OnScan);
             // 
+            // flowLayoutPanel1
+            // 
+            this.flowLayoutPanel1.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.flowLayoutPanel1.AutoSize = true;
+            this.flowLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.flowLayoutPanel1.Controls.Add(this.blockedGamesCheckBox);
+            this.flowLayoutPanel1.Controls.Add(this.blockProtectedHelpButton);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(230, 9);
+            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(173, 25);
+            this.flowLayoutPanel1.TabIndex = 1005;
+            // 
+            // flowLayoutPanel2
+            // 
+            this.flowLayoutPanel2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.flowLayoutPanel2.AutoSize = true;
+            this.flowLayoutPanel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.flowLayoutPanel2.Controls.Add(this.allCheckBox);
+            this.flowLayoutPanel2.Location = new System.Drawing.Point(520, 9);
+            this.flowLayoutPanel2.Name = "flowLayoutPanel2";
+            this.flowLayoutPanel2.Size = new System.Drawing.Size(43, 25);
+            this.flowLayoutPanel2.TabIndex = 1006;
+            // 
             // SelectForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(584, 361);
+            this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.scanButton);
+            this.Controls.Add(this.flowLayoutPanel2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.label1);
@@ -185,8 +245,12 @@ namespace CreamInstaller
             this.TopMost = true;
             this.Load += new System.EventHandler(this.OnLoad);
             this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
+            this.flowLayoutPanel1.ResumeLayout(false);
+            this.flowLayoutPanel1.PerformLayout();
+            this.flowLayoutPanel2.ResumeLayout(false);
+            this.flowLayoutPanel2.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -201,7 +265,11 @@ namespace CreamInstaller
         private System.Windows.Forms.CheckBox allCheckBox;
         private Button scanButton;
         private Label noneFoundLabel;
-        private CustomTreeView treeView1;
+        private CustomTreeView selectionTreeView;
+        private CheckBox blockedGamesCheckBox;
+        private Button blockProtectedHelpButton;
+        private FlowLayoutPanel flowLayoutPanel1;
+        private FlowLayoutPanel flowLayoutPanel2;
     }
 }
 

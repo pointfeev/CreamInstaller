@@ -18,6 +18,11 @@ namespace CreamInstaller
         public static readonly string CurrentProcessDirectory = CurrentProcessFilePath.Substring(0, CurrentProcessFilePath.LastIndexOf("\\"));
         public static readonly string BackupFileExtension = ".creaminstaller.backup";
 
+        public static bool BlockProtectedGames = true;
+        public static readonly string[] ProtectedGameNames = { "PAYDAY 2", "Call to Arms" }; // non-functioning CreamAPI or DLL detections
+        public static readonly string[] ProtectedGameDirectories = { @"\EasyAntiCheat", @"\BattlEye" }; // DLL detections
+        public static readonly string[] ProtectedGameDirectoryExceptions = { "Arma 3" }; // Arma 3's BattlEye doesn't detect DLL changes?
+
         [STAThread]
         private static void Main()
         {

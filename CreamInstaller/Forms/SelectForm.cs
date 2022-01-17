@@ -221,17 +221,24 @@ namespace CreamInstaller
                 {
                     return;
                 }
-                // EasyAntiCheat detects DLL changes, so skip those games
-                if (Directory.Exists(directory + @"\EasyAntiCheat"))
+                if (Program.BlockProtectedGames)
                 {
-                    continue;
+                    bool blockedGame = Program.ProtectedGameNames.Contains(name);
+                    if (!Program.ProtectedGameDirectoryExceptions.Contains(name))
+                    {
+                        foreach (string path in Program.ProtectedGameDirectories)
+                        {
+                            if (Directory.Exists(directory + path))
+                            {
+                                blockedGame = true;
+                            }
+                        }
+                    }
+                    if (blockedGame)
+                    {
+                        continue;
+                    }
                 }
-                // BattlEye in DayZ detects DLL changes, but not in Arma3?
-                if (name != "Arma 3" && Directory.Exists(directory + @"\BattlEye"))
-                {
-                    continue;
-                }
-
                 Task task = Task.Run(() =>
                 {
                     if (Program.Canceled || !GetDllDirectoriesFromGameDirectory(directory, out List<string> dllDirectories))
@@ -314,6 +321,10 @@ namespace CreamInstaller
                     selection.SteamAppId = appId;
                     selection.SteamApiDllDirectories = dllDirectories;
                     selection.AppInfo = appInfo;
+                    if (allCheckBox.Checked)
+                    {
+                        selection.Enabled = true;
+                    }
 
                     foreach (Task task in dlcTasks.ToList())
                     {
@@ -329,7 +340,7 @@ namespace CreamInstaller
                         return;
                     }
 
-                    treeView1.Invoke((MethodInvoker)delegate
+                    selectionTreeView.Invoke((MethodInvoker)delegate
                     {
                         if (Program.Canceled)
                         {
@@ -341,7 +352,7 @@ namespace CreamInstaller
                         programNode.Text = /*(appId > 0 ? $"[{appId}] " : "") +*/ name;
                         programNode.Checked = selection.Enabled;
                         programNode.Remove();
-                        treeView1.Nodes.Add(programNode);
+                        selectionTreeView.Nodes.Add(programNode);
                         treeNodes.Remove(programNode);
                         treeNodes.Add(programNode);
                         if (appId == 0) // paradox launcher
@@ -357,6 +368,12 @@ namespace CreamInstaller
                                     return;
                                 }
 
+                                selection.AllSteamDlc[dlcApp.Key] = dlcApp.Value;
+                                if (allCheckBox.Checked)
+                                {
+                                    selection.SelectedSteamDlc[dlcApp.Key] = dlcApp.Value;
+                                }
+
                                 TreeNode dlcNode = treeNodes.Find(s => s.Name == "" + dlcApp.Key) ?? new();
                                 dlcNode.Name = "" + dlcApp.Key;
                                 dlcNode.Text = dlcApp.Value;
@@ -365,7 +382,6 @@ namespace CreamInstaller
                                 programNode.Nodes.Add(dlcNode);
                                 treeNodes.Remove(dlcNode);
                                 treeNodes.Add(dlcNode);
-                                selection.AllSteamDlc[dlcApp.Key] = dlcApp.Value;
                             }
                         }
                     });
@@ -390,12 +406,14 @@ namespace CreamInstaller
         private async void OnLoad(bool validating = false)
         {
             Program.Canceled = false;
+            blockedGamesCheckBox.Enabled = false;
+            blockProtectedHelpButton.Enabled = false;
             cancelButton.Enabled = true;
             scanButton.Enabled = false;
             noneFoundLabel.Visible = false;
             allCheckBox.Enabled = false;
             acceptButton.Enabled = false;
-            treeView1.Enabled = false;
+            selectionTreeView.Enabled = false;
 
             label2.Visible = true;
             progressBar1.Visible = true;
@@ -459,6 +477,8 @@ namespace CreamInstaller
             setup = false;
             if (!validating)
             {
+                selectionTreeView.Nodes.Clear();
+                Program.ProgramSelections.Clear();
                 label2.Text = "Gathering and caching your applicable games and their DLCs . . . ";
             }
 
@@ -479,13 +499,16 @@ namespace CreamInstaller
             label2.Visible = false;
             progressBar1.Visible = false;
 
-            treeView1.Enabled = ProgramSelection.All.Any();
-            allCheckBox.Enabled = treeView1.Enabled;
-            noneFoundLabel.Visible = !treeView1.Enabled;
+            selectionTreeView.Enabled = ProgramSelection.All.Any();
+            allCheckBox.Enabled = selectionTreeView.Enabled;
+            noneFoundLabel.Visible = !selectionTreeView.Enabled;
 
             acceptButton.Enabled = ProgramSelection.AllSafeEnabled.Any();
             cancelButton.Enabled = false;
             scanButton.Enabled = true;
+
+            blockedGamesCheckBox.Enabled = true;
+            blockProtectedHelpButton.Enabled = true;
 
             label2.Text = "Validating . . . ";
             if (!validating && !Program.Canceled)
@@ -567,9 +590,9 @@ namespace CreamInstaller
 
         private void OnLoad(object sender, EventArgs _)
         {
-            treeView1.TreeViewNodeSorter = new TreeNodeSorter();
-            treeView1.AfterCheck += OnTreeViewNodeCheckedChanged;
-            treeView1.NodeMouseClick += (sender, e) =>
+            selectionTreeView.TreeViewNodeSorter = new TreeNodeSorter();
+            selectionTreeView.AfterCheck += OnTreeViewNodeCheckedChanged;
+            selectionTreeView.NodeMouseClick += (sender, e) =>
             {
                 if (e.Button == MouseButtons.Right)
                 {
@@ -685,16 +708,9 @@ namespace CreamInstaller
                 installForm.ShowDialog();
                 if (installForm.Reselecting)
                 {
-                    foreach (TreeNode treeNode in treeNodes)
-                    {
-                        if (!(treeNode.Parent is null) || int.Parse(treeNode.Name) == 0)
-                        {
-                            OnTreeViewNodeCheckedChanged(null, new(treeNode, TreeViewAction.ByMouse));
-                        }
-                    }
-
                     this.InheritLocation(installForm);
                     Show();
+                    OnLoad();
                 }
                 else
                 {
@@ -730,6 +746,39 @@ namespace CreamInstaller
                 }
             }
             allCheckBox.Checked = shouldCheck;
+        }
+
+        private void OnBlockProtectedGamesCheckBoxChanged(object sender, EventArgs e)
+        {
+            Program.BlockProtectedGames = blockedGamesCheckBox.Checked;
+            OnLoad();
+        }
+
+        private readonly string helpButtonListPrefix = "\n    •  ";
+        private void OnBlockProtectedGamesHelpButtonClicked(object sender, EventArgs e)
+        {
+            string blockedGames = "";
+            foreach (string name in Program.ProtectedGameNames)
+            {
+                blockedGames += helpButtonListPrefix + name;
+            }
+            string blockedDirectories = "";
+            foreach (string path in Program.ProtectedGameDirectories)
+            {
+                blockedDirectories += helpButtonListPrefix + path;
+            }
+            string blockedDirectoryExceptions = "";
+            foreach (string name in Program.ProtectedGameDirectoryExceptions)
+            {
+                blockedDirectoryExceptions += helpButtonListPrefix + name;
+            }
+            new DialogForm(this).Show(blockedGamesCheckBox.Text, SystemIcons.Information,
+                "Blocks the program from caching and displaying games protected by DLL checks," +
+                "\nanti-cheats, or that are confirmed not to be working with CreamAPI." +
+                "\n\nBlocked game names:" + blockedGames +
+                "\n\nBlocked game sub-directories:" + blockedDirectories +
+                "\n\nBlocked game sub-directory exceptions (not blocked):" + blockedDirectoryExceptions,
+                "OK");
         }
     }
 }

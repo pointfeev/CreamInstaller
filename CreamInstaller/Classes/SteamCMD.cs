@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Windows.Forms;
 
@@ -59,9 +59,10 @@ namespace CreamInstaller
             Kill();
             if (!File.Exists(FilePath))
             {
-                using (WebClient webClient = new())
+                using (HttpClient httpClient = new())
                 {
-                    webClient.DownloadFile("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip", ArchivePath);
+                    byte[] file = httpClient.GetByteArrayAsync("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip").Result;
+                    file.Write(ArchivePath);
                 }
 
                 ZipFile.ExtractToDirectory(ArchivePath, DirectoryPath);
