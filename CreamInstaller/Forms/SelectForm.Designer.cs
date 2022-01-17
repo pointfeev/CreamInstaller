@@ -190,7 +190,7 @@ namespace CreamInstaller
             // 
             this.scanButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.scanButton.Enabled = false;
-            this.scanButton.Location = new System.Drawing.Point(155, 326);
+            this.scanButton.Location = new System.Drawing.Point(140, 326);
             this.scanButton.Name = "scanButton";
             this.scanButton.Size = new System.Drawing.Size(180, 23);
             this.scanButton.TabIndex = 10001;
@@ -225,9 +225,9 @@ namespace CreamInstaller
             // 
             this.uninstallButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.uninstallButton.Enabled = false;
-            this.uninstallButton.Location = new System.Drawing.Point(341, 326);
+            this.uninstallButton.Location = new System.Drawing.Point(326, 326);
             this.uninstallButton.Name = "uninstallButton";
-            this.uninstallButton.Size = new System.Drawing.Size(75, 23);
+            this.uninstallButton.Size = new System.Drawing.Size(90, 23);
             this.uninstallButton.TabIndex = 10002;
             this.uninstallButton.Text = "Uninstall";
             this.uninstallButton.UseVisualStyleBackColor = true;

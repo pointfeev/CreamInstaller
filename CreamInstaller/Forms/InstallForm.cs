@@ -217,11 +217,11 @@ namespace CreamInstaller
             try
             {
                 await Operate();
-                UpdateUser("CreamAPI successfully installed and generated for " + ProgramCount + " program(s).", InstallationLog.Success);
+                UpdateUser($"CreamAPI successfully {(Uninstalling ? "uninstalled" : "installed and generated")} for " + ProgramCount + " program(s).", InstallationLog.Success);
             }
             catch (Exception exception)
             {
-                UpdateUser("CreamAPI installation and/or generation failed: " + exception.ToString(), InstallationLog.Error);
+                UpdateUser($"CreamAPI {(Uninstalling ? "uninstallation" : "installation and/or generation")} failed: " + exception.ToString(), InstallationLog.Error);
                 retryButton.Enabled = true;
             }
             userProgressBar.Value = userProgressBar.Maximum;
