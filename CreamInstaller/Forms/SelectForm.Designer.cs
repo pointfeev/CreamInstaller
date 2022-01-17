@@ -31,7 +31,7 @@ namespace CreamInstaller
         /// </summary>
         private void InitializeComponent()
         {
-            this.acceptButton = new System.Windows.Forms.Button();
+            this.installButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -45,22 +45,23 @@ namespace CreamInstaller
             this.scanButton = new System.Windows.Forms.Button();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
+            this.uninstallButton = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
             // 
-            // acceptButton
+            // installButton
             // 
-            this.acceptButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.acceptButton.Enabled = false;
-            this.acceptButton.Location = new System.Drawing.Point(422, 326);
-            this.acceptButton.Name = "acceptButton";
-            this.acceptButton.Size = new System.Drawing.Size(150, 23);
-            this.acceptButton.TabIndex = 10002;
-            this.acceptButton.Text = "Generate and Install";
-            this.acceptButton.UseVisualStyleBackColor = true;
-            this.acceptButton.Click += new System.EventHandler(this.OnAccept);
+            this.installButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.installButton.Enabled = false;
+            this.installButton.Location = new System.Drawing.Point(422, 326);
+            this.installButton.Name = "installButton";
+            this.installButton.Size = new System.Drawing.Size(150, 23);
+            this.installButton.TabIndex = 10003;
+            this.installButton.Text = "Generate and Install";
+            this.installButton.UseVisualStyleBackColor = true;
+            this.installButton.Click += new System.EventHandler(this.OnInstall);
             // 
             // cancelButton
             // 
@@ -189,7 +190,7 @@ namespace CreamInstaller
             // 
             this.scanButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.scanButton.Enabled = false;
-            this.scanButton.Location = new System.Drawing.Point(236, 326);
+            this.scanButton.Location = new System.Drawing.Point(155, 326);
             this.scanButton.Name = "scanButton";
             this.scanButton.Size = new System.Drawing.Size(180, 23);
             this.scanButton.TabIndex = 10001;
@@ -220,11 +221,24 @@ namespace CreamInstaller
             this.flowLayoutPanel2.Size = new System.Drawing.Size(43, 25);
             this.flowLayoutPanel2.TabIndex = 1006;
             // 
+            // uninstallButton
+            // 
+            this.uninstallButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.uninstallButton.Enabled = false;
+            this.uninstallButton.Location = new System.Drawing.Point(341, 326);
+            this.uninstallButton.Name = "uninstallButton";
+            this.uninstallButton.Size = new System.Drawing.Size(75, 23);
+            this.uninstallButton.TabIndex = 10002;
+            this.uninstallButton.Text = "Uninstall";
+            this.uninstallButton.UseVisualStyleBackColor = true;
+            this.uninstallButton.Click += new System.EventHandler(this.OnUninstall);
+            // 
             // SelectForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(584, 361);
+            this.Controls.Add(this.uninstallButton);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.scanButton);
             this.Controls.Add(this.flowLayoutPanel2);
@@ -232,7 +246,7 @@ namespace CreamInstaller
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.cancelButton);
-            this.Controls.Add(this.acceptButton);
+            this.Controls.Add(this.installButton);
             this.Controls.Add(this.label2);
             this.DoubleBuffered = true;
             this.MaximizeBox = false;
@@ -256,7 +270,7 @@ namespace CreamInstaller
 
         #endregion
 
-        private System.Windows.Forms.Button acceptButton;
+        private System.Windows.Forms.Button installButton;
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.GroupBox groupBox1;
@@ -270,6 +284,7 @@ namespace CreamInstaller
         private Button blockProtectedHelpButton;
         private FlowLayoutPanel flowLayoutPanel1;
         private FlowLayoutPanel flowLayoutPanel2;
+        private Button uninstallButton;
     }
 }
 

@@ -412,7 +412,8 @@ namespace CreamInstaller
             scanButton.Enabled = false;
             noneFoundLabel.Visible = false;
             allCheckBox.Enabled = false;
-            acceptButton.Enabled = false;
+            installButton.Enabled = false;
+            uninstallButton.Enabled = installButton.Enabled;
             selectionTreeView.Enabled = false;
 
             label2.Visible = true;
@@ -503,7 +504,8 @@ namespace CreamInstaller
             allCheckBox.Enabled = selectionTreeView.Enabled;
             noneFoundLabel.Visible = !selectionTreeView.Enabled;
 
-            acceptButton.Enabled = ProgramSelection.AllSafeEnabled.Any();
+            installButton.Enabled = ProgramSelection.AllSafeEnabled.Any();
+            uninstallButton.Enabled = installButton.Enabled;
             cancelButton.Enabled = false;
             scanButton.Enabled = true;
 
@@ -575,7 +577,8 @@ namespace CreamInstaller
                 allCheckBox.Checked = treeNodes.TrueForAll(treeNode => treeNode.Checked);
                 allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
             }
-            acceptButton.Enabled = ProgramSelection.AllSafeEnabled.Any();
+            installButton.Enabled = ProgramSelection.AllSafeEnabled.Any();
+            uninstallButton.Enabled = installButton.Enabled;
         }
 
         private class TreeNodeSorter : IComparer
@@ -686,7 +689,7 @@ namespace CreamInstaller
             return false;
         }
 
-        private void OnAccept(object sender, EventArgs e)
+        private void OnAccept(bool uninstall = false)
         {
             if (ProgramSelection.All.Count > 0)
             {
@@ -704,7 +707,7 @@ namespace CreamInstaller
                 }
 
                 Hide();
-                InstallForm installForm = new(this);
+                InstallForm installForm = new(this, uninstall);
                 installForm.ShowDialog();
                 if (installForm.Reselecting)
                 {
@@ -717,6 +720,16 @@ namespace CreamInstaller
                     Close();
                 }
             }
+        }
+
+        private void OnInstall(object sender, EventArgs e)
+        {
+            OnAccept(false);
+        }
+
+        private void OnUninstall(object sender, EventArgs e)
+        {
+            OnAccept(true);
         }
 
         private void OnScan(object sender, EventArgs e)

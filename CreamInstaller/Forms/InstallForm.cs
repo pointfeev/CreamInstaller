@@ -13,8 +13,9 @@ namespace CreamInstaller
     public partial class InstallForm : Form
     {
         public bool Reselecting = false;
+        public bool Uninstalling = false;
 
-        public InstallForm(IWin32Window owner)
+        public InstallForm(IWin32Window owner, bool uninstall = false)
         {
             Owner = owner as Form;
             InitializeComponent();
@@ -22,6 +23,7 @@ namespace CreamInstaller
             Text = Program.ApplicationName;
             Icon = Properties.Resources.Icon;
             logTextBox.BackColor = InstallationLog.Background;
+            Uninstalling = uninstall;
         }
 
         private int OperationsCount;
@@ -58,72 +60,102 @@ namespace CreamInstaller
             int cur = 0;
             foreach (string directory in selection.SteamApiDllDirectories)
             {
-                UpdateUser("Installing CreamAPI for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+                UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} CreamAPI for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
                 if (!Program.IsProgramRunningDialog(this, selection))
                 {
                     throw new OperationCanceledException();
                 }
-
                 string api = directory + @"\steam_api.dll";
                 string api_o = directory + @"\steam_api_o.dll";
-                if (File.Exists(api) && !File.Exists(api_o))
-                {
-                    File.Move(api, api_o);
-                    UpdateUser($"Renamed file: {api} -> steam_api_o.dll", InstallationLog.Resource);
-                }
-                if (File.Exists(api_o))
-                {
-                    Properties.Resources.API.Write(api);
-                    UpdateUser($"Wrote resource to file: {api}", InstallationLog.Resource);
-                }
                 string api64 = directory + @"\steam_api64.dll";
                 string api64_o = directory + @"\steam_api64_o.dll";
-                if (File.Exists(api64) && !File.Exists(api64_o))
-                {
-                    File.Move(api64, api64_o);
-                    UpdateUser($"Renamed file: {api64} -> steam_api64_o.dll", InstallationLog.Resource);
-                }
-                if (File.Exists(api64_o))
-                {
-                    Properties.Resources.API64.Write(api64);
-                    UpdateUser($"Wrote resource to file: {api64}", InstallationLog.Resource);
-                }
-                UpdateUser("Generating CreamAPI for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
                 string cApi = directory + @"\cream_api.ini";
-                File.Create(cApi).Close();
-                StreamWriter writer = new(cApi, true, Encoding.UTF8);
-                writer.WriteLine("; " + Application.CompanyName + " v" + Application.ProductVersion);
-                if (selection.SteamAppId > 0)
+                if (Uninstalling)
                 {
-                    writer.WriteLine();
-                    writer.WriteLine($"; {selection.Name}");
-                    writer.WriteLine("[steam]");
-                    writer.WriteLine($"appid = {selection.SteamAppId}");
-                    writer.WriteLine();
-                    writer.WriteLine("[dlc]");
-                    UpdateUser($"Added game to cream_api.ini with appid {selection.SteamAppId} ({selection.Name})", InstallationLog.Resource);
-                    foreach (KeyValuePair<int, string> dlcApp in selection.SelectedSteamDlc)
+                    if (File.Exists(api_o))
                     {
-                        writer.WriteLine($"{dlcApp.Key} = {dlcApp.Value}");
-                        UpdateUser($"Added DLC to cream_api.ini with appid {dlcApp.Key} ({dlcApp.Value})", InstallationLog.Resource);
+                        if (File.Exists(api))
+                        {
+                            File.Delete(api);
+                            UpdateUser($"Deleted file: {Path.GetFileName(api)}", InstallationLog.Resource);
+                        }
+                        File.Move(api_o, api);
+                        UpdateUser($"Renamed file: {Path.GetFileName(api_o)} -> {Path.GetFileName(api)}", InstallationLog.Resource);
+                    }
+                    if (File.Exists(api64_o))
+                    {
+                        if (File.Exists(api64))
+                        {
+                            File.Delete(api64);
+                            UpdateUser($"Deleted file: {Path.GetFileName(api64)}", InstallationLog.Resource);
+                        }
+                        File.Move(api64_o, api64);
+                        UpdateUser($"Renamed file: {Path.GetFileName(api64_o)} -> {Path.GetFileName(api64)}", InstallationLog.Resource);
+                    }
+                    if (File.Exists(cApi))
+                    {
+                        File.Delete(cApi);
+                        UpdateUser($"Deleted file: {Path.GetFileName(cApi)}", InstallationLog.Resource);
                     }
                 }
-                foreach (Tuple<int, string, SortedList<int, string>> extraAppDlc in selection.ExtraSteamAppIdDlc)
+                else
                 {
-                    writer.WriteLine();
-                    writer.WriteLine("[steam]");
-                    writer.WriteLine($"appid = {extraAppDlc.Item1}");
-                    writer.WriteLine();
-                    writer.WriteLine("[dlc]");
-                    UpdateUser($"Added game to cream_api.ini with appid {extraAppDlc.Item1} ({extraAppDlc.Item2})", InstallationLog.Resource);
-                    foreach (KeyValuePair<int, string> dlcApp in extraAppDlc.Item3)
+                    if (File.Exists(api) && !File.Exists(api_o))
                     {
-                        writer.WriteLine($"{dlcApp.Key} = {dlcApp.Value}");
-                        UpdateUser($"Added DLC to cream_api.ini with appid {dlcApp.Key} ({dlcApp.Value})", InstallationLog.Resource);
+                        File.Move(api, api_o);
+                        UpdateUser($"Renamed file: {Path.GetFileName(api)} -> {Path.GetFileName(api_o)}", InstallationLog.Resource);
                     }
+                    if (File.Exists(api_o))
+                    {
+                        Properties.Resources.API.Write(api);
+                        UpdateUser($"Wrote resource to file: {Path.GetFileName(api)}", InstallationLog.Resource);
+                    }
+                    if (File.Exists(api64) && !File.Exists(api64_o))
+                    {
+                        File.Move(api64, api64_o);
+                        UpdateUser($"Renamed file: {Path.GetFileName(api64)} -> {Path.GetFileName(api64_o)}", InstallationLog.Resource);
+                    }
+                    if (File.Exists(api64_o))
+                    {
+                        Properties.Resources.API64.Write(api64);
+                        UpdateUser($"Wrote resource to file: {Path.GetFileName(api64)}", InstallationLog.Resource);
+                    }
+                    UpdateUser("Generating CreamAPI for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+                    File.Create(cApi).Close();
+                    StreamWriter writer = new(cApi, true, Encoding.UTF8);
+                    writer.WriteLine("; " + Application.CompanyName + " v" + Application.ProductVersion);
+                    if (selection.SteamAppId > 0)
+                    {
+                        writer.WriteLine();
+                        writer.WriteLine($"; {selection.Name}");
+                        writer.WriteLine("[steam]");
+                        writer.WriteLine($"appid = {selection.SteamAppId}");
+                        writer.WriteLine();
+                        writer.WriteLine("[dlc]");
+                        UpdateUser($"Added game to cream_api.ini with appid {selection.SteamAppId} ({selection.Name})", InstallationLog.Resource);
+                        foreach (KeyValuePair<int, string> dlcApp in selection.SelectedSteamDlc)
+                        {
+                            writer.WriteLine($"{dlcApp.Key} = {dlcApp.Value}");
+                            UpdateUser($"Added DLC to cream_api.ini with appid {dlcApp.Key} ({dlcApp.Value})", InstallationLog.Resource);
+                        }
+                    }
+                    foreach (Tuple<int, string, SortedList<int, string>> extraAppDlc in selection.ExtraSteamAppIdDlc)
+                    {
+                        writer.WriteLine();
+                        writer.WriteLine("[steam]");
+                        writer.WriteLine($"appid = {extraAppDlc.Item1}");
+                        writer.WriteLine();
+                        writer.WriteLine("[dlc]");
+                        UpdateUser($"Added game to cream_api.ini with appid {extraAppDlc.Item1} ({extraAppDlc.Item2})", InstallationLog.Resource);
+                        foreach (KeyValuePair<int, string> dlcApp in extraAppDlc.Item3)
+                        {
+                            writer.WriteLine($"{dlcApp.Key} = {dlcApp.Value}");
+                            UpdateUser($"Added DLC to cream_api.ini with appid {dlcApp.Key} ({dlcApp.Value})", InstallationLog.Resource);
+                        }
+                    }
+                    writer.Flush();
+                    writer.Close();
                 }
-                writer.Flush();
-                writer.Close();
                 await Task.Run(() => Thread.Sleep(10)); // to keep the text box control from glitching
                 UpdateProgress(++cur / count * 100);
             }
