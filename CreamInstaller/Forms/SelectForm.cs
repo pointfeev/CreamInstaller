@@ -180,7 +180,18 @@ namespace CreamInstaller
             return true;
         }
 
-        private readonly List<TreeNode> treeNodes = new();
+        internal List<TreeNode> TreeNodes => GatherTreeNodes(selectionTreeView.Nodes);
+        private List<TreeNode> GatherTreeNodes(TreeNodeCollection nodeCollection)
+        {
+            List<TreeNode> treeNodes = new();
+            foreach (TreeNode rootNode in nodeCollection)
+            {
+                treeNodes.Add(rootNode);
+                treeNodes.AddRange(GatherTreeNodes(rootNode.Nodes));
+            }
+            return treeNodes;
+        }
+
         internal List<Task> RunningTasks = new();
 
         private void GetCreamApiApplicablePrograms(IProgress<int> progress)
@@ -217,6 +228,7 @@ namespace CreamInstaller
                 string branch = program.Item3;
                 int buildId = program.Item4;
                 string directory = program.Item5;
+                ProgramSelection selection = ProgramSelection.FromAppId(appId);
                 if (Program.Canceled)
                 {
                     return;
@@ -236,6 +248,11 @@ namespace CreamInstaller
                     }
                     if (blockedGame)
                     {
+                        if (selection is not null)
+                        {
+                            selection.Enabled = false;
+                            selection.Usable = false;
+                        }
                         continue;
                     }
                 }
@@ -315,7 +332,8 @@ namespace CreamInstaller
                         return;
                     }
 
-                    ProgramSelection selection = ProgramSelection.FromAppId(appId) ?? new();
+                    selection ??= new();
+                    selection.Usable = true;
                     selection.Name = name;
                     selection.RootDirectory = directory;
                     selection.SteamAppId = appId;
@@ -347,14 +365,12 @@ namespace CreamInstaller
                             return;
                         }
 
-                        TreeNode programNode = treeNodes.Find(s => s.Name == "" + appId) ?? new();
+                        TreeNode programNode = TreeNodes.Find(s => s.Name == "" + appId) ?? new();
                         programNode.Name = "" + appId;
                         programNode.Text = /*(appId > 0 ? $"[{appId}] " : "") +*/ name;
                         programNode.Checked = selection.Enabled;
                         programNode.Remove();
                         selectionTreeView.Nodes.Add(programNode);
-                        treeNodes.Remove(programNode);
-                        treeNodes.Add(programNode);
                         if (appId == 0) // paradox launcher
                         {
                             // maybe add game and/or dlc choice here?
@@ -374,14 +390,12 @@ namespace CreamInstaller
                                     selection.SelectedSteamDlc[dlcApp.Key] = dlcApp.Value;
                                 }
 
-                                TreeNode dlcNode = treeNodes.Find(s => s.Name == "" + dlcApp.Key) ?? new();
+                                TreeNode dlcNode = TreeNodes.Find(s => s.Name == "" + dlcApp.Key) ?? new();
                                 dlcNode.Name = "" + dlcApp.Key;
                                 dlcNode.Text = dlcApp.Value;
                                 dlcNode.Checked = selection.SelectedSteamDlc.Contains(dlcApp);
                                 dlcNode.Remove();
                                 programNode.Nodes.Add(dlcNode);
-                                treeNodes.Remove(dlcNode);
-                                treeNodes.Add(dlcNode);
                             }
                         }
                     });
@@ -405,148 +419,127 @@ namespace CreamInstaller
 
         private async void OnLoad(bool validating = false)
         {
-            Program.Canceled = false;
-            blockedGamesCheckBox.Enabled = false;
-            blockProtectedHelpButton.Enabled = false;
-            cancelButton.Enabled = true;
-            scanButton.Enabled = false;
-            noneFoundLabel.Visible = false;
-            allCheckBox.Enabled = false;
-            installButton.Enabled = false;
-            uninstallButton.Enabled = installButton.Enabled;
-            selectionTreeView.Enabled = false;
-
-            label2.Visible = true;
-            progressBar1.Visible = true;
-            progressBar1.Value = 0;
-            groupBox1.Size = new(groupBox1.Size.Width, groupBox1.Size.Height - 44);
-
-            bool setup = true;
-            int maxProgress = 0;
-            int curProgress = 0;
-            Progress<int> progress = new();
-            IProgress<int> iProgress = progress;
-            progress.ProgressChanged += (sender, _progress) =>
+        retry:
+            try
             {
-                if (_progress < 0)
+                Program.Canceled = false;
+                blockedGamesCheckBox.Enabled = false;
+                blockProtectedHelpButton.Enabled = false;
+                cancelButton.Enabled = true;
+                scanButton.Enabled = false;
+                noneFoundLabel.Visible = false;
+                allCheckBox.Enabled = false;
+                installButton.Enabled = false;
+                uninstallButton.Enabled = installButton.Enabled;
+                selectionTreeView.Enabled = false;
+
+                label2.Visible = true;
+                progressBar1.Visible = true;
+                progressBar1.Value = 0;
+                groupBox1.Size = new(groupBox1.Size.Width, groupBox1.Size.Height - 44);
+
+                bool setup = true;
+                int maxProgress = 0;
+                int curProgress = 0;
+                Progress<int> progress = new();
+                IProgress<int> iProgress = progress;
+                progress.ProgressChanged += (sender, _progress) =>
                 {
-                    maxProgress = -_progress;
-                }
-                else
+                    if (_progress < 0)
+                    {
+                        maxProgress = -_progress;
+                    }
+                    else
+                    {
+                        curProgress = _progress;
+                    }
+
+                    int p = Math.Max(Math.Min((int)((float)(curProgress / (float)maxProgress) * 100), 100), 0);
+                    if (validating)
+                    {
+                        label2.Text = $"Validating . . . {p}% ({curProgress}/{maxProgress})";
+                    }
+                    else if (setup)
+                    {
+                        label2.Text = $"Setting up SteamCMD . . . {p}% ({curProgress}/{maxProgress})";
+                    }
+                    else
+                    {
+                        label2.Text = $"Gathering and caching your applicable games and their DLCs . . . {p}% ({curProgress}/{maxProgress})";
+                    }
+
+                    progressBar1.Value = p;
+                };
+
+                iProgress.Report(-1660); // not exact, number varies
+                int cur = 0;
+                iProgress.Report(cur);
+                if (!validating)
                 {
-                    curProgress = _progress;
+                    label2.Text = "Setting up SteamCMD . . . ";
                 }
 
-                int p = Math.Max(Math.Min((int)((float)(curProgress / (float)maxProgress) * 100), 100), 0);
-                if (validating)
+                if (!Directory.Exists(SteamCMD.DirectoryPath))
                 {
-                    label2.Text = $"Validating . . . {p}% ({curProgress}/{maxProgress})";
-                }
-                else if (setup)
-                {
-                    label2.Text = $"Setting up SteamCMD . . . {p}% ({curProgress}/{maxProgress})";
-                }
-                else
-                {
-                    label2.Text = $"Gathering and caching your applicable games and their DLCs . . . {p}% ({curProgress}/{maxProgress})";
+                    Directory.CreateDirectory(SteamCMD.DirectoryPath);
                 }
 
-                progressBar1.Value = p;
-            };
+                FileSystemWatcher watcher = new(SteamCMD.DirectoryPath);
+                watcher.Changed += (sender, e) => iProgress.Report(++cur);
+                watcher.Filter = "*";
+                watcher.IncludeSubdirectories = true;
+                watcher.EnableRaisingEvents = true;
+                await Task.Run(() => SteamCMD.Setup());
+                watcher.Dispose();
 
-            iProgress.Report(-1660); // not exact, number varies
-            int cur = 0;
-            iProgress.Report(cur);
-            if (!validating)
-            {
-                label2.Text = "Setting up SteamCMD . . . ";
+                setup = false;
+                if (!validating)
+                {
+                    label2.Text = "Gathering and caching your applicable games and their DLCs . . . ";
+                }
+
+                await Task.Run(() => GetCreamApiApplicablePrograms(iProgress));
+                ProgramSelection.ValidateAll();
+                TreeNodes.ForEach(node =>
+                {
+                    if (node.Parent is null && ProgramSelection.FromAppId(int.Parse(node.Name)) is null)
+                    {
+                        node.Remove();
+                    }
+                });
+
+                progressBar1.Value = 100;
+                groupBox1.Size = new(groupBox1.Size.Width, groupBox1.Size.Height + 44);
+                label2.Visible = false;
+                progressBar1.Visible = false;
+
+                selectionTreeView.Enabled = ProgramSelection.All.Any();
+                allCheckBox.Enabled = selectionTreeView.Enabled;
+                noneFoundLabel.Visible = !selectionTreeView.Enabled;
+
+                installButton.Enabled = ProgramSelection.AllSafeEnabled.Any();
+                uninstallButton.Enabled = installButton.Enabled;
+                cancelButton.Enabled = false;
+                scanButton.Enabled = true;
+
+                blockedGamesCheckBox.Enabled = true;
+                blockProtectedHelpButton.Enabled = true;
+
+                label2.Text = "Validating . . . ";
+                if (!validating && !Program.Canceled)
+                {
+                    OnLoad(true);
+                }
             }
-
-            if (!Directory.Exists(SteamCMD.DirectoryPath))
+            catch (Exception e)
             {
-                Directory.CreateDirectory(SteamCMD.DirectoryPath);
-            }
-
-            FileSystemWatcher watcher = new(SteamCMD.DirectoryPath);
-            watcher.Changed += (sender, e) => iProgress.Report(++cur);
-            watcher.Filter = "*";
-            watcher.IncludeSubdirectories = true;
-            watcher.EnableRaisingEvents = true;
-            await Task.Run(() => SteamCMD.Setup());
-            watcher.Dispose();
-
-            setup = false;
-            if (!validating)
-            {
-                selectionTreeView.Nodes.Clear();
-                Program.ProgramSelections.Clear();
-                label2.Text = "Gathering and caching your applicable games and their DLCs . . . ";
-            }
-
-            await Task.Run(() => GetCreamApiApplicablePrograms(iProgress));
-            ProgramSelection.All.ForEach(selection => selection.SteamApiDllDirectories.RemoveAll(directory => !Directory.Exists(directory)));
-            ProgramSelection.All.RemoveAll(selection => !Directory.Exists(selection.RootDirectory) || !selection.SteamApiDllDirectories.Any());
-            foreach (TreeNode treeNode in treeNodes)
-            {
-                if (treeNode.Parent is null && ProgramSelection.FromAppId(int.Parse(treeNode.Name)) is null)
+                if (ExceptionHandler.OutputException(e))
                 {
-                    treeNode.Remove();
+                    goto retry;
                 }
-            }
-            //SetMinimumSizeFromTreeView();
-
-            progressBar1.Value = 100;
-            groupBox1.Size = new(groupBox1.Size.Width, groupBox1.Size.Height + 44);
-            label2.Visible = false;
-            progressBar1.Visible = false;
-
-            selectionTreeView.Enabled = ProgramSelection.All.Any();
-            allCheckBox.Enabled = selectionTreeView.Enabled;
-            noneFoundLabel.Visible = !selectionTreeView.Enabled;
-
-            installButton.Enabled = ProgramSelection.AllSafeEnabled.Any();
-            uninstallButton.Enabled = installButton.Enabled;
-            cancelButton.Enabled = false;
-            scanButton.Enabled = true;
-
-            blockedGamesCheckBox.Enabled = true;
-            blockProtectedHelpButton.Enabled = true;
-
-            label2.Text = "Validating . . . ";
-            if (!validating && !Program.Canceled)
-            {
-                OnLoad(true);
+                Close();
             }
         }
-
-        /*private const int GWL_STYLE = -16;
-        private const int WS_VSCROLL = 0x00200000;
-        private const int WS_HSCROLL = 0x00100000;
-
-        [DllImport("user32.dll", ExactSpelling = false, CharSet = CharSet.Auto)]
-        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-
-        private const int MINIMUM_SIZE_INCREMENT = 8;
-        private void SetMinimumSizeFromTreeView()
-        {
-            Dictionary<TreeNode, bool> expansionState = new();
-            foreach (TreeNode node in treeView1.Nodes) expansionState[node] = node.IsExpanded;
-            treeView1.ExpandAll();
-            Size minimumSize = MinimumSize;
-            Point point;
-            int style = GetWindowLong(treeView1.Handle, GWL_STYLE);
-            while ((style & WS_HSCROLL) != 0)
-            {
-                minimumSize.Width += MINIMUM_SIZE_INCREMENT;
-                point = Location;
-                point.X -= MINIMUM_SIZE_INCREMENT / 2;
-                Location = point;
-                MinimumSize = minimumSize;
-                style = GetWindowLong(treeView1.Handle, GWL_STYLE);
-                Update();
-            }
-            foreach (TreeNode node in treeView1.Nodes) if (!expansionState[node]) node.Collapse();
-        }*/
 
         private void OnTreeViewNodeCheckedChanged(object sender, TreeViewEventArgs e)
         {
@@ -554,28 +547,34 @@ namespace CreamInstaller
             {
                 return;
             }
-
-            ProgramSelection selection = ProgramSelection.FromAppId(int.Parse(e.Node.Name));
-            if (selection is null)
+            TreeNode node = e.Node;
+            if (node is not null)
             {
-                ProgramSelection.FromAppId(int.Parse(e.Node.Parent.Name)).ToggleDlc(int.Parse(e.Node.Name), e.Node.Checked);
-                e.Node.Parent.Checked = e.Node.Parent.Nodes.Cast<TreeNode>().ToList().Any(treeNode => treeNode.Checked);
-            }
-            else
-            {
-                if (selection.AllSteamDlc.Any())
+                ProgramSelection selection = ProgramSelection.FromAppId(int.Parse(node.Name));
+                if (selection is null)
                 {
-                    selection.ToggleAllDlc(e.Node.Checked);
-                    e.Node.Nodes.Cast<TreeNode>().ToList().ForEach(treeNode => treeNode.Checked = e.Node.Checked);
+                    TreeNode parent = node.Parent;
+                    if (parent is not null)
+                    {
+                        ProgramSelection.FromAppId(int.Parse(parent.Name)).ToggleDlc(int.Parse(node.Name), node.Checked);
+                        parent.Checked = parent.Nodes.Cast<TreeNode>().ToList().Any(treeNode => treeNode.Checked);
+                    }
                 }
                 else
                 {
-                    selection.Enabled = e.Node.Checked;
+                    if (selection.AllSteamDlc.Any())
+                    {
+                        selection.ToggleAllDlc(node.Checked);
+                        node.Nodes.Cast<TreeNode>().ToList().ForEach(treeNode => treeNode.Checked = node.Checked);
+                    }
+                    else
+                    {
+                        selection.Enabled = node.Checked;
+                    }
+                    allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
+                    allCheckBox.Checked = TreeNodes.TrueForAll(treeNode => treeNode.Checked);
+                    allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
                 }
-
-                allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
-                allCheckBox.Checked = treeNodes.TrueForAll(treeNode => treeNode.Checked);
-                allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
             }
             installButton.Enabled = ProgramSelection.AllSafeEnabled.Any();
             uninstallButton.Enabled = installButton.Enabled;
@@ -612,26 +611,13 @@ namespace CreamInstaller
                     }
                 }
             };
-        retry:
-            try
-            {
-                OnLoad();
-            }
-            catch (Exception e)
-            {
-                if (ExceptionHandler.OutputException(e))
-                {
-                    goto retry;
-                }
-
-                Close();
-            }
+            OnLoad();
         }
 
         private static void PopulateParadoxLauncherDlc(ProgramSelection paradoxLauncher = null)
         {
             paradoxLauncher ??= ProgramSelection.FromAppId(0);
-            if (!(paradoxLauncher is null))
+            if (paradoxLauncher is not null)
             {
                 paradoxLauncher.ExtraSteamAppIdDlc.Clear();
                 foreach (ProgramSelection selection in ProgramSelection.AllSafeEnabled)
@@ -640,12 +626,10 @@ namespace CreamInstaller
                     {
                         continue;
                     }
-
                     if (selection.AppInfo.Value["extended"]["publisher"].ToString() != "Paradox Interactive")
                     {
                         continue;
                     }
-
                     paradoxLauncher.ExtraSteamAppIdDlc.Add(new(selection.SteamAppId, selection.Name, selection.SelectedSteamDlc));
                 }
                 if (!paradoxLauncher.ExtraSteamAppIdDlc.Any())
@@ -656,12 +640,10 @@ namespace CreamInstaller
                         {
                             continue;
                         }
-
                         if (selection.AppInfo.Value["extended"]["publisher"].ToString() != "Paradox Interactive")
                         {
                             continue;
                         }
-
                         paradoxLauncher.ExtraSteamAppIdDlc.Add(new(selection.SteamAppId, selection.Name, selection.AllSteamDlc));
                     }
                 }
@@ -671,7 +653,7 @@ namespace CreamInstaller
         private static bool ParadoxLauncherDlcDialog(Form form)
         {
             ProgramSelection paradoxLauncher = ProgramSelection.FromAppId(0);
-            if (!(paradoxLauncher is null) && paradoxLauncher.Enabled)
+            if (paradoxLauncher is not null && paradoxLauncher.Enabled)
             {
                 PopulateParadoxLauncherDlc(paradoxLauncher);
                 if (!paradoxLauncher.ExtraSteamAppIdDlc.Any())
@@ -691,7 +673,7 @@ namespace CreamInstaller
 
         private void OnAccept(bool uninstall = false)
         {
-            if (ProgramSelection.All.Count > 0)
+            if (ProgramSelection.All.Any())
             {
                 foreach (ProgramSelection selection in ProgramSelection.AllSafeEnabled)
                 {
@@ -700,12 +682,10 @@ namespace CreamInstaller
                         return;
                     }
                 }
-
                 if (ParadoxLauncherDlcDialog(this))
                 {
                     return;
                 }
-
                 Hide();
                 InstallForm installForm = new(this, uninstall);
                 installForm.ShowDialog();
@@ -745,19 +725,21 @@ namespace CreamInstaller
         private void OnAllCheckBoxChanged(object sender, EventArgs e)
         {
             bool shouldCheck = false;
-            foreach (TreeNode treeNode in treeNodes)
+            TreeNodes.ForEach(node =>
             {
-                if (treeNode.Parent is null)
+                if (node.Parent is null)
                 {
-                    if (!treeNode.Checked)
+                    if (!node.Checked)
                     {
                         shouldCheck = true;
                     }
-
-                    treeNode.Checked = shouldCheck;
-                    OnTreeViewNodeCheckedChanged(null, new(treeNode, TreeViewAction.ByMouse));
+                    if (node.Checked != shouldCheck)
+                    {
+                        node.Checked = shouldCheck;
+                        OnTreeViewNodeCheckedChanged(null, new(node, TreeViewAction.ByMouse));
+                    }
                 }
-            }
+            });
             allCheckBox.Checked = shouldCheck;
         }
 

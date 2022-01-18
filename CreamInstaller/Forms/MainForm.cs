@@ -28,7 +28,7 @@ namespace CreamInstaller
 
         private void StartProgram()
         {
-            if (!(cancellationTokenSource is null))
+            if (cancellationTokenSource is not null)
             {
                 cancellationTokenSource.Cancel();
                 cancellationTokenSource.Dispose();
@@ -195,7 +195,7 @@ namespace CreamInstaller
             }
             catch { }
 
-            if (!(updateManager is null) && updateManager.IsUpdatePrepared(latestVersion))
+            if (updateManager is not null && updateManager.IsUpdatePrepared(latestVersion))
             {
                 updateManager.LaunchUpdater(latestVersion);
                 Application.Exit();

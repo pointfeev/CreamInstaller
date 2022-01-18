@@ -136,7 +136,7 @@ namespace CreamInstaller
                 goto restart;
             }
 
-            if (appInfo is null || (!(appInfo.Value is VValue) && appInfo.Value.Children().ToList().Count == 0))
+            if (appInfo is null || (appInfo.Value is not VValue && appInfo.Value.Children().ToList().Count == 0))
             {
                 return true;
             }
@@ -145,7 +145,7 @@ namespace CreamInstaller
             if (type is null || type.ToString() == "Game")
             {
                 string buildid = appInfo.Value is VValue ? null : appInfo.Value["depots"]?["branches"]?[branch]?["buildid"]?.ToString();
-                if (buildid is null && !(type is null))
+                if (buildid is null && type is not null)
                 {
                     return true;
                 }
@@ -174,12 +174,12 @@ namespace CreamInstaller
         public static List<int> ParseDlcAppIds(VProperty appInfo)
         {
             List<int> dlcIds = new();
-            if (!(appInfo is VProperty))
+            if (appInfo is not VProperty)
             {
                 return dlcIds;
             }
 
-            if (!(appInfo.Value["extended"] is null))
+            if (appInfo.Value["extended"] is not null)
             {
                 foreach (VProperty property in appInfo.Value["extended"])
                 {
@@ -196,7 +196,7 @@ namespace CreamInstaller
                 }
             }
 
-            if (!(appInfo.Value["depots"] is null))
+            if (appInfo.Value["depots"] is not null)
             {
                 foreach (VProperty _property in appInfo.Value["depots"])
                 {

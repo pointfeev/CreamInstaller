@@ -1,6 +1,7 @@
 ﻿using Gameloop.Vdf.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace CreamInstaller
@@ -8,6 +9,7 @@ namespace CreamInstaller
     public class ProgramSelection
     {
         public bool Enabled = false;
+        public bool Usable = true;
 
         public string Name;
         public string RootDirectory;
@@ -84,9 +86,23 @@ namespace CreamInstaller
             All.Add(this);
         }
 
+        public void Validate()
+        {
+            SteamApiDllDirectories.RemoveAll(directory => !Directory.Exists(directory));
+            if (!Directory.Exists(RootDirectory) || !SteamApiDllDirectories.Any())
+            {
+                All.Remove(this);
+            }
+        }
+
+        public static void ValidateAll()
+        {
+            All.ForEach(selection => selection.Validate());
+        }
+
         public static List<ProgramSelection> All => Program.ProgramSelections;
 
-        public static List<ProgramSelection> AllSafe => All.ToList();
+        public static List<ProgramSelection> AllSafe => All.FindAll(s => s.Usable);
 
         public static List<ProgramSelection> AllSafeEnabled => AllSafe.FindAll(s => s.Enabled);
 

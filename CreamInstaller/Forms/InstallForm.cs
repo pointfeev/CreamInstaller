@@ -36,7 +36,6 @@ namespace CreamInstaller
             {
                 return;
             }
-
             userProgressBar.Value = value;
         }
 
@@ -164,20 +163,15 @@ namespace CreamInstaller
 
         private async Task Operate()
         {
-            OperationsCount = ProgramSelection.AllSafeEnabled.Count;
+            List<ProgramSelection> programSelections = ProgramSelection.AllSafeEnabled;
+            OperationsCount = programSelections.Count;
             CompleteOperationsCount = 0;
-            foreach (ProgramSelection selection in ProgramSelection.AllSafe)
+            foreach (ProgramSelection selection in programSelections)
             {
-                if (!selection.Enabled)
-                {
-                    continue;
-                }
-
                 if (!Program.IsProgramRunningDialog(this, selection))
                 {
                     throw new OperationCanceledException();
                 }
-
                 try
                 {
                     await OperateFor(selection);
