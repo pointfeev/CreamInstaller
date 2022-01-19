@@ -51,6 +51,7 @@ namespace CreamInstaller
             // 
             this.userInfoLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.userInfoLabel.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.userInfoLabel.Location = new System.Drawing.Point(12, 9);
             this.userInfoLabel.Name = "userInfoLabel";
             this.userInfoLabel.Size = new System.Drawing.Size(760, 15);
@@ -61,6 +62,7 @@ namespace CreamInstaller
             // 
             this.acceptButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.acceptButton.Enabled = false;
+            this.acceptButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.acceptButton.Location = new System.Drawing.Point(697, 526);
             this.acceptButton.Name = "acceptButton";
             this.acceptButton.Size = new System.Drawing.Size(75, 23);
@@ -73,6 +75,7 @@ namespace CreamInstaller
             // 
             this.retryButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.retryButton.Enabled = false;
+            this.retryButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.retryButton.Location = new System.Drawing.Point(616, 526);
             this.retryButton.Name = "retryButton";
             this.retryButton.Size = new System.Drawing.Size(75, 23);
@@ -84,6 +87,7 @@ namespace CreamInstaller
             // cancelButton
             // 
             this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.cancelButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.cancelButton.Location = new System.Drawing.Point(12, 526);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
@@ -110,6 +114,7 @@ namespace CreamInstaller
             // reselectButton
             // 
             this.reselectButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.reselectButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.reselectButton.Location = new System.Drawing.Point(410, 526);
             this.reselectButton.Name = "reselectButton";
             this.reselectButton.Size = new System.Drawing.Size(200, 23);

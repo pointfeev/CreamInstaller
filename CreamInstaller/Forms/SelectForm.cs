@@ -596,12 +596,11 @@ namespace CreamInstaller
             selectionTreeView.AfterCheck += OnTreeViewNodeCheckedChanged;
             selectionTreeView.NodeMouseClick += (sender, e) =>
             {
-                if (e.Button == MouseButtons.Right)
+                TreeNode node = e.Node;
+                string appId = node.Name;
+                if (e.Button == MouseButtons.Right && node.Bounds.Contains(e.Location))
                 {
-                    ProgramSelection selection = ProgramSelection.FromAppId(int.Parse(e.Node.Name));
-                    KeyValuePair<int, string>? dlc = ProgramSelection.GetDlcFromAppId(int.Parse(e.Node.Name));
-                    int appId = selection?.SteamAppId ?? dlc?.Key ?? 0;
-                    if (appId > 0)
+                    if (appId != "0")
                     {
                         Process.Start(new ProcessStartInfo
                         {

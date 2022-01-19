@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
 
 namespace CreamInstaller
 {
@@ -21,46 +20,38 @@ namespace CreamInstaller
 
         public CustomTreeView() : base()
         {
-            //DrawMode = TreeViewDrawMode.OwnerDrawAll;
-            //DrawNode += new DrawTreeNodeEventHandler(DrawTreeNode);
-
-            closedGlyphRenderer = new(VisualStyleElement.TreeView.Glyph.Closed);
-            openedGlyphRenderer = new(VisualStyleElement.TreeView.Glyph.Opened);
+            DrawMode = TreeViewDrawMode.OwnerDrawAll;
+            DrawNode += new DrawTreeNodeEventHandler(DrawTreeNode);
         }
-
-        private readonly VisualStyleRenderer closedGlyphRenderer;
-        private readonly VisualStyleRenderer openedGlyphRenderer;
 
         private void DrawTreeNode(object sender, DrawTreeNodeEventArgs e)
         {
-            if (!e.Node.IsVisible)
+            e.DrawDefault = true;
+            TreeNode node = e.Node;
+            if (!node.IsVisible)
             {
                 return;
             }
 
-            e.Graphics.FillRectangle(new SolidBrush(BackColor), e.Bounds);
+            Graphics graphics = e.Graphics;
+            Color backColor = BackColor;
+            SolidBrush brush = new(backColor);
+            Font font = Font;
+            Font subFont = new(font.FontFamily, font.SizeInPoints, FontStyle.Regular, font.Unit, font.GdiCharSet, font.GdiVerticalFont);
 
-            int startX = e.Bounds.X + (e.Node.Parent is null ? 22 : 41);
-            int startY = e.Bounds.Y;
-
-            if (e.Node.Parent is null && e.Node.Nodes.Count > 0)
+            string subText = node.Name;
+            if (subText is null || subText == "0")
             {
-                if (e.Node.IsExpanded)
-                {
-                    openedGlyphRenderer.DrawBackground(e.Graphics, new(e.Bounds.X + startX / 2 - 8, startY, 16, 16));
-                }
-                else
-                {
-                    closedGlyphRenderer.DrawBackground(e.Graphics, new(e.Bounds.X + startX / 2 - 8, startY, 16, 16));
-                }
+                return;
             }
 
-            CheckBoxState checkBoxState = e.Node.TreeView.Enabled
-                    ? (e.Node.Checked ? CheckBoxState.CheckedNormal : CheckBoxState.UncheckedNormal)
-                    : (e.Node.Checked ? CheckBoxState.CheckedDisabled : CheckBoxState.UncheckedDisabled);
-            CheckBoxRenderer.DrawCheckBox(e.Graphics, new(startX, startY + 1), checkBoxState);
-
-            TextRenderer.DrawText(e.Graphics, e.Node.Text, e.Node.NodeFont, e.Node.Bounds.Location, Color.Black);
+            Size subSize = TextRenderer.MeasureText(graphics, subText, subFont);
+            Rectangle bounds = node.Bounds;
+            Rectangle subBounds = new(bounds.X + bounds.Width, bounds.Y, subSize.Width, bounds.Height);
+            graphics.FillRectangle(brush, subBounds);
+            Point location = subBounds.Location;
+            Point subLocation = new(location.X - 1, location.Y + 1);
+            TextRenderer.DrawText(graphics, subText, subFont, subLocation, Color.Gray);
         }
     }
 }

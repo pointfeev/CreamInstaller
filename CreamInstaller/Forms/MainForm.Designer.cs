@@ -41,6 +41,7 @@ namespace CreamInstaller
             // 
             // label1
             // 
+            this.label1.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.label1.Location = new System.Drawing.Point(12, 16);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(218, 15);
@@ -51,6 +52,7 @@ namespace CreamInstaller
             // 
             this.updateButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.updateButton.Enabled = false;
+            this.updateButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.updateButton.Location = new System.Drawing.Point(317, 12);
             this.updateButton.Name = "updateButton";
             this.updateButton.Size = new System.Drawing.Size(75, 23);
@@ -62,6 +64,7 @@ namespace CreamInstaller
             // 
             this.ignoreButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.ignoreButton.Enabled = false;
+            this.ignoreButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.ignoreButton.Location = new System.Drawing.Point(236, 12);
             this.ignoreButton.Name = "ignoreButton";
             this.ignoreButton.Size = new System.Drawing.Size(75, 23);

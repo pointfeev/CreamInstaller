@@ -46,10 +46,11 @@ namespace CreamInstaller
             this.cancelButton.AutoSize = true;
             this.cancelButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cancelButton.Location = new System.Drawing.Point(40, 9);
+            this.cancelButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.cancelButton.Location = new System.Drawing.Point(32, 9);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.cancelButton.Size = new System.Drawing.Size(111, 25);
+            this.cancelButton.Size = new System.Drawing.Size(115, 24);
             this.cancelButton.TabIndex = 1;
             this.cancelButton.Text = "cancelButton";
             this.cancelButton.UseVisualStyleBackColor = true;
@@ -60,10 +61,11 @@ namespace CreamInstaller
             this.acceptButton.AutoSize = true;
             this.acceptButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.acceptButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.acceptButton.Location = new System.Drawing.Point(157, 9);
+            this.acceptButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.acceptButton.Location = new System.Drawing.Point(153, 9);
             this.acceptButton.Name = "acceptButton";
             this.acceptButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.acceptButton.Size = new System.Drawing.Size(112, 25);
+            this.acceptButton.Size = new System.Drawing.Size(116, 24);
             this.acceptButton.TabIndex = 0;
             this.acceptButton.Text = "acceptButton";
             this.acceptButton.UseVisualStyleBackColor = true;
@@ -71,6 +73,7 @@ namespace CreamInstaller
             // descriptionLabel
             // 
             this.descriptionLabel.AutoSize = true;
+            this.descriptionLabel.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.descriptionLabel.Location = new System.Drawing.Point(69, 12);
             this.descriptionLabel.Name = "descriptionLabel";
             this.descriptionLabel.Size = new System.Drawing.Size(94, 15);
@@ -97,7 +100,7 @@ namespace CreamInstaller
             this.descriptionPanel.Margin = new System.Windows.Forms.Padding(0);
             this.descriptionPanel.Name = "descriptionPanel";
             this.descriptionPanel.Padding = new System.Windows.Forms.Padding(12, 12, 12, 6);
-            this.descriptionPanel.Size = new System.Drawing.Size(284, 72);
+            this.descriptionPanel.Size = new System.Drawing.Size(284, 73);
             this.descriptionPanel.TabIndex = 5;
             // 
             // buttonPanel
@@ -108,10 +111,10 @@ namespace CreamInstaller
             this.buttonPanel.Controls.Add(this.cancelButton);
             this.buttonPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.buttonPanel.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.buttonPanel.Location = new System.Drawing.Point(0, 72);
+            this.buttonPanel.Location = new System.Drawing.Point(0, 73);
             this.buttonPanel.Name = "buttonPanel";
             this.buttonPanel.Padding = new System.Windows.Forms.Padding(12, 6, 0, 12);
-            this.buttonPanel.Size = new System.Drawing.Size(284, 49);
+            this.buttonPanel.Size = new System.Drawing.Size(284, 48);
             this.buttonPanel.TabIndex = 6;
             // 
             // DialogForm
