@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace CreamInstaller
 {
-    public class CustomTreeView : TreeView
+    internal class CustomTreeView : TreeView
     {
         protected override void WndProc(ref Message m)
         {
@@ -18,7 +18,7 @@ namespace CreamInstaller
             }
         }
 
-        public CustomTreeView() : base()
+        internal CustomTreeView() : base()
         {
             DrawMode = TreeViewDrawMode.OwnerDrawAll;
             DrawNode += new DrawTreeNodeEventHandler(DrawTreeNode);

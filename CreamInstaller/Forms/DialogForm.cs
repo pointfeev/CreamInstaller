@@ -3,16 +3,14 @@ using System.Windows.Forms;
 
 namespace CreamInstaller
 {
-    public partial class DialogForm : Form
+    internal partial class DialogForm : CustomForm
     {
-        public DialogForm(IWin32Window owner)
+        internal DialogForm(IWin32Window owner) : base(owner)
         {
-            Owner = owner as Form;
             InitializeComponent();
-            Icon = Properties.Resources.Icon;
         }
 
-        public DialogResult Show(string formName, Icon descriptionIcon, string descriptionText, string acceptButtonText, string cancelButtonText = null)
+        internal DialogResult Show(string formName, Icon descriptionIcon, string descriptionText, string acceptButtonText, string cancelButtonText = null)
         {
             icon.Image = descriptionIcon.ToBitmap();
             Text = formName;

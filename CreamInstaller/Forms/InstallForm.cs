@@ -10,18 +10,16 @@ using System.Windows.Forms;
 
 namespace CreamInstaller
 {
-    public partial class InstallForm : Form
+    internal partial class InstallForm : CustomForm
     {
-        public bool Reselecting = false;
-        public bool Uninstalling = false;
+        internal bool Reselecting = false;
+        internal bool Uninstalling = false;
 
-        public InstallForm(IWin32Window owner, bool uninstall = false)
+        internal InstallForm(IWin32Window owner, bool uninstall = false) : base(owner)
         {
-            Owner = owner as Form;
             InitializeComponent();
-            Program.InstallForm = this;
             Text = Program.ApplicationName;
-            Icon = Properties.Resources.Icon;
+            Program.InstallForm = this;
             logTextBox.BackColor = InstallationLog.Background;
             Uninstalling = uninstall;
         }
@@ -29,7 +27,7 @@ namespace CreamInstaller
         private int OperationsCount;
         private int CompleteOperationsCount;
 
-        public void UpdateProgress(int progress)
+        internal void UpdateProgress(int progress)
         {
             int value = (int)((float)(CompleteOperationsCount / (float)OperationsCount) * 100) + (progress / OperationsCount);
             if (value < userProgressBar.Value)
@@ -39,7 +37,7 @@ namespace CreamInstaller
             userProgressBar.Value = value;
         }
 
-        public void UpdateUser(string text, Color color, bool log = true)
+        internal async Task UpdateUser(string text, Color color, bool log = true)
         {
             userInfoLabel.Text = text;
             if (log && !logTextBox.IsDisposed)
@@ -50,6 +48,23 @@ namespace CreamInstaller
                 }
                 logTextBox.AppendText(userInfoLabel.Text, color);
             }
+            await Task.Run(() => Thread.Sleep(1)); // to keep the text box control from glitching
+        }
+
+        internal async Task WriteConfiguration(StreamWriter writer, int steamAppId, string name, SortedList<int, string> steamDlcApps)
+        {
+            writer.WriteLine();
+            writer.WriteLine($"; {name}");
+            writer.WriteLine("[steam]");
+            writer.WriteLine($"appid = {steamAppId}");
+            writer.WriteLine();
+            writer.WriteLine("[dlc]");
+            await UpdateUser($"Added game to cream_api.ini with appid {steamAppId} ({name})", InstallationLog.Resource);
+            foreach (KeyValuePair<int, string> dlcApp in steamDlcApps)
+            {
+                writer.WriteLine($"{dlcApp.Key} = {dlcApp.Value}");
+                await UpdateUser($"Added DLC to cream_api.ini with appid {dlcApp.Key} ({dlcApp.Value})", InstallationLog.Resource);
+            }
         }
 
         private async Task OperateFor(ProgramSelection selection)
@@ -59,7 +74,7 @@ namespace CreamInstaller
             int cur = 0;
             foreach (string directory in selection.SteamApiDllDirectories)
             {
-                UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} CreamAPI for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+                await UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} CreamAPI for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
                 if (!Program.IsProgramRunningDialog(this, selection))
                 {
                     throw new OperationCanceledException();
@@ -76,25 +91,25 @@ namespace CreamInstaller
                         if (File.Exists(api))
                         {
                             File.Delete(api);
-                            UpdateUser($"Deleted file: {Path.GetFileName(api)}", InstallationLog.Resource);
+                            await UpdateUser($"Deleted file: {Path.GetFileName(api)}", InstallationLog.Resource);
                         }
                         File.Move(api_o, api);
-                        UpdateUser($"Renamed file: {Path.GetFileName(api_o)} -> {Path.GetFileName(api)}", InstallationLog.Resource);
+                        await UpdateUser($"Renamed file: {Path.GetFileName(api_o)} -> {Path.GetFileName(api)}", InstallationLog.Resource);
                     }
                     if (File.Exists(api64_o))
                     {
                         if (File.Exists(api64))
                         {
                             File.Delete(api64);
-                            UpdateUser($"Deleted file: {Path.GetFileName(api64)}", InstallationLog.Resource);
+                            await UpdateUser($"Deleted file: {Path.GetFileName(api64)}", InstallationLog.Resource);
                         }
                         File.Move(api64_o, api64);
-                        UpdateUser($"Renamed file: {Path.GetFileName(api64_o)} -> {Path.GetFileName(api64)}", InstallationLog.Resource);
+                        await UpdateUser($"Renamed file: {Path.GetFileName(api64_o)} -> {Path.GetFileName(api64)}", InstallationLog.Resource);
                     }
                     if (File.Exists(cApi))
                     {
                         File.Delete(cApi);
-                        UpdateUser($"Deleted file: {Path.GetFileName(cApi)}", InstallationLog.Resource);
+                        await UpdateUser($"Deleted file: {Path.GetFileName(cApi)}", InstallationLog.Resource);
                     }
                 }
                 else
@@ -102,60 +117,38 @@ namespace CreamInstaller
                     if (File.Exists(api) && !File.Exists(api_o))
                     {
                         File.Move(api, api_o);
-                        UpdateUser($"Renamed file: {Path.GetFileName(api)} -> {Path.GetFileName(api_o)}", InstallationLog.Resource);
+                        await UpdateUser($"Renamed file: {Path.GetFileName(api)} -> {Path.GetFileName(api_o)}", InstallationLog.Resource);
                     }
                     if (File.Exists(api_o))
                     {
                         Properties.Resources.API.Write(api);
-                        UpdateUser($"Wrote resource to file: {Path.GetFileName(api)}", InstallationLog.Resource);
+                        await UpdateUser($"Wrote resource to file: {Path.GetFileName(api)}", InstallationLog.Resource);
                     }
                     if (File.Exists(api64) && !File.Exists(api64_o))
                     {
                         File.Move(api64, api64_o);
-                        UpdateUser($"Renamed file: {Path.GetFileName(api64)} -> {Path.GetFileName(api64_o)}", InstallationLog.Resource);
+                        await UpdateUser($"Renamed file: {Path.GetFileName(api64)} -> {Path.GetFileName(api64_o)}", InstallationLog.Resource);
                     }
                     if (File.Exists(api64_o))
                     {
                         Properties.Resources.API64.Write(api64);
-                        UpdateUser($"Wrote resource to file: {Path.GetFileName(api64)}", InstallationLog.Resource);
+                        await UpdateUser($"Wrote resource to file: {Path.GetFileName(api64)}", InstallationLog.Resource);
                     }
-                    UpdateUser("Generating CreamAPI for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+                    await UpdateUser("Generating CreamAPI for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
                     File.Create(cApi).Close();
                     StreamWriter writer = new(cApi, true, Encoding.UTF8);
                     writer.WriteLine("; " + Application.CompanyName + " v" + Application.ProductVersion);
                     if (selection.SteamAppId > 0)
                     {
-                        writer.WriteLine();
-                        writer.WriteLine($"; {selection.Name}");
-                        writer.WriteLine("[steam]");
-                        writer.WriteLine($"appid = {selection.SteamAppId}");
-                        writer.WriteLine();
-                        writer.WriteLine("[dlc]");
-                        UpdateUser($"Added game to cream_api.ini with appid {selection.SteamAppId} ({selection.Name})", InstallationLog.Resource);
-                        foreach (KeyValuePair<int, string> dlcApp in selection.SelectedSteamDlc)
-                        {
-                            writer.WriteLine($"{dlcApp.Key} = {dlcApp.Value}");
-                            UpdateUser($"Added DLC to cream_api.ini with appid {dlcApp.Key} ({dlcApp.Value})", InstallationLog.Resource);
-                        }
+                        await WriteConfiguration(writer, selection.SteamAppId, selection.Name, selection.SelectedSteamDlc);
                     }
                     foreach (Tuple<int, string, SortedList<int, string>> extraAppDlc in selection.ExtraSteamAppIdDlc)
                     {
-                        writer.WriteLine();
-                        writer.WriteLine("[steam]");
-                        writer.WriteLine($"appid = {extraAppDlc.Item1}");
-                        writer.WriteLine();
-                        writer.WriteLine("[dlc]");
-                        UpdateUser($"Added game to cream_api.ini with appid {extraAppDlc.Item1} ({extraAppDlc.Item2})", InstallationLog.Resource);
-                        foreach (KeyValuePair<int, string> dlcApp in extraAppDlc.Item3)
-                        {
-                            writer.WriteLine($"{dlcApp.Key} = {dlcApp.Value}");
-                            UpdateUser($"Added DLC to cream_api.ini with appid {dlcApp.Key} ({dlcApp.Value})", InstallationLog.Resource);
-                        }
+                        await WriteConfiguration(writer, extraAppDlc.Item1, extraAppDlc.Item2, extraAppDlc.Item3);
                     }
                     writer.Flush();
                     writer.Close();
                 }
-                await Task.Run(() => Thread.Sleep(10)); // to keep the text box control from glitching
                 UpdateProgress(++cur / count * 100);
             }
             UpdateProgress(100);
@@ -175,16 +168,16 @@ namespace CreamInstaller
                 try
                 {
                     await OperateFor(selection);
-                    UpdateUser($"Operation succeeded for {selection.Name}.", InstallationLog.Success);
+                    await UpdateUser($"Operation succeeded for {selection.Name}.", InstallationLog.Success);
                     selection.Enabled = false;
                 }
                 catch (Exception exception)
                 {
-                    UpdateUser($"Operation failed for {selection.Name}: " + exception.ToString(), InstallationLog.Error);
+                    await UpdateUser($"Operation failed for {selection.Name}: " + exception.ToString(), InstallationLog.Error);
                 }
                 ++CompleteOperationsCount;
             }
-            Program.Cleanup();
+            await Program.Cleanup();
             List<ProgramSelection> FailedSelections = ProgramSelection.AllSafeEnabled;
             if (FailedSelections.Any())
             {
@@ -211,11 +204,11 @@ namespace CreamInstaller
             try
             {
                 await Operate();
-                UpdateUser($"CreamAPI successfully {(Uninstalling ? "uninstalled" : "installed and generated")} for " + ProgramCount + " program(s).", InstallationLog.Success);
+                await UpdateUser($"CreamAPI successfully {(Uninstalling ? "uninstalled" : "installed and generated")} for " + ProgramCount + " program(s).", InstallationLog.Success);
             }
             catch (Exception exception)
             {
-                UpdateUser($"CreamAPI {(Uninstalling ? "uninstallation" : "installation and/or generation")} failed: " + exception.ToString(), InstallationLog.Error);
+                await UpdateUser($"CreamAPI {(Uninstalling ? "uninstallation" : "installation and/or generation")} failed: " + exception.ToString(), InstallationLog.Error);
                 retryButton.Enabled = true;
             }
             userProgressBar.Value = userProgressBar.Maximum;
@@ -239,31 +232,30 @@ namespace CreamInstaller
                 {
                     goto retry;
                 }
-
                 Close();
             }
         }
 
         private void OnAccept(object sender, EventArgs e)
         {
-            Program.Cleanup();
+            Program.Cleanup().Wait();
             Close();
         }
 
         private void OnRetry(object sender, EventArgs e)
         {
-            Program.Cleanup();
+            Program.Cleanup().Wait();
             Start();
         }
 
         private void OnCancel(object sender, EventArgs e)
         {
-            Program.Cleanup();
+            Program.Cleanup().Wait();
         }
 
         private void OnReselect(object sender, EventArgs e)
         {
-            Program.Cleanup();
+            Program.Cleanup().Wait();
             Reselecting = true;
             Close();
         }

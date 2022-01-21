@@ -6,23 +6,23 @@ using System.Linq;
 
 namespace CreamInstaller
 {
-    public class ProgramSelection
+    internal class ProgramSelection
     {
-        public bool Enabled = false;
-        public bool Usable = true;
+        internal bool Enabled = false;
+        internal bool Usable = true;
 
-        public string Name;
-        public string RootDirectory;
-        public int SteamAppId;
-        public List<string> SteamApiDllDirectories;
+        internal string Name;
+        internal string RootDirectory;
+        internal int SteamAppId;
+        internal List<string> SteamApiDllDirectories;
 
-        public VProperty AppInfo = null;
+        internal VProperty AppInfo = null;
 
-        public readonly SortedList<int, string> AllSteamDlc = new();
-        public readonly SortedList<int, string> SelectedSteamDlc = new();
-        public readonly List<Tuple<int, string, SortedList<int, string>>> ExtraSteamAppIdDlc = new();
+        internal readonly SortedList<int, string> AllSteamDlc = new();
+        internal readonly SortedList<int, string> SelectedSteamDlc = new();
+        internal readonly List<Tuple<int, string, SortedList<int, string>>> ExtraSteamAppIdDlc = new();
 
-        public bool AreSteamApiDllsLocked
+        internal bool AreSteamApiDllsLocked
         {
             get
             {
@@ -51,7 +51,7 @@ namespace CreamInstaller
             }
         }
 
-        public void ToggleDlc(int dlcAppId, bool enabled)
+        internal void ToggleDlc(int dlcAppId, bool enabled)
         {
             foreach (KeyValuePair<int, string> dlcApp in AllSteamDlc)
             {
@@ -64,7 +64,7 @@ namespace CreamInstaller
             Enabled = SelectedSteamDlc.Any();
         }
 
-        public void ToggleAllDlc(bool enabled)
+        internal void ToggleAllDlc(bool enabled)
         {
             if (!enabled)
             {
@@ -81,12 +81,12 @@ namespace CreamInstaller
             Enabled = SelectedSteamDlc.Any();
         }
 
-        public ProgramSelection()
+        internal ProgramSelection()
         {
             All.Add(this);
         }
 
-        public void Validate()
+        internal void Validate()
         {
             SteamApiDllDirectories.RemoveAll(directory => !Directory.Exists(directory));
             if (!Directory.Exists(RootDirectory) || !SteamApiDllDirectories.Any())
@@ -95,23 +95,23 @@ namespace CreamInstaller
             }
         }
 
-        public static void ValidateAll()
+        internal static void ValidateAll()
         {
             All.ForEach(selection => selection.Validate());
         }
 
-        public static List<ProgramSelection> All => Program.ProgramSelections;
+        internal static List<ProgramSelection> All => Program.ProgramSelections;
 
-        public static List<ProgramSelection> AllSafe => All.FindAll(s => s.Usable);
+        internal static List<ProgramSelection> AllSafe => All.FindAll(s => s.Usable);
 
-        public static List<ProgramSelection> AllSafeEnabled => AllSafe.FindAll(s => s.Enabled);
+        internal static List<ProgramSelection> AllSafeEnabled => AllSafe.FindAll(s => s.Enabled);
 
-        public static ProgramSelection FromAppId(int appId)
+        internal static ProgramSelection FromAppId(int appId)
         {
             return AllSafe.Find(s => s.SteamAppId == appId);
         }
 
-        public static KeyValuePair<int, string>? GetDlcFromAppId(int appId)
+        internal static KeyValuePair<int, string>? GetDlcFromAppId(int appId)
         {
             foreach (ProgramSelection selection in AllSafe)
             {

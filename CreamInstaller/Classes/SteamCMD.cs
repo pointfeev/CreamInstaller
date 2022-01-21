@@ -8,26 +8,30 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CreamInstaller
 {
-    public static class SteamCMD
+    internal static class SteamCMD
     {
-        public static readonly string DirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\CreamInstaller";
-        public static readonly string FilePath = DirectoryPath + @"\steamcmd.exe";
-        public static readonly string ArchivePath = DirectoryPath + @"\steamcmd.zip";
-        public static readonly string DllPath = DirectoryPath + @"\steamclient.dll";
-        public static readonly string AppCachePath = DirectoryPath + @"\appcache";
-        public static readonly string AppCacheAppInfoPath = AppCachePath + @"\appinfo.vdf";
-        public static readonly string AppInfoPath = DirectoryPath + @"\appinfo";
+        internal static readonly string DirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\CreamInstaller";
+        internal static readonly string FilePath = DirectoryPath + @"\steamcmd.exe";
+        internal static readonly string ArchivePath = DirectoryPath + @"\steamcmd.zip";
+        internal static readonly string DllPath = DirectoryPath + @"\steamclient.dll";
+        internal static readonly string AppCachePath = DirectoryPath + @"\appcache";
+        internal static readonly string AppCacheAppInfoPath = AppCachePath + @"\appinfo.vdf";
+        internal static readonly string AppInfoPath = DirectoryPath + @"\appinfo";
 
-        public static readonly Version MinimumAppInfoVersion = Version.Parse("2.0.3.2");
-        public static readonly string AppInfoVersionPath = AppInfoPath + @"\version.txt";
+        internal static readonly Version MinimumAppInfoVersion = Version.Parse("2.0.3.2");
+        internal static readonly string AppInfoVersionPath = AppInfoPath + @"\version.txt";
 
-        public static bool Run(string command, out string output)
+        internal static string Run(string command)
         {
-            bool success = true;
+            if (Program.Canceled)
+            {
+                return "";
+            }
             List<string> logs = new();
             ProcessStartInfo processStartInfo = new()
             {
@@ -50,18 +54,17 @@ namespace CreamInstaller
                 process.BeginErrorReadLine();
                 process.WaitForExit();
             }
-            output = string.Join("\r\n", logs);
-            return success;
+            return string.Join("\r\n", logs);
         }
 
-        public static void Setup()
+        internal static async Task Setup()
         {
-            Kill();
+            await Kill();
             if (!File.Exists(FilePath))
             {
                 using (HttpClient httpClient = new())
                 {
-                    byte[] file = httpClient.GetByteArrayAsync("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip").Result;
+                    byte[] file = await httpClient.GetByteArrayAsync("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip");
                     file.Write(ArchivePath);
                 }
 
@@ -85,11 +88,11 @@ namespace CreamInstaller
             }
             if (!File.Exists(DllPath))
             {
-                Run($@"+quit", out _);
+                Run($@"+quit");
             }
         }
 
-        public static bool GetAppInfo(int appId, out VProperty appInfo, string branch = "public", int buildId = 0)
+        internal static bool GetAppInfo(int appId, out VProperty appInfo, string branch = "public", int buildId = 0)
         {
             appInfo = null;
             if (Program.Canceled)
@@ -101,14 +104,19 @@ namespace CreamInstaller
             string appUpdatePath = $@"{AppInfoPath}\{appId}";
             string appUpdateFile = $@"{appUpdatePath}\appinfo.txt";
         restart:
+            if (Program.Canceled)
+            {
+                return false;
+            }
+
             if (Directory.Exists(appUpdatePath) && File.Exists(appUpdateFile))
             {
                 output = File.ReadAllText(appUpdateFile, Encoding.UTF8);
             }
             else
             {
-                Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {appId} +force_install_dir {appUpdatePath} +app_update 4 +quit", out _);
-                Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {appId} +quit", out output);
+                Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {appId} +force_install_dir {appUpdatePath} +app_update 4 +quit");
+                output = Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {appId} +quit");
                 int openBracket = output.IndexOf("{");
                 int closeBracket = output.LastIndexOf("}");
                 if (openBracket != -1 && closeBracket != -1)
@@ -149,7 +157,6 @@ namespace CreamInstaller
                 {
                     return true;
                 }
-
                 if (type is null || int.Parse(buildid) < buildId)
                 {
                     foreach (int id in ParseDlcAppIds(appInfo))
@@ -164,14 +171,13 @@ namespace CreamInstaller
                     {
                         Directory.Delete(appUpdatePath, true);
                     }
-
                     goto restart;
                 }
             }
             return true;
         }
 
-        public static List<int> ParseDlcAppIds(VProperty appInfo)
+        internal static List<int> ParseDlcAppIds(VProperty appInfo)
         {
             List<int> dlcIds = new();
             if (appInfo is not VProperty)
@@ -213,17 +219,23 @@ namespace CreamInstaller
             return dlcIds;
         }
 
-        public static void Kill()
+        internal static async Task Kill()
         {
+            List<Task> tasks = new();
             foreach (Process process in Process.GetProcessesByName("steamcmd"))
             {
                 process.Kill();
+                tasks.Add(Task.Run(() => process.WaitForExit()));
+            }
+            foreach (Task task in tasks)
+            {
+                await task;
             }
         }
 
-        public static void Dispose()
+        internal static void Dispose()
         {
-            Kill();
+            Kill().Wait();
             if (Directory.Exists(DirectoryPath))
             {
                 Directory.Delete(DirectoryPath, true);

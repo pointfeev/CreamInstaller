@@ -43,7 +43,7 @@ namespace CreamInstaller
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.allCheckBox = new System.Windows.Forms.CheckBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.label2 = new System.Windows.Forms.Label();
+            this.progressLabel = new System.Windows.Forms.Label();
             this.scanButton = new System.Windows.Forms.Button();
             this.uninstallButton = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
@@ -208,13 +208,13 @@ namespace CreamInstaller
             // 
             // label2
             // 
-            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.progressLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.label2.Location = new System.Drawing.Point(12, 279);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(760, 15);
-            this.label2.TabIndex = 10;
-            this.label2.Text = "Loading . . .";
+            this.progressLabel.Location = new System.Drawing.Point(12, 279);
+            this.progressLabel.Name = "label2";
+            this.progressLabel.Size = new System.Drawing.Size(760, 15);
+            this.progressLabel.TabIndex = 10;
+            this.progressLabel.Text = "Loading . . .";
             // 
             // scanButton
             // 
@@ -254,7 +254,7 @@ namespace CreamInstaller
             this.Controls.Add(this.label1);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.installButton);
-            this.Controls.Add(this.label2);
+            this.Controls.Add(this.progressLabel);
             this.DoubleBuffered = true;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -280,7 +280,7 @@ namespace CreamInstaller
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.ProgressBar progressBar1;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label progressLabel;
         private System.Windows.Forms.CheckBox allCheckBox;
         private Button scanButton;
         private Label noneFoundLabel;

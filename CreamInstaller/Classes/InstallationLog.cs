@@ -3,17 +3,17 @@ using System.Windows.Forms;
 
 namespace CreamInstaller
 {
-    public static class InstallationLog
+    internal static class InstallationLog
     {
-        public static readonly Color Background = Color.DarkSlateGray;
-        public static readonly Color Operation = Color.LightGray;
-        public static readonly Color Resource = Color.LightBlue;
-        public static readonly Color Success = Color.LightGreen;
-        public static readonly Color Cleanup = Color.YellowGreen;
-        public static readonly Color Warning = Color.Yellow;
-        public static readonly Color Error = Color.DarkOrange;
+        internal static readonly Color Background = Color.DarkSlateGray;
+        internal static readonly Color Operation = Color.LightGray;
+        internal static readonly Color Resource = Color.LightBlue;
+        internal static readonly Color Success = Color.LightGreen;
+        internal static readonly Color Cleanup = Color.YellowGreen;
+        internal static readonly Color Warning = Color.Yellow;
+        internal static readonly Color Error = Color.DarkOrange;
 
-        public static void AppendText(this RichTextBox logTextBox, string text, Color color)
+        internal static void AppendText(this RichTextBox logTextBox, string text, Color color)
         {
             logTextBox.SelectionStart = logTextBox.TextLength;
             logTextBox.SelectionLength = 0;

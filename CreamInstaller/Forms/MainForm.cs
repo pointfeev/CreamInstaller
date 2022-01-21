@@ -15,13 +15,12 @@ using System.Windows.Forms;
 
 namespace CreamInstaller
 {
-    public partial class MainForm : Form
+    internal partial class MainForm : CustomForm
     {
-        public MainForm()
+        internal MainForm() : base()
         {
             InitializeComponent();
             Text = Program.ApplicationName;
-            Icon = Properties.Resources.Icon;
         }
 
         private static CancellationTokenSource cancellationTokenSource;

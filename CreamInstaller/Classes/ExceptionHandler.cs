@@ -3,9 +3,9 @@ using System.Windows.Forms;
 
 namespace CreamInstaller
 {
-    public static class ExceptionHandler
+    internal static class ExceptionHandler
     {
-        public static bool OutputException(Exception e)
+        internal static bool OutputException(Exception e)
         {
             while (e.InnerException is not null)
             {
@@ -48,7 +48,7 @@ namespace CreamInstaller
         }
     }
 
-    public class CustomMessageException : Exception
+    internal class CustomMessageException : Exception
     {
         private readonly string message;
         public override string Message => message ?? "CustomMessageException";
@@ -58,7 +58,7 @@ namespace CreamInstaller
             return Message;
         }
 
-        public CustomMessageException(string message)
+        internal CustomMessageException(string message)
         {
             this.message = message;
         }

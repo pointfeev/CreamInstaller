@@ -15,15 +15,13 @@ using System.Windows.Forms;
 
 namespace CreamInstaller
 {
-    public partial class SelectForm : Form
+    internal partial class SelectForm : CustomForm
     {
-        public SelectForm(IWin32Window owner)
+        internal SelectForm(IWin32Window owner) : base(owner)
         {
-            Owner = owner as Form;
             InitializeComponent();
-            Program.SelectForm = this;
             Text = Program.ApplicationName;
-            Icon = Properties.Resources.Icon;
+            Program.SelectForm = this;
         }
 
         private static List<string> GameLibraryDirectories
@@ -194,7 +192,7 @@ namespace CreamInstaller
 
         internal List<Task> RunningTasks = new();
 
-        private void GetCreamApiApplicablePrograms(IProgress<int> progress)
+        private async Task GetCreamApiApplicablePrograms(IProgress<int> progress)
         {
             int cur = 0;
             if (Program.Canceled)
@@ -256,7 +254,7 @@ namespace CreamInstaller
                         continue;
                     }
                 }
-                Task task = Task.Run(() =>
+                Task task = Task.Run(async () =>
                 {
                     if (Program.Canceled || !GetDllDirectoriesFromGameDirectory(directory, out List<string> dllDirectories))
                     {
@@ -350,8 +348,7 @@ namespace CreamInstaller
                         {
                             return;
                         }
-
-                        task.Wait();
+                        await task;
                     }
                     if (Program.Canceled)
                     {
@@ -411,8 +408,7 @@ namespace CreamInstaller
                 {
                     return;
                 }
-
-                task.Wait();
+                await task;
             }
             progress.Report(RunningTasks.Count);
         }
@@ -433,7 +429,7 @@ namespace CreamInstaller
                 uninstallButton.Enabled = installButton.Enabled;
                 selectionTreeView.Enabled = false;
 
-                label2.Visible = true;
+                progressLabel.Visible = true;
                 progressBar1.Visible = true;
                 progressBar1.Value = 0;
                 groupBox1.Size = new(groupBox1.Size.Width, groupBox1.Size.Height - 44);
@@ -457,15 +453,15 @@ namespace CreamInstaller
                     int p = Math.Max(Math.Min((int)((float)(curProgress / (float)maxProgress) * 100), 100), 0);
                     if (validating)
                     {
-                        label2.Text = $"Validating . . . {p}% ({curProgress}/{maxProgress})";
+                        progressLabel.Text = $"Validating . . . {p}% ({curProgress}/{maxProgress})";
                     }
                     else if (setup)
                     {
-                        label2.Text = $"Setting up SteamCMD . . . {p}% ({curProgress}/{maxProgress})";
+                        progressLabel.Text = $"Setting up SteamCMD . . . {p}% ({curProgress}/{maxProgress})";
                     }
                     else
                     {
-                        label2.Text = $"Gathering and caching your applicable games and their DLCs . . . {p}% ({curProgress}/{maxProgress})";
+                        progressLabel.Text = $"Gathering and caching your applicable games and their DLCs . . . {p}% ({curProgress}/{maxProgress})";
                     }
 
                     progressBar1.Value = p;
@@ -476,7 +472,7 @@ namespace CreamInstaller
                 iProgress.Report(cur);
                 if (!validating)
                 {
-                    label2.Text = "Setting up SteamCMD . . . ";
+                    progressLabel.Text = "Setting up SteamCMD . . . ";
                 }
 
                 if (!Directory.Exists(SteamCMD.DirectoryPath))
@@ -489,16 +485,16 @@ namespace CreamInstaller
                 watcher.Filter = "*";
                 watcher.IncludeSubdirectories = true;
                 watcher.EnableRaisingEvents = true;
-                await Task.Run(() => SteamCMD.Setup());
+                await SteamCMD.Setup();
                 watcher.Dispose();
 
                 setup = false;
                 if (!validating)
                 {
-                    label2.Text = "Gathering and caching your applicable games and their DLCs . . . ";
+                    progressLabel.Text = "Gathering and caching your applicable games and their DLCs . . . ";
                 }
 
-                await Task.Run(() => GetCreamApiApplicablePrograms(iProgress));
+                await GetCreamApiApplicablePrograms(iProgress);
                 ProgramSelection.ValidateAll();
                 TreeNodes.ForEach(node =>
                 {
@@ -510,7 +506,7 @@ namespace CreamInstaller
 
                 progressBar1.Value = 100;
                 groupBox1.Size = new(groupBox1.Size.Width, groupBox1.Size.Height + 44);
-                label2.Visible = false;
+                progressLabel.Visible = false;
                 progressBar1.Visible = false;
 
                 selectionTreeView.Enabled = ProgramSelection.All.Any();
@@ -525,7 +521,7 @@ namespace CreamInstaller
                 blockedGamesCheckBox.Enabled = true;
                 blockProtectedHelpButton.Enabled = true;
 
-                label2.Text = "Validating . . . ";
+                progressLabel.Text = "Validating . . . ";
                 if (!validating && !Program.Canceled)
                 {
                     OnLoad(true);
@@ -597,9 +593,9 @@ namespace CreamInstaller
             selectionTreeView.NodeMouseClick += (sender, e) =>
             {
                 TreeNode node = e.Node;
-                string appId = node.Name;
                 if (e.Button == MouseButtons.Right && node.Bounds.Contains(e.Location))
                 {
+                    string appId = node.Name;
                     if (appId != "0")
                     {
                         Process.Start(new ProcessStartInfo
@@ -718,7 +714,11 @@ namespace CreamInstaller
 
         private void OnCancel(object sender, EventArgs e)
         {
-            Program.Cleanup();
+            progressLabel.Text = "Cancelling . . . ";
+            Task.Run(async () =>
+            {
+                await Program.Cleanup();
+            });
         }
 
         private void OnAllCheckBoxChanged(object sender, EventArgs e)

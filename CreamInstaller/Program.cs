@@ -5,23 +5,24 @@ using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CreamInstaller
 {
-    public static class Program
+    internal static class Program
     {
-        public static readonly string ApplicationName = Application.CompanyName + " v" + Application.ProductVersion + ": " + Application.ProductName;
-        public static readonly Assembly EntryAssembly = Assembly.GetEntryAssembly();
-        public static readonly Process CurrentProcess = Process.GetCurrentProcess();
-        public static readonly string CurrentProcessFilePath = CurrentProcess.MainModule.FileName;
-        public static readonly string CurrentProcessDirectory = CurrentProcessFilePath.Substring(0, CurrentProcessFilePath.LastIndexOf("\\"));
-        public static readonly string BackupFileExtension = ".creaminstaller.backup";
+        internal static readonly string ApplicationName = Application.CompanyName + " v" + Application.ProductVersion + ": " + Application.ProductName;
+        internal static readonly Assembly EntryAssembly = Assembly.GetEntryAssembly();
+        internal static readonly Process CurrentProcess = Process.GetCurrentProcess();
+        internal static readonly string CurrentProcessFilePath = CurrentProcess.MainModule.FileName;
+        internal static readonly string CurrentProcessDirectory = CurrentProcessFilePath.Substring(0, CurrentProcessFilePath.LastIndexOf("\\"));
+        internal static readonly string BackupFileExtension = ".creaminstaller.backup";
 
-        public static bool BlockProtectedGames = true;
-        public static readonly string[] ProtectedGameNames = { "PAYDAY 2", "Call to Arms" }; // non-functioning CreamAPI or DLL detections
-        public static readonly string[] ProtectedGameDirectories = { @"\EasyAntiCheat", @"\BattlEye" }; // DLL detections
-        public static readonly string[] ProtectedGameDirectoryExceptions = { "Arma 3" }; // Arma 3's BattlEye doesn't detect DLL changes?
+        internal static bool BlockProtectedGames = true;
+        internal static readonly string[] ProtectedGameNames = { "PAYDAY 2", "Call to Arms" }; // non-functioning CreamAPI or DLL detections
+        internal static readonly string[] ProtectedGameDirectories = { @"\EasyAntiCheat", @"\BattlEye" }; // DLL detections
+        internal static readonly string[] ProtectedGameDirectoryExceptions = { "Arma 3" }; // Arma 3's BattlEye doesn't detect DLL changes?
 
         [STAThread]
         private static void Main()
@@ -52,7 +53,7 @@ namespace CreamInstaller
             mutex.Close();
         }
 
-        public static bool IsProgramRunningDialog(Form form, ProgramSelection selection)
+        internal static bool IsProgramRunningDialog(Form form, ProgramSelection selection)
         {
             if (selection.AreSteamApiDllsLocked)
             {
@@ -71,7 +72,7 @@ namespace CreamInstaller
             return false;
         }
 
-        public static bool IsFilePathLocked(this string filePath)
+        internal static bool IsFilePathLocked(this string filePath)
         {
             try { File.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None).Close(); }
             catch (FileNotFoundException) { return false; }
@@ -79,22 +80,22 @@ namespace CreamInstaller
             return false;
         }
 
-        public static SelectForm SelectForm;
-        public static InstallForm InstallForm;
+        internal static SelectForm SelectForm;
+        internal static InstallForm InstallForm;
 
-        public static List<ProgramSelection> ProgramSelections = new();
+        internal static List<ProgramSelection> ProgramSelections = new();
 
-        public static bool Canceled = false;
+        internal static bool Canceled = false;
 
-        public static void Cleanup(bool cancel = true)
+        internal static async Task Cleanup(bool cancel = true)
         {
             Canceled = cancel;
-            SteamCMD.Kill();
+            await SteamCMD.Kill();
         }
 
         private static void OnApplicationExit(object s, EventArgs e)
         {
-            Cleanup();
+            Cleanup().Wait();
         }
 
         internal static void InheritLocation(this Form form, Form fromForm)
