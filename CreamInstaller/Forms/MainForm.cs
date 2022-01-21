@@ -97,9 +97,9 @@ namespace CreamInstaller
                     if (version > currentVersion && !changelogTreeView.Nodes.ContainsKey(version.ToString()))
                     {
                         TreeNode root = new($"v{version}");
-                        root.Name = version.ToString();
+                        root.Name = root.Text;
                         changelogTreeView.Nodes.Add(root);
-                        new Task(async () =>
+                        _ = Task.Run(async () =>
                         {
                             try
                             {
@@ -126,7 +126,7 @@ namespace CreamInstaller
                             {
                                 changelogTreeView.Nodes.Remove(root);
                             }
-                        }).Start();
+                        });
                     }
                 }
             }
