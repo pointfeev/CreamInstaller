@@ -5,10 +5,7 @@ namespace CreamInstaller
 {
     internal partial class DialogForm : CustomForm
     {
-        internal DialogForm(IWin32Window owner) : base(owner)
-        {
-            InitializeComponent();
-        }
+        internal DialogForm(IWin32Window owner) : base(owner) => InitializeComponent();
 
         internal DialogResult Show(string formName, Icon descriptionIcon, string descriptionText, string acceptButtonText, string cancelButtonText = null)
         {
@@ -21,10 +18,7 @@ namespace CreamInstaller
                 cancelButton.Enabled = false;
                 cancelButton.Visible = false;
             }
-            else
-            {
-                cancelButton.Text = cancelButtonText;
-            }
+            else cancelButton.Text = cancelButtonText;
             return ShowDialog();
         }
     }

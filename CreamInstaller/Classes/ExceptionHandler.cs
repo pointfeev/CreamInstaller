@@ -53,14 +53,8 @@ namespace CreamInstaller
         private readonly string message;
         public override string Message => message ?? "CustomMessageException";
 
-        public override string ToString()
-        {
-            return Message;
-        }
+        public override string ToString() => Message;
 
-        internal CustomMessageException(string message)
-        {
-            this.message = message;
-        }
+        internal CustomMessageException(string message) => this.message = message;
     }
 }

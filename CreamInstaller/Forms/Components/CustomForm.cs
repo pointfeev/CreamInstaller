@@ -4,15 +4,9 @@ namespace CreamInstaller
 {
     internal class CustomForm : Form
     {
-        internal CustomForm() : base()
-        {
-            Icon = Properties.Resources.Icon;
-        }
+        internal CustomForm() : base() => Icon = Properties.Resources.Icon;
 
-        internal CustomForm(IWin32Window owner) : this()
-        {
-            Owner = owner as Form;
-        }
+        internal CustomForm(IWin32Window owner) : this() => Owner = owner as Form;
 
         protected override CreateParams CreateParams // Double buffering for all controls
         {

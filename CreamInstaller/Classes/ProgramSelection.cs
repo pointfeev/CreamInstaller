@@ -1,8 +1,9 @@
-﻿using Gameloop.Vdf.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
+using Gameloop.Vdf.Linq;
 
 namespace CreamInstaller
 {
@@ -81,10 +82,7 @@ namespace CreamInstaller
             Enabled = SelectedSteamDlc.Any();
         }
 
-        internal ProgramSelection()
-        {
-            All.Add(this);
-        }
+        internal ProgramSelection() => All.Add(this);
 
         internal void Validate()
         {
@@ -95,10 +93,7 @@ namespace CreamInstaller
             }
         }
 
-        internal static void ValidateAll()
-        {
-            All.ForEach(selection => selection.Validate());
-        }
+        internal static void ValidateAll() => All.ForEach(selection => selection.Validate());
 
         internal static List<ProgramSelection> All => Program.ProgramSelections;
 
@@ -106,10 +101,7 @@ namespace CreamInstaller
 
         internal static List<ProgramSelection> AllSafeEnabled => AllSafe.FindAll(s => s.Enabled);
 
-        internal static ProgramSelection FromAppId(int appId)
-        {
-            return AllSafe.Find(s => s.SteamAppId == appId);
-        }
+        internal static ProgramSelection FromAppId(int appId) => AllSafe.Find(s => s.SteamAppId == appId);
 
         internal static KeyValuePair<int, string>? GetDlcFromAppId(int appId)
         {

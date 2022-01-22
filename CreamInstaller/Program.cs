@@ -41,11 +41,7 @@ namespace CreamInstaller
                 }
                 catch (Exception e)
                 {
-                    if (ExceptionHandler.OutputException(e))
-                    {
-                        goto retry;
-                    }
-
+                    if (ExceptionHandler.OutputException(e)) goto retry;
                     Application.Exit();
                     return;
                 }
@@ -61,14 +57,9 @@ namespace CreamInstaller
                 $"ERROR: {selection.Name} is currently running!" +
                 "\n\nPlease close the program/game to continue . . . ",
                 "Retry", "Cancel") == DialogResult.OK)
-                {
                     return IsProgramRunningDialog(form, selection);
-                }
             }
-            else
-            {
-                return true;
-            }
+            else return true;
             return false;
         }
 
@@ -86,17 +77,13 @@ namespace CreamInstaller
         internal static List<ProgramSelection> ProgramSelections = new();
 
         internal static bool Canceled = false;
-
         internal static async Task Cleanup(bool cancel = true)
         {
             Canceled = cancel;
             await SteamCMD.Kill();
         }
 
-        private static void OnApplicationExit(object s, EventArgs e)
-        {
-            Cleanup().Wait();
-        }
+        private static void OnApplicationExit(object s, EventArgs e) => Cleanup().Wait();
 
         internal static void InheritLocation(this Form form, Form fromForm)
         {

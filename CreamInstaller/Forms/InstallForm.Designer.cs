@@ -51,6 +51,7 @@ namespace CreamInstaller
             // 
             this.userInfoLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.userInfoLabel.AutoEllipsis = true;
             this.userInfoLabel.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.userInfoLabel.Location = new System.Drawing.Point(12, 9);
             this.userInfoLabel.Name = "userInfoLabel";

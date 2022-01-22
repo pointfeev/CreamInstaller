@@ -1,8 +1,4 @@
-﻿using HtmlAgilityPack;
-using Onova;
-using Onova.Models;
-using Onova.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -12,6 +8,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
+
+using HtmlAgilityPack;
+
+using Onova;
+using Onova.Models;
+using Onova.Services;
 
 namespace CreamInstaller
 {
@@ -33,7 +35,6 @@ namespace CreamInstaller
                 cancellationTokenSource.Dispose();
                 cancellationTokenSource = null;
             }
-
             Hide();
             new SelectForm(this).ShowDialog();
             Close();
@@ -93,7 +94,6 @@ namespace CreamInstaller
                 changelogTreeView.Visible = true;
                 Version currentVersion = new(Application.ProductVersion);
                 foreach (Version version in versions)
-                {
                     if (version > currentVersion && !changelogTreeView.Nodes.ContainsKey(version.ToString()))
                     {
                         TreeNode root = new($"v{version}");
@@ -128,7 +128,6 @@ namespace CreamInstaller
                             }
                         });
                     }
-                }
             }
         }
 
@@ -139,7 +138,6 @@ namespace CreamInstaller
             {
                 string FileName = Path.GetFileName(Program.CurrentProcessFilePath);
                 if (FileName != "CreamInstaller.exe")
-                {
                     if (new DialogForm(this).Show(Program.ApplicationName, SystemIcons.Warning,
                         "WARNING: CreamInstaller.exe was renamed!" +
                         "\n\nThis will cause unwanted behavior when updating the program!",
@@ -148,24 +146,16 @@ namespace CreamInstaller
                         Application.Exit();
                         return;
                     }
-                }
                 OnLoad();
             }
             catch (Exception e)
             {
-                if (ExceptionHandler.OutputException(e))
-                {
-                    goto retry;
-                }
-
+                if (ExceptionHandler.OutputException(e)) goto retry;
                 Close();
             }
         }
 
-        private void OnIgnore(object sender, EventArgs e)
-        {
-            StartProgram();
-        }
+        private void OnIgnore(object sender, EventArgs e) => StartProgram();
 
         private async void OnUpdate(object sender, EventArgs e)
         {
@@ -200,10 +190,7 @@ namespace CreamInstaller
                 Application.Exit();
                 return;
             }
-            else
-            {
-                OnLoad();
-            }
+            else OnLoad();
         }
 
         private void OnUpdateCancel(object sender, EventArgs e)
