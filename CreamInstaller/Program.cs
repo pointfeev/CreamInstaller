@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +25,15 @@ namespace CreamInstaller
         internal static readonly string[] ProtectedGameNames = { "PAYDAY 2", "Call to Arms" }; // non-functioning CreamAPI or DLL detections
         internal static readonly string[] ProtectedGameDirectories = { @"\EasyAntiCheat", @"\BattlEye" }; // DLL detections
         internal static readonly string[] ProtectedGameDirectoryExceptions = { "Arma 3" }; // Arma 3's BattlEye doesn't detect DLL changes?
+
+        internal static bool IsGameBlocked(string name, string directory)
+        {
+            if (ProtectedGameNames.Contains(name)) return true;
+            if (!ProtectedGameDirectoryExceptions.Contains(name))
+                foreach (string path in ProtectedGameDirectories)
+                    if (Directory.Exists(directory + path)) return true;
+            return false;
+        }
 
         [STAThread]
         private static void Main()
@@ -48,6 +59,34 @@ namespace CreamInstaller
             }
             mutex.Close();
         }
+
+        internal static async Task<Image> GetImageFromUrl(string url)
+        {
+            try
+            {
+                HttpClient httpClient = new();
+                httpClient.DefaultRequestHeaders.Add("user-agent", "CreamInstaller");
+                return new Bitmap(await httpClient.GetStreamAsync(url));
+            }
+            catch { }
+            return null;
+        }
+
+        internal static void OpenDirectoryInFileExplorer(string path) => Process.Start(new ProcessStartInfo
+        {
+            FileName = "explorer.exe",
+            Arguments = path
+        });
+
+        internal static void OpenUrlInInternetBrowser(string url) => Process.Start(new ProcessStartInfo
+        {
+            FileName = url,
+            UseShellExecute = true
+        });
+
+        internal static Image GetFileIconImage(string path) => File.Exists(path) ? Icon.ExtractAssociatedIcon(path).ToBitmap() : null;
+
+        internal static Image GetFileExplorerImage() => GetFileIconImage(Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\explorer.exe");
 
         internal static bool IsProgramRunningDialog(Form form, ProgramSelection selection)
         {

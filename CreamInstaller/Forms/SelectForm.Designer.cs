@@ -31,6 +31,7 @@ namespace CreamInstaller
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.installButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -46,6 +47,7 @@ namespace CreamInstaller
             this.progressLabel = new System.Windows.Forms.Label();
             this.scanButton = new System.Windows.Forms.Button();
             this.uninstallButton = new System.Windows.Forms.Button();
+            this.nodeContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.groupBox1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
@@ -166,7 +168,6 @@ namespace CreamInstaller
             this.selectionTreeView.CheckBoxes = true;
             this.selectionTreeView.Enabled = false;
             this.selectionTreeView.FullRowSelect = true;
-            this.selectionTreeView.HotTracking = true;
             this.selectionTreeView.Location = new System.Drawing.Point(6, 22);
             this.selectionTreeView.Name = "selectionTreeView";
             this.selectionTreeView.Size = new System.Drawing.Size(548, 280);
@@ -206,12 +207,12 @@ namespace CreamInstaller
             this.progressBar1.Size = new System.Drawing.Size(560, 23);
             this.progressBar1.TabIndex = 9;
             // 
-            // label2
+            // progressLabel
             // 
             this.progressLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.progressLabel.Location = new System.Drawing.Point(12, 279);
-            this.progressLabel.Name = "label2";
+            this.progressLabel.Name = "progressLabel";
             this.progressLabel.Size = new System.Drawing.Size(760, 15);
             this.progressLabel.TabIndex = 10;
             this.progressLabel.Text = "Loading . . .";
@@ -241,6 +242,11 @@ namespace CreamInstaller
             this.uninstallButton.Text = "Uninstall";
             this.uninstallButton.UseVisualStyleBackColor = true;
             this.uninstallButton.Click += new System.EventHandler(this.OnUninstall);
+            // 
+            // nodeContextMenu
+            // 
+            this.nodeContextMenu.Name = "nodeContextMenu";
+            this.nodeContextMenu.Size = new System.Drawing.Size(61, 4);
             // 
             // SelectForm
             // 
@@ -290,6 +296,7 @@ namespace CreamInstaller
         private FlowLayoutPanel flowLayoutPanel1;
         private FlowLayoutPanel flowLayoutPanel2;
         private Button uninstallButton;
+        private ContextMenuStrip nodeContextMenu;
     }
 }
 

@@ -5,7 +5,7 @@
 		<UseWindowsForms>true</UseWindowsForms>
 		<ApplicationIcon>Resources\ini.ico</ApplicationIcon>
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-		<Version>2.2.2.0</Version>
+		<Version>2.2.3.0</Version>
 		<PackageIcon>Resources\ini.ico</PackageIcon>
 		<PackageIconUrl />
 		<Description>Automatically generates and installs CreamAPI files for Steam games on the user's computer. It can also generate and install CreamAPI for the Paradox Launcher should the user select a Paradox Interactive game.</Description>
@@ -42,7 +42,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Gameloop.Vdf" Version="0.6.1" />
-		<PackageReference Include="HtmlAgilityPack" Version="1.11.38" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.11.40" />
 		<PackageReference Include="Onova" Version="2.6.2" />
 	</ItemGroup>
 	<ItemGroup>

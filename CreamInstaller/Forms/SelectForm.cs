@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -157,24 +156,9 @@ namespace CreamInstaller
                 int buildId = program.Item4;
                 string directory = program.Item5;
                 ProgramSelection selection = ProgramSelection.FromAppId(appId);
+                if (selection is not null) selection.Validate();
                 if (Program.Canceled) return;
-                if (Program.BlockProtectedGames)
-                {
-                    bool blockedGame = Program.ProtectedGameNames.Contains(name);
-                    if (!Program.ProtectedGameDirectoryExceptions.Contains(name))
-                        foreach (string path in Program.ProtectedGameDirectories)
-                            if (Directory.Exists(directory + path))
-                                blockedGame = true;
-                    if (blockedGame)
-                    {
-                        if (selection is not null)
-                        {
-                            selection.Enabled = false;
-                            selection.Usable = false;
-                        }
-                        continue;
-                    }
-                }
+                if (Program.BlockProtectedGames && Program.IsGameBlocked(name, directory)) continue;
                 RunningTasks.Add(Task.Run(async () =>
                 {
                     if (Program.Canceled) return;
@@ -215,11 +199,20 @@ namespace CreamInstaller
 
                     selection ??= new();
                     selection.Usable = true;
+                    selection.SteamAppId = appId;
                     selection.Name = name;
                     selection.RootDirectory = directory;
-                    selection.SteamAppId = appId;
                     selection.SteamApiDllDirectories = dllDirectories;
                     selection.AppInfo = appInfo;
+                    if (selection.Icon is null)
+                    {
+                        if (appId == 0) selection.Icon = Program.GetFileIconImage(directory + @"\launcher\bootstrapper-v2.exe");
+                        else
+                        {
+                            selection.IconStaticID = appInfo?.Value?["common"]?["icon"]?.ToString();
+                            selection.ClientIconStaticID = appInfo?.Value?["common"]?["clienticon"]?.ToString();
+                        }
+                    }
                     if (allCheckBox.Checked) selection.Enabled = true;
 
                     foreach (Task task in dlcTasks)
@@ -270,7 +263,7 @@ namespace CreamInstaller
             progress.Report(RunningTasks.Count);
         }
 
-        private async void OnLoad(bool validating = false)
+        private async void OnLoad()
         {
         retry:
             try
@@ -300,16 +293,15 @@ namespace CreamInstaller
                     if (_progress < 0) maxProgress = -_progress;
                     else curProgress = _progress;
                     int p = Math.Max(Math.Min((int)((float)(curProgress / (float)maxProgress) * 100), 100), 0);
-                    if (validating) progressLabel.Text = $"Validating . . . {p}% ({curProgress}/{maxProgress})";
-                    else if (setup) progressLabel.Text = $"Setting up SteamCMD . . . {p}% ({curProgress}/{maxProgress})";
-                    else progressLabel.Text = $"Gathering and caching your applicable games and their DLCs . . . {p}% ({curProgress}/{maxProgress})";
+                    progressLabel.Text = setup ? $"Setting up SteamCMD . . . {p}% ({curProgress}/{maxProgress})"
+                        : $"Gathering and caching your applicable games and their DLCs . . . {p}% ({curProgress}/{maxProgress})";
                     progressBar1.Value = p;
                 };
 
                 iProgress.Report(-1660); // not exact, number varies
                 int cur = 0;
                 iProgress.Report(cur);
-                if (!validating) progressLabel.Text = "Setting up SteamCMD . . . ";
+                progressLabel.Text = "Setting up SteamCMD . . . ";
                 if (!Directory.Exists(SteamCMD.DirectoryPath)) Directory.CreateDirectory(SteamCMD.DirectoryPath);
 
                 FileSystemWatcher watcher = new(SteamCMD.DirectoryPath);
@@ -321,14 +313,13 @@ namespace CreamInstaller
                 watcher.Dispose();
 
                 setup = false;
-                if (!validating) progressLabel.Text = "Gathering and caching your applicable games and their DLCs . . . ";
-
-                await GetCreamApiApplicablePrograms(iProgress);
+                progressLabel.Text = "Gathering and caching your applicable games and their DLCs . . . ";
                 ProgramSelection.ValidateAll();
                 TreeNodes.ForEach(node =>
                 {
-                    if (node.Parent is null && ProgramSelection.FromAppId(int.Parse(node.Name)) is null) node.Remove();
+                    if (!int.TryParse(node.Name, out int appId) || node.Parent is null && ProgramSelection.FromAppId(appId) is null) node.Remove();
                 });
+                await GetCreamApiApplicablePrograms(iProgress);
 
                 progressBar1.Value = 100;
                 groupBox1.Size = new(groupBox1.Size.Width, groupBox1.Size.Height + 44);
@@ -337,15 +328,12 @@ namespace CreamInstaller
                 selectionTreeView.Enabled = ProgramSelection.All.Any();
                 allCheckBox.Enabled = selectionTreeView.Enabled;
                 noneFoundLabel.Visible = !selectionTreeView.Enabled;
-                installButton.Enabled = ProgramSelection.AllSafeEnabled.Any();
+                installButton.Enabled = ProgramSelection.AllUsableEnabled.Any();
                 uninstallButton.Enabled = installButton.Enabled;
                 cancelButton.Enabled = false;
                 scanButton.Enabled = true;
                 blockedGamesCheckBox.Enabled = true;
                 blockProtectedHelpButton.Enabled = true;
-
-                progressLabel.Text = "Validating . . . ";
-                //if (!validating && !Program.Canceled) OnLoad(true);
             }
             catch (Exception e)
             {
@@ -383,7 +371,7 @@ namespace CreamInstaller
                     allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
                 }
             }
-            installButton.Enabled = ProgramSelection.AllSafeEnabled.Any();
+            installButton.Enabled = ProgramSelection.AllUsableEnabled.Any();
             uninstallButton.Enabled = installButton.Enabled;
         }
 
@@ -391,9 +379,9 @@ namespace CreamInstaller
         {
             public int Compare(object a, object b)
             {
-                TreeNode A = a as TreeNode;
-                TreeNode B = b as TreeNode;
-                return int.Parse(A.Name) > int.Parse(B.Name) ? 1 : 0;
+                if (!int.TryParse((a as TreeNode).Name, out int A)) return 1;
+                if (!int.TryParse((b as TreeNode).Name, out int B)) return 0;
+                return A > B ? 1 : 0;
             }
         }
 
@@ -401,16 +389,54 @@ namespace CreamInstaller
         {
             selectionTreeView.TreeViewNodeSorter = new TreeNodeSorter();
             selectionTreeView.AfterCheck += OnTreeViewNodeCheckedChanged;
+            Dictionary<string, Image> images = new();
+            Task.Run(async () =>
+            {
+                images["File Explorer"] = Program.GetFileExplorerImage();
+                images["SteamDB"] = await Program.GetImageFromUrl("https://steamdb.info/favicon.ico");
+                images["Steam Store"] = await Program.GetImageFromUrl("https://store.steampowered.com/favicon.ico");
+                images["Steam Community"] = await Program.GetImageFromUrl("https://steamcommunity.com/favicon.ico");
+            });
+            Image Image(string identifier) => images.GetValueOrDefault(identifier, null);
             selectionTreeView.NodeMouseClick += (sender, e) =>
             {
                 TreeNode node = e.Node;
-                string appId = node.Name;
-                if (e.Button == MouseButtons.Right && node.Bounds.Contains(e.Location) && appId != "0")
-                    Process.Start(new ProcessStartInfo
+                TreeNode parentNode = node.Parent;
+                if (!int.TryParse(node.Name, out int appId)) return;
+                ProgramSelection selection = ProgramSelection.FromAppId(appId);
+                if (e.Button == MouseButtons.Right && node.Bounds.Contains(e.Location))
+                {
+                    selectionTreeView.SelectedNode = node;
+                    nodeContextMenu.Items.Clear();
+                    if (selection is not null)
                     {
-                        FileName = "https://steamdb.info/app/" + appId,
-                        UseShellExecute = true
-                    });
+                        nodeContextMenu.Items.Add(new ToolStripMenuItem(selection.Name, selection.Icon));
+                        nodeContextMenu.Items.Add(new ToolStripSeparator());
+                        nodeContextMenu.Items.Add(new ToolStripMenuItem("Open Root Directory", Image("File Explorer"),
+                            new EventHandler((sender, e) => Program.OpenDirectoryInFileExplorer(selection.RootDirectory))));
+                        for (int i = 0; i < selection.SteamApiDllDirectories.Count; i++)
+                        {
+                            string directory = selection.SteamApiDllDirectories[i];
+                            nodeContextMenu.Items.Add(new ToolStripMenuItem($"Open Steamworks Directory ({i + 1})", Image("File Explorer"),
+                                new EventHandler((sender, e) => Program.OpenDirectoryInFileExplorer(directory))));
+                        }
+                    }
+                    else
+                    {
+                        nodeContextMenu.Items.Add(new ToolStripMenuItem(node.Text));
+                        nodeContextMenu.Items.Add(new ToolStripSeparator());
+                    }
+                    if (appId != 0)
+                    {
+                        nodeContextMenu.Items.Add(new ToolStripMenuItem("Open SteamDB", Image("SteamDB"),
+                            new EventHandler((sender, e) => Program.OpenUrlInInternetBrowser("https://steamdb.info/app/" + appId))));
+                        nodeContextMenu.Items.Add(new ToolStripMenuItem("Open Steam Store", Image("Steam Store"),
+                            new EventHandler((sender, e) => Program.OpenUrlInInternetBrowser("https://store.steampowered.com/app/" + appId))));
+                        if (selection is not null) nodeContextMenu.Items.Add(new ToolStripMenuItem("Open Steam Community", selection.ClientIcon ?? Image("Steam Community"),
+                            new EventHandler((sender, e) => Program.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + appId))));
+                    }
+                    nodeContextMenu.Show(selectionTreeView, e.Location);
+                }
             };
             OnLoad();
         }
@@ -421,14 +447,14 @@ namespace CreamInstaller
             if (paradoxLauncher is not null)
             {
                 paradoxLauncher.ExtraSteamAppIdDlc.Clear();
-                foreach (ProgramSelection selection in ProgramSelection.AllSafeEnabled)
+                foreach (ProgramSelection selection in ProgramSelection.AllUsableEnabled)
                 {
                     if (selection.Name == paradoxLauncher.Name) continue;
                     if (selection.AppInfo.Value["extended"]["publisher"].ToString() != "Paradox Interactive") continue;
                     paradoxLauncher.ExtraSteamAppIdDlc.Add(new(selection.SteamAppId, selection.Name, selection.SelectedSteamDlc));
                 }
                 if (!paradoxLauncher.ExtraSteamAppIdDlc.Any())
-                    foreach (ProgramSelection selection in ProgramSelection.AllSafe)
+                    foreach (ProgramSelection selection in ProgramSelection.AllUsable)
                     {
                         if (selection.Name == paradoxLauncher.Name) continue;
                         if (selection.AppInfo.Value["extended"]["publisher"].ToString() != "Paradox Interactive") continue;
@@ -445,12 +471,10 @@ namespace CreamInstaller
                 PopulateParadoxLauncherDlc(paradoxLauncher);
                 if (!paradoxLauncher.ExtraSteamAppIdDlc.Any())
                 {
-                    if (new DialogForm(form).Show(Program.ApplicationName, SystemIcons.Warning,
-                    $"WARNING: There are no installed games with DLC that can be added to the Paradox Launcher!" +
-                    "\n\nInstalling CreamAPI for the Paradox Launcher is pointless, since no DLC will be added to the configuration!",
-                    "Ignore", "Cancel") == DialogResult.OK)
-                        return false;
-                    return true;
+                    return new DialogForm(form).Show(Program.ApplicationName, SystemIcons.Warning,
+                        $"WARNING: There are no installed games with DLC that can be added to the Paradox Launcher!" +
+                        "\n\nInstalling CreamAPI for the Paradox Launcher is pointless, since no DLC will be added to the configuration!",
+                        "Ignore", "Cancel") != DialogResult.OK;
                 }
             }
             return false;
@@ -460,7 +484,7 @@ namespace CreamInstaller
         {
             if (ProgramSelection.All.Any())
             {
-                foreach (ProgramSelection selection in ProgramSelection.AllSafeEnabled)
+                foreach (ProgramSelection selection in ProgramSelection.AllUsableEnabled)
                     if (!Program.IsProgramRunningDialog(this, selection)) return;
                 if (ParadoxLauncherDlcDialog(this)) return;
                 Hide();
@@ -483,10 +507,7 @@ namespace CreamInstaller
         private void OnCancel(object sender, EventArgs e)
         {
             progressLabel.Text = "Cancelling . . . ";
-            Task.Run(async () =>
-            {
-                await Program.Cleanup();
-            });
+            Task.Run(async () => await Program.Cleanup());
         }
 
         private void OnAllCheckBoxChanged(object sender, EventArgs e)

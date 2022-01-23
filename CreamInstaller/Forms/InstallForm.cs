@@ -150,9 +150,10 @@ namespace CreamInstaller
 
         private async Task Operate()
         {
-            List<ProgramSelection> programSelections = ProgramSelection.AllSafeEnabled;
+            List<ProgramSelection> programSelections = ProgramSelection.AllUsableEnabled;
             OperationsCount = programSelections.Count;
             CompleteOperationsCount = 0;
+            List<ProgramSelection> disabledSelections = new();
             foreach (ProgramSelection selection in programSelections)
             {
                 if (!Program.IsProgramRunningDialog(this, selection)) throw new OperationCanceledException();
@@ -161,6 +162,7 @@ namespace CreamInstaller
                     await OperateFor(selection);
                     await UpdateUser($"Operation succeeded for {selection.Name}.", InstallationLog.Success);
                     selection.Enabled = false;
+                    disabledSelections.Add(selection);
                 }
                 catch (Exception exception)
                 {
@@ -169,13 +171,14 @@ namespace CreamInstaller
                 ++CompleteOperationsCount;
             }
             await Program.Cleanup();
-            List<ProgramSelection> FailedSelections = ProgramSelection.AllSafeEnabled;
+            List<ProgramSelection> FailedSelections = ProgramSelection.AllUsableEnabled;
             if (FailedSelections.Any())
                 if (FailedSelections.Count == 1) throw new CustomMessageException($"Operation failed for {FailedSelections.First().Name}.");
                 else throw new CustomMessageException($"Operation failed for {FailedSelections.Count} programs.");
+            foreach (ProgramSelection selection in disabledSelections) selection.Enabled = true;
         }
 
-        private readonly int ProgramCount = ProgramSelection.AllSafeEnabled.Count;
+        private readonly int ProgramCount = ProgramSelection.AllUsableEnabled.Count;
 
         private async void Start()
         {
