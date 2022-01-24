@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using Gameloop.Vdf;
 using Gameloop.Vdf.Linq;
 
 namespace CreamInstaller
@@ -78,7 +77,6 @@ namespace CreamInstaller
 
         internal static async Task<VProperty> GetAppInfo(int appId, string branch = "public", int buildId = 0)
         {
-            VProperty appInfo = null;
             if (Program.Canceled) return null;
             string output;
             string appUpdatePath = $@"{AppInfoPath}\{appId}";
@@ -99,8 +97,7 @@ namespace CreamInstaller
                 }
             }
             if (Program.Canceled || output is null) return null;
-            try { appInfo = VdfConvert.Deserialize(output); }
-            catch
+            if (!ValveDataFile.TryDeserialize(output, out VProperty appInfo))
             {
                 if (Directory.Exists(appUpdatePath))
                 {
@@ -109,12 +106,11 @@ namespace CreamInstaller
                 }
             }
             if (appInfo.Value is VValue) goto restart;
-            if (appInfo is null || appInfo.Value is not VValue && appInfo.Value.Children().ToList().Count == 0)
-                return appInfo;
-            VToken type = appInfo.Value is VValue ? null : appInfo.Value?["common"]?["type"];
+            if (appInfo is null || appInfo.Value?.Children()?.ToList()?.Count == 0) return appInfo;
+            VToken type = appInfo.Value?.TryGet("common")?.TryGet("type");
             if (type is null || type.ToString() == "Game")
             {
-                string buildid = appInfo.Value is VValue ? null : appInfo.Value["depots"]?["branches"]?[branch]?["buildid"]?.ToString();
+                string buildid = appInfo.Value?.TryGet("depots")?.TryGet("branches")?.TryGet(branch)?.TryGet("buildid")?.ToString();
                 if (buildid is null && type is not null) return appInfo;
                 if (type is null || int.Parse(buildid) < buildId)
                 {
@@ -135,17 +131,16 @@ namespace CreamInstaller
         {
             List<int> dlcIds = new();
             if (Program.Canceled || appInfo is not VProperty) return dlcIds;
-            if (appInfo.Value["extended"] is not null)
-                foreach (VProperty property in appInfo.Value["extended"])
-                    if (property.Key.ToString() == "listofdlc")
-                        foreach (string id in property.Value.ToString().Split(","))
-                            if (!dlcIds.Contains(int.Parse(id)))
-                                dlcIds.Add(int.Parse(id));
-            if (appInfo.Value["depots"] is not null)
-                foreach (VProperty _property in appInfo.Value["depots"])
-                    if (int.TryParse(_property.Key.ToString(), out int _))
-                        if (int.TryParse(_property.Value?["dlcappid"]?.ToString(), out int appid) && !dlcIds.Contains(appid))
-                            dlcIds.Add(appid);
+            VToken extended = appInfo.Value.TryGet("extended");
+            if (extended is not null) foreach (VProperty property in extended)
+                    if (property.Key.ToString() == "listofdlc") foreach (string id in property.Value.ToString().Split(","))
+                            if (!dlcIds.Contains(int.Parse(id))) dlcIds.Add(int.Parse(id));
+            VToken depots = appInfo.Value.TryGet("depots");
+            if (depots is not null) foreach (VProperty property in depots)
+                    if (int.TryParse(property.Key.ToString(), out int _)
+                        && int.TryParse(property.Value.TryGet("dlcappid")?.ToString(), out int appid)
+                        && !dlcIds.Contains(appid))
+                        dlcIds.Add(appid);
             return dlcIds;
         });
 

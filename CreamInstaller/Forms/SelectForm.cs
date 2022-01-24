@@ -10,7 +10,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using Gameloop.Vdf;
 using Gameloop.Vdf.Linq;
 
 using Microsoft.Win32;
@@ -38,22 +37,18 @@ namespace CreamInstaller
                 if (Directory.Exists(libraryFolder))
                 {
                     gameDirectories.Add(libraryFolder);
-                    try
+                    string libraryFolders = libraryFolder + @"\libraryfolders.vdf";
+                    if (File.Exists(libraryFolders) && ValveDataFile.TryDeserialize(File.ReadAllText(libraryFolders, Encoding.UTF8), out VProperty _result))
                     {
-                        string libraryFolders = libraryFolder + @"\libraryfolders.vdf";
-                        if (File.Exists(libraryFolders))
-                        {
-                            dynamic property = VdfConvert.Deserialize(File.ReadAllText(libraryFolders, Encoding.UTF8)).Value;
-                            foreach (dynamic _property in property)
-                                if (int.TryParse(_property.Key, out int _))
-                                {
-                                    string path = _property.Value.path.ToString() + @"\steamapps";
-                                    if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path)) continue;
-                                    if (!gameDirectories.Contains(path)) gameDirectories.Add(path);
-                                }
-                        }
+                        dynamic result = _result;
+                        foreach (dynamic property in result?.Value) if (int.TryParse(property.Key, out int _))
+                            {
+                                string path = property.Value?.path?.ToString();
+                                if (string.IsNullOrWhiteSpace(path)) continue;
+                                path += @"\steamapps";
+                                if (Directory.Exists(path) && !gameDirectories.Contains(path)) gameDirectories.Add(path);
+                            }
                     }
-                    catch { }
                 }
             }
             return gameDirectories;
@@ -89,28 +84,24 @@ namespace CreamInstaller
             foreach (string file in files)
             {
                 if (Program.Canceled) return null;
-                if (Path.GetExtension(file) == ".acf")
+                if (Path.GetExtension(file) == ".acf" && ValveDataFile.TryDeserialize(File.ReadAllText(file, Encoding.UTF8), out VProperty _result))
                 {
-                    try
-                    {
-                        dynamic property = VdfConvert.Deserialize(File.ReadAllText(file, Encoding.UTF8));
-                        string _appid = property.Value.appid.ToString();
-                        string installdir = property.Value.installdir.ToString();
-                        string name = property.Value.name.ToString();
-                        string _buildid = property.Value.buildid.ToString();
-                        if (string.IsNullOrWhiteSpace(_appid)
-                            || string.IsNullOrWhiteSpace(installdir)
-                            || string.IsNullOrWhiteSpace(name)
-                            || string.IsNullOrWhiteSpace(_buildid))
-                            continue;
-                        string branch = property.Value.UserConfig?.betakey?.ToString();
-                        if (string.IsNullOrWhiteSpace(branch)) branch = "public";
-                        string gameDirectory = libraryDirectory + @"\common\" + installdir;
-                        if (!int.TryParse(_appid, out int appid)) continue;
-                        if (!int.TryParse(_buildid, out int buildid)) continue;
-                        games.Add(new(appid, name, branch, buildid, gameDirectory));
-                    }
-                    catch { }
+                    dynamic result = _result;
+                    string _appid = result.Value?.appid?.ToString();
+                    string installdir = result.Value?.installdir?.ToString();
+                    string name = result.Value?.name?.ToString();
+                    string _buildid = result.Value?.buildid?.ToString();
+                    if (string.IsNullOrWhiteSpace(_appid)
+                        || string.IsNullOrWhiteSpace(installdir)
+                        || string.IsNullOrWhiteSpace(name)
+                        || string.IsNullOrWhiteSpace(_buildid))
+                        continue;
+                    string branch = result.Value?.UserConfig?.betakey?.ToString();
+                    if (string.IsNullOrWhiteSpace(branch)) branch = "public";
+                    string gameDirectory = libraryDirectory + @"\common\" + installdir;
+                    if (!int.TryParse(_appid, out int appid)) continue;
+                    if (!int.TryParse(_buildid, out int buildid)) continue;
+                    games.Add(new(appid, name, branch, buildid, gameDirectory));
                 }
             }
             if (!games.Any()) return null;
@@ -182,8 +173,7 @@ namespace CreamInstaller
                                 if (Program.Canceled) return;
                                 string dlcName = null;
                                 VProperty dlcAppInfo = await SteamCMD.GetAppInfo(id);
-                                if (dlcAppInfo is not null)
-                                    dlcName = dlcAppInfo?.Value?["common"]?["name"]?.ToString();
+                                if (dlcAppInfo is not null) dlcName = dlcAppInfo.Value?.TryGet("common")?.TryGet("name")?.ToString();
                                 if (Program.Canceled) return;
                                 if (string.IsNullOrWhiteSpace(dlcName)) return; //dlcName = "Unknown DLC";
                                 dlc[id] = /*$"[{id}] " +*/ dlcName;
@@ -211,8 +201,8 @@ namespace CreamInstaller
                         if (appId == 0) selection.Icon = Program.GetFileIconImage(directory + @"\launcher\bootstrapper-v2.exe");
                         else
                         {
-                            selection.IconStaticID = appInfo?.Value?["common"]?["icon"]?.ToString();
-                            selection.ClientIconStaticID = appInfo?.Value?["common"]?["clienticon"]?.ToString();
+                            selection.IconStaticID = appInfo?.Value?.TryGet("common")?.TryGet("icon")?.ToString();
+                            selection.ClientIconStaticID = appInfo?.Value?.TryGet("common")?.TryGet("clienticon")?.ToString();
                         }
                     }
                     if (allCheckBox.Checked) selection.Enabled = true;
@@ -453,14 +443,14 @@ namespace CreamInstaller
                 foreach (ProgramSelection selection in ProgramSelection.AllUsableEnabled)
                 {
                     if (selection.Name == paradoxLauncher.Name) continue;
-                    if (selection.AppInfo.Value["extended"]["publisher"].ToString() != "Paradox Interactive") continue;
+                    if (selection.AppInfo.Value?.TryGet("extended")?.TryGet("publisher")?.ToString() != "Paradox Interactive") continue;
                     paradoxLauncher.ExtraSteamAppIdDlc.Add(new(selection.SteamAppId, selection.Name, selection.SelectedSteamDlc));
                 }
                 if (!paradoxLauncher.ExtraSteamAppIdDlc.Any())
                     foreach (ProgramSelection selection in ProgramSelection.AllUsable)
                     {
                         if (selection.Name == paradoxLauncher.Name) continue;
-                        if (selection.AppInfo.Value["extended"]["publisher"].ToString() != "Paradox Interactive") continue;
+                        if (selection.AppInfo.Value?.TryGet("extended")?.TryGet("publisher")?.ToString() != "Paradox Interactive") continue;
                         paradoxLauncher.ExtraSteamAppIdDlc.Add(new(selection.SteamAppId, selection.Name, selection.AllSteamDlc));
                     }
             }
