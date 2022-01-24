@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -190,8 +191,9 @@ namespace CreamInstaller
                             });
                             dlcTasks.Add(task);
                             RunningTasks.Add(task);
+                            progress.Report(-RunningTasks.Count);
+                            Thread.Sleep(10); // to reduce control & window freezing
                         }
-                        progress.Report(-RunningTasks.Count);
                     }
                     else if (appId > 0) return;
                     if (Program.Canceled) return;
@@ -250,11 +252,11 @@ namespace CreamInstaller
                             }
                         }
                     });
+
                     progress.Report(++cur);
                 }));
+                progress.Report(-RunningTasks.Count);
             }
-            progress.Report(-RunningTasks.Count);
-            progress.Report(cur);
             foreach (Task task in RunningTasks.ToList())
             {
                 if (Program.Canceled) return;
@@ -290,6 +292,7 @@ namespace CreamInstaller
                 IProgress<int> iProgress = progress;
                 progress.ProgressChanged += (sender, _progress) =>
                 {
+                    if (Program.Canceled) return;
                     if (_progress < 0) maxProgress = -_progress;
                     else curProgress = _progress;
                     int p = Math.Max(Math.Min((int)((float)(curProgress / (float)maxProgress) * 100), 100), 0);
@@ -507,7 +510,7 @@ namespace CreamInstaller
         private void OnCancel(object sender, EventArgs e)
         {
             progressLabel.Text = "Cancelling . . . ";
-            Task.Run(async () => await Program.Cleanup());
+            Program.Cleanup();
         }
 
         private void OnAllCheckBoxChanged(object sender, EventArgs e)

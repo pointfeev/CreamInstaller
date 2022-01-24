@@ -42,7 +42,7 @@ namespace CreamInstaller
                 if (logTextBox.Text.Length > 0) logTextBox.AppendText(Environment.NewLine, color);
                 logTextBox.AppendText(text, color);
             }
-            await Task.Run(() => Thread.Sleep(1)); // to keep the text box control from glitching
+            await Task.Run(() => Thread.Sleep(0)); // to keep the text box control from glitching
         }
 
         internal async Task WriteConfiguration(StreamWriter writer, int steamAppId, string name, SortedList<int, string> steamDlcApps)
@@ -170,7 +170,7 @@ namespace CreamInstaller
                 }
                 ++CompleteOperationsCount;
             }
-            await Program.Cleanup();
+            Program.Cleanup();
             List<ProgramSelection> FailedSelections = ProgramSelection.AllUsableEnabled;
             if (FailedSelections.Any())
                 if (FailedSelections.Count == 1) throw new CustomMessageException($"Operation failed for {FailedSelections.First().Name}.");
@@ -221,21 +221,21 @@ namespace CreamInstaller
 
         private void OnAccept(object sender, EventArgs e)
         {
-            Program.Cleanup().Wait();
+            Program.Cleanup();
             Close();
         }
 
         private void OnRetry(object sender, EventArgs e)
         {
-            Program.Cleanup().Wait();
+            Program.Cleanup();
             Start();
         }
 
-        private void OnCancel(object sender, EventArgs e) => Program.Cleanup().Wait();
+        private void OnCancel(object sender, EventArgs e) => Program.Cleanup();
 
         private void OnReselect(object sender, EventArgs e)
         {
-            Program.Cleanup().Wait();
+            Program.Cleanup();
             Reselecting = true;
             Close();
         }

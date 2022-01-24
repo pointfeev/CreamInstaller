@@ -116,13 +116,13 @@ namespace CreamInstaller
         internal static List<ProgramSelection> ProgramSelections = new();
 
         internal static bool Canceled = false;
-        internal static async Task Cleanup(bool cancel = true)
+        internal static async void Cleanup(bool cancel = true)
         {
             Canceled = cancel;
             await SteamCMD.Kill();
         }
 
-        private static void OnApplicationExit(object s, EventArgs e) => Cleanup().Wait();
+        private static void OnApplicationExit(object s, EventArgs e) => Cleanup();
 
         internal static void InheritLocation(this Form form, Form fromForm)
         {

@@ -44,14 +44,12 @@ namespace CreamInstaller
                 StandardOutputEncoding = Encoding.UTF8,
                 StandardErrorEncoding = Encoding.UTF8
             };
-            using (Process process = Process.Start(processStartInfo))
-            {
-                process.OutputDataReceived += (object sender, DataReceivedEventArgs e) => logs.Add(e.Data);
-                process.BeginOutputReadLine();
-                process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => logs.Add(e.Data);
-                process.BeginErrorReadLine();
-                process.WaitForExit();
-            }
+            using Process process = Process.Start(processStartInfo);
+            process.OutputDataReceived += (object sender, DataReceivedEventArgs e) => logs.Add(e.Data);
+            process.BeginOutputReadLine();
+            process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => logs.Add(e.Data);
+            process.BeginErrorReadLine();
+            process.WaitForExit();
             return string.Join("\r\n", logs);
         });
 
@@ -91,8 +89,7 @@ namespace CreamInstaller
                 output = File.ReadAllText(appUpdateFile, Encoding.UTF8);
             else
             {
-                await Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {appId} +force_install_dir {appUpdatePath} +app_update 4 +quit");
-                output = await Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {appId} +quit");
+                output = await Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {appId} +force_install_dir {appUpdatePath} +app_update 4 +quit");
                 int openBracket = output.IndexOf("{");
                 int closeBracket = output.LastIndexOf("}");
                 if (openBracket != -1 && closeBracket != -1)
@@ -112,7 +109,7 @@ namespace CreamInstaller
                 }
             }
             if (appInfo.Value is VValue) goto restart;
-            if (appInfo is null || (appInfo.Value is not VValue && appInfo.Value.Children().ToList().Count == 0))
+            if (appInfo is null || appInfo.Value is not VValue && appInfo.Value.Children().ToList().Count == 0)
                 return appInfo;
             VToken type = appInfo.Value is VValue ? null : appInfo.Value?["common"]?["type"];
             if (type is null || type.ToString() == "Game")
@@ -137,7 +134,7 @@ namespace CreamInstaller
         internal static async Task<List<int>> ParseDlcAppIds(VProperty appInfo) => await Task.Run(() =>
         {
             List<int> dlcIds = new();
-            if (appInfo is not VProperty) return dlcIds;
+            if (Program.Canceled || appInfo is not VProperty) return dlcIds;
             if (appInfo.Value["extended"] is not null)
                 foreach (VProperty property in appInfo.Value["extended"])
                     if (property.Key.ToString() == "listofdlc")
