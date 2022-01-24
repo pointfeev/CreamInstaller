@@ -17,7 +17,7 @@ internal static class ValveDataFile
         return false;
     }
 
-    internal static VToken TryGet(this VToken token, string index)
+    internal static VToken GetChild(this VToken token, string index)
     {
         try
         {
