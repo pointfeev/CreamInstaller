@@ -112,7 +112,7 @@ internal static class SteamCMD
         {
             string buildid = appInfo.Value?.GetChild("depots")?.GetChild("branches")?.GetChild(branch)?.GetChild("buildid")?.ToString();
             if (buildid is null && type is not null) return appInfo;
-            if (type is null || int.Parse(buildid) < buildId)
+            if (type is null || int.TryParse(buildid, out int gamebuildId) && gamebuildId < buildId)
             {
                 List<int> dlcAppIds = await ParseDlcAppIds(appInfo);
                 foreach (int id in dlcAppIds)
@@ -136,7 +136,7 @@ internal static class SteamCMD
             foreach (VProperty property in extended)
                 if (property.Key.ToString() == "listofdlc")
                     foreach (string id in property.Value.ToString().Split(","))
-                        if (!dlcIds.Contains(int.Parse(id))) dlcIds.Add(int.Parse(id));
+                        if (int.TryParse(id, out int appId) && !dlcIds.Contains(appId)) dlcIds.Add(appId);
         VToken depots = appInfo.Value.GetChild("depots");
         if (depots is not null) foreach (VProperty property in depots)
                 if (int.TryParse(property.Key.ToString(), out int _)

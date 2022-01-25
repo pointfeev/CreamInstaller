@@ -334,15 +334,15 @@ internal partial class SelectForm : CustomForm
     {
         if (e.Action == TreeViewAction.Unknown) return;
         TreeNode node = e.Node;
-        if (node is not null)
+        if (node is not null && int.TryParse(node.Name, out int appId))
         {
-            ProgramSelection selection = ProgramSelection.FromAppId(int.Parse(node.Name));
+            ProgramSelection selection = ProgramSelection.FromAppId(appId);
             if (selection is null)
             {
                 TreeNode parent = node.Parent;
-                if (parent is not null)
+                if (parent is not null && int.TryParse(parent.Name, out int gameAppId))
                 {
-                    ProgramSelection.FromAppId(int.Parse(parent.Name)).ToggleDlc(int.Parse(node.Name), node.Checked);
+                    ProgramSelection.FromAppId(gameAppId).ToggleDlc(appId, node.Checked);
                     parent.Checked = parent.Nodes.Cast<TreeNode>().ToList().Any(treeNode => treeNode.Checked);
                 }
             }
