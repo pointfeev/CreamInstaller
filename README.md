@@ -29,6 +29,7 @@ It can also generate and install (or uninstall) CreamAPI for the Paradox Launche
 4. **CAREFULLY** select what games and DLCs you wish to unlock. *CreamAPI is not tested for every game!*
 5. Click the **Generate and Install** button.
 6. Click the **OK** button to close the program.
+7. If CreamAPI doesn't work for any of the games you installed it on, simply go back to step 4 and select what games you wish you **revert** changes to, and instead click the **Uninstall** button this time.
 
 ---
 ##### Bugs/Crashes/Issues:
