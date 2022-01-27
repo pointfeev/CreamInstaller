@@ -83,8 +83,8 @@ internal static class SteamCMD
         string appUpdateFile = $@"{appUpdatePath}\appinfo.txt";
     restart:
         if (Program.Canceled) return null;
-        if (Directory.Exists(appUpdatePath) && File.Exists(appUpdateFile))
-            output = File.ReadAllText(appUpdateFile, Encoding.UTF8);
+        if (!Directory.Exists(appUpdatePath)) Directory.CreateDirectory(appUpdatePath);
+        if (File.Exists(appUpdateFile)) output = File.ReadAllText(appUpdateFile, Encoding.UTF8);
         else
         {
             output = await Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {appId} +force_install_dir {appUpdatePath} +app_update 4 +quit");
@@ -99,11 +99,8 @@ internal static class SteamCMD
         if (Program.Canceled || output is null) return null;
         if (!ValveDataFile.TryDeserialize(output, out VProperty appInfo))
         {
-            if (Directory.Exists(appUpdatePath))
-            {
-                Directory.Delete(appUpdatePath, true);
-                goto restart;
-            }
+            Directory.Delete(appUpdatePath, true);
+            goto restart;
         }
         if (appInfo.Value is VValue) goto restart;
         if (appInfo is null || appInfo.Value?.Children()?.ToList()?.Count == 0) return appInfo;
