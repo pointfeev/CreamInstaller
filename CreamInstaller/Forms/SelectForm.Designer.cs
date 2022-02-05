@@ -43,11 +43,13 @@ namespace CreamInstaller
             this.selectionTreeView = new CreamInstaller.CustomTreeView();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.allCheckBox = new System.Windows.Forms.CheckBox();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.progressBar = new System.Windows.Forms.ProgressBar();
             this.progressLabel = new System.Windows.Forms.Label();
             this.scanButton = new System.Windows.Forms.Button();
             this.uninstallButton = new System.Windows.Forms.Button();
             this.nodeContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.progressLabelGames = new System.Windows.Forms.Label();
+            this.progressLabelDLCs = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
@@ -97,19 +99,17 @@ namespace CreamInstaller
             this.groupBox1.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(560, 308);
+            this.groupBox1.Size = new System.Drawing.Size(560, 240);
             this.groupBox1.TabIndex = 8;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Programs / Games";
             // 
             // noneFoundLabel
             // 
-            this.noneFoundLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.noneFoundLabel.Location = new System.Drawing.Point(6, 22);
+            this.noneFoundLabel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.noneFoundLabel.Location = new System.Drawing.Point(3, 19);
             this.noneFoundLabel.Name = "noneFoundLabel";
-            this.noneFoundLabel.Size = new System.Drawing.Size(548, 280);
+            this.noneFoundLabel.Size = new System.Drawing.Size(554, 218);
             this.noneFoundLabel.TabIndex = 1002;
             this.noneFoundLabel.Text = "No CreamAPI-applicable programs were found on your computer!";
             this.noneFoundLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -160,8 +160,8 @@ namespace CreamInstaller
             // 
             // selectionTreeView
             // 
-            this.selectionTreeView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.selectionTreeView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.selectionTreeView.BackColor = System.Drawing.SystemColors.Control;
             this.selectionTreeView.BorderStyle = System.Windows.Forms.BorderStyle.None;
@@ -198,24 +198,40 @@ namespace CreamInstaller
             this.allCheckBox.Text = "All";
             this.allCheckBox.CheckedChanged += new System.EventHandler(this.OnAllCheckBoxChanged);
             // 
+            // selectionTreeView
+            // 
+            this.selectionTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.selectionTreeView.Location = new System.Drawing.Point(3, 19);
+            this.selectionTreeView.Size = new System.Drawing.Size(554, 218);
+            this.selectionTreeView.BackColor = System.Drawing.SystemColors.Control;
+            this.selectionTreeView.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.selectionTreeView.CheckBoxes = true;
+            this.selectionTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.selectionTreeView.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawAll;
+            this.selectionTreeView.Enabled = false;
+            this.selectionTreeView.FullRowSelect = true;
+            this.selectionTreeView.LineColor = System.Drawing.Color.Empty;
+            this.selectionTreeView.Name = "selectionTreeView";
+            this.selectionTreeView.TabIndex = 1001;
+            // 
             // progressBar1
             // 
-            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar1.Location = new System.Drawing.Point(12, 297);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(560, 23);
-            this.progressBar1.TabIndex = 9;
+            this.progressBar.Location = new System.Drawing.Point(12, 297);
+            this.progressBar.Name = "progressBar1";
+            this.progressBar.Size = new System.Drawing.Size(560, 23);
+            this.progressBar.TabIndex = 9;
             // 
             // progressLabel
             // 
             this.progressLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressLabel.Location = new System.Drawing.Point(12, 279);
+            this.progressLabel.Location = new System.Drawing.Point(12, 255);
             this.progressLabel.Name = "progressLabel";
-            this.progressLabel.Size = new System.Drawing.Size(760, 15);
+            this.progressLabel.Size = new System.Drawing.Size(560, 15);
             this.progressLabel.TabIndex = 10;
-            this.progressLabel.Text = "Loading . . .";
+            this.progressLabel.Text = "Gathering and caching your applicable games and their DLCs . . . 0%";
             // 
             // scanButton
             // 
@@ -248,15 +264,39 @@ namespace CreamInstaller
             this.nodeContextMenu.Name = "nodeContextMenu";
             this.nodeContextMenu.Size = new System.Drawing.Size(61, 4);
             // 
+            // progressLabelGames
+            // 
+            this.progressLabelGames.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressLabelGames.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.progressLabelGames.Location = new System.Drawing.Point(12, 270);
+            this.progressLabelGames.Name = "progressLabelGames";
+            this.progressLabelGames.Size = new System.Drawing.Size(560, 12);
+            this.progressLabelGames.TabIndex = 11;
+            this.progressLabelGames.Text = "Remaining games (2): Game 1, Game 2";
+            // 
+            // progressLabelDLC
+            // 
+            this.progressLabelDLCs.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressLabelDLCs.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.progressLabelDLCs.Location = new System.Drawing.Point(12, 282);
+            this.progressLabelDLCs.Name = "progressLabelDLC";
+            this.progressLabelDLCs.Size = new System.Drawing.Size(560, 12);
+            this.progressLabelDLCs.TabIndex = 10004;
+            this.progressLabelDLCs.Text = "Remaining DLC (2): 123456, 654321";
+            // 
             // SelectForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(584, 361);
+            this.Controls.Add(this.progressLabelDLCs);
+            this.Controls.Add(this.progressLabelGames);
             this.Controls.Add(this.uninstallButton);
             this.Controls.Add(this.scanButton);
             this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.progressBar1);
+            this.Controls.Add(this.progressBar);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.installButton);
@@ -285,7 +325,7 @@ namespace CreamInstaller
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.ProgressBar progressBar;
         private System.Windows.Forms.Label progressLabel;
         private System.Windows.Forms.CheckBox allCheckBox;
         private Button scanButton;
@@ -297,6 +337,8 @@ namespace CreamInstaller
         private FlowLayoutPanel flowLayoutPanel2;
         private Button uninstallButton;
         private ContextMenuStrip nodeContextMenu;
+        private Label progressLabelGames;
+        private Label progressLabelDLCs;
     }
 }
 

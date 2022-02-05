@@ -113,7 +113,7 @@ internal partial class MainForm : CustomForm
                             document.LoadHtml(reader.ReadToEnd());
                             foreach (HtmlNode node in document.DocumentNode.SelectNodes("//div[@data-test-selector='body-content']/ul/li"))
                             {
-                                changelogTreeView.Invoke((MethodInvoker)delegate
+                                changelogTreeView.TryMethodInvoke(delegate
                                 {
                                     TreeNode change = new();
                                     change.Text = $"{HttpUtility.HtmlDecode(node.InnerText)}";

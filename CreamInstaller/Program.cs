@@ -28,6 +28,7 @@ internal static class Program
 
     internal static bool IsGameBlocked(string name, string directory)
     {
+        if (!BlockProtectedGames) return false;
         if (ProtectedGameNames.Contains(name)) return true;
         if (!ProtectedGameDirectoryExceptions.Contains(name))
             foreach (string path in ProtectedGameDirectories)
@@ -120,6 +121,15 @@ internal static class Program
     {
         Canceled = cancel;
         await SteamCMD.Kill();
+    }
+
+    internal static void TryMethodInvoke(this Control control, MethodInvoker methodInvoker)
+    {
+        try
+        {
+            control.Invoke(methodInvoker);
+        }
+        catch { }
     }
 
     private static void OnApplicationExit(object s, EventArgs e) => Cleanup();

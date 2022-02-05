@@ -100,7 +100,7 @@ internal class ProgramSelection
 
     internal void Validate()
     {
-        if (Program.BlockProtectedGames && Program.IsGameBlocked(Name, RootDirectory))
+        if (Program.IsGameBlocked(Name, RootDirectory))
         {
             All.Remove(this);
             return;

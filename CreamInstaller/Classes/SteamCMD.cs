@@ -131,12 +131,12 @@ internal static class SteamCMD
         VToken extended = appInfo.Value.GetChild("extended");
         if (extended is not null)
             foreach (VProperty property in extended)
-                if (property.Key.ToString() == "listofdlc")
+                if (property.Key == "listofdlc")
                     foreach (string id in property.Value.ToString().Split(","))
                         if (int.TryParse(id, out int appId) && !dlcIds.Contains(appId)) dlcIds.Add(appId);
         VToken depots = appInfo.Value.GetChild("depots");
         if (depots is not null) foreach (VProperty property in depots)
-                if (int.TryParse(property.Key.ToString(), out int _)
+                if (int.TryParse(property.Key, out int _)
                     && int.TryParse(property.Value.GetChild("dlcappid")?.ToString(), out int appid)
                     && !dlcIds.Contains(appid))
                     dlcIds.Add(appid);

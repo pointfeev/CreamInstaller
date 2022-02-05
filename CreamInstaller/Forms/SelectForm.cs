@@ -119,6 +119,66 @@ internal partial class SelectForm : CustomForm
 
     internal List<Task> RunningTasks = new();
 
+    private List<string> RemainingGames = new();
+    private void UpdateRemainingGames()
+    {
+        if (Program.Canceled) return;
+        progressLabelGames.Text = $"Remaining games ({RemainingGames.Count}): "
+            + (RemainingGames.Any() ? string.Join(", ", RemainingGames).Replace("&", "&&") : "None");
+    }
+    private void AddToRemainingGames(string gameName)
+    {
+        if (Program.Canceled) return;
+        progressLabelGames.TryMethodInvoke(delegate
+        {
+            if (Program.Canceled) return;
+            if (!RemainingGames.Contains(gameName))
+                RemainingGames.Add(gameName);
+            UpdateRemainingGames();
+        });
+    }
+    private void RemoveFromRemainingGames(string gameName)
+    {
+        if (Program.Canceled) return;
+        progressLabelGames.TryMethodInvoke(delegate
+        {
+            if (Program.Canceled) return;
+            if (RemainingGames.Contains(gameName))
+                RemainingGames.Remove(gameName);
+            UpdateRemainingGames();
+        });
+    }
+
+    private List<string> RemainingDLCs = new();
+    private void UpdateRemainingDLCs()
+    {
+        if (Program.Canceled) return;
+        progressLabelDLCs.Text = $"Remaining DLCs ({RemainingDLCs.Count}): "
+            + (RemainingDLCs.Any() ? string.Join(", ", RemainingDLCs).Replace("&", "&&") : "None");
+    }
+    private void AddToRemainingDLCs(string dlcId)
+    {
+        if (Program.Canceled) return;
+        progressLabelDLCs.TryMethodInvoke(delegate
+        {
+            if (Program.Canceled) return;
+            if (!RemainingDLCs.Contains(dlcId))
+                RemainingDLCs.Add(dlcId);
+            UpdateRemainingDLCs();
+        });
+    }
+    private void RemoveFromRemainingDLCs(string dlcId)
+    {
+        if (Program.Canceled) return;
+        progressLabelDLCs.TryMethodInvoke(delegate
+        {
+            if (Program.Canceled) return;
+            if (RemainingDLCs.Contains(dlcId))
+                RemainingDLCs.Remove(dlcId);
+            UpdateRemainingDLCs();
+        });
+    }
+
     private async Task GetCreamApiApplicablePrograms(IProgress<int> progress)
     {
         if (Program.Canceled) return;
@@ -132,11 +192,14 @@ internal partial class SelectForm : CustomForm
             List<Tuple<int, string, string, int, string>> games = await GetGamesFromLibraryDirectory(libraryDirectory);
             if (games is not null)
                 foreach (Tuple<int, string, string, int, string> game in games)
-                    applicablePrograms.Add(game);
+                    if (!applicablePrograms.Any(_game => _game.Item1 == game.Item1))
+                        applicablePrograms.Add(game);
         }
 
         int CompleteTasks = 0;
         RunningTasks.Clear();
+        RemainingGames.Clear();
+        RemainingDLCs.Clear();
         foreach (Tuple<int, string, string, int, string> program in applicablePrograms)
         {
             int appId = program.Item1;
@@ -146,15 +209,24 @@ internal partial class SelectForm : CustomForm
             string directory = program.Item5;
             ProgramSelection selection = ProgramSelection.FromAppId(appId);
             if (Program.Canceled) return;
-            if (Program.BlockProtectedGames && Program.IsGameBlocked(name, directory)) continue;
+            if (Program.IsGameBlocked(name, directory)) continue;
             RunningTasks.Add(Task.Run(async () =>
             {
                 if (Program.Canceled) return;
+                AddToRemainingGames(name);
                 List<string> dllDirectories = await GetDllDirectoriesFromGameDirectory(directory);
-                if (dllDirectories is null) return;
+                if (dllDirectories is null)
+                {
+                    RemoveFromRemainingGames(name);
+                    return;
+                }
                 VProperty appInfo = null;
                 if (appId > 0) appInfo = await SteamCMD.GetAppInfo(appId, branch, buildId);
-                if (appId > 0 && appInfo is null) return;
+                if (appId > 0 && appInfo is null)
+                {
+                    RemoveFromRemainingGames(name);
+                    return;
+                }
                 if (Program.Canceled) return;
                 ConcurrentDictionary<int, string> dlc = new();
                 List<Task> dlcTasks = new();
@@ -167,12 +239,18 @@ internal partial class SelectForm : CustomForm
                         Task task = Task.Run(async () =>
                         {
                             if (Program.Canceled) return;
+                            AddToRemainingDLCs(id.ToString());
                             string dlcName = null;
                             VProperty dlcAppInfo = await SteamCMD.GetAppInfo(id);
                             if (dlcAppInfo is not null) dlcName = dlcAppInfo.Value?.GetChild("common")?.GetChild("name")?.ToString();
                             if (Program.Canceled) return;
-                            if (string.IsNullOrWhiteSpace(dlcName)) return; //dlcName = "Unknown DLC";
+                            if (string.IsNullOrWhiteSpace(dlcName))
+                            {
+                                RemoveFromRemainingDLCs(id.ToString());
+                                return;
+                            }
                             dlc[id] = /*$"[{id}] " +*/ dlcName;
+                            RemoveFromRemainingDLCs(id.ToString());
                             progress.Report(++CompleteTasks);
                         });
                         dlcTasks.Add(task);
@@ -181,9 +259,17 @@ internal partial class SelectForm : CustomForm
                         Thread.Sleep(10); // to reduce control & window freezing
                     }
                 }
-                else if (appId > 0) return;
+                else if (appId > 0)
+                {
+                    RemoveFromRemainingGames(name);
+                    return;
+                }
                 if (Program.Canceled) return;
-                if (string.IsNullOrWhiteSpace(name)) return;
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    RemoveFromRemainingGames(name);
+                    return;
+                }
 
                 selection ??= new();
                 selection.Usable = true;
@@ -209,7 +295,7 @@ internal partial class SelectForm : CustomForm
                     await task;
                 }
                 if (Program.Canceled) return;
-                selectionTreeView.Invoke((MethodInvoker)delegate
+                selectionTreeView.TryMethodInvoke(delegate
                 {
                     if (Program.Canceled) return;
                     TreeNode programNode = TreeNodes.Find(s => s.Name == "" + appId) ?? new();
@@ -238,6 +324,8 @@ internal partial class SelectForm : CustomForm
                         }
                     }
                 });
+                if (Program.Canceled) return;
+                RemoveFromRemainingGames(name);
                 progress.Report(++CompleteTasks);
             }));
             progress.Report(-RunningTasks.Count);
@@ -265,10 +353,7 @@ internal partial class SelectForm : CustomForm
             installButton.Enabled = false;
             uninstallButton.Enabled = installButton.Enabled;
             selectionTreeView.Enabled = false;
-            progressLabel.Visible = true;
-            progressBar1.Visible = true;
-            progressBar1.Value = 0;
-            groupBox1.Size = new(groupBox1.Size.Width, groupBox1.Size.Height - 44);
+            ShowProgressBar();
 
             bool setup = true;
             int maxProgress = 0;
@@ -282,8 +367,8 @@ internal partial class SelectForm : CustomForm
                 else curProgress = _progress;
                 int p = Math.Max(Math.Min((int)((float)(curProgress / (float)maxProgress) * 100), 100), 0);
                 progressLabel.Text = setup ? $"Setting up SteamCMD . . . {p}% ({curProgress}/{maxProgress})"
-                    : $"Gathering and caching your applicable games and their DLCs . . . {p}% ({curProgress}/{maxProgress})";
-                progressBar1.Value = p;
+                    : $"Gathering and caching your applicable games and their DLCs . . . {p}%";
+                progressBar.Value = p;
             };
 
             iProgress.Report(-1660); // not exact, number varies
@@ -309,10 +394,7 @@ internal partial class SelectForm : CustomForm
             });
             await GetCreamApiApplicablePrograms(iProgress);
 
-            progressBar1.Value = 100;
-            groupBox1.Size = new(groupBox1.Size.Width, groupBox1.Size.Height + 44);
-            progressLabel.Visible = false;
-            progressBar1.Visible = false;
+            HideProgressBar();
             selectionTreeView.Enabled = ProgramSelection.All.Any();
             allCheckBox.Enabled = selectionTreeView.Enabled;
             noneFoundLabel.Visible = !selectionTreeView.Enabled;
@@ -373,8 +455,39 @@ internal partial class SelectForm : CustomForm
         }
     }
 
+    private void ShowProgressBar()
+    {
+        progressBar.Value = 0;
+        progressLabelGames.Text = "Loading . . . ";
+        progressLabel.Visible = true;
+        progressLabelGames.Text = "";
+        progressLabelGames.Visible = true;
+        progressLabelDLCs.Text = "";
+        progressLabelDLCs.Visible = true;
+        progressBar.Visible = true;
+        groupBox1.Size = new(groupBox1.Size.Width, groupBox1.Size.Height - 3
+            - progressLabel.Size.Height
+            - progressLabelGames.Size.Height
+            - progressLabelDLCs.Size.Height
+            - progressBar.Size.Height);
+    }
+    private void HideProgressBar()
+    {
+        progressBar.Value = 100;
+        progressLabel.Visible = false;
+        progressLabelGames.Visible = false;
+        progressLabelDLCs.Visible = false;
+        progressBar.Visible = false;
+        groupBox1.Size = new(groupBox1.Size.Width, groupBox1.Size.Height + 3
+            + progressLabel.Size.Height
+            + progressLabelGames.Size.Height
+            + progressLabelDLCs.Size.Height
+            + progressBar.Size.Height);
+    }
+
     private void OnLoad(object sender, EventArgs _)
     {
+        HideProgressBar();
         selectionTreeView.TreeViewNodeSorter = new TreeNodeSorter();
         selectionTreeView.AfterCheck += OnTreeViewNodeCheckedChanged;
         Dictionary<string, Image> images = new();
