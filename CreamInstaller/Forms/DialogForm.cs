@@ -1,6 +1,8 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
 
+using CreamInstaller.Forms.Components;
+
 namespace CreamInstaller;
 
 internal partial class DialogForm : CustomForm

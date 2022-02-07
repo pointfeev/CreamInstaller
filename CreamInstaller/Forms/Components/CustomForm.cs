@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
 
-namespace CreamInstaller;
+namespace CreamInstaller.Forms.Components;
 
 internal class CustomForm : Form
 {

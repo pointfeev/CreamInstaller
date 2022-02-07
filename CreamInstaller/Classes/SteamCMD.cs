@@ -9,9 +9,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using CreamInstaller.Resources;
+
 using Gameloop.Vdf.Linq;
 
-namespace CreamInstaller;
+namespace CreamInstaller.Classes;
 
 internal static class SteamCMD
 {
@@ -158,8 +160,6 @@ internal static class SteamCMD
     {
         Kill().Wait();
         if (Directory.Exists(DirectoryPath))
-        {
             Directory.Delete(DirectoryPath, true);
-        }
     }
 }

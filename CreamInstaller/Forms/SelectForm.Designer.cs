@@ -1,6 +1,8 @@
 ﻿
 using System.Windows.Forms;
 
+using CreamInstaller.Forms.Components;
+
 namespace CreamInstaller
 {
     partial class SelectForm
@@ -40,7 +42,7 @@ namespace CreamInstaller
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.blockedGamesCheckBox = new System.Windows.Forms.CheckBox();
             this.blockProtectedHelpButton = new System.Windows.Forms.Button();
-            this.selectionTreeView = new CreamInstaller.CustomTreeView();
+            this.selectionTreeView = new CustomTreeView();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.allCheckBox = new System.Windows.Forms.CheckBox();
             this.progressBar = new System.Windows.Forms.ProgressBar();

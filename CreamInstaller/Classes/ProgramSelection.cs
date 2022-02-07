@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 using Gameloop.Vdf.Linq;
 
-namespace CreamInstaller;
+namespace CreamInstaller.Classes;
 
 internal class ProgramSelection
 {

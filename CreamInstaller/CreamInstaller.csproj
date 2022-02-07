@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net6.0-windows</TargetFramework>
-		<UseWindowsForms>true</UseWindowsForms>
+		<TargetFramework>net6.0-windows10.0.22000.0</TargetFramework>
+		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Resources\ini.ico</ApplicationIcon>
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-		<Version>2.3.0.0</Version>
+		<Version>2.3.1.0</Version>
 		<PackageIcon>Resources\ini.ico</PackageIcon>
 		<PackageIconUrl />
 		<Description>Automatically generates and installs CreamAPI files for Steam games on the user's computer. It can also generate and install CreamAPI for the Paradox Launcher should the user select a Paradox Interactive game.</Description>
@@ -23,7 +23,8 @@
 		<Authors>pointfeev</Authors>
 		<PackageId>pointfeev.creaminstaller</PackageId>
 		<StartupObject>CreamInstaller.Program</StartupObject>
-		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+		<SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<DebugType>embedded</DebugType>

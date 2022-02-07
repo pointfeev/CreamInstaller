@@ -10,6 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using CreamInstaller.Classes;
+
 namespace CreamInstaller;
 
 internal static class Program
@@ -18,7 +20,7 @@ internal static class Program
     internal static readonly Assembly EntryAssembly = Assembly.GetEntryAssembly();
     internal static readonly Process CurrentProcess = Process.GetCurrentProcess();
     internal static readonly string CurrentProcessFilePath = CurrentProcess.MainModule.FileName;
-    internal static readonly string CurrentProcessDirectory = CurrentProcessFilePath.Substring(0, CurrentProcessFilePath.LastIndexOf("\\"));
+    internal static readonly string CurrentProcessDirectory = CurrentProcessFilePath[..CurrentProcessFilePath.LastIndexOf("\\")];
     internal static readonly string BackupFileExtension = ".creaminstaller.backup";
 
     internal static bool BlockProtectedGames = true;
@@ -123,14 +125,7 @@ internal static class Program
         await SteamCMD.Kill();
     }
 
-    internal static void TryMethodInvoke(this Control control, MethodInvoker methodInvoker)
-    {
-        try
-        {
-            control.Invoke(methodInvoker);
-        }
-        catch { }
-    }
+    internal static void Invoke(this Control control, MethodInvoker methodInvoker) => control.Invoke(methodInvoker);
 
     private static void OnApplicationExit(object s, EventArgs e) => Cleanup();
 

@@ -2,6 +2,8 @@
 using System;
 using System.Windows.Forms;
 
+using CreamInstaller.Forms.Components;
+
 namespace CreamInstaller
 {
     partial class MainForm
@@ -36,7 +38,7 @@ namespace CreamInstaller
             this.updateButton = new System.Windows.Forms.Button();
             this.ignoreButton = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.changelogTreeView = new CreamInstaller.CustomTreeView();
+            this.changelogTreeView = new CustomTreeView();
             this.SuspendLayout();
             // 
             // label1

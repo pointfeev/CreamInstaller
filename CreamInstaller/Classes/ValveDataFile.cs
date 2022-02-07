@@ -1,7 +1,8 @@
-﻿using Gameloop.Vdf;
+﻿
+using Gameloop.Vdf;
 using Gameloop.Vdf.Linq;
 
-namespace CreamInstaller;
+namespace CreamInstaller.Classes;
 
 internal static class ValveDataFile
 {

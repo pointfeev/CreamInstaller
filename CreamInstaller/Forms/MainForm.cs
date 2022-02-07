@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
 
+using CreamInstaller.Classes;
+using CreamInstaller.Forms.Components;
+
 using HtmlAgilityPack;
 
 using Onova;
@@ -113,7 +116,7 @@ internal partial class MainForm : CustomForm
                             document.LoadHtml(reader.ReadToEnd());
                             foreach (HtmlNode node in document.DocumentNode.SelectNodes("//div[@data-test-selector='body-content']/ul/li"))
                             {
-                                changelogTreeView.TryMethodInvoke(delegate
+                                Program.Invoke(changelogTreeView, delegate
                                 {
                                     TreeNode change = new();
                                     change.Text = $"{HttpUtility.HtmlDecode(node.InnerText)}";

@@ -8,6 +8,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using CreamInstaller.Classes;
+using CreamInstaller.Forms.Components;
+using CreamInstaller.Resources;
+
 namespace CreamInstaller;
 
 internal partial class InstallForm : CustomForm

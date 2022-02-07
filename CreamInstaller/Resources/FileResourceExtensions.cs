@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace CreamInstaller;
+namespace CreamInstaller.Resources;
 
 internal static class FileResourceExtensions
 {

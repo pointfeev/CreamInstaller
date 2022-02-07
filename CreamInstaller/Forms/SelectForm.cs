@@ -10,6 +10,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using CreamInstaller.Classes;
+using CreamInstaller.Forms.Components;
+
 using Gameloop.Vdf.Linq;
 
 using Microsoft.Win32;
@@ -117,19 +120,15 @@ internal partial class SelectForm : CustomForm
         return treeNodes;
     }
 
-    internal List<Task> RunningTasks = new();
+    private static void UpdateRemaining(Label label, List<string> list, string descriptor) =>
+        label.Text = list.Any() ? $"Remaining {descriptor} ({list.Count}): " + string.Join(", ", list).Replace("&", "&&") : "";
 
-    private List<string> RemainingGames = new();
-    private void UpdateRemainingGames()
-    {
-        if (Program.Canceled) return;
-        progressLabelGames.Text = $"Remaining games ({RemainingGames.Count}): "
-            + (RemainingGames.Any() ? string.Join(", ", RemainingGames).Replace("&", "&&") : "None");
-    }
+    private readonly List<string> RemainingGames = new();
+    private void UpdateRemainingGames() => UpdateRemaining(progressLabelGames, RemainingGames, "games");
     private void AddToRemainingGames(string gameName)
     {
         if (Program.Canceled) return;
-        progressLabelGames.TryMethodInvoke(delegate
+        Program.Invoke(progressLabelGames, delegate
         {
             if (Program.Canceled) return;
             if (!RemainingGames.Contains(gameName))
@@ -140,7 +139,7 @@ internal partial class SelectForm : CustomForm
     private void RemoveFromRemainingGames(string gameName)
     {
         if (Program.Canceled) return;
-        progressLabelGames.TryMethodInvoke(delegate
+        Program.Invoke(progressLabelGames, delegate
         {
             if (Program.Canceled) return;
             if (RemainingGames.Contains(gameName))
@@ -149,17 +148,12 @@ internal partial class SelectForm : CustomForm
         });
     }
 
-    private List<string> RemainingDLCs = new();
-    private void UpdateRemainingDLCs()
-    {
-        if (Program.Canceled) return;
-        progressLabelDLCs.Text = $"Remaining DLCs ({RemainingDLCs.Count}): "
-            + (RemainingDLCs.Any() ? string.Join(", ", RemainingDLCs).Replace("&", "&&") : "None");
-    }
+    private readonly List<string> RemainingDLCs = new();
+    private void UpdateRemainingDLCs() => UpdateRemaining(progressLabelDLCs, RemainingDLCs, "DLCs");
     private void AddToRemainingDLCs(string dlcId)
     {
         if (Program.Canceled) return;
-        progressLabelDLCs.TryMethodInvoke(delegate
+        Program.Invoke(progressLabelDLCs, delegate
         {
             if (Program.Canceled) return;
             if (!RemainingDLCs.Contains(dlcId))
@@ -170,7 +164,7 @@ internal partial class SelectForm : CustomForm
     private void RemoveFromRemainingDLCs(string dlcId)
     {
         if (Program.Canceled) return;
-        progressLabelDLCs.TryMethodInvoke(delegate
+        Program.Invoke(progressLabelDLCs, delegate
         {
             if (Program.Canceled) return;
             if (RemainingDLCs.Contains(dlcId))
@@ -179,6 +173,7 @@ internal partial class SelectForm : CustomForm
         });
     }
 
+    internal readonly List<Task> RunningTasks = new();
     private async Task GetCreamApiApplicablePrograms(IProgress<int> progress)
     {
         if (Program.Canceled) return;
@@ -295,7 +290,7 @@ internal partial class SelectForm : CustomForm
                     await task;
                 }
                 if (Program.Canceled) return;
-                selectionTreeView.TryMethodInvoke(delegate
+                Program.Invoke(selectionTreeView, delegate
                 {
                     if (Program.Canceled) return;
                     TreeNode programNode = TreeNodes.Find(s => s.Name == "" + appId) ?? new();

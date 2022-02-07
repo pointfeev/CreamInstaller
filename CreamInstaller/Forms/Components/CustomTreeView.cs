@@ -2,20 +2,16 @@
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace CreamInstaller;
+namespace CreamInstaller.Forms.Components;
 
 internal class CustomTreeView : TreeView
 {
     protected override void WndProc(ref Message m)
     {
         if (m.Msg == 0x203)
-        {
             m.Result = IntPtr.Zero;
-        }
         else
-        {
             base.WndProc(ref m);
-        }
     }
 
     internal CustomTreeView() : base()
@@ -29,9 +25,7 @@ internal class CustomTreeView : TreeView
         e.DrawDefault = true;
         TreeNode node = e.Node;
         if (!node.IsVisible)
-        {
             return;
-        }
 
         Graphics graphics = e.Graphics;
         Color backColor = BackColor;
@@ -41,9 +35,7 @@ internal class CustomTreeView : TreeView
 
         string subText = node.Name;
         if (subText is null || !int.TryParse(subText, out int subInt) || subInt <= 0)
-        {
             return;
-        }
 
         Size subSize = TextRenderer.MeasureText(graphics, subText, subFont);
         Rectangle bounds = node.Bounds;
