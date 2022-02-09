@@ -192,9 +192,10 @@ internal partial class SelectForm : CustomForm
         }
 
         int CompleteTasks = 0;
-        RunningTasks.Clear();
-        RemainingGames.Clear();
-        RemainingDLCs.Clear();
+        RunningTasks.Clear(); // contains all running tasks including games AND their dlc
+        RemainingGames.Clear(); // for display purposes only, otherwise ignorable
+        RemainingDLCs.Clear(); // for display purposes only, otherwise ignorable
+        List<Task> appTasks = new();
         foreach (Tuple<int, string, string, int, string> program in applicablePrograms)
         {
             int appId = program.Item1;
@@ -205,10 +206,10 @@ internal partial class SelectForm : CustomForm
             ProgramSelection selection = ProgramSelection.FromAppId(appId);
             if (Program.Canceled) return;
             if (Program.IsGameBlocked(name, directory)) continue;
-            RunningTasks.Add(Task.Run(async () =>
+            AddToRemainingGames(name);
+            Task task = Task.Run(async () =>
             {
                 if (Program.Canceled) return;
-                AddToRemainingGames(name);
                 List<string> dllDirectories = await GetDllDirectoriesFromGameDirectory(directory);
                 if (dllDirectories is null)
                 {
@@ -231,10 +232,10 @@ internal partial class SelectForm : CustomForm
                     foreach (int id in dlcIds)
                     {
                         if (Program.Canceled) return;
+                        AddToRemainingDLCs(id.ToString());
                         Task task = Task.Run(async () =>
                         {
                             if (Program.Canceled) return;
-                            AddToRemainingDLCs(id.ToString());
                             string dlcName = null;
                             VProperty dlcAppInfo = await SteamCMD.GetAppInfo(id);
                             if (dlcAppInfo is not null) dlcName = dlcAppInfo.Value?.GetChild("common")?.GetChild("name")?.ToString();
@@ -265,6 +266,11 @@ internal partial class SelectForm : CustomForm
                     RemoveFromRemainingGames(name);
                     return;
                 }
+                foreach (Task task in dlcTasks)
+                {
+                    if (Program.Canceled) return;
+                    await task;
+                }
 
                 selection ??= new();
                 selection.Usable = true;
@@ -284,11 +290,6 @@ internal partial class SelectForm : CustomForm
                 }
                 if (allCheckBox.Checked) selection.Enabled = true;
 
-                foreach (Task task in dlcTasks)
-                {
-                    if (Program.Canceled) return;
-                    await task;
-                }
                 if (Program.Canceled) return;
                 Program.Invoke(selectionTreeView, delegate
                 {
@@ -322,10 +323,12 @@ internal partial class SelectForm : CustomForm
                 if (Program.Canceled) return;
                 RemoveFromRemainingGames(name);
                 progress.Report(++CompleteTasks);
-            }));
+            });
+            appTasks.Add(task);
+            RunningTasks.Add(task);
             progress.Report(-RunningTasks.Count);
         }
-        foreach (Task task in RunningTasks.ToList())
+        foreach (Task task in appTasks)
         {
             if (Program.Canceled) return;
             await task;
