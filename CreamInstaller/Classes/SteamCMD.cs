@@ -54,9 +54,10 @@ internal static class SteamCMD
         return string.Join("\r\n", logs);
     });
 
-    internal static async Task Setup()
+    internal static async Task Setup(IProgress<int> progress = null)
     {
         await Kill();
+        if (!Directory.Exists(DirectoryPath)) Directory.CreateDirectory(DirectoryPath);
         if (!File.Exists(FilePath))
         {
             using (HttpClient httpClient = new())
@@ -74,7 +75,20 @@ internal static class SteamCMD
             Directory.CreateDirectory(AppInfoPath);
             File.WriteAllText(AppInfoVersionPath, Application.ProductVersion, Encoding.UTF8);
         }
-        if (!File.Exists(DllPath)) await Run($@"+quit");
+        if (!File.Exists(DllPath))
+        {
+            FileSystemWatcher watcher = new(DirectoryPath);
+            watcher.Filter = "*";
+            watcher.IncludeSubdirectories = true;
+            watcher.EnableRaisingEvents = true;
+            if (File.Exists(DllPath)) progress.Report(-15); // update (not used at the moment)
+            else progress.Report(-1660); // install
+            int cur = 0;
+            progress.Report(cur);
+            watcher.Changed += (sender, e) => progress.Report(++cur);
+            await Run($@"+quit");
+            watcher.Dispose();
+        }
     }
 
     internal static async Task<VProperty> GetAppInfo(int appId, string branch = "public", int buildId = 0)
@@ -89,7 +103,7 @@ internal static class SteamCMD
         if (File.Exists(appUpdateFile)) output = File.ReadAllText(appUpdateFile, Encoding.UTF8);
         else
         {
-            output = await Run($@"+@ShutdownOnFailedCommand 0 +login anonymous +app_info_print {appId} +force_install_dir {appUpdatePath} +app_update 4 +quit");
+            output = await Run($@"+login anonymous +app_info_print {appId} +force_install_dir {appUpdatePath} +app_update 4 +quit"); // we add app_update 4 to allow the app_info_print to finish
             int openBracket = output.IndexOf("{");
             int closeBracket = output.LastIndexOf("}");
             if (openBracket != -1 && closeBracket != -1)
@@ -129,7 +143,9 @@ internal static class SteamCMD
     internal static async Task<List<int>> ParseDlcAppIds(VProperty appInfo) => await Task.Run(() =>
     {
         List<int> dlcIds = new();
+#pragma warning disable IDE0150 // Prefer 'null' check over type check
         if (Program.Canceled || appInfo is not VProperty) return dlcIds;
+#pragma warning restore IDE0150 // Prefer 'null' check over type check
         VToken extended = appInfo.Value.GetChild("extended");
         if (extended is not null)
             foreach (VProperty property in extended)

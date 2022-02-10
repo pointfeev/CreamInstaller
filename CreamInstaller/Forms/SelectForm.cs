@@ -361,27 +361,16 @@ internal partial class SelectForm : CustomForm
             progress.ProgressChanged += (sender, _progress) =>
             {
                 if (Program.Canceled) return;
-                if (_progress < 0) maxProgress = -_progress;
+                if (_progress < 0 || _progress > maxProgress) maxProgress = -_progress;
                 else curProgress = _progress;
                 int p = Math.Max(Math.Min((int)((float)(curProgress / (float)maxProgress) * 100), 100), 0);
-                progressLabel.Text = setup ? $"Setting up SteamCMD . . . {p}% ({curProgress}/{maxProgress})"
+                progressLabel.Text = setup ? $"Setting up SteamCMD . . . {p}%"
                     : $"Gathering and caching your applicable games and their DLCs . . . {p}%";
                 progressBar.Value = p;
             };
 
-            iProgress.Report(-1660); // not exact, number varies
-            int cur = 0;
-            iProgress.Report(cur);
-            progressLabel.Text = "Setting up SteamCMD . . . ";
-            if (!Directory.Exists(SteamCMD.DirectoryPath)) Directory.CreateDirectory(SteamCMD.DirectoryPath);
-
-            FileSystemWatcher watcher = new(SteamCMD.DirectoryPath);
-            watcher.Changed += (sender, e) => iProgress.Report(++cur);
-            watcher.Filter = "*";
-            watcher.IncludeSubdirectories = true;
-            watcher.EnableRaisingEvents = true;
-            await SteamCMD.Setup();
-            watcher.Dispose();
+            progressLabel.Text = $"Setting up SteamCMD . . . ";
+            await SteamCMD.Setup(iProgress);
 
             setup = false;
             progressLabel.Text = "Gathering and caching your applicable games and their DLCs . . . ";
