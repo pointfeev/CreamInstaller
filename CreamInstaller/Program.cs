@@ -122,7 +122,7 @@ internal static class Program
     internal static async void Cleanup(bool cancel = true)
     {
         Canceled = cancel;
-        await SteamCMD.Kill();
+        await SteamCMD.Cleanup();
     }
 
     internal static void Invoke(this Control control, MethodInvoker methodInvoker) => control.Invoke(methodInvoker);

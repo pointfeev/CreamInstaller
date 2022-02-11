@@ -6,6 +6,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -17,59 +18,60 @@ namespace CreamInstaller.Classes;
 
 internal static class SteamCMD
 {
+    internal static readonly int ProcessLimit = 20;
+    internal static readonly Version MinimumAppInfoVersion = Version.Parse("2.3.3.0");
+
     internal static readonly string DirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\CreamInstaller";
     internal static readonly string FilePath = DirectoryPath + @"\steamcmd.exe";
-    internal static readonly string ArchivePath = DirectoryPath + @"\steamcmd.zip";
-    internal static readonly string DllPath = DirectoryPath + @"\steamclient.dll";
-    internal static readonly string AppCachePath = DirectoryPath + @"\appcache";
-    internal static readonly string AppCacheAppInfoPath = AppCachePath + @"\appinfo.vdf";
-    internal static readonly string AppInfoPath = DirectoryPath + @"\appinfo";
 
-    internal static readonly Version MinimumAppInfoVersion = Version.Parse("2.0.3.2");
-    internal static readonly string AppInfoVersionPath = AppInfoPath + @"\version.txt";
-
-    //private static readonly int[] locks = new int[20]; // acts as an effective process limit
+    private static readonly int[] locks = new int[ProcessLimit];
     internal static async Task<string> Run(string command) => await Task.Run(() =>
     {
-        /*wait_for_lock:
+    wait_for_lock:
+        if (Program.Canceled) return "";
+        for (int i = 0; i < locks.Length; i++)
+        {
             if (Program.Canceled) return "";
-            for (int i = 0; i < locks.Length; i++)
+            if (Interlocked.CompareExchange(ref locks[i], 1, 0) == 0)
             {
                 if (Program.Canceled) return "";
-                if (Interlocked.CompareExchange(ref locks[i], 1, 0) == 0)
-                {*/
-        if (Program.Canceled) return "";
-        List<string> logs = new();
-        ProcessStartInfo processStartInfo = new()
-        {
-            FileName = FilePath,
-            RedirectStandardOutput = true,
-            RedirectStandardInput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            Arguments = command,
-            CreateNoWindow = true,
-            StandardInputEncoding = Encoding.UTF8,
-            StandardOutputEncoding = Encoding.UTF8,
-            StandardErrorEncoding = Encoding.UTF8
-        };
-        using Process process = Process.Start(processStartInfo);
-        process.OutputDataReceived += (object sender, DataReceivedEventArgs e) => logs.Add(e.Data);
-        process.BeginOutputReadLine();
-        process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => logs.Add(e.Data);
-        process.BeginErrorReadLine();
-        process.WaitForExit();
-        //Interlocked.Decrement(ref locks[i]);
-        return string.Join("\r\n", logs);
-        /*}
+                List<string> logs = new();
+                ProcessStartInfo processStartInfo = new()
+                {
+                    FileName = FilePath,
+                    RedirectStandardOutput = true,
+                    RedirectStandardInput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    Arguments = command,
+                    CreateNoWindow = true,
+                    StandardInputEncoding = Encoding.UTF8,
+                    StandardOutputEncoding = Encoding.UTF8,
+                    StandardErrorEncoding = Encoding.UTF8
+                };
+                using Process process = Process.Start(processStartInfo);
+                process.OutputDataReceived += (object sender, DataReceivedEventArgs e) => logs.Add(e.Data);
+                process.BeginOutputReadLine();
+                process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => logs.Add(e.Data);
+                process.BeginErrorReadLine();
+                process.WaitForExit();
+                Interlocked.Decrement(ref locks[i]);
+                return string.Join("\r\n", logs);
+            }
+            Thread.Sleep(0);
+        }
         Thread.Sleep(200);
-    }
-    goto wait_for_lock;*/
+        goto wait_for_lock;
     });
+
+    internal static readonly string ArchivePath = DirectoryPath + @"\steamcmd.zip";
+    internal static readonly string DllPath = DirectoryPath + @"\steamclient.dll";
+    internal static readonly string AppInfoPath = DirectoryPath + @"\appinfo";
+    internal static readonly string AppInfoVersionPath = AppInfoPath + @"\version.txt";
 
     internal static async Task Setup(IProgress<int> progress = null)
     {
-        await Kill();
+        await Cleanup();
         if (!Directory.Exists(DirectoryPath)) Directory.CreateDirectory(DirectoryPath);
         if (!File.Exists(FilePath))
         {
@@ -81,7 +83,6 @@ internal static class SteamCMD
             ZipFile.ExtractToDirectory(ArchivePath, DirectoryPath);
             File.Delete(ArchivePath);
         }
-        if (File.Exists(AppCacheAppInfoPath)) File.Delete(AppCacheAppInfoPath);
         if (!File.Exists(AppInfoVersionPath) || !Version.TryParse(File.ReadAllText(AppInfoVersionPath, Encoding.UTF8), out Version version) || version < MinimumAppInfoVersion)
         {
             if (Directory.Exists(AppInfoPath)) Directory.Delete(AppInfoPath, true);
@@ -100,19 +101,66 @@ internal static class SteamCMD
             progress.Report(cur);
             watcher.Changed += (sender, e) => progress.Report(++cur);
             await Run($@"+quit");
-            await Cleanup();
             watcher.Dispose();
         }
     }
 
-    internal static async Task Cleanup() => await Task.Run(() =>
+    internal static readonly string AppCachePath = DirectoryPath + @"\appcache";
+    internal static readonly string ConfigPath = DirectoryPath + @"\config";
+    internal static readonly string DumpsPath = DirectoryPath + @"\dumps";
+    internal static readonly string LogsPath = DirectoryPath + @"\logs";
+    internal static readonly string SteamAppsPath = DirectoryPath + @"\steamapps";
+    internal static readonly string UserDataPath = DirectoryPath + @"\userdata";
+
+    internal static async Task Cleanup() => await Task.Run(async () =>
     {
+        await Kill();
         try
         {
             string[] oldFiles = Directory.GetFiles(DirectoryPath, "*.old");
             foreach (string file in oldFiles) File.Delete(file);
+        }
+        catch { }
+        try
+        {
             string[] deleteFiles = Directory.GetFiles(DirectoryPath, "*.delete");
             foreach (string file in deleteFiles) File.Delete(file);
+        }
+        catch { }
+        try
+        {
+            string[] crashFiles = Directory.GetFiles(DirectoryPath, "*.crash");
+            foreach (string file in crashFiles) File.Delete(file);
+        }
+        catch { }
+        try
+        {
+            if (Directory.Exists(AppCachePath)) Directory.Delete(AppCachePath, true);
+        }
+        catch { }
+        try
+        {
+            if (Directory.Exists(ConfigPath)) Directory.Delete(ConfigPath, true);
+        }
+        catch { }
+        try
+        {
+            if (Directory.Exists(DumpsPath)) Directory.Delete(DumpsPath, true);
+        }
+        catch { }
+        try
+        {
+            if (Directory.Exists(LogsPath)) Directory.Delete(LogsPath, true);
+        }
+        catch { }
+        try
+        {
+            if (Directory.Exists(SteamAppsPath)) Directory.Delete(SteamAppsPath, true);
+        }
+        catch { }
+        try
+        {
+            if (Directory.Exists(UserDataPath)) Directory.Delete(UserDataPath, true);
         }
         catch { }
     });
@@ -121,17 +169,14 @@ internal static class SteamCMD
     {
         if (Program.Canceled) return null;
         string output;
-        string appUpdatePath = $@"{AppInfoPath}\{appId}";
-        string appUpdateFile = $@"{appUpdatePath}\appinfo.txt";
+        string appUpdateFile = $@"{AppInfoPath}\{appId}.vdf";
     restart:
-        await Cleanup();
         if (Program.Canceled) return null;
-        if (!Directory.Exists(appUpdatePath)) Directory.CreateDirectory(appUpdatePath);
         if (File.Exists(appUpdateFile)) output = File.ReadAllText(appUpdateFile, Encoding.UTF8);
         else
         {
             // we add app_update 4 to allow the app_info_print to finish
-            output = await Run($@"@ShutdownOnFailedCommand 0 +force_install_dir {appUpdatePath} +login anonymous +app_info_print {appId} +app_update 4 +quit");
+            output = await Run($@"@ShutdownOnFailedCommand 0 +force_install_dir {DirectoryPath} +login anonymous +app_info_print {appId} +app_update 4 +quit");
             int openBracket = output.IndexOf("{");
             int closeBracket = output.LastIndexOf("}");
             if (openBracket != -1 && closeBracket != -1)
@@ -143,13 +188,13 @@ internal static class SteamCMD
         if (Program.Canceled || output is null) return null;
         if (!ValveDataFile.TryDeserialize(output, out VProperty appInfo))
         {
-            Directory.Delete(appUpdatePath, true);
-            //new DialogForm(null).Show("AppInfoAttempts", SystemIcons.Information, "Deserialize exception:\n\n" + output, "OK");
+            File.Delete(appUpdateFile);
+            //new DialogForm(null).Show("GetAppInfo", SystemIcons.Information, "Deserialize exception:\n\n" + output, "OK");
             goto restart;
         }
         if (appInfo.Value is VValue)
         {
-            //new DialogForm(null).Show("AppInfoAttempts", SystemIcons.Information, "VValue exception:\n\n" + output, "OK");
+            //new DialogForm(null).Show("GetAppInfo", SystemIcons.Information, "VValue exception:\n\n" + output, "OK");
             goto restart;
         }
         if (appInfo is null || appInfo.Value?.Children()?.ToList()?.Count == 0) return appInfo;
@@ -163,10 +208,10 @@ internal static class SteamCMD
                 List<int> dlcAppIds = await ParseDlcAppIds(appInfo);
                 foreach (int id in dlcAppIds)
                 {
-                    string dlcAppUpdatePath = $@"{AppInfoPath}\{id}";
-                    if (Directory.Exists(dlcAppUpdatePath)) Directory.Delete(dlcAppUpdatePath, true);
+                    string dlcAppUpdateFile = $@"{AppInfoPath}\{id}.vdf";
+                    if (File.Exists(dlcAppUpdateFile)) File.Delete(dlcAppUpdateFile);
                 }
-                if (Directory.Exists(appUpdatePath)) Directory.Delete(appUpdatePath, true);
+                if (File.Exists(appUpdateFile)) File.Delete(appUpdateFile);
                 goto restart;
             }
         }
@@ -199,12 +244,15 @@ internal static class SteamCMD
         List<Task> tasks = new();
         foreach (Process process in Process.GetProcessesByName("steamcmd"))
         {
-            try
+            tasks.Add(Task.Run(() =>
             {
-                process.Kill();
-                tasks.Add(Task.Run(() => process.WaitForExit()));
-            }
-            catch { }
+                try
+                {
+                    process.Kill(true);
+                    process.WaitForExit();
+                }
+                catch { }
+            }));
         }
         foreach (Task task in tasks) await task;
     }

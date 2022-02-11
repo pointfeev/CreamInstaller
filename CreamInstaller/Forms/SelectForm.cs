@@ -379,7 +379,12 @@ internal partial class SelectForm : CustomForm
             {
                 if (!int.TryParse(node.Name, out int appId) || node.Parent is null && ProgramSelection.FromAppId(appId) is null) node.Remove();
             });
+            //DateTime start = DateTime.Now;
             await GetCreamApiApplicablePrograms(iProgress);
+            //DateTime end = DateTime.Now;
+            //TimeSpan t = end - start;
+            //new DialogForm(null).Show("GetCreamApiApplicablePrograms", SystemIcons.Information, "Gathering took " + t.ToString(@"mm\:ss"), "OK");
+            await SteamCMD.Cleanup();
 
             HideProgressBar();
             selectionTreeView.Enabled = ProgramSelection.All.Any();
