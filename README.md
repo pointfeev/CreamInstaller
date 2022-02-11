@@ -4,6 +4,8 @@
 ![Program Preview Image](https://i.imgur.com/BxGU99q.png)
 
 ###### Refer to [this post](https://cs.rin.ru/forum/viewtopic.php?f=29&t=70576) if you don't know what CreamAPI is! ;)
+
+###### The program utilizes CreamAPI v4.5.0.0 Hotfix downloaded from that post and embedded into the program itself; no download necessary on your part!
 ---
 #### Description:
 Automatically generates and installs (or uninstalls) CreamAPI files for Steam games on the user's computer.
