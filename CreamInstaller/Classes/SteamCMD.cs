@@ -6,7 +6,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -29,43 +28,43 @@ internal static class SteamCMD
     internal static readonly Version MinimumAppInfoVersion = Version.Parse("2.0.3.2");
     internal static readonly string AppInfoVersionPath = AppInfoPath + @"\version.txt";
 
-    private static readonly int[] locks = new int[20]; // acts as an effective process limit
+    //private static readonly int[] locks = new int[20]; // acts as an effective process limit
     internal static async Task<string> Run(string command) => await Task.Run(() =>
     {
-    wait_for_lock:
-        if (Program.Canceled) return "";
-        for (int i = 0; i < locks.Length; i++)
-        {
+        /*wait_for_lock:
             if (Program.Canceled) return "";
-            if (Interlocked.CompareExchange(ref locks[i], 1, 0) == 0)
+            for (int i = 0; i < locks.Length; i++)
             {
                 if (Program.Canceled) return "";
-                List<string> logs = new();
-                ProcessStartInfo processStartInfo = new()
-                {
-                    FileName = FilePath,
-                    RedirectStandardOutput = true,
-                    RedirectStandardInput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    Arguments = command,
-                    CreateNoWindow = true,
-                    StandardInputEncoding = Encoding.UTF8,
-                    StandardOutputEncoding = Encoding.UTF8,
-                    StandardErrorEncoding = Encoding.UTF8
-                };
-                using Process process = Process.Start(processStartInfo);
-                process.OutputDataReceived += (object sender, DataReceivedEventArgs e) => logs.Add(e.Data);
-                process.BeginOutputReadLine();
-                process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => logs.Add(e.Data);
-                process.BeginErrorReadLine();
-                process.WaitForExit();
-                Interlocked.Decrement(ref locks[i]);
-                return string.Join("\r\n", logs);
-            }
-            Thread.Sleep(0);
-        }
-        goto wait_for_lock;
+                if (Interlocked.CompareExchange(ref locks[i], 1, 0) == 0)
+                {*/
+        if (Program.Canceled) return "";
+        List<string> logs = new();
+        ProcessStartInfo processStartInfo = new()
+        {
+            FileName = FilePath,
+            RedirectStandardOutput = true,
+            RedirectStandardInput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            Arguments = command,
+            CreateNoWindow = true,
+            StandardInputEncoding = Encoding.UTF8,
+            StandardOutputEncoding = Encoding.UTF8,
+            StandardErrorEncoding = Encoding.UTF8
+        };
+        using Process process = Process.Start(processStartInfo);
+        process.OutputDataReceived += (object sender, DataReceivedEventArgs e) => logs.Add(e.Data);
+        process.BeginOutputReadLine();
+        process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => logs.Add(e.Data);
+        process.BeginErrorReadLine();
+        process.WaitForExit();
+        //Interlocked.Decrement(ref locks[i]);
+        return string.Join("\r\n", logs);
+        /*}
+        Thread.Sleep(200);
+    }
+    goto wait_for_lock;*/
     });
 
     internal static async Task Setup(IProgress<int> progress = null)
