@@ -6,6 +6,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -28,30 +29,43 @@ internal static class SteamCMD
     internal static readonly Version MinimumAppInfoVersion = Version.Parse("2.0.3.2");
     internal static readonly string AppInfoVersionPath = AppInfoPath + @"\version.txt";
 
+    private static readonly int[] locks = new int[20]; // acts as an effective process limit
     internal static async Task<string> Run(string command) => await Task.Run(() =>
     {
+    wait_for_lock:
         if (Program.Canceled) return "";
-        List<string> logs = new();
-        ProcessStartInfo processStartInfo = new()
+        for (int i = 0; i < locks.Length; i++)
         {
-            FileName = FilePath,
-            RedirectStandardOutput = true,
-            RedirectStandardInput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            Arguments = command,
-            CreateNoWindow = true,
-            StandardInputEncoding = Encoding.UTF8,
-            StandardOutputEncoding = Encoding.UTF8,
-            StandardErrorEncoding = Encoding.UTF8
-        };
-        using Process process = Process.Start(processStartInfo);
-        process.OutputDataReceived += (object sender, DataReceivedEventArgs e) => logs.Add(e.Data);
-        process.BeginOutputReadLine();
-        process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => logs.Add(e.Data);
-        process.BeginErrorReadLine();
-        process.WaitForExit();
-        return string.Join("\r\n", logs);
+            if (Program.Canceled) return "";
+            if (Interlocked.CompareExchange(ref locks[i], 1, 0) == 0)
+            {
+                if (Program.Canceled) return "";
+                List<string> logs = new();
+                ProcessStartInfo processStartInfo = new()
+                {
+                    FileName = FilePath,
+                    RedirectStandardOutput = true,
+                    RedirectStandardInput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    Arguments = command,
+                    CreateNoWindow = true,
+                    StandardInputEncoding = Encoding.UTF8,
+                    StandardOutputEncoding = Encoding.UTF8,
+                    StandardErrorEncoding = Encoding.UTF8
+                };
+                using Process process = Process.Start(processStartInfo);
+                process.OutputDataReceived += (object sender, DataReceivedEventArgs e) => logs.Add(e.Data);
+                process.BeginOutputReadLine();
+                process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => logs.Add(e.Data);
+                process.BeginErrorReadLine();
+                process.WaitForExit();
+                Interlocked.Decrement(ref locks[i]);
+                return string.Join("\r\n", logs);
+            }
+            Thread.Sleep(0);
+        }
+        goto wait_for_lock;
     });
 
     internal static async Task Setup(IProgress<int> progress = null)
@@ -87,9 +101,22 @@ internal static class SteamCMD
             progress.Report(cur);
             watcher.Changed += (sender, e) => progress.Report(++cur);
             await Run($@"+quit");
+            await Cleanup();
             watcher.Dispose();
         }
     }
+
+    internal static async Task Cleanup() => await Task.Run(() =>
+    {
+        try
+        {
+            string[] oldFiles = Directory.GetFiles(DirectoryPath, "*.old");
+            foreach (string file in oldFiles) File.Delete(file);
+            string[] deleteFiles = Directory.GetFiles(DirectoryPath, "*.delete");
+            foreach (string file in deleteFiles) File.Delete(file);
+        }
+        catch { }
+    });
 
     internal static async Task<VProperty> GetAppInfo(int appId, string branch = "public", int buildId = 0)
     {
@@ -98,12 +125,14 @@ internal static class SteamCMD
         string appUpdatePath = $@"{AppInfoPath}\{appId}";
         string appUpdateFile = $@"{appUpdatePath}\appinfo.txt";
     restart:
+        await Cleanup();
         if (Program.Canceled) return null;
         if (!Directory.Exists(appUpdatePath)) Directory.CreateDirectory(appUpdatePath);
         if (File.Exists(appUpdateFile)) output = File.ReadAllText(appUpdateFile, Encoding.UTF8);
         else
         {
-            output = await Run($@"+login anonymous +app_info_print {appId} +force_install_dir {appUpdatePath} +app_update 4 +quit"); // we add app_update 4 to allow the app_info_print to finish
+            // we add app_update 4 to allow the app_info_print to finish
+            output = await Run($@"@ShutdownOnFailedCommand 0 +force_install_dir {appUpdatePath} +login anonymous +app_info_print {appId} +app_update 4 +quit");
             int openBracket = output.IndexOf("{");
             int closeBracket = output.LastIndexOf("}");
             if (openBracket != -1 && closeBracket != -1)
@@ -116,9 +145,14 @@ internal static class SteamCMD
         if (!ValveDataFile.TryDeserialize(output, out VProperty appInfo))
         {
             Directory.Delete(appUpdatePath, true);
+            //new DialogForm(null).Show("AppInfoAttempts", SystemIcons.Information, "Deserialize exception:\n\n" + output, "OK");
             goto restart;
         }
-        if (appInfo.Value is VValue) goto restart;
+        if (appInfo.Value is VValue)
+        {
+            //new DialogForm(null).Show("AppInfoAttempts", SystemIcons.Information, "VValue exception:\n\n" + output, "OK");
+            goto restart;
+        }
         if (appInfo is null || appInfo.Value?.Children()?.ToList()?.Count == 0) return appInfo;
         VToken type = appInfo.Value?.GetChild("common")?.GetChild("type");
         if (type is null || type.ToString() == "Game")
@@ -166,8 +200,12 @@ internal static class SteamCMD
         List<Task> tasks = new();
         foreach (Process process in Process.GetProcessesByName("steamcmd"))
         {
-            process.Kill();
-            tasks.Add(Task.Run(() => process.WaitForExit()));
+            try
+            {
+                process.Kill();
+                tasks.Add(Task.Run(() => process.WaitForExit()));
+            }
+            catch { }
         }
         foreach (Task task in tasks) await task;
     }
