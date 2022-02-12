@@ -21,7 +21,8 @@ internal static class SteamCMD
     internal static readonly int ProcessLimit = 20;
     internal static readonly Version MinimumAppInfoVersion = Version.Parse("2.3.3.0");
 
-    internal static readonly string DirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\CreamInstaller";
+    internal static readonly string DirectoryPathOld = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\CreamInstaller";
+    internal static readonly string DirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\CreamInstaller";
     internal static readonly string FilePath = DirectoryPath + @"\steamcmd.exe";
 
     private static readonly int[] locks = new int[ProcessLimit];
@@ -72,6 +73,11 @@ internal static class SteamCMD
     internal static async Task Setup(IProgress<int> progress = null)
     {
         await Cleanup();
+        if (Directory.Exists(DirectoryPathOld))
+        {
+            if (Directory.Exists(DirectoryPath)) Directory.Delete(DirectoryPath, true);
+            Directory.Move(DirectoryPathOld, DirectoryPath);
+        }
         if (!Directory.Exists(DirectoryPath)) Directory.CreateDirectory(DirectoryPath);
         if (!File.Exists(FilePath))
         {
