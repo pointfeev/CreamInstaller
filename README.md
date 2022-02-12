@@ -40,6 +40,6 @@ All bugs, crashes, and other issues should be referred to the [GitHub Issues](ht
 ---
 ##### More Information:
 * You can right click on any game or DLC in the selection tree view to open a context menu with multiple shortcuts.
-* SteamCMD installation and appinfo cache can be found at **%AppData%\CreamInstaller**.
+* SteamCMD installation and appinfo cache can be found at **C:\ProgramData\CreamInstaller**.
 * The program automatically and very quickly updates from [GitHub](https://github.com/pointfeev/CreamInstaller) using [Onova](https://github.com/Tyrrrz/Onova). *updates can be ignored*
 * The program source and other information can be found on [GitHub](https://github.com/pointfeev/CreamInstaller).
