@@ -485,6 +485,7 @@ internal partial class SelectForm : CustomForm
         Dictionary<string, Image> images = new();
         Task.Run(async () =>
         {
+            images["Notepad"] = Program.GetNotepadImage();
             images["File Explorer"] = Program.GetFileExplorerImage();
             images["SteamDB"] = await Program.GetImageFromUrl("https://steamdb.info/favicon.ico");
             images["Steam Store"] = await Program.GetImageFromUrl("https://store.steampowered.com/favicon.ico");
@@ -505,6 +506,10 @@ internal partial class SelectForm : CustomForm
                 {
                     nodeContextMenu.Items.Add(new ToolStripMenuItem(selection.Name, selection.Icon));
                     nodeContextMenu.Items.Add(new ToolStripSeparator());
+                    string appInfo = $@"{SteamCMD.AppInfoPath}\{appId}.vdf";
+                    if (Directory.Exists(Directory.GetDirectoryRoot(appInfo)) && File.Exists(appInfo))
+                        nodeContextMenu.Items.Add(new ToolStripMenuItem("Open AppInfo", Image("Notepad"),
+                            new EventHandler((sender, e) => Program.OpenFileInNotepad(appInfo))));
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Open Root Directory", Image("File Explorer"),
                         new EventHandler((sender, e) => Program.OpenDirectoryInFileExplorer(selection.RootDirectory))));
                     for (int i = 0; i < selection.SteamApiDllDirectories.Count; i++)

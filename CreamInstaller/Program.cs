@@ -75,6 +75,12 @@ internal static class Program
         return null;
     }
 
+    internal static void OpenFileInNotepad(string path) => Process.Start(new ProcessStartInfo
+    {
+        FileName = "notepad.exe",
+        Arguments = path
+    });
+
     internal static void OpenDirectoryInFileExplorer(string path) => Process.Start(new ProcessStartInfo
     {
         FileName = "explorer.exe",
@@ -88,6 +94,8 @@ internal static class Program
     });
 
     internal static Image GetFileIconImage(string path) => File.Exists(path) ? Icon.ExtractAssociatedIcon(path).ToBitmap() : null;
+
+    internal static Image GetNotepadImage() => GetFileIconImage(Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\notepad.exe");
 
     internal static Image GetFileExplorerImage() => GetFileIconImage(Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\explorer.exe");
 

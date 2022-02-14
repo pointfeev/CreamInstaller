@@ -19,7 +19,7 @@ namespace CreamInstaller.Classes;
 internal static class SteamCMD
 {
     internal static readonly int ProcessLimit = 20;
-    internal static readonly Version MinimumAppInfoVersion = Version.Parse("2.3.3.0");
+    internal static readonly Version MinimumAppInfoVersion = Version.Parse("2.4.0.0");
 
     internal static readonly string DirectoryPathOld = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\CreamInstaller";
     internal static readonly string DirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\CreamInstaller";
@@ -188,6 +188,7 @@ internal static class SteamCMD
             if (openBracket != -1 && closeBracket != -1)
             {
                 output = $"\"{appId}\"\n" + output[openBracket..(1 + closeBracket)];
+                output = output.Replace("ERROR! Failed to install app '4' (Invalid platform)", "");
                 File.WriteAllText(appUpdateFile, output, Encoding.UTF8);
             }
         }
