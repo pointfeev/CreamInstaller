@@ -33,7 +33,7 @@ internal partial class InstallForm : CustomForm
 
     internal void UpdateProgress(int progress)
     {
-        int value = (int)((float)(CompleteOperationsCount / (float)OperationsCount) * 100) + (progress / OperationsCount);
+        int value = (int)((float)(CompleteOperationsCount / (float)OperationsCount) * 100) + progress / OperationsCount;
         if (value < userProgressBar.Value) return;
         userProgressBar.Value = value;
     }
@@ -49,7 +49,7 @@ internal partial class InstallForm : CustomForm
         await Task.Run(() => Thread.Sleep(0)); // to keep the text box control from glitching
     }
 
-    internal async Task WriteConfiguration(StreamWriter writer, int steamAppId, string name, SortedList<int, string> steamDlcApps)
+    internal async Task WriteConfiguration(StreamWriter writer, int steamAppId, string name, SortedList<int, (string name, string iconStaticId)> steamDlcApps)
     {
         writer.WriteLine();
         writer.WriteLine($"; {name}");
@@ -58,10 +58,12 @@ internal partial class InstallForm : CustomForm
         writer.WriteLine();
         writer.WriteLine("[dlc]");
         await UpdateUser($"Added game to cream_api.ini with appid {steamAppId} ({name})", InstallationLog.Resource, info: false);
-        foreach (KeyValuePair<int, string> dlcApp in steamDlcApps)
+        foreach (KeyValuePair<int, (string name, string iconStaticId)> pair in steamDlcApps)
         {
-            writer.WriteLine($"{dlcApp.Key} = {dlcApp.Value}");
-            await UpdateUser($"Added DLC to cream_api.ini with appid {dlcApp.Key} ({dlcApp.Value})", InstallationLog.Resource, info: false);
+            int appId = pair.Key;
+            (string name, string iconStaticId) dlcApp = pair.Value;
+            writer.WriteLine($"{appId} = {dlcApp.name}");
+            await UpdateUser($"Added DLC to cream_api.ini with appid {appId} ({dlcApp.name})", InstallationLog.Resource, info: false);
         }
     }
 
@@ -134,7 +136,7 @@ internal partial class InstallForm : CustomForm
                 StreamWriter writer = new(cApi, true, Encoding.UTF8);
                 writer.WriteLine("; " + Application.CompanyName + " v" + Application.ProductVersion);
                 if (selection.SteamAppId > 0) await WriteConfiguration(writer, selection.SteamAppId, selection.Name, selection.SelectedSteamDlc);
-                foreach (Tuple<int, string, SortedList<int, string>> extraAppDlc in selection.ExtraSteamAppIdDlc)
+                foreach (Tuple<int, string, SortedList<int, (string name, string iconStaticId)>> extraAppDlc in selection.ExtraSteamAppIdDlc)
                     await WriteConfiguration(writer, extraAppDlc.Item1, extraAppDlc.Item2, extraAppDlc.Item3);
                 writer.Flush();
                 writer.Close();

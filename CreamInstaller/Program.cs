@@ -28,6 +28,8 @@ internal static class Program
     internal static readonly string[] ProtectedGameDirectories = { @"\EasyAntiCheat", @"\BattlEye" }; // DLL detections
     internal static readonly string[] ProtectedGameDirectoryExceptions = { "Arma 3" }; // Arma 3's BattlEye doesn't detect DLL changes?
 
+    internal static readonly string ParadoxLauncherDirectory = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\Programs\Paradox Interactive\launcher";
+
     internal static bool IsGameBlocked(string name, string directory)
     {
         if (!BlockProtectedGames) return false;
@@ -62,6 +64,10 @@ internal static class Program
         }
         mutex.Close();
     }
+
+    private static readonly string SteamAppImagesPath = "https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/apps/";
+    internal static async Task<Image> GetSteamIcon(int steamAppId, string iconStaticId) => await GetImageFromUrl(SteamAppImagesPath + $"/{steamAppId}/{iconStaticId}.jpg");
+    internal static async Task<Image> GetSteamClientIcon(int steamAppId, string clientIconStaticId) => await GetImageFromUrl(SteamAppImagesPath + $"/{steamAppId}/{clientIconStaticId}.ico");
 
     internal static async Task<Image> GetImageFromUrl(string url)
     {
@@ -121,8 +127,17 @@ internal static class Program
         return false;
     }
 
+    internal static void Invoke(this Control control, MethodInvoker methodInvoker) => control.Invoke(methodInvoker);
+
     internal static SelectForm SelectForm;
     internal static InstallForm InstallForm;
+
+    internal static void InheritLocation(this Form form, Form fromForm)
+    {
+        int X = fromForm.Location.X + fromForm.Size.Width / 2 - form.Size.Width / 2;
+        int Y = fromForm.Location.Y + fromForm.Size.Height / 2 - form.Size.Height / 2;
+        form.Location = new(X, Y);
+    }
 
     internal static List<ProgramSelection> ProgramSelections = new();
 
@@ -133,14 +148,5 @@ internal static class Program
         await SteamCMD.Cleanup();
     }
 
-    internal static void Invoke(this Control control, MethodInvoker methodInvoker) => control.Invoke(methodInvoker);
-
     private static void OnApplicationExit(object s, EventArgs e) => Cleanup();
-
-    internal static void InheritLocation(this Form form, Form fromForm)
-    {
-        int X = fromForm.Location.X + fromForm.Size.Width / 2 - form.Size.Width / 2;
-        int Y = fromForm.Location.Y + fromForm.Size.Height / 2 - form.Size.Height / 2;
-        form.Location = new(X, Y);
-    }
 }

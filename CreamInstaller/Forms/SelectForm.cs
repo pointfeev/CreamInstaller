@@ -178,9 +178,8 @@ internal partial class SelectForm : CustomForm
     {
         if (Program.Canceled) return;
         List<Tuple<int, string, string, int, string>> applicablePrograms = new();
-        string launcherRootDirectory = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Programs\\Paradox Interactive";
-        if (Directory.Exists(launcherRootDirectory))
-            applicablePrograms.Add(new(0, "Paradox Launcher", "", 0, launcherRootDirectory));
+        if (Directory.Exists(Program.ParadoxLauncherDirectory))
+            applicablePrograms.Add(new(0, "Paradox Launcher", "", 0, Program.ParadoxLauncherDirectory));
         List<string> gameLibraryDirectories = await GameLibraryDirectories();
         foreach (string libraryDirectory in gameLibraryDirectories)
         {
@@ -224,7 +223,7 @@ internal partial class SelectForm : CustomForm
                     return;
                 }
                 if (Program.Canceled) return;
-                ConcurrentDictionary<int, string> dlc = new();
+                ConcurrentDictionary<int, (string name, string iconStaticId)> dlc = new();
                 List<Task> dlcTasks = new();
                 List<int> dlcIds = await SteamCMD.ParseDlcAppIds(appInfo);
                 if (dlcIds.Count > 0)
@@ -237,15 +236,22 @@ internal partial class SelectForm : CustomForm
                         {
                             if (Program.Canceled) return;
                             string dlcName = null;
+                            string dlcIconStaticId = null;
                             VProperty dlcAppInfo = await SteamCMD.GetAppInfo(id);
-                            if (dlcAppInfo is not null) dlcName = dlcAppInfo.Value?.GetChild("common")?.GetChild("name")?.ToString();
+                            if (dlcAppInfo is not null)
+                            {
+                                dlcName = dlcAppInfo.Value?.GetChild("common")?.GetChild("name")?.ToString();
+                                dlcIconStaticId = dlcAppInfo.Value?.GetChild("common")?.GetChild("icon")?.ToString();
+                                dlcIconStaticId ??= dlcAppInfo.Value?.GetChild("common")?.GetChild("logo_small")?.ToString();
+                                dlcIconStaticId ??= dlcAppInfo.Value?.GetChild("common")?.GetChild("logo")?.ToString();
+                            }
                             if (Program.Canceled) return;
                             if (string.IsNullOrWhiteSpace(dlcName))
                             {
                                 RemoveFromRemainingDLCs(id.ToString());
                                 return;
                             }
-                            dlc[id] = /*$"[{id}] " +*/ dlcName;
+                            dlc[id] = /*$"[{id}] " +*/ (dlcName, dlcIconStaticId);
                             RemoveFromRemainingDLCs(id.ToString());
                             progress.Report(++CompleteTasks);
                         });
@@ -279,15 +285,8 @@ internal partial class SelectForm : CustomForm
                 selection.RootDirectory = directory;
                 selection.SteamApiDllDirectories = dllDirectories;
                 selection.AppInfo = appInfo;
-                if (selection.Icon is null)
-                {
-                    if (appId == 0) selection.Icon = Program.GetFileIconImage(directory + @"\launcher\bootstrapper-v2.exe");
-                    else
-                    {
-                        selection.IconStaticID = appInfo?.Value?.GetChild("common")?.GetChild("icon")?.ToString();
-                        selection.ClientIconStaticID = appInfo?.Value?.GetChild("common")?.GetChild("clienticon")?.ToString();
-                    }
-                }
+                selection.IconStaticID = appInfo?.Value?.GetChild("common")?.GetChild("icon")?.ToString();
+                selection.ClientIconStaticID = appInfo?.Value?.GetChild("common")?.GetChild("clienticon")?.ToString();
                 if (allCheckBox.Checked) selection.Enabled = true;
 
                 if (Program.Canceled) return;
@@ -306,15 +305,17 @@ internal partial class SelectForm : CustomForm
                     }
                     else
                     {
-                        foreach (KeyValuePair<int, string> dlcApp in dlc)
+                        foreach (KeyValuePair<int, (string name, string iconStaticId)> pair in dlc)
                         {
                             if (Program.Canceled || programNode is null) return;
-                            selection.AllSteamDlc[dlcApp.Key] = dlcApp.Value;
-                            if (allCheckBox.Checked) selection.SelectedSteamDlc[dlcApp.Key] = dlcApp.Value;
-                            TreeNode dlcNode = TreeNodes.Find(s => s.Name == "" + dlcApp.Key) ?? new();
-                            dlcNode.Name = "" + dlcApp.Key;
-                            dlcNode.Text = dlcApp.Value;
-                            dlcNode.Checked = selection.SelectedSteamDlc.Contains(dlcApp);
+                            int appId = pair.Key;
+                            (string name, string iconStaticId) dlcApp = pair.Value;
+                            selection.AllSteamDlc[appId] = dlcApp;
+                            if (allCheckBox.Checked) selection.SelectedSteamDlc[appId] = dlcApp;
+                            TreeNode dlcNode = TreeNodes.Find(s => s.Name == "" + appId) ?? new();
+                            dlcNode.Name = appId.ToString();
+                            dlcNode.Text = dlcApp.name;
+                            dlcNode.Checked = selection.SelectedSteamDlc.ContainsKey(appId);
                             dlcNode.Remove();
                             programNode.Nodes.Add(dlcNode);
                         }
@@ -485,6 +486,14 @@ internal partial class SelectForm : CustomForm
         Dictionary<string, Image> images = new();
         Task.Run(async () =>
         {
+            if (Directory.Exists(Program.ParadoxLauncherDirectory))
+            {
+                foreach (string file in Directory.GetFiles(Program.ParadoxLauncherDirectory, "*.exe"))
+                {
+                    images["Paradox Launcher"] = Program.GetFileIconImage(file);
+                    break;
+                }
+            }
             images["Notepad"] = Program.GetNotepadImage();
             images["File Explorer"] = Program.GetFileExplorerImage();
             images["SteamDB"] = await Program.GetImageFromUrl("https://steamdb.info/favicon.ico");
@@ -492,24 +501,51 @@ internal partial class SelectForm : CustomForm
             images["Steam Community"] = await Program.GetImageFromUrl("https://steamcommunity.com/favicon.ico");
         });
         Image Image(string identifier) => images.GetValueOrDefault(identifier, null);
+        void TrySetImageAsync(ToolStripMenuItem menuItem, int appId, string iconStaticId, bool client = false) =>
+            Task.Run(async () =>
+            {
+                menuItem.Image = client ? await Program.GetSteamClientIcon(appId, iconStaticId) : await Program.GetSteamIcon(appId, iconStaticId);
+                images[client ? "ClientIcon_" + appId : "Icon_" + appId] = menuItem.Image;
+            });
         selectionTreeView.NodeMouseClick += (sender, e) =>
         {
             TreeNode node = e.Node;
             TreeNode parentNode = node.Parent;
             if (!int.TryParse(node.Name, out int appId)) return;
             ProgramSelection selection = ProgramSelection.FromAppId(appId);
+            (int gameAppId, (string name, string iconStaticId) app)? dlc = null;
+            if (selection is null) dlc = ProgramSelection.GetDlcFromAppId(appId);
             if (e.Button == MouseButtons.Right && node.Bounds.Contains(e.Location))
             {
                 selectionTreeView.SelectedNode = node;
                 nodeContextMenu.Items.Clear();
+                ToolStripMenuItem header = new(selection?.Name ?? node.Text, Image(appId == 0 ? "Paradox Launcher" : "Icon_" + node.Name));
+                if (header.Image is null)
+                {
+                    string iconStaticId = dlc?.app.iconStaticId ?? selection?.IconStaticID;
+                    if (iconStaticId is not null)
+                        TrySetImageAsync(header, appId, iconStaticId);
+                    else if (dlc is not null)
+                    {
+                        int gameAppId = dlc.Value.gameAppId;
+                        header.Image = Image("Icon_" + gameAppId);
+                        ProgramSelection gameSelection = ProgramSelection.FromAppId(gameAppId);
+                        iconStaticId = gameSelection?.IconStaticID;
+                        if (header.Image is null && iconStaticId is not null)
+                            TrySetImageAsync(header, gameAppId, iconStaticId);
+                    }
+                }
+                nodeContextMenu.Items.Add(header);
+                string appInfo = $@"{SteamCMD.AppInfoPath}\{appId}.vdf";
+                if (appId != 0 && Directory.Exists(Directory.GetDirectoryRoot(appInfo)) && File.Exists(appInfo))
+                {
+                    nodeContextMenu.Items.Add(new ToolStripSeparator());
+                    nodeContextMenu.Items.Add(new ToolStripMenuItem("Open AppInfo", Image("Notepad"),
+                        new EventHandler((sender, e) => Program.OpenFileInNotepad(appInfo))));
+                }
                 if (selection is not null)
                 {
-                    nodeContextMenu.Items.Add(new ToolStripMenuItem(selection.Name, selection.Icon));
                     nodeContextMenu.Items.Add(new ToolStripSeparator());
-                    string appInfo = $@"{SteamCMD.AppInfoPath}\{appId}.vdf";
-                    if (Directory.Exists(Directory.GetDirectoryRoot(appInfo)) && File.Exists(appInfo))
-                        nodeContextMenu.Items.Add(new ToolStripMenuItem("Open AppInfo", Image("Notepad"),
-                            new EventHandler((sender, e) => Program.OpenFileInNotepad(appInfo))));
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Open Root Directory", Image("File Explorer"),
                         new EventHandler((sender, e) => Program.OpenDirectoryInFileExplorer(selection.RootDirectory))));
                     for (int i = 0; i < selection.SteamApiDllDirectories.Count; i++)
@@ -519,19 +555,24 @@ internal partial class SelectForm : CustomForm
                             new EventHandler((sender, e) => Program.OpenDirectoryInFileExplorer(directory))));
                     }
                 }
-                else
-                {
-                    nodeContextMenu.Items.Add(new ToolStripMenuItem(node.Text));
-                    nodeContextMenu.Items.Add(new ToolStripSeparator());
-                }
                 if (appId != 0)
                 {
+                    nodeContextMenu.Items.Add(new ToolStripSeparator());
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Open SteamDB", Image("SteamDB"),
                         new EventHandler((sender, e) => Program.OpenUrlInInternetBrowser("https://steamdb.info/app/" + appId))));
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Open Steam Store", Image("Steam Store"),
                         new EventHandler((sender, e) => Program.OpenUrlInInternetBrowser("https://store.steampowered.com/app/" + appId))));
-                    if (selection is not null) nodeContextMenu.Items.Add(new ToolStripMenuItem("Open Steam Community", selection.ClientIcon ?? Image("Steam Community"),
-                        new EventHandler((sender, e) => Program.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + appId))));
+                    if (selection is not null)
+                    {
+                        ToolStripMenuItem steamCommunity = new("Open Steam Community", Image("ClientIcon_" + node.Name),
+                            new EventHandler((sender, e) => Program.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + appId)));
+                        nodeContextMenu.Items.Add(steamCommunity);
+                        if (steamCommunity.Image is null)
+                        {
+                            steamCommunity.Image = Image("Steam Community");
+                            TrySetImageAsync(steamCommunity, appId, selection.ClientIconStaticID, true);
+                        }
+                    }
                 }
                 nodeContextMenu.Show(selectionTreeView, e.Location);
             }

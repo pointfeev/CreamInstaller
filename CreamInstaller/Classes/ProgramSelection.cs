@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 using Gameloop.Vdf.Linq;
 
@@ -17,46 +15,17 @@ internal class ProgramSelection
     internal int SteamAppId = 0;
     internal string Name = "Program";
 
-    internal Image Icon;
-    private string iconPath;
-    internal string IconPath
-    {
-        get => iconPath;
-        set
-        {
-            iconPath = value;
-            Task.Run(async () => Icon = await Program.GetImageFromUrl(iconPath));
-        }
-    }
-    internal string IconStaticID
-    {
-        set => IconPath = $"https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/apps/{SteamAppId}/{value}.jpg";
-    }
-
-    internal Image ClientIcon;
-    private string clientIconPath;
-    internal string ClientIconPath
-    {
-        get => clientIconPath;
-        set
-        {
-            clientIconPath = value;
-            Task.Run(async () => ClientIcon = await Program.GetImageFromUrl(clientIconPath));
-        }
-    }
-    internal string ClientIconStaticID
-    {
-        set => ClientIconPath = $"https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/apps/{SteamAppId}/{value}.ico";
-    }
+    internal string IconStaticID = null;
+    internal string ClientIconStaticID = null;
 
     internal string RootDirectory;
     internal List<string> SteamApiDllDirectories;
 
     internal VProperty AppInfo = null;
 
-    internal readonly SortedList<int, string> AllSteamDlc = new();
-    internal readonly SortedList<int, string> SelectedSteamDlc = new();
-    internal readonly List<Tuple<int, string, SortedList<int, string>>> ExtraSteamAppIdDlc = new();
+    internal readonly SortedList<int, (string name, string iconStaticId)> AllSteamDlc = new();
+    internal readonly SortedList<int, (string name, string iconStaticId)> SelectedSteamDlc = new();
+    internal readonly List<Tuple<int, string, SortedList<int, (string name, string iconStaticId)>>> ExtraSteamAppIdDlc = new();
 
     internal bool AreSteamApiDllsLocked
     {
@@ -72,27 +41,36 @@ internal class ProgramSelection
         }
     }
 
-    private void Toggle(KeyValuePair<int, string> dlcApp, bool enabled)
+    private void Toggle(int dlcAppId, (string name, string iconStaticId) dlcApp, bool enabled)
     {
-        if (enabled) SelectedSteamDlc[dlcApp.Key] = dlcApp.Value;
-        else SelectedSteamDlc.Remove(dlcApp.Key);
+        if (enabled) SelectedSteamDlc[dlcAppId] = dlcApp;
+        else SelectedSteamDlc.Remove(dlcAppId);
     }
 
     internal void ToggleDlc(int dlcAppId, bool enabled)
     {
-        foreach (KeyValuePair<int, string> dlcApp in AllSteamDlc)
-            if (dlcApp.Key == dlcAppId)
+        foreach (KeyValuePair<int, (string name, string iconStaticId)> pair in AllSteamDlc)
+        {
+            int appId = pair.Key;
+            (string name, string iconStaticId) dlcApp = pair.Value;
+            if (appId == dlcAppId)
             {
-                Toggle(dlcApp, enabled);
+                Toggle(appId, dlcApp, enabled);
                 break;
             }
+        }
         Enabled = SelectedSteamDlc.Any();
     }
 
     internal void ToggleAllDlc(bool enabled)
     {
         if (!enabled) SelectedSteamDlc.Clear();
-        else foreach (KeyValuePair<int, string> dlcApp in AllSteamDlc) Toggle(dlcApp, enabled);
+        else foreach (KeyValuePair<int, (string name, string iconStaticId)> pair in AllSteamDlc)
+            {
+                int appId = pair.Key;
+                (string name, string iconStaticId) dlcApp = pair.Value;
+                Toggle(appId, dlcApp, enabled);
+            }
         Enabled = SelectedSteamDlc.Any();
     }
 
@@ -126,11 +104,11 @@ internal class ProgramSelection
 
     internal static ProgramSelection FromAppId(int appId) => AllUsable.Find(s => s.SteamAppId == appId);
 
-    internal static KeyValuePair<int, string>? GetDlcFromAppId(int appId)
+    internal static (int gameAppId, (string name, string iconStaticId) app)? GetDlcFromAppId(int appId)
     {
         foreach (ProgramSelection selection in AllUsable)
-            foreach (KeyValuePair<int, string> app in selection.AllSteamDlc)
-                if (app.Key == appId) return app;
+            foreach (KeyValuePair<int, (string name, string iconStaticId)> pair in selection.AllSteamDlc)
+                if (pair.Key == appId) return (selection.SteamAppId, pair.Value);
         return null;
     }
 }
