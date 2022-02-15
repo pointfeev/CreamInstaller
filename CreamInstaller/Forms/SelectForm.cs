@@ -246,12 +246,8 @@ internal partial class SelectForm : CustomForm
                                 dlcIconStaticId ??= dlcAppInfo.Value?.GetChild("common")?.GetChild("logo")?.ToString();
                             }
                             if (Program.Canceled) return;
-                            if (string.IsNullOrWhiteSpace(dlcName))
-                            {
-                                RemoveFromRemainingDLCs(id.ToString());
-                                return;
-                            }
-                            dlc[id] = /*$"[{id}] " +*/ (dlcName, dlcIconStaticId);
+                            if (string.IsNullOrWhiteSpace(dlcName)) dlcName = "Unnamed DLC";
+                            dlc[id] = (dlcName, dlcIconStaticId);
                             RemoveFromRemainingDLCs(id.ToString());
                             progress.Report(++CompleteTasks);
                         });
