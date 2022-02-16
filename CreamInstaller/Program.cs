@@ -28,7 +28,7 @@ internal static class Program
     internal static readonly string[] ProtectedGameDirectories = { @"\EasyAntiCheat", @"\BattlEye" }; // DLL detections
     internal static readonly string[] ProtectedGameDirectoryExceptions = { "Arma 3" }; // Arma 3's BattlEye doesn't detect DLL changes?
 
-    internal static readonly string ParadoxLauncherDirectory = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\Programs\Paradox Interactive\launcher";
+    internal static readonly string ParadoxLauncherDirectory = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\Programs\Paradox Interactive";
 
     internal static bool IsGameBlocked(string name, string directory)
     {
