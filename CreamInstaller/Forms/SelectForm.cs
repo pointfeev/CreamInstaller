@@ -15,8 +15,6 @@ using CreamInstaller.Forms.Components;
 
 using Gameloop.Vdf.Linq;
 
-using Microsoft.Win32;
-
 namespace CreamInstaller;
 
 internal partial class SelectForm : CustomForm
@@ -32,8 +30,7 @@ internal partial class SelectForm : CustomForm
     {
         List<string> gameDirectories = new();
         if (Program.Canceled) return gameDirectories;
-        string steamInstallPath = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Valve\\Steam", "InstallPath", null) as string;
-        steamInstallPath ??= Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Valve\\Steam", "InstallPath", null) as string;
+        string steamInstallPath = Program.SteamInstallPath;
         if (steamInstallPath != null && Directory.Exists(steamInstallPath))
         {
             string libraryFolder = steamInstallPath + @"\steamapps";
@@ -178,8 +175,8 @@ internal partial class SelectForm : CustomForm
     {
         if (Program.Canceled) return;
         List<Tuple<int, string, string, int, string>> applicablePrograms = new();
-        if (Directory.Exists(Program.ParadoxLauncherDirectory))
-            applicablePrograms.Add(new(0, "Paradox Launcher", "", 0, Program.ParadoxLauncherDirectory));
+        if (Directory.Exists(Program.ParadoxLauncherInstallPath))
+            applicablePrograms.Add(new(0, "Paradox Launcher", "", 0, Program.ParadoxLauncherInstallPath));
         List<string> gameLibraryDirectories = await GameLibraryDirectories();
         foreach (string libraryDirectory in gameLibraryDirectories)
         {
@@ -482,9 +479,9 @@ internal partial class SelectForm : CustomForm
         Dictionary<string, Image> images = new();
         Task.Run(async () =>
         {
-            if (Directory.Exists(Program.ParadoxLauncherDirectory))
+            if (Directory.Exists(Program.ParadoxLauncherInstallPath))
             {
-                foreach (string file in Directory.GetFiles(Program.ParadoxLauncherDirectory, "*.exe"))
+                foreach (string file in Directory.GetFiles(Program.ParadoxLauncherInstallPath, "*.exe"))
                 {
                     images["Paradox Launcher"] = Program.GetFileIconImage(file);
                     break;

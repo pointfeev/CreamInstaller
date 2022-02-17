@@ -12,6 +12,8 @@ using System.Windows.Forms;
 
 using CreamInstaller.Classes;
 
+using Microsoft.Win32;
+
 namespace CreamInstaller;
 
 internal static class Program
@@ -28,7 +30,26 @@ internal static class Program
     internal static readonly string[] ProtectedGameDirectories = { @"\EasyAntiCheat", @"\BattlEye" }; // DLL detections
     internal static readonly string[] ProtectedGameDirectoryExceptions = { "Arma 3" }; // Arma 3's BattlEye doesn't detect DLL changes?
 
-    internal static readonly string ParadoxLauncherDirectory = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\Programs\Paradox Interactive";
+    internal static string steamInstallPath = null;
+    internal static string SteamInstallPath
+    {
+        get
+        {
+            steamInstallPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\Software\Valve\Steam", "InstallPath", null) as string;
+            steamInstallPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\Software\Wow6432Node\Valve\Steam", "InstallPath", null) as string;
+            return steamInstallPath;
+        }
+    }
+
+    internal static string paradoxLauncherInstallPath = null;
+    internal static string ParadoxLauncherInstallPath
+    {
+        get
+        {
+            paradoxLauncherInstallPath ??= Registry.GetValue(@"HKEY_CURRENT_USER\Software\Paradox Interactive\Paradox Launcher v2", "LauncherInstallation", null) as string;
+            return paradoxLauncherInstallPath;
+        }
+    }
 
     internal static bool IsGameBlocked(string name, string directory)
     {
