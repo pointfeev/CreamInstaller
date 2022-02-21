@@ -561,13 +561,14 @@ internal partial class SelectForm : CustomForm
                             new EventHandler(async (sender, e) =>
                             {
                                 if (!Program.IsProgramRunningDialog(this, selection)) return;
-                                bool shouldReinstall = false;
+                                byte[] cApiIni = null;
                                 byte[] properApi = null;
                                 byte[] properApi64 = null;
                                 foreach (string directory in selection.SteamApiDllDirectories)
                                 {
                                     directory.GetApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string cApi);
-                                    shouldReinstall = File.Exists(cApi);
+                                    if (cApiIni is null && File.Exists(cApi))
+                                        cApiIni = File.ReadAllBytes(cApi);
                                     await InstallForm.UninstallCreamAPI(directory);
                                     if (properApi is null && File.Exists(api) && !FileResourceExtensions.Equals(Properties.Resources.API, api))
                                         properApi = File.ReadAllBytes(api);
@@ -590,8 +591,11 @@ internal partial class SelectForm : CustomForm
                                             properApi64.Write(api64);
                                             neededRepair = true;
                                         }
-                                        if (shouldReinstall)
+                                        if (cApiIni is not null)
+                                        {
                                             await InstallForm.InstallCreamAPI(directory, selection);
+                                            cApiIni.Write(cApi);
+                                        }
                                     }
                                     if (neededRepair)
                                         new DialogForm(this).Show("Paradox Launcher Repair", Icon, "Paradox Launcher successfully repaired!", "OK");
