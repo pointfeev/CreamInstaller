@@ -12,6 +12,7 @@ using System.Windows.Forms;
 
 using CreamInstaller.Classes;
 using CreamInstaller.Forms.Components;
+using CreamInstaller.Resources;
 
 using Gameloop.Vdf.Linq;
 
@@ -58,9 +59,13 @@ internal partial class SelectForm : CustomForm
     {
         List<string> dllDirectories = new();
         if (Program.Canceled || !Directory.Exists(gameDirectory)) return null;
-        string api = gameDirectory + @"\steam_api.dll";
-        string api64 = gameDirectory + @"\steam_api64.dll";
-        if (File.Exists(api) || File.Exists(api64)) dllDirectories.Add(gameDirectory);
+        gameDirectory.GetApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string cApi);
+        if (File.Exists(api)
+            || File.Exists(api_o)
+            || File.Exists(api64)
+            || File.Exists(api64_o)
+            || File.Exists(cApi))
+            dllDirectories.Add(gameDirectory);
         string[] directories = Directory.GetDirectories(gameDirectory);
         foreach (string _directory in directories)
         {
@@ -549,6 +554,56 @@ internal partial class SelectForm : CustomForm
                 }
                 if (selection is not null)
                 {
+                    if (appId == 0)
+                    {
+                        nodeContextMenu.Items.Add(new ToolStripSeparator());
+                        nodeContextMenu.Items.Add(new ToolStripMenuItem("Repair", Image("Command Prompt"),
+                            new EventHandler(async (sender, e) =>
+                            {
+                                if (!Program.IsProgramRunningDialog(this, selection)) return;
+                                bool shouldReinstall = false;
+                                byte[] properApi = null;
+                                byte[] properApi64 = null;
+                                foreach (string directory in selection.SteamApiDllDirectories)
+                                {
+                                    directory.GetApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string cApi);
+                                    shouldReinstall = File.Exists(cApi);
+                                    await InstallForm.UninstallCreamAPI(directory);
+                                    if (properApi is null && File.Exists(api) && !FileResourceExtensions.Equals(Properties.Resources.API, api))
+                                        properApi = File.ReadAllBytes(api);
+                                    if (properApi64 is null && File.Exists(api64) && !FileResourceExtensions.Equals(Properties.Resources.API64, api64))
+                                        properApi64 = File.ReadAllBytes(api64);
+                                }
+                                if (properApi is not null || properApi64 is not null)
+                                {
+                                    bool neededRepair = false;
+                                    foreach (string directory in selection.SteamApiDllDirectories)
+                                    {
+                                        directory.GetApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string cApi);
+                                        if (properApi is not null && FileResourceExtensions.Equals(Properties.Resources.API, api))
+                                        {
+                                            properApi.Write(api);
+                                            neededRepair = true;
+                                        }
+                                        if (properApi64 is not null && FileResourceExtensions.Equals(Properties.Resources.API64, api64))
+                                        {
+                                            properApi64.Write(api64);
+                                            neededRepair = true;
+                                        }
+                                        if (shouldReinstall)
+                                            await InstallForm.InstallCreamAPI(directory, selection);
+                                    }
+                                    if (neededRepair)
+                                        new DialogForm(this).Show("Paradox Launcher Repair", Icon, "Paradox Launcher successfully repaired!", "OK");
+                                    else
+                                        new DialogForm(this).Show("Paradox Launcher Repair", SystemIcons.Information, "Paradox Launcher does not need to be repaired.", "OK");
+                                }
+                                else
+                                    new DialogForm(this).Show("Paradox Launcher Repair", SystemIcons.Error, "Paradox Launcher repair failed!"
+                                        + "\n\nAn original Steamworks API file could not be found."
+                                        + "\nYou must reinstall Paradox Launcher to fix this issue.", "OK");
+                            })));
+                    }
                     nodeContextMenu.Items.Add(new ToolStripSeparator());
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Open Root Directory", Image("File Explorer"),
                         new EventHandler((sender, e) => Program.OpenDirectoryInFileExplorer(selection.RootDirectory))));

@@ -9,4 +9,15 @@ internal static class FileResourceExtensions
         using FileStream file = new(filePath, FileMode.Create, FileAccess.Write);
         file.Write(resource);
     }
+
+    internal static bool Equals(byte[] resource, string filePath)
+    {
+        byte[] file = File.ReadAllBytes(filePath);
+        if (resource.Length != file.Length)
+            return false;
+        for (int i = 0; i < resource.Length; i++)
+            if (resource[i] != file[i])
+                return false;
+        return true;
+    }
 }

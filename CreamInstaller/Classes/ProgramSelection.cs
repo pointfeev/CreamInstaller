@@ -33,9 +33,13 @@ internal class ProgramSelection
         {
             foreach (string directory in SteamApiDllDirectories)
             {
-                string api = directory + @"\steam_api.dll";
-                string api64 = directory + @"\steam_api64.dll";
-                if (api.IsFilePathLocked() || api64.IsFilePathLocked()) return true;
+                directory.GetApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string cApi);
+                if (api.IsFilePathLocked()
+                    || api_o.IsFilePathLocked()
+                    || api64.IsFilePathLocked()
+                    || api64_o.IsFilePathLocked()
+                    || cApi.IsFilePathLocked())
+                    return true;
             }
             return false;
         }

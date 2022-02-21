@@ -9,8 +9,10 @@ internal partial class DialogForm : CustomForm
 {
     internal DialogForm(IWin32Window owner) : base(owner) => InitializeComponent();
 
-    internal DialogResult Show(string formName, Icon descriptionIcon, string descriptionText, string acceptButtonText, string cancelButtonText = null)
+    internal DialogResult Show(string formName, Icon descriptionIcon, string descriptionText, string acceptButtonText, string cancelButtonText = null, Icon customFormIcon = null)
     {
+        if (customFormIcon is not null)
+            Icon = customFormIcon;
         icon.Image = descriptionIcon.ToBitmap();
         Text = formName;
         descriptionLabel.Text = descriptionText;

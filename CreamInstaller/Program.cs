@@ -51,6 +51,15 @@ internal static class Program
         }
     }
 
+    internal static void GetApiComponents(this string directory, out string api, out string api_o, out string api64, out string api64_o, out string cApi)
+    {
+        api = directory + @"\steam_api.dll";
+        api_o = directory + @"\steam_api_o.dll";
+        api64 = directory + @"\steam_api64.dll";
+        api64_o = directory + @"\steam_api64_o.dll";
+        cApi = directory + @"\cream_api.ini";
+    }
+
     internal static bool IsGameBlocked(string name, string directory)
     {
         if (!BlockProtectedGames) return false;
@@ -84,6 +93,12 @@ internal static class Program
             }
         }
         mutex.Close();
+    }
+
+    internal static Icon ToIcon(this Image image)
+    {
+        Bitmap dialogIconBitmap = new(image, new Size(image.Width, image.Height));
+        return Icon.FromHandle(dialogIconBitmap.GetHicon());
     }
 
     private static readonly string SteamAppImagesPath = "https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/apps/";

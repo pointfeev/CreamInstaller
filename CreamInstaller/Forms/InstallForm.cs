@@ -4,7 +4,6 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -33,23 +32,29 @@ internal partial class InstallForm : CustomForm
 
     internal void UpdateProgress(int progress)
     {
-        int value = (int)((float)(CompleteOperationsCount / (float)OperationsCount) * 100) + progress / OperationsCount;
-        if (value < userProgressBar.Value) return;
-        userProgressBar.Value = value;
+        if (!userProgressBar.Disposing && !userProgressBar.IsDisposed)
+            userProgressBar.Invoke(() =>
+            {
+                int value = (int)((float)(CompleteOperationsCount / (float)OperationsCount) * 100) + progress / OperationsCount;
+                if (value < userProgressBar.Value) return;
+                userProgressBar.Value = value;
+            });
     }
 
-    internal async Task UpdateUser(string text, Color color, bool info = true, bool log = true)
+    internal void UpdateUser(string text, Color color, bool info = true, bool log = true)
     {
-        if (info) userInfoLabel.Text = text;
-        if (log && !logTextBox.IsDisposed)
+        if (info) userInfoLabel.Invoke(() => userInfoLabel.Text = text);
+        if (log && !logTextBox.Disposing && !logTextBox.IsDisposed)
         {
-            if (logTextBox.Text.Length > 0) logTextBox.AppendText(Environment.NewLine, color);
-            logTextBox.AppendText(text, color);
+            logTextBox.Invoke(() =>
+            {
+                if (logTextBox.Text.Length > 0) logTextBox.AppendText(Environment.NewLine, color);
+                logTextBox.AppendText(text, color);
+            });
         }
-        await Task.Run(() => Thread.Sleep(0)); // to keep the text box control from glitching
     }
 
-    internal async Task WriteConfiguration(StreamWriter writer, int steamAppId, string name, SortedList<int, (string name, string iconStaticId)> steamDlcApps)
+    internal static void WriteConfiguration(StreamWriter writer, int steamAppId, string name, SortedList<int, (string name, string iconStaticId)> steamDlcApps, InstallForm installForm = null)
     {
         writer.WriteLine();
         writer.WriteLine($"; {name}");
@@ -57,15 +62,92 @@ internal partial class InstallForm : CustomForm
         writer.WriteLine($"appid = {steamAppId}");
         writer.WriteLine();
         writer.WriteLine("[dlc]");
-        await UpdateUser($"Added game to cream_api.ini with appid {steamAppId} ({name})", InstallationLog.Resource, info: false);
+        if (installForm is not null)
+            installForm.UpdateUser($"Added game to cream_api.ini with appid {steamAppId} ({name})", InstallationLog.Resource, info: false);
         foreach (KeyValuePair<int, (string name, string iconStaticId)> pair in steamDlcApps)
         {
             int appId = pair.Key;
             (string name, string iconStaticId) dlcApp = pair.Value;
             writer.WriteLine($"{appId} = {dlcApp.name}");
-            await UpdateUser($"Added DLC to cream_api.ini with appid {appId} ({dlcApp.name})", InstallationLog.Resource, info: false);
+            if (installForm is not null)
+                installForm.UpdateUser($"Added DLC to cream_api.ini with appid {appId} ({dlcApp.name})", InstallationLog.Resource, info: false);
         }
     }
+
+    internal static async Task UninstallCreamAPI(string directory, InstallForm installForm = null) => await Task.Run(() =>
+    {
+        directory.GetApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string cApi);
+        if (File.Exists(api_o))
+        {
+            if (File.Exists(api))
+            {
+                File.Delete(api);
+                if (installForm is not null)
+                    installForm.UpdateUser($"Deleted file: {Path.GetFileName(api)}", InstallationLog.Resource, info: false);
+            }
+            File.Move(api_o, api);
+            if (installForm is not null)
+                installForm.UpdateUser($"Renamed file: {Path.GetFileName(api_o)} -> {Path.GetFileName(api)}", InstallationLog.Resource, info: false);
+        }
+        if (File.Exists(api64_o))
+        {
+            if (File.Exists(api64))
+            {
+                File.Delete(api64);
+                if (installForm is not null)
+                    installForm.UpdateUser($"Deleted file: {Path.GetFileName(api64)}", InstallationLog.Resource, info: false);
+            }
+            File.Move(api64_o, api64);
+            if (installForm is not null)
+                installForm.UpdateUser($"Renamed file: {Path.GetFileName(api64_o)} -> {Path.GetFileName(api64)}", InstallationLog.Resource, info: false);
+        }
+        if (File.Exists(cApi))
+        {
+            File.Delete(cApi);
+            if (installForm is not null)
+                installForm.UpdateUser($"Deleted file: {Path.GetFileName(cApi)}", InstallationLog.Resource, info: false);
+        }
+    });
+
+    internal static async Task InstallCreamAPI(string directory, ProgramSelection selection, InstallForm installForm = null) => await Task.Run(() =>
+    {
+        directory.GetApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string cApi);
+        if (File.Exists(api) && !File.Exists(api_o))
+        {
+            File.Move(api, api_o);
+            if (installForm is not null)
+                installForm.UpdateUser($"Renamed file: {Path.GetFileName(api)} -> {Path.GetFileName(api_o)}", InstallationLog.Resource, info: false);
+        }
+        if (File.Exists(api_o))
+        {
+            Properties.Resources.API.Write(api);
+            if (installForm is not null)
+                installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(api)}", InstallationLog.Resource, info: false);
+        }
+        if (File.Exists(api64) && !File.Exists(api64_o))
+        {
+            File.Move(api64, api64_o);
+            if (installForm is not null)
+                installForm.UpdateUser($"Renamed file: {Path.GetFileName(api64)} -> {Path.GetFileName(api64_o)}", InstallationLog.Resource, info: false);
+        }
+        if (File.Exists(api64_o))
+        {
+            Properties.Resources.API64.Write(api64);
+            if (installForm is not null)
+                installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(api64)}", InstallationLog.Resource, info: false);
+        }
+        if (installForm is not null)
+            installForm.UpdateUser("Generating CreamAPI for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+        File.Create(cApi).Close();
+        StreamWriter writer = new(cApi, true, Encoding.UTF8);
+        writer.WriteLine("; " + Application.CompanyName + " v" + Application.ProductVersion);
+        if (selection.SteamAppId > 0)
+            WriteConfiguration(writer, selection.SteamAppId, selection.Name, selection.SelectedSteamDlc, installForm);
+        foreach (Tuple<int, string, SortedList<int, (string name, string iconStaticId)>> extraAppDlc in selection.ExtraSteamAppIdDlc)
+            WriteConfiguration(writer, extraAppDlc.Item1, extraAppDlc.Item2, extraAppDlc.Item3, installForm);
+        writer.Flush();
+        writer.Close();
+    });
 
     private async Task OperateFor(ProgramSelection selection)
     {
@@ -74,73 +156,12 @@ internal partial class InstallForm : CustomForm
         int cur = 0;
         foreach (string directory in selection.SteamApiDllDirectories)
         {
-            await UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} CreamAPI for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+            UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} CreamAPI for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
             if (!Program.IsProgramRunningDialog(this, selection)) throw new OperationCanceledException();
-            string api = directory + @"\steam_api.dll";
-            string api_o = directory + @"\steam_api_o.dll";
-            string api64 = directory + @"\steam_api64.dll";
-            string api64_o = directory + @"\steam_api64_o.dll";
-            string cApi = directory + @"\cream_api.ini";
             if (Uninstalling)
-            {
-                if (File.Exists(api_o))
-                {
-                    if (File.Exists(api))
-                    {
-                        File.Delete(api);
-                        await UpdateUser($"Deleted file: {Path.GetFileName(api)}", InstallationLog.Resource, info: false);
-                    }
-                    File.Move(api_o, api);
-                    await UpdateUser($"Renamed file: {Path.GetFileName(api_o)} -> {Path.GetFileName(api)}", InstallationLog.Resource, info: false);
-                }
-                if (File.Exists(api64_o))
-                {
-                    if (File.Exists(api64))
-                    {
-                        File.Delete(api64);
-                        await UpdateUser($"Deleted file: {Path.GetFileName(api64)}", InstallationLog.Resource, info: false);
-                    }
-                    File.Move(api64_o, api64);
-                    await UpdateUser($"Renamed file: {Path.GetFileName(api64_o)} -> {Path.GetFileName(api64)}", InstallationLog.Resource, info: false);
-                }
-                if (File.Exists(cApi))
-                {
-                    File.Delete(cApi);
-                    await UpdateUser($"Deleted file: {Path.GetFileName(cApi)}", InstallationLog.Resource, info: false);
-                }
-            }
+                await UninstallCreamAPI(directory, this);
             else
-            {
-                if (File.Exists(api) && !File.Exists(api_o))
-                {
-                    File.Move(api, api_o);
-                    await UpdateUser($"Renamed file: {Path.GetFileName(api)} -> {Path.GetFileName(api_o)}", InstallationLog.Resource, info: false);
-                }
-                if (File.Exists(api_o))
-                {
-                    Properties.Resources.API.Write(api);
-                    await UpdateUser($"Wrote resource to file: {Path.GetFileName(api)}", InstallationLog.Resource, info: false);
-                }
-                if (File.Exists(api64) && !File.Exists(api64_o))
-                {
-                    File.Move(api64, api64_o);
-                    await UpdateUser($"Renamed file: {Path.GetFileName(api64)} -> {Path.GetFileName(api64_o)}", InstallationLog.Resource, info: false);
-                }
-                if (File.Exists(api64_o))
-                {
-                    Properties.Resources.API64.Write(api64);
-                    await UpdateUser($"Wrote resource to file: {Path.GetFileName(api64)}", InstallationLog.Resource, info: false);
-                }
-                await UpdateUser("Generating CreamAPI for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
-                File.Create(cApi).Close();
-                StreamWriter writer = new(cApi, true, Encoding.UTF8);
-                writer.WriteLine("; " + Application.CompanyName + " v" + Application.ProductVersion);
-                if (selection.SteamAppId > 0) await WriteConfiguration(writer, selection.SteamAppId, selection.Name, selection.SelectedSteamDlc);
-                foreach (Tuple<int, string, SortedList<int, (string name, string iconStaticId)>> extraAppDlc in selection.ExtraSteamAppIdDlc)
-                    await WriteConfiguration(writer, extraAppDlc.Item1, extraAppDlc.Item2, extraAppDlc.Item3);
-                writer.Flush();
-                writer.Close();
-            }
+                await InstallCreamAPI(directory, selection, this);
             UpdateProgress(++cur / count * 100);
         }
         UpdateProgress(100);
@@ -158,13 +179,13 @@ internal partial class InstallForm : CustomForm
             try
             {
                 await OperateFor(selection);
-                await UpdateUser($"Operation succeeded for {selection.Name}.", InstallationLog.Success);
+                UpdateUser($"Operation succeeded for {selection.Name}.", InstallationLog.Success);
                 selection.Enabled = false;
                 disabledSelections.Add(selection);
             }
             catch (Exception exception)
             {
-                await UpdateUser($"Operation failed for {selection.Name}: " + exception.ToString(), InstallationLog.Error);
+                UpdateUser($"Operation failed for {selection.Name}: " + exception.ToString(), InstallationLog.Error);
             }
             ++CompleteOperationsCount;
         }
@@ -188,11 +209,11 @@ internal partial class InstallForm : CustomForm
         try
         {
             await Operate();
-            await UpdateUser($"CreamAPI successfully {(Uninstalling ? "uninstalled" : "installed and generated")} for " + ProgramCount + " program(s).", InstallationLog.Success);
+            UpdateUser($"CreamAPI successfully {(Uninstalling ? "uninstalled" : "installed and generated")} for " + ProgramCount + " program(s).", InstallationLog.Success);
         }
         catch (Exception exception)
         {
-            await UpdateUser($"CreamAPI {(Uninstalling ? "uninstallation" : "installation and/or generation")} failed: " + exception.ToString(), InstallationLog.Error);
+            UpdateUser($"CreamAPI {(Uninstalling ? "uninstallation" : "installation and/or generation")} failed: " + exception.ToString(), InstallationLog.Error);
             retryButton.Enabled = true;
         }
         userProgressBar.Value = userProgressBar.Maximum;
