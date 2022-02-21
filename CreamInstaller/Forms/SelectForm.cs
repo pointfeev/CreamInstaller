@@ -243,8 +243,8 @@ internal partial class SelectForm : CustomForm
                                 dlcIconStaticId ??= dlcAppInfo.Value?.GetChild("common")?.GetChild("logo")?.ToString();
                             }
                             if (Program.Canceled) return;
-                            if (string.IsNullOrWhiteSpace(dlcName)) dlcName = "Unnamed DLC";
-                            dlc[id] = (dlcName, dlcIconStaticId);
+                            if (!string.IsNullOrWhiteSpace(dlcName))
+                                dlc[id] = (dlcName, dlcIconStaticId);
                             RemoveFromRemainingDLCs(id.ToString());
                             progress.Report(++CompleteTasks);
                         });
@@ -488,6 +488,7 @@ internal partial class SelectForm : CustomForm
                 }
             }
             images["Notepad"] = Program.GetNotepadImage();
+            images["Command Prompt"] = Program.GetCommandPromptImage();
             images["File Explorer"] = Program.GetFileExplorerImage();
             images["SteamDB"] = await Program.GetImageFromUrl("https://steamdb.info/favicon.ico");
             images["Steam Store"] = await Program.GetImageFromUrl("https://store.steampowered.com/favicon.ico");
@@ -535,6 +536,16 @@ internal partial class SelectForm : CustomForm
                     nodeContextMenu.Items.Add(new ToolStripSeparator());
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Open AppInfo", Image("Notepad"),
                         new EventHandler((sender, e) => Program.OpenFileInNotepad(appInfo))));
+                    nodeContextMenu.Items.Add(new ToolStripMenuItem("Refresh AppInfo", Image("Command Prompt"),
+                        new EventHandler((sender, e) =>
+                        {
+                            try
+                            {
+                                File.Delete(appInfo);
+                            }
+                            catch { }
+                            OnLoad();
+                        })));
                 }
                 if (selection is not null)
                 {

@@ -124,6 +124,8 @@ internal static class Program
 
     internal static Image GetNotepadImage() => GetFileIconImage(Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\notepad.exe");
 
+    internal static Image GetCommandPromptImage() => GetFileIconImage(Environment.SystemDirectory + @"\cmd.exe");
+
     internal static Image GetFileExplorerImage() => GetFileIconImage(Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\explorer.exe");
 
     internal static bool IsProgramRunningDialog(Form form, ProgramSelection selection)
