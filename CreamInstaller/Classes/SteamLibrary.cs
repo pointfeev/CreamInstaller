@@ -7,15 +7,38 @@ using System.Threading.Tasks;
 
 using Gameloop.Vdf.Linq;
 
+using Microsoft.Win32;
+
 namespace CreamInstaller.Classes;
 
 internal static class SteamLibrary
 {
+    internal static string paradoxLauncherInstallPath = null;
+    internal static string ParadoxLauncherInstallPath
+    {
+        get
+        {
+            paradoxLauncherInstallPath ??= Registry.GetValue(@"HKEY_CURRENT_USER\Software\Paradox Interactive\Paradox Launcher v2", "LauncherInstallation", null) as string;
+            return paradoxLauncherInstallPath;
+        }
+    }
+
+    internal static string steamInstallPath = null;
+    internal static string SteamInstallPath
+    {
+        get
+        {
+            steamInstallPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\Software\Valve\Steam", "InstallPath", null) as string;
+            steamInstallPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\Software\Wow6432Node\Valve\Steam", "InstallPath", null) as string;
+            return steamInstallPath;
+        }
+    }
+
     internal static async Task<List<string>> GetLibraryDirectories() => await Task.Run(() =>
     {
         List<string> gameDirectories = new();
         if (Program.Canceled) return gameDirectories;
-        string steamInstallPath = FileGrabber.SteamInstallPath;
+        string steamInstallPath = SteamInstallPath;
         if (steamInstallPath != null && Directory.Exists(steamInstallPath))
         {
             string libraryFolder = steamInstallPath + @"\steamapps";

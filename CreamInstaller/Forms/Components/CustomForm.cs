@@ -17,4 +17,11 @@ internal class CustomForm : Form
             return handleParam;
         }
     }
+
+    internal void InheritLocation(Form fromForm)
+    {
+        int X = fromForm.Location.X + fromForm.Size.Width / 2 - Size.Width / 2;
+        int Y = fromForm.Location.Y + fromForm.Size.Height / 2 - Size.Height / 2;
+        Location = new(X, Y);
+    }
 }

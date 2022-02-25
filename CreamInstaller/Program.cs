@@ -34,6 +34,14 @@ internal static class Program
         return false;
     }
 
+    internal static bool IsFilePathLocked(this string filePath)
+    {
+        try { File.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None).Close(); }
+        catch (FileNotFoundException) { return false; }
+        catch (IOException) { return true; }
+        return false;
+    }
+
     internal static bool IsProgramRunningDialog(Form form, ProgramSelection selection)
     {
         if (selection.AreSteamApiDllsLocked)
@@ -46,6 +54,15 @@ internal static class Program
         }
         else return true;
         return false;
+    }
+
+    internal static void GetApiComponents(this string directory, out string api, out string api_o, out string api64, out string api64_o, out string cApi)
+    {
+        api = directory + @"\steam_api.dll";
+        api_o = directory + @"\steam_api_o.dll";
+        api64 = directory + @"\steam_api64.dll";
+        api64_o = directory + @"\steam_api64_o.dll";
+        cApi = directory + @"\cream_api.ini";
     }
 
     [STAThread]
@@ -76,20 +93,16 @@ internal static class Program
 
     internal static void Invoke(this Control control, MethodInvoker methodInvoker) => control.Invoke(methodInvoker);
 
-    internal static void InheritLocation(this Form form, Form fromForm)
-    {
-        int X = fromForm.Location.X + fromForm.Size.Width / 2 - form.Size.Width / 2;
-        int Y = fromForm.Location.Y + fromForm.Size.Height / 2 - form.Size.Height / 2;
-        form.Location = new(X, Y);
-    }
-
     internal static bool Canceled = false;
     internal static async void Cleanup(bool cancel = true)
     {
         Canceled = cancel;
-        HttpClientManager.Cleanup();
         await SteamCMD.Cleanup();
     }
 
-    private static void OnApplicationExit(object s, EventArgs e) => Cleanup();
+    private static void OnApplicationExit(object s, EventArgs e)
+    {
+        Cleanup();
+        HttpClientManager.Dispose();
+    }
 }

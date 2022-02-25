@@ -83,8 +83,8 @@ internal partial class SelectForm : CustomForm
     {
         if (Program.Canceled) return;
         List<Tuple<int, string, string, int, string>> applicablePrograms = new();
-        if (Directory.Exists(FileGrabber.ParadoxLauncherInstallPath))
-            applicablePrograms.Add(new(0, "Paradox Launcher", "", 0, FileGrabber.ParadoxLauncherInstallPath));
+        if (Directory.Exists(SteamLibrary.ParadoxLauncherInstallPath))
+            applicablePrograms.Add(new(0, "Paradox Launcher", "", 0, SteamLibrary.ParadoxLauncherInstallPath));
         List<string> gameLibraryDirectories = await SteamLibrary.GetLibraryDirectories();
         foreach (string libraryDirectory in gameLibraryDirectories)
         {
@@ -393,9 +393,9 @@ internal partial class SelectForm : CustomForm
         Dictionary<string, Image> images = new();
         Task.Run(async () =>
         {
-            if (Directory.Exists(FileGrabber.ParadoxLauncherInstallPath))
+            if (Directory.Exists(SteamLibrary.ParadoxLauncherInstallPath))
             {
-                foreach (string file in Directory.GetFiles(FileGrabber.ParadoxLauncherInstallPath, "*.exe"))
+                foreach (string file in Directory.GetFiles(SteamLibrary.ParadoxLauncherInstallPath, "*.exe"))
                 {
                     images["Paradox Launcher"] = IconGrabber.GetFileIconImage(file);
                     break;
@@ -449,7 +449,7 @@ internal partial class SelectForm : CustomForm
                 {
                     nodeContextMenu.Items.Add(new ToolStripSeparator());
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Open AppInfo", Image("Notepad"),
-                        new EventHandler((sender, e) => FileGrabber.OpenFileInNotepad(appInfo))));
+                        new EventHandler((sender, e) => Diagnostics.OpenFileInNotepad(appInfo))));
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Refresh AppInfo", Image("Command Prompt"),
                         new EventHandler((sender, e) =>
                         {
@@ -519,25 +519,25 @@ internal partial class SelectForm : CustomForm
                     }
                     nodeContextMenu.Items.Add(new ToolStripSeparator());
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Open Root Directory", Image("File Explorer"),
-                        new EventHandler((sender, e) => FileGrabber.OpenDirectoryInFileExplorer(selection.RootDirectory))));
+                        new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(selection.RootDirectory))));
                     for (int i = 0; i < selection.SteamApiDllDirectories.Count; i++)
                     {
                         string directory = selection.SteamApiDllDirectories[i];
                         nodeContextMenu.Items.Add(new ToolStripMenuItem($"Open Steamworks Directory ({i + 1})", Image("File Explorer"),
-                            new EventHandler((sender, e) => FileGrabber.OpenDirectoryInFileExplorer(directory))));
+                            new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
                     }
                 }
                 if (appId != 0)
                 {
                     nodeContextMenu.Items.Add(new ToolStripSeparator());
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Open SteamDB", Image("SteamDB"),
-                        new EventHandler((sender, e) => FileGrabber.OpenUrlInInternetBrowser("https://steamdb.info/app/" + appId))));
+                        new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamdb.info/app/" + appId))));
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Open Steam Store", Image("Steam Store"),
-                        new EventHandler((sender, e) => FileGrabber.OpenUrlInInternetBrowser("https://store.steampowered.com/app/" + appId))));
+                        new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://store.steampowered.com/app/" + appId))));
                     if (selection is not null)
                     {
                         ToolStripMenuItem steamCommunity = new("Open Steam Community", Image("ClientIcon_" + node.Name),
-                            new EventHandler((sender, e) => FileGrabber.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + appId)));
+                            new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + appId)));
                         nodeContextMenu.Items.Add(steamCommunity);
                         if (steamCommunity.Image is null)
                         {
@@ -603,7 +603,7 @@ internal partial class SelectForm : CustomForm
             installForm.ShowDialog();
             if (installForm.Reselecting)
             {
-                this.InheritLocation(installForm);
+                InheritLocation(installForm);
                 Show();
                 OnLoad();
             }
