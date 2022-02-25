@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -24,102 +23,6 @@ internal partial class SelectForm : CustomForm
     {
         InitializeComponent();
         Text = Program.ApplicationName;
-        Program.SelectForm = this;
-    }
-
-    private static async Task<List<string>> GameLibraryDirectories() => await Task.Run(() =>
-    {
-        List<string> gameDirectories = new();
-        if (Program.Canceled) return gameDirectories;
-        string steamInstallPath = Program.SteamInstallPath;
-        if (steamInstallPath != null && Directory.Exists(steamInstallPath))
-        {
-            string libraryFolder = steamInstallPath + @"\steamapps";
-            if (Directory.Exists(libraryFolder))
-            {
-                gameDirectories.Add(libraryFolder);
-                string libraryFolders = libraryFolder + @"\libraryfolders.vdf";
-                if (File.Exists(libraryFolders) && ValveDataFile.TryDeserialize(File.ReadAllText(libraryFolders, Encoding.UTF8), out VProperty result))
-                {
-                    foreach (VProperty property in result.Value)
-                        if (int.TryParse(property.Key, out int _))
-                        {
-                            string path = property.Value.GetChild("path")?.ToString();
-                            if (string.IsNullOrWhiteSpace(path)) continue;
-                            path += @"\steamapps";
-                            if (Directory.Exists(path) && !gameDirectories.Contains(path)) gameDirectories.Add(path);
-                        }
-                }
-            }
-        }
-        return gameDirectories;
-    });
-
-    private static async Task<List<string>> GetDllDirectoriesFromGameDirectory(string gameDirectory) => await Task.Run(async () =>
-    {
-        List<string> dllDirectories = new();
-        if (Program.Canceled || !Directory.Exists(gameDirectory)) return null;
-        gameDirectory.GetApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string cApi);
-        if (File.Exists(api)
-            || File.Exists(api_o)
-            || File.Exists(api64)
-            || File.Exists(api64_o)
-            || File.Exists(cApi))
-            dllDirectories.Add(gameDirectory);
-        string[] directories = Directory.GetDirectories(gameDirectory);
-        foreach (string _directory in directories)
-        {
-            if (Program.Canceled) return null;
-            try
-            {
-                List<string> moreDllDirectories = await GetDllDirectoriesFromGameDirectory(_directory);
-                if (moreDllDirectories is not null) dllDirectories.AddRange(moreDllDirectories);
-            }
-            catch { }
-        }
-        return !dllDirectories.Any() ? null : dllDirectories;
-    });
-
-    private static async Task<List<Tuple<int, string, string, int, string>>> GetGamesFromLibraryDirectory(string libraryDirectory) => await Task.Run(() =>
-    {
-        List<Tuple<int, string, string, int, string>> games = new();
-        if (Program.Canceled || !Directory.Exists(libraryDirectory)) return null;
-        string[] files = Directory.GetFiles(libraryDirectory);
-        foreach (string file in files)
-        {
-            if (Program.Canceled) return null;
-            if (Path.GetExtension(file) == ".acf" && ValveDataFile.TryDeserialize(File.ReadAllText(file, Encoding.UTF8), out VProperty result))
-            {
-                string appId = result.Value.GetChild("appid")?.ToString();
-                string installdir = result.Value.GetChild("installdir")?.ToString();
-                string name = result.Value.GetChild("name")?.ToString();
-                string buildId = result.Value.GetChild("buildid")?.ToString();
-                if (string.IsNullOrWhiteSpace(appId)
-                    || string.IsNullOrWhiteSpace(installdir)
-                    || string.IsNullOrWhiteSpace(name)
-                    || string.IsNullOrWhiteSpace(buildId))
-                    continue;
-                string branch = result.Value.GetChild("UserConfig")?.GetChild("betakey")?.ToString();
-                if (string.IsNullOrWhiteSpace(branch)) branch = "public";
-                string gameDirectory = libraryDirectory + @"\common\" + installdir;
-                if (!int.TryParse(appId, out int appIdInt)) continue;
-                if (!int.TryParse(buildId, out int buildIdInt)) continue;
-                games.Add(new(appIdInt, name, branch, buildIdInt, gameDirectory));
-            }
-        }
-        return !games.Any() ? null : games;
-    });
-
-    internal List<TreeNode> TreeNodes => GatherTreeNodes(selectionTreeView.Nodes);
-    private List<TreeNode> GatherTreeNodes(TreeNodeCollection nodeCollection)
-    {
-        List<TreeNode> treeNodes = new();
-        foreach (TreeNode rootNode in nodeCollection)
-        {
-            treeNodes.Add(rootNode);
-            treeNodes.AddRange(GatherTreeNodes(rootNode.Nodes));
-        }
-        return treeNodes;
     }
 
     private static void UpdateRemaining(Label label, List<string> list, string descriptor) =>
@@ -180,12 +83,12 @@ internal partial class SelectForm : CustomForm
     {
         if (Program.Canceled) return;
         List<Tuple<int, string, string, int, string>> applicablePrograms = new();
-        if (Directory.Exists(Program.ParadoxLauncherInstallPath))
-            applicablePrograms.Add(new(0, "Paradox Launcher", "", 0, Program.ParadoxLauncherInstallPath));
-        List<string> gameLibraryDirectories = await GameLibraryDirectories();
+        if (Directory.Exists(FileGrabber.ParadoxLauncherInstallPath))
+            applicablePrograms.Add(new(0, "Paradox Launcher", "", 0, FileGrabber.ParadoxLauncherInstallPath));
+        List<string> gameLibraryDirectories = await SteamLibrary.GetLibraryDirectories();
         foreach (string libraryDirectory in gameLibraryDirectories)
         {
-            List<Tuple<int, string, string, int, string>> games = await GetGamesFromLibraryDirectory(libraryDirectory);
+            List<Tuple<int, string, string, int, string>> games = await SteamLibrary.GetGamesFromLibraryDirectory(libraryDirectory);
             if (games is not null)
                 foreach (Tuple<int, string, string, int, string> game in games)
                     if (!applicablePrograms.Any(_game => _game.Item1 == game.Item1))
@@ -211,7 +114,7 @@ internal partial class SelectForm : CustomForm
             Task task = Task.Run(async () =>
             {
                 if (Program.Canceled) return;
-                List<string> dllDirectories = await GetDllDirectoriesFromGameDirectory(directory);
+                List<string> dllDirectories = await SteamLibrary.GetDllDirectoriesFromGameDirectory(directory);
                 if (dllDirectories is null)
                 {
                     RemoveFromRemainingGames(name);
@@ -436,14 +339,24 @@ internal partial class SelectForm : CustomForm
         uninstallButton.Enabled = installButton.Enabled;
     }
 
+    internal List<TreeNode> TreeNodes => GatherTreeNodes(selectionTreeView.Nodes);
+    private List<TreeNode> GatherTreeNodes(TreeNodeCollection nodeCollection)
+    {
+        List<TreeNode> treeNodes = new();
+        foreach (TreeNode rootNode in nodeCollection)
+        {
+            treeNodes.Add(rootNode);
+            treeNodes.AddRange(GatherTreeNodes(rootNode.Nodes));
+        }
+        return treeNodes;
+    }
+
     private class TreeNodeSorter : IComparer
     {
-        public int Compare(object a, object b)
-        {
-            if (!int.TryParse((a as TreeNode).Name, out int A)) return 1;
-            if (!int.TryParse((b as TreeNode).Name, out int B)) return 0;
-            return A > B ? 1 : 0;
-        }
+        public int Compare(object a, object b) =>
+            !int.TryParse((a as TreeNode).Name, out int A) ? 1
+            : !int.TryParse((b as TreeNode).Name, out int B) ? 0
+            : A > B ? 1 : 0;
     }
 
     private void ShowProgressBar()
@@ -484,26 +397,26 @@ internal partial class SelectForm : CustomForm
         Dictionary<string, Image> images = new();
         Task.Run(async () =>
         {
-            if (Directory.Exists(Program.ParadoxLauncherInstallPath))
+            if (Directory.Exists(FileGrabber.ParadoxLauncherInstallPath))
             {
-                foreach (string file in Directory.GetFiles(Program.ParadoxLauncherInstallPath, "*.exe"))
+                foreach (string file in Directory.GetFiles(FileGrabber.ParadoxLauncherInstallPath, "*.exe"))
                 {
-                    images["Paradox Launcher"] = Program.GetFileIconImage(file);
+                    images["Paradox Launcher"] = IconGrabber.GetFileIconImage(file);
                     break;
                 }
             }
-            images["Notepad"] = Program.GetNotepadImage();
-            images["Command Prompt"] = Program.GetCommandPromptImage();
-            images["File Explorer"] = Program.GetFileExplorerImage();
-            images["SteamDB"] = await Program.GetImageFromUrl("https://steamdb.info/favicon.ico");
-            images["Steam Store"] = await Program.GetImageFromUrl("https://store.steampowered.com/favicon.ico");
-            images["Steam Community"] = await Program.GetImageFromUrl("https://steamcommunity.com/favicon.ico");
+            images["Notepad"] = IconGrabber.GetNotepadImage();
+            images["Command Prompt"] = IconGrabber.GetCommandPromptImage();
+            images["File Explorer"] = IconGrabber.GetFileExplorerImage();
+            images["SteamDB"] = await HttpClientManager.GetImageFromUrl("https://steamdb.info/favicon.ico");
+            images["Steam Store"] = await HttpClientManager.GetImageFromUrl("https://store.steampowered.com/favicon.ico");
+            images["Steam Community"] = await HttpClientManager.GetImageFromUrl("https://steamcommunity.com/favicon.ico");
         });
         Image Image(string identifier) => images.GetValueOrDefault(identifier, null);
         void TrySetImageAsync(ToolStripMenuItem menuItem, int appId, string iconStaticId, bool client = false) =>
             Task.Run(async () =>
             {
-                menuItem.Image = client ? await Program.GetSteamClientIcon(appId, iconStaticId) : await Program.GetSteamIcon(appId, iconStaticId);
+                menuItem.Image = client ? await IconGrabber.GetSteamClientIcon(appId, iconStaticId) : await IconGrabber.GetSteamIcon(appId, iconStaticId);
                 images[client ? "ClientIcon_" + appId : "Icon_" + appId] = menuItem.Image;
             });
         selectionTreeView.NodeMouseClick += (sender, e) =>
@@ -540,7 +453,7 @@ internal partial class SelectForm : CustomForm
                 {
                     nodeContextMenu.Items.Add(new ToolStripSeparator());
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Open AppInfo", Image("Notepad"),
-                        new EventHandler((sender, e) => Program.OpenFileInNotepad(appInfo))));
+                        new EventHandler((sender, e) => FileGrabber.OpenFileInNotepad(appInfo))));
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Refresh AppInfo", Image("Command Prompt"),
                         new EventHandler((sender, e) =>
                         {
@@ -610,25 +523,25 @@ internal partial class SelectForm : CustomForm
                     }
                     nodeContextMenu.Items.Add(new ToolStripSeparator());
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Open Root Directory", Image("File Explorer"),
-                        new EventHandler((sender, e) => Program.OpenDirectoryInFileExplorer(selection.RootDirectory))));
+                        new EventHandler((sender, e) => FileGrabber.OpenDirectoryInFileExplorer(selection.RootDirectory))));
                     for (int i = 0; i < selection.SteamApiDllDirectories.Count; i++)
                     {
                         string directory = selection.SteamApiDllDirectories[i];
                         nodeContextMenu.Items.Add(new ToolStripMenuItem($"Open Steamworks Directory ({i + 1})", Image("File Explorer"),
-                            new EventHandler((sender, e) => Program.OpenDirectoryInFileExplorer(directory))));
+                            new EventHandler((sender, e) => FileGrabber.OpenDirectoryInFileExplorer(directory))));
                     }
                 }
                 if (appId != 0)
                 {
                     nodeContextMenu.Items.Add(new ToolStripSeparator());
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Open SteamDB", Image("SteamDB"),
-                        new EventHandler((sender, e) => Program.OpenUrlInInternetBrowser("https://steamdb.info/app/" + appId))));
+                        new EventHandler((sender, e) => FileGrabber.OpenUrlInInternetBrowser("https://steamdb.info/app/" + appId))));
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Open Steam Store", Image("Steam Store"),
-                        new EventHandler((sender, e) => Program.OpenUrlInInternetBrowser("https://store.steampowered.com/app/" + appId))));
+                        new EventHandler((sender, e) => FileGrabber.OpenUrlInInternetBrowser("https://store.steampowered.com/app/" + appId))));
                     if (selection is not null)
                     {
                         ToolStripMenuItem steamCommunity = new("Open Steam Community", Image("ClientIcon_" + node.Name),
-                            new EventHandler((sender, e) => Program.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + appId)));
+                            new EventHandler((sender, e) => FileGrabber.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + appId)));
                         nodeContextMenu.Items.Add(steamCommunity);
                         if (steamCommunity.Image is null)
                         {
@@ -703,7 +616,9 @@ internal partial class SelectForm : CustomForm
     }
 
     private void OnInstall(object sender, EventArgs e) => OnAccept(false);
+
     private void OnUninstall(object sender, EventArgs e) => OnAccept(true);
+
     private void OnScan(object sender, EventArgs e) => OnLoad();
 
     private void OnCancel(object sender, EventArgs e)

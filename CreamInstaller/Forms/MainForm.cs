@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -43,7 +41,6 @@ internal partial class MainForm : CustomForm
         Close();
     }
 
-    private static readonly HttpClient httpClient = new();
     private static UpdateManager updateManager = null;
     private static Version latestVersion = null;
     private static IReadOnlyList<Version> versions;
@@ -104,17 +101,11 @@ internal partial class MainForm : CustomForm
                     changelogTreeView.Nodes.Add(root);
                     _ = Task.Run(async () =>
                     {
-                        try
-                        {
-                            string url = $"https://github.com/pointfeev/CreamInstaller/releases/tag/v{version}";
-                            using HttpRequestMessage request = new(HttpMethod.Get, url);
-                            using HttpResponseMessage response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-                            response.EnsureSuccessStatusCode();
-                            using Stream stream = await response.Content.ReadAsStreamAsync();
-                            using StreamReader reader = new(stream, Encoding.UTF8);
-                            HtmlAgilityPack.HtmlDocument document = new();
-                            document.LoadHtml(reader.ReadToEnd());
-                            foreach (HtmlNode node in document.DocumentNode.SelectNodes("//div[@data-test-selector='body-content']/ul/li"))
+                        HtmlNodeCollection nodes = await HttpClientManager.GetDocumentNodes(
+                            $"https://github.com/pointfeev/CreamInstaller/releases/tag/v{version}",
+                            "//div[@data-test-selector='body-content']/ul/li");
+                        if (nodes is null) changelogTreeView.Nodes.Remove(root);
+                        else foreach (HtmlNode node in nodes)
                             {
                                 Program.Invoke(changelogTreeView, delegate
                                 {
@@ -124,11 +115,6 @@ internal partial class MainForm : CustomForm
                                     root.Expand();
                                 });
                             }
-                        }
-                        catch
-                        {
-                            changelogTreeView.Nodes.Remove(root);
-                        }
                     });
                 }
         }

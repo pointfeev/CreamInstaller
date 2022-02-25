@@ -22,7 +22,6 @@ internal partial class InstallForm : CustomForm
     {
         InitializeComponent();
         Text = Program.ApplicationName;
-        Program.InstallForm = this;
         logTextBox.BackColor = InstallationLog.Background;
         Uninstalling = uninstall;
     }

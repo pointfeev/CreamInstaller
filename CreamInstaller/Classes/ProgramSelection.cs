@@ -98,7 +98,7 @@ internal class ProgramSelection
 
     internal static void ValidateAll() => AllSafe.ForEach(selection => selection.Validate());
 
-    internal static List<ProgramSelection> All => Program.ProgramSelections;
+    internal static List<ProgramSelection> All => new();
 
     internal static List<ProgramSelection> AllSafe => All.ToList();
 
