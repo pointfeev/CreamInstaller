@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows.Forms;
 
 using CreamInstaller.Classes;
@@ -14,6 +15,8 @@ using CreamInstaller.Forms.Components;
 using CreamInstaller.Resources;
 
 using Gameloop.Vdf.Linq;
+
+using HtmlAgilityPack;
 
 namespace CreamInstaller;
 
@@ -131,18 +134,19 @@ internal partial class SelectForm : CustomForm
                 ConcurrentDictionary<int, (string name, string iconStaticId)> dlc = new();
                 List<Task> dlcTasks = new();
                 List<int> dlcIds = await SteamCMD.ParseDlcAppIds(appInfo);
+                await HttpClientManager.ParseSteamStoreDlcAppIds(appId, dlcIds);
                 if (dlcIds.Count > 0)
                 {
-                    foreach (int id in dlcIds)
+                    foreach (int dlcAppId in dlcIds)
                     {
                         if (Program.Canceled) return;
-                        AddToRemainingDLCs(id.ToString());
+                        AddToRemainingDLCs(dlcAppId.ToString());
                         Task task = Task.Run(async () =>
                         {
                             if (Program.Canceled) return;
                             string dlcName = null;
                             string dlcIconStaticId = null;
-                            VProperty dlcAppInfo = await SteamCMD.GetAppInfo(id);
+                            VProperty dlcAppInfo = await SteamCMD.GetAppInfo(dlcAppId);
                             if (dlcAppInfo is not null)
                             {
                                 dlcName = dlcAppInfo.Value?.GetChild("common")?.GetChild("name")?.ToString();
@@ -152,8 +156,8 @@ internal partial class SelectForm : CustomForm
                             }
                             if (Program.Canceled) return;
                             if (!string.IsNullOrWhiteSpace(dlcName))
-                                dlc[id] = (dlcName, dlcIconStaticId);
-                            RemoveFromRemainingDLCs(id.ToString());
+                                dlc[dlcAppId] = (dlcName, dlcIconStaticId);
+                            RemoveFromRemainingDLCs(dlcAppId.ToString());
                             progress.Report(++CompleteTasks);
                         });
                         dlcTasks.Add(task);
@@ -168,11 +172,6 @@ internal partial class SelectForm : CustomForm
                     return;
                 }
                 if (Program.Canceled) return;
-                if (string.IsNullOrWhiteSpace(name))
-                {
-                    RemoveFromRemainingGames(name);
-                    return;
-                }
                 foreach (Task task in dlcTasks)
                 {
                     if (Program.Canceled) return;

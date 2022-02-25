@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 using HtmlAgilityPack;
 
@@ -42,6 +45,19 @@ internal static class HttpClientManager
         }
         catch { }
         return null;
+    }
+
+    internal static async Task ParseSteamStoreDlcAppIds(int appId, List<int> dlcIds)
+    {
+        // currently this is only really needed to get DLC that release without changing game buildid (very rare)
+        // it also finds things which aren't really connected to the game itself, and thus not needed (usually soundtracks, collections, packs, etc.)
+        HtmlNodeCollection nodes = await GetDocumentNodes(
+                        $"https://store.steampowered.com/dlc/{appId}",
+                        "//div[@class='recommendation']/div/a");
+        if (nodes is not null)
+            foreach (HtmlNode node in nodes)
+                if (int.TryParse(node.Attributes["data-ds-appid"]?.Value, out int dlcAppId) && !dlcIds.Contains(dlcAppId))
+                    dlcIds.Add(dlcAppId);
     }
 
     internal static void Cleanup() => httpClient.Dispose();
