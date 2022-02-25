@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using System.Windows.Forms;
 
 using CreamInstaller.Classes;
@@ -15,8 +14,6 @@ using CreamInstaller.Forms.Components;
 using CreamInstaller.Resources;
 
 using Gameloop.Vdf.Linq;
-
-using HtmlAgilityPack;
 
 namespace CreamInstaller;
 
