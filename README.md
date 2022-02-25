@@ -11,8 +11,8 @@
 Automatically finds all installed Steam games and their respective Steamworks DLL locations on the user's computer,
 automatically parses SteamCMD and the Steam Store for those games' DLCs, then provides a very simple graphical interface utilizing the gathered information.
 
-The primary function of the program is to [b]automatically generate and install CreamAPI[/b] for whichever
-games and DLCs the user selects, however through the use of the [b]right-click context menu[/b] the user can also:
+The primary function of the program is to **automatically generate and install CreamAPI** for whichever
+games and DLCs the user selects, however through the use of the **right-click context menu** the user can also:
 * automatically repair the Paradox Launcher
 * open the parsed SteamCMD AppInfo in Notepad
 * refresh the parsed SteamCMD AppInfo
