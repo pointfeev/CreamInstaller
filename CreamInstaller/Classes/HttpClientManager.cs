@@ -54,7 +54,7 @@ internal static class HttpClientManager
                         "//div[@class='recommendation']/div/a");
         if (nodes is not null)
             foreach (HtmlNode node in nodes)
-                if (int.TryParse(node.Attributes?["data-ds-appid"]?.Value, out int dlcAppId) && !dlcIds.Contains(dlcAppId))
+                if (int.TryParse(node.Attributes?["data-ds-appid"]?.Value, out int dlcAppId) && dlcAppId > 0 && !dlcIds.Contains(dlcAppId))
                     dlcIds.Add(dlcAppId);
     }
 
