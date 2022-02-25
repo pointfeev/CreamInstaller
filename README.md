@@ -17,6 +17,7 @@ It can also generate and install (or uninstall) CreamAPI for the Paradox Launche
 * Automatic gathering and caching of appinfo for **ALL** installed Steam games and **ALL** of their DLCs.
 * Automatic generation of cream_api.ini configuration and installation of CreamAPI DLLs.
 * Automatic uninstallation of CreamAPI DLLs and cream_api.ini configuration.
+* Automatic repairing of the Paradox Launcher via the right-click context menu "Repair" option. *for when the launcher updates whilst you have CreamAPI installed to it*
 
 ---
 #### Installation:
