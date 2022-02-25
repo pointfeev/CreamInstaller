@@ -16,7 +16,7 @@ internal static class HttpClientManager
     internal static void Setup()
     {
         httpClient = new();
-        httpClient.DefaultRequestHeaders.Add("user-agent", "CreamInstaller");
+        httpClient.DefaultRequestHeaders.Add("user-agent", $"CreamInstaller-{Environment.MachineName}_{Environment.UserDomainName}_{Environment.UserName}");
     }
 
     internal static async Task<HtmlNodeCollection> GetDocumentNodes(string url, string xpath)
