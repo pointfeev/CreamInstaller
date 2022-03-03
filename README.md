@@ -1,7 +1,7 @@
 ### CreamInstaller: CreamAPI Generator & Installer
 
 
-![Program Preview Image](https://i.imgur.com/BxGU99q.png)
+![Program Preview Image](https://i.imgur.com/VAx1LRa.png)
 
 ###### Refer to [this post](https://cs.rin.ru/forum/viewtopic.php?f=29&t=70576) if you don't know what CreamAPI is! ;)
 ###### Refer to [this post](https://cs.rin.ru/forum/viewtopic.php?f=29&t=106474) if you don't know what ScreamAPI is! ;)
