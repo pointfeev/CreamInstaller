@@ -201,6 +201,7 @@ internal partial class SelectForm : CustomForm
                     selection.ProductUrl = "https://store.steampowered.com/app/" + appId;
                     selection.IconUrl = IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("icon")?.ToString()}.jpg";
                     selection.ClientIconUrl = IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("clienticon")?.ToString()}.ico";
+                    selection.Publisher = appInfo?.Value?.GetChild("extended")?.GetChild("publisher")?.ToString();
 
                     if (Program.Canceled) return;
                     Program.Invoke(selectionTreeView, delegate
@@ -260,19 +261,19 @@ internal partial class SelectForm : CustomForm
                         return;
                     }
                     if (Program.Canceled) return;
-                    ConcurrentDictionary<string, (string name, string product, string icon)> dlc = new();
+                    ConcurrentDictionary<string, (string name, string product, string icon, string developer)> dlc = new();
                     List<Task> dlcTasks = new();
-                    List<(string id, string name, string product, string icon)> dlcIds = await EpicStore.ParseDlcAppIds(@namespace);
+                    List<(string id, string name, string product, string icon, string developer)> dlcIds = await EpicStore.ParseDlcAppIds(@namespace);
                     if (dlcIds.Count > 0)
                     {
-                        foreach ((string id, string name, string product, string icon) in dlcIds)
+                        foreach ((string id, string name, string product, string icon, string developer) in dlcIds)
                         {
                             if (Program.Canceled) return;
                             AddToRemainingDLCs(id);
                             Task task = Task.Run(() =>
                             {
                                 if (Program.Canceled) return;
-                                dlc[id] = (name, product, icon);
+                                dlc[id] = (name, product, icon, developer);
                                 RemoveFromRemainingDLCs(id);
                                 progress.Report(++CompleteTasks);
                             });
@@ -301,11 +302,12 @@ internal partial class SelectForm : CustomForm
                     selection.Name = name;
                     selection.RootDirectory = directory;
                     selection.DllDirectories = dllDirectories;
-                    foreach (KeyValuePair<string, (string name, string product, string icon)> pair in dlc)
+                    foreach (KeyValuePair<string, (string name, string product, string icon, string developer)> pair in dlc)
                         if (pair.Value.name == selection.Name)
                         {
                             selection.ProductUrl = "https://www.epicgames.com/store/product/" + pair.Value.product;
                             selection.IconUrl = pair.Value.icon;
+                            selection.Publisher = pair.Value.developer;
                         }
 
                     if (Program.Canceled) return;
@@ -318,7 +320,7 @@ internal partial class SelectForm : CustomForm
                         programNode.Checked = selection.Enabled;
                         programNode.Remove();
                         selectionTreeView.Nodes.Add(programNode);
-                        foreach (KeyValuePair<string, (string name, string product, string icon)> pair in dlc)
+                        foreach (KeyValuePair<string, (string name, string product, string icon, string developer)> pair in dlc)
                         {
                             if (Program.Canceled || programNode is null) return;
                             string dlcId = pair.Key;

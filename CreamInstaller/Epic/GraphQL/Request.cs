@@ -34,6 +34,7 @@ internal class Request
                         pageSlug
                     }
                 }
+                developer
             }
         }
         searchStore(category: ""games/edition/base"", namespace: $namespace) {
@@ -52,6 +53,7 @@ internal class Request
                         pageSlug
                     }
                 }
+                developer
             }
         }
     }

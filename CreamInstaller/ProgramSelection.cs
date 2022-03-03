@@ -20,6 +20,8 @@ internal class ProgramSelection
     internal string IconUrl = null;
     internal string ClientIconUrl = null;
 
+    internal string Publisher = null;
+
     internal string RootDirectory = null;
     internal List<string> DllDirectories = null;
 

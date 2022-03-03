@@ -13,9 +13,9 @@ namespace CreamInstaller.Epic;
 
 internal static class EpicStore
 {
-    internal static async Task<List<(string id, string name, string product, string icon)>> ParseDlcAppIds(string categoryNamespace)
+    internal static async Task<List<(string id, string name, string product, string icon, string developer)>> ParseDlcAppIds(string categoryNamespace)
     {
-        List<(string id, string name, string product, string icon)> dlcIds = new();
+        List<(string id, string name, string product, string icon, string developer)> dlcIds = new();
         Response response = await QueryGraphQL(categoryNamespace);
         if (response is null)
             return dlcIds;
@@ -35,7 +35,7 @@ internal static class EpicStore
                     break;
                 }
             }
-            (string id, string name, string product, string icon) app = (element.Items[0].Id, element.Title, product, icon);
+            (string id, string name, string product, string icon, string developer) app = (element.Items[0].Id, element.Title, product, icon, element.Developer);
             if (!dlcIds.Contains(app))
                 dlcIds.Add(app);
         }

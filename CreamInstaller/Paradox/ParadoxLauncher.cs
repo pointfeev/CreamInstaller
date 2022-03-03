@@ -2,8 +2,6 @@
 using System.Linq;
 using System.Windows.Forms;
 
-using CreamInstaller.Steam;
-
 using Microsoft.Win32;
 
 namespace CreamInstaller.Paradox;
@@ -29,15 +27,13 @@ internal static class ParadoxLauncher
             paradoxLauncher.ExtraDlc.Clear();
             foreach (ProgramSelection selection in ProgramSelection.AllUsableEnabled)
             {
-                if (selection == paradoxLauncher) continue;
-                if (selection.AppInfo?.Value?.GetChild("extended")?.GetChild("publisher")?.ToString() != "Paradox Interactive") continue;
+                if (selection == paradoxLauncher || selection.Publisher != "Paradox Interactive") continue;
                 paradoxLauncher.ExtraDlc.Add(new(selection.Id, selection.Name, selection.SelectedDlc));
             }
             if (!paradoxLauncher.ExtraDlc.Any())
                 foreach (ProgramSelection selection in ProgramSelection.AllUsable)
                 {
-                    if (selection == paradoxLauncher) continue;
-                    if (selection.AppInfo?.Value?.GetChild("extended")?.GetChild("publisher")?.ToString() != "Paradox Interactive") continue;
+                    if (selection == paradoxLauncher || selection.Publisher != "Paradox Interactive") continue;
                     paradoxLauncher.ExtraDlc.Add(new(selection.Id, selection.Name, selection.AllDlc));
                 }
         }

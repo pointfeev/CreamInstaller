@@ -53,9 +53,6 @@ public class Element
     [JsonProperty(PropertyName = "title")]
     public string Title { get; protected set; }
 
-    [JsonProperty(PropertyName = "offerType")]
-    public string OfferType { get; protected set; }
-
     [JsonProperty(PropertyName = "items")]
     public Item[] Items { get; protected set; }
 
@@ -64,6 +61,9 @@ public class Element
 
     [JsonProperty(PropertyName = "catalogNs")]
     public CatalogNs CatalogNs { get; protected set; }
+
+    [JsonProperty(PropertyName = "developer")]
+    public string Developer { get; protected set; }
 }
 
 public class Item
