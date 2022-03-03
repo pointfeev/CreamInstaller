@@ -53,7 +53,7 @@ internal partial class InstallForm : CustomForm
         }
     }
 
-    internal static void WriteCreamConfiguration(StreamWriter writer, string steamAppId, string name, SortedList<string, (string name, string iconStaticId)> steamDlcApps, InstallForm installForm = null)
+    internal static void WriteCreamConfiguration(StreamWriter writer, string steamAppId, string name, SortedList<string, (string name, string icon)> steamDlcApps, InstallForm installForm = null)
     {
         writer.WriteLine($"; {name}");
         writer.WriteLine("[steam]");
@@ -62,7 +62,7 @@ internal partial class InstallForm : CustomForm
         writer.WriteLine("[dlc]");
         if (installForm is not null)
             installForm.UpdateUser($"Added game to cream_api.ini with appid {steamAppId} ({name})", InstallationLog.Resource, info: false);
-        foreach (KeyValuePair<string, (string name, string iconStaticId)> pair in steamDlcApps)
+        foreach (KeyValuePair<string, (string name, string icon)> pair in steamDlcApps)
         {
             string appId = pair.Key;
             (string dlcName, _) = pair.Value;
@@ -140,13 +140,13 @@ internal partial class InstallForm : CustomForm
         StreamWriter writer = new(cApi, true, Encoding.UTF8);
         if (selection.Id != "ParadoxLauncher")
             WriteCreamConfiguration(writer, selection.Id, selection.Name, selection.SelectedDlc, installForm);
-        foreach (Tuple<string, string, SortedList<string, (string name, string iconStaticId)>> extraAppDlc in selection.ExtraDlc)
+        foreach (Tuple<string, string, SortedList<string, (string name, string icon)>> extraAppDlc in selection.ExtraDlc)
             WriteCreamConfiguration(writer, extraAppDlc.Item1, extraAppDlc.Item2, extraAppDlc.Item3, installForm);
         writer.Flush();
         writer.Close();
     });
 
-    internal static void WriteScreamConfiguration(StreamWriter writer, SortedList<string, (string name, string iconStaticId)> steamDlcApps, InstallForm installForm = null)
+    internal static void WriteScreamConfiguration(StreamWriter writer, SortedList<string, (string name, string icon)> dlcApps, InstallForm installForm = null)
     {
         writer.WriteLine("{");
         writer.WriteLine("  \"version\": 2,");
@@ -156,8 +156,8 @@ internal partial class InstallForm : CustomForm
         writer.WriteLine("  \"catalog_items\": {");
         writer.WriteLine("    \"unlock_all\": false,");
         writer.WriteLine("    \"override\": [");
-        KeyValuePair<string, (string name, string iconStaticId)> last = steamDlcApps.Last();
-        foreach (KeyValuePair<string, (string name, string iconStaticId)> pair in steamDlcApps)
+        KeyValuePair<string, (string name, string icon)> last = dlcApps.Last();
+        foreach (KeyValuePair<string, (string name, string icon)> pair in dlcApps)
         {
             string id = pair.Key;
             (string name, _) = pair.Value;
@@ -171,7 +171,7 @@ internal partial class InstallForm : CustomForm
         writer.WriteLine("    \"unlock_all\": false,");
         writer.WriteLine("    \"auto_inject\": false,");
         writer.WriteLine("    \"inject\": [");
-        foreach (KeyValuePair<string, (string name, string iconStaticId)> pair in steamDlcApps)
+        foreach (KeyValuePair<string, (string name, string icon)> pair in dlcApps)
         {
             string id = pair.Key;
             (string name, _) = pair.Value;
@@ -252,7 +252,7 @@ internal partial class InstallForm : CustomForm
         StreamWriter writer = new(sApi, true, Encoding.UTF8);
         if (selection.Id != "ParadoxLauncher")
             WriteScreamConfiguration(writer, selection.SelectedDlc, installForm);
-        foreach (Tuple<string, string, SortedList<string, (string name, string iconStaticId)>> extraAppDlc in selection.ExtraDlc)
+        foreach (Tuple<string, string, SortedList<string, (string name, string icon)>> extraAppDlc in selection.ExtraDlc)
             WriteScreamConfiguration(writer, extraAppDlc.Item3, installForm);
         writer.Flush();
         writer.Close();

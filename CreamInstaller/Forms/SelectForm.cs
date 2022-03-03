@@ -140,7 +140,7 @@ internal partial class SelectForm : CustomForm
                         return;
                     }
                     if (Program.Canceled) return;
-                    ConcurrentDictionary<string, (string name, string iconStaticId)> dlc = new();
+                    ConcurrentDictionary<string, (string name, string icon)> dlc = new();
                     List<Task> dlcTasks = new();
                     List<string> dlcIds = await SteamCMD.ParseDlcAppIds(appInfo);
                     await SteamStore.ParseDlcAppIds(appId, dlcIds);
@@ -162,6 +162,8 @@ internal partial class SelectForm : CustomForm
                                     dlcIconStaticId = dlcAppInfo.Value?.GetChild("common")?.GetChild("icon")?.ToString();
                                     dlcIconStaticId ??= dlcAppInfo.Value?.GetChild("common")?.GetChild("logo_small")?.ToString();
                                     dlcIconStaticId ??= dlcAppInfo.Value?.GetChild("common")?.GetChild("logo")?.ToString();
+                                    if (dlcIconStaticId is not null)
+                                        dlcIconStaticId = IconGrabber.SteamAppImagesPath + @$"\{dlcAppId}\{dlcIconStaticId}.jpg";
                                 }
                                 if (Program.Canceled) return;
                                 if (!string.IsNullOrWhiteSpace(dlcName))
@@ -196,8 +198,9 @@ internal partial class SelectForm : CustomForm
                     selection.DllDirectories = dllDirectories;
                     selection.IsSteam = true;
                     selection.AppInfo = appInfo;
-                    selection.IconStaticID = appInfo?.Value?.GetChild("common")?.GetChild("icon")?.ToString();
-                    selection.ClientIconStaticID = appInfo?.Value?.GetChild("common")?.GetChild("clienticon")?.ToString();
+                    selection.ProductUrl = "https://store.steampowered.com/app/" + appId;
+                    selection.IconUrl = IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("icon")?.ToString()}.jpg";
+                    selection.ClientIconUrl = IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("clienticon")?.ToString()}.ico";
 
                     if (Program.Canceled) return;
                     Program.Invoke(selectionTreeView, delegate
@@ -209,11 +212,11 @@ internal partial class SelectForm : CustomForm
                         programNode.Checked = selection.Enabled;
                         programNode.Remove();
                         selectionTreeView.Nodes.Add(programNode);
-                        foreach (KeyValuePair<string, (string name, string iconStaticId)> pair in dlc)
+                        foreach (KeyValuePair<string, (string name, string icon)> pair in dlc)
                         {
                             if (Program.Canceled || programNode is null) return;
                             string appId = pair.Key;
-                            (string name, string iconStaticId) dlcApp = pair.Value;
+                            (string name, string icon) dlcApp = pair.Value;
                             selection.AllDlc[appId] = dlcApp;
                             if (allCheckBox.Checked) selection.SelectedDlc[appId] = dlcApp;
                             TreeNode dlcNode = TreeNodes.Find(s => s.Name == appId) ?? new();
@@ -239,10 +242,11 @@ internal partial class SelectForm : CustomForm
             Dictionary<string, List<string>> games = new();
             foreach (Manifest manifest in epicGames)
             {
-                string id = manifest.CatalogNamespace;
+                string @namespace = manifest.CatalogNamespace;
+                string mainId = manifest.MainGameCatalogItemId;
                 string name = manifest.DisplayName;
                 string directory = manifest.InstallLocation;
-                ProgramSelection selection = ProgramSelection.FromId(id);
+                ProgramSelection selection = ProgramSelection.FromId(@namespace);
                 if (Program.Canceled) return;
                 if (Program.IsGameBlocked(name, directory)) continue;
                 AddToRemainingGames(name);
@@ -256,19 +260,19 @@ internal partial class SelectForm : CustomForm
                         return;
                     }
                     if (Program.Canceled) return;
-                    ConcurrentDictionary<string, string> dlc = new();
+                    ConcurrentDictionary<string, (string name, string product, string icon)> dlc = new();
                     List<Task> dlcTasks = new();
-                    List<(string id, string name)> dlcIds = await EpicStore.ParseDlcAppIds(id);
+                    List<(string id, string name, string product, string icon)> dlcIds = await EpicStore.ParseDlcAppIds(@namespace);
                     if (dlcIds.Count > 0)
                     {
-                        foreach ((string id, string name) in dlcIds)
+                        foreach ((string id, string name, string product, string icon) in dlcIds)
                         {
                             if (Program.Canceled) return;
                             AddToRemainingDLCs(id);
                             Task task = Task.Run(() =>
                             {
                                 if (Program.Canceled) return;
-                                dlc[id] = name;
+                                dlc[id] = (name, product, icon);
                                 RemoveFromRemainingDLCs(id);
                                 progress.Report(++CompleteTasks);
                             });
@@ -293,32 +297,37 @@ internal partial class SelectForm : CustomForm
                     selection ??= new();
                     if (allCheckBox.Checked) selection.Enabled = true;
                     selection.Usable = true;
-                    selection.Id = id;
+                    selection.Id = @namespace;
                     selection.Name = name;
                     selection.RootDirectory = directory;
                     selection.DllDirectories = dllDirectories;
+                    foreach (KeyValuePair<string, (string name, string product, string icon)> pair in dlc)
+                        if (pair.Value.name == selection.Name)
+                        {
+                            selection.ProductUrl = "https://www.epicgames.com/store/product/" + pair.Value.product;
+                            selection.IconUrl = pair.Value.icon;
+                        }
 
                     if (Program.Canceled) return;
                     Program.Invoke(selectionTreeView, delegate
                     {
                         if (Program.Canceled) return;
-                        TreeNode programNode = TreeNodes.Find(s => s.Name == id) ?? new();
-                        programNode.Name = id;
+                        TreeNode programNode = TreeNodes.Find(s => s.Name == @namespace) ?? new();
+                        programNode.Name = @namespace;
                         programNode.Text = name;
                         programNode.Checked = selection.Enabled;
                         programNode.Remove();
                         selectionTreeView.Nodes.Add(programNode);
-                        foreach (KeyValuePair<string, string> pair in dlc)
+                        foreach (KeyValuePair<string, (string name, string product, string icon)> pair in dlc)
                         {
                             if (Program.Canceled || programNode is null) return;
                             string dlcId = pair.Key;
-                            string dlcName = pair.Value;
-                            (string name, string iconStaticId) dlcApp = (dlcName, null); // temporary?
+                            (string name, string icon) dlcApp = (pair.Value.name, pair.Value.icon);
                             selection.AllDlc[dlcId] = dlcApp;
                             if (allCheckBox.Checked) selection.SelectedDlc[dlcId] = dlcApp;
                             TreeNode dlcNode = TreeNodes.Find(s => s.Name == dlcId) ?? new();
                             dlcNode.Name = dlcId;
-                            dlcNode.Text = dlcName;
+                            dlcNode.Text = dlcApp.name;
                             dlcNode.Checked = selection.SelectedDlc.ContainsKey(dlcId);
                             dlcNode.Remove();
                             programNode.Nodes.Add(dlcNode);
@@ -523,12 +532,14 @@ internal partial class SelectForm : CustomForm
             images["SteamDB"] = await HttpClientManager.GetImageFromUrl("https://steamdb.info/favicon.ico");
             images["Steam Store"] = await HttpClientManager.GetImageFromUrl("https://store.steampowered.com/favicon.ico");
             images["Steam Community"] = await HttpClientManager.GetImageFromUrl("https://steamcommunity.com/favicon.ico");
+            images["ScreamDB"] = await HttpClientManager.GetImageFromUrl("https://scream-db.web.app/favicon.ico");
+            images["Epic Games"] = await HttpClientManager.GetImageFromUrl("https://www.epicgames.com/favicon.ico");
         });
         Image Image(string identifier) => images.GetValueOrDefault(identifier, null);
-        void TrySetImageAsync(ToolStripMenuItem menuItem, string appId, string iconStaticId, bool client = false) =>
+        void TrySetImageAsync(ToolStripMenuItem menuItem, string appId, string iconUrl, bool client = false) =>
             Task.Run(async () =>
             {
-                menuItem.Image = client ? await IconGrabber.GetSteamClientIcon(appId, iconStaticId) : await IconGrabber.GetSteamIcon(appId, iconStaticId);
+                menuItem.Image = await HttpClientManager.GetImageFromUrl(iconUrl);
                 images[client ? "ClientIcon_" + appId : "Icon_" + appId] = menuItem.Image;
             });
         selectionTreeView.NodeMouseClick += (sender, e) =>
@@ -537,7 +548,7 @@ internal partial class SelectForm : CustomForm
             TreeNode parentNode = node.Parent;
             string id = node.Name;
             ProgramSelection selection = ProgramSelection.FromId(id);
-            (string gameAppId, (string name, string iconStaticId) app)? dlc = null;
+            (string gameAppId, (string name, string icon) app)? dlc = null;
             if (selection is null) dlc = ProgramSelection.GetDlcFromId(id);
             if (e.Button == MouseButtons.Right && node.Bounds.Contains(e.Location))
             {
@@ -546,17 +557,17 @@ internal partial class SelectForm : CustomForm
                 ToolStripMenuItem header = new(selection?.Name ?? node.Text, Image("Icon_" + id));
                 if (header.Image is null)
                 {
-                    string iconStaticId = dlc?.app.iconStaticId ?? selection?.IconStaticID;
-                    if (iconStaticId is not null)
-                        TrySetImageAsync(header, id, iconStaticId);
+                    string icon = dlc?.app.icon ?? selection?.IconUrl;
+                    if (icon is not null)
+                        TrySetImageAsync(header, id, icon);
                     else if (dlc is not null)
                     {
                         string gameAppId = dlc.Value.gameAppId;
                         header.Image = Image("Icon_" + gameAppId);
                         ProgramSelection gameSelection = ProgramSelection.FromId(gameAppId);
-                        iconStaticId = gameSelection?.IconStaticID;
-                        if (header.Image is null && iconStaticId is not null)
-                            TrySetImageAsync(header, gameAppId, iconStaticId);
+                        icon = gameSelection?.IconUrl;
+                        if (header.Image is null && icon is not null)
+                            TrySetImageAsync(header, gameAppId, icon);
                     }
                 }
                 nodeContextMenu.Items.Add(header);
@@ -683,19 +694,23 @@ internal partial class SelectForm : CustomForm
                         nodeContextMenu.Items.Add(new ToolStripMenuItem("Open SteamDB", Image("SteamDB"),
                             new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamdb.info/app/" + id))));
                         nodeContextMenu.Items.Add(new ToolStripMenuItem("Open Steam Store", Image("Steam Store"),
-                            new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://store.steampowered.com/app/" + id))));
+                            new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
                         ToolStripMenuItem steamCommunity = new("Open Steam Community", Image("ClientIcon_" + id),
                         new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + id)));
                         nodeContextMenu.Items.Add(steamCommunity);
                         if (steamCommunity.Image is null)
                         {
                             steamCommunity.Image = Image("Steam Community");
-                            TrySetImageAsync(steamCommunity, id, selection.ClientIconStaticID, true);
+                            TrySetImageAsync(steamCommunity, id, selection.ClientIconUrl, true);
                         }
                     }
                     else
                     {
-                        // Epic Games links?
+                        nodeContextMenu.Items.Add(new ToolStripSeparator());
+                        nodeContextMenu.Items.Add(new ToolStripMenuItem("Open ScreamDB", Image("ScreamDB"),
+                            new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://scream-db.web.app/offers/" + id))));
+                        nodeContextMenu.Items.Add(new ToolStripMenuItem("Open Epic Games Store", Image("Epic Games"),
+                            new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
                     }
                 }
                 nodeContextMenu.Show(selectionTreeView, e.Location);
