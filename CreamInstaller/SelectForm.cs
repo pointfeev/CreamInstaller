@@ -9,8 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using CreamInstaller.Components;
 using CreamInstaller.Epic;
-using CreamInstaller.Forms.Components;
 using CreamInstaller.Paradox;
 using CreamInstaller.Resources;
 using CreamInstaller.Steam;
@@ -262,7 +262,7 @@ internal partial class SelectForm : CustomForm
                     if (Program.Canceled) return;
                     ConcurrentDictionary<string, (string name, string product, string icon, string developer)> dlc = new();
                     List<Task> dlcTasks = new();
-                    List<(string id, string name, string product, string icon, string developer)> dlcIds = await EpicStore.ParseDlcAppIds(@namespace);
+                    List<(string id, string name, string product, string icon, string developer)> dlcIds = await EpicStore.ParseDlcIds(@namespace);
                     if (dlcIds.Count > 0)
                     {
                         foreach ((string id, string name, string product, string icon, string developer) in dlcIds)
@@ -384,6 +384,7 @@ internal partial class SelectForm : CustomForm
                 progressBar.Value = p;
             };
 
+            await ProgramData.Setup();
             if (Directory.Exists(SteamLibrary.InstallPath))
             {
                 progressLabel.Text = $"Setting up SteamCMD . . . ";
@@ -573,17 +574,29 @@ internal partial class SelectForm : CustomForm
                 }
                 nodeContextMenu.Items.Add(header);
                 string appInfo = $@"{SteamCMD.AppInfoPath}\{id}.vdf";
-                if (Directory.Exists(Directory.GetDirectoryRoot(appInfo)) && File.Exists(appInfo))
+                string appInfoEpic = $@"{SteamCMD.AppInfoPath}\{id}.json";
+                if (Directory.Exists(Directory.GetDirectoryRoot(appInfo)) && (File.Exists(appInfo) || File.Exists(appInfoEpic)))
                 {
                     nodeContextMenu.Items.Add(new ToolStripSeparator());
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Open AppInfo", Image("Notepad"),
-                        new EventHandler((sender, e) => Diagnostics.OpenFileInNotepad(appInfo))));
+                        new EventHandler((sender, e) =>
+                        {
+                            if (File.Exists(appInfo))
+                                Diagnostics.OpenFileInNotepad(appInfo);
+                            else
+                                Diagnostics.OpenFileInNotepad(appInfoEpic);
+                        })));
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Refresh AppInfo", Image("Command Prompt"),
                         new EventHandler((sender, e) =>
                         {
                             try
                             {
                                 File.Delete(appInfo);
+                            }
+                            catch { }
+                            try
+                            {
+                                File.Delete(appInfoEpic);
                             }
                             catch { }
                             OnLoad();

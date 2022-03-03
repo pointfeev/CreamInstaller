@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 
-using CreamInstaller.Forms.Components;
+using CreamInstaller.Components;
 
 namespace CreamInstaller;
 

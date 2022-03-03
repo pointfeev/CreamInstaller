@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using CreamInstaller.Forms.Components;
+using CreamInstaller.Components;
 using CreamInstaller.Resources;
 using CreamInstaller.Utility;
 

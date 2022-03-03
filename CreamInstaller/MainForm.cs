@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
 
-using CreamInstaller.Forms.Components;
+using CreamInstaller.Components;
 using CreamInstaller.Utility;
 
 using HtmlAgilityPack;

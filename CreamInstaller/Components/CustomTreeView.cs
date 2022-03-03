@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace CreamInstaller.Forms.Components;
+namespace CreamInstaller.Components;
 
 internal class CustomTreeView : TreeView
 {

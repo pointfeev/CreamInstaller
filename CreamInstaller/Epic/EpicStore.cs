@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -13,12 +14,13 @@ namespace CreamInstaller.Epic;
 
 internal static class EpicStore
 {
-    internal static async Task<List<(string id, string name, string product, string icon, string developer)>> ParseDlcAppIds(string categoryNamespace)
+    internal static async Task<List<(string id, string name, string product, string icon, string developer)>> ParseDlcIds(string categoryNamespace)
     {
         List<(string id, string name, string product, string icon, string developer)> dlcIds = new();
         Response response = await QueryGraphQL(categoryNamespace);
         if (response is null)
             return dlcIds;
+        try { File.WriteAllText(ProgramData.AppInfoPath + @$"\{categoryNamespace}.json", JsonConvert.SerializeObject(response, Formatting.Indented)); } catch { }
         List<Element> elements = new(response.Data.Catalog.CatalogOffers.Elements);
         elements.AddRange(response.Data.Catalog.SearchStore.Elements);
         foreach (Element element in elements)
