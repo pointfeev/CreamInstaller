@@ -240,7 +240,6 @@ internal partial class SelectForm : CustomForm
         if (Directory.Exists(EpicLibrary.EpicAppDataPath))
         {
             List<Manifest> epicGames = await EpicLibrary.GetGames();
-            Dictionary<string, List<string>> games = new();
             foreach (Manifest manifest in epicGames)
             {
                 string @namespace = manifest.CatalogNamespace;
