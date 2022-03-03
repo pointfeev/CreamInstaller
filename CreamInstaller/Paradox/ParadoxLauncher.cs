@@ -30,14 +30,14 @@ internal static class ParadoxLauncher
             foreach (ProgramSelection selection in ProgramSelection.AllUsableEnabled)
             {
                 if (selection == paradoxLauncher) continue;
-                if (selection.AppInfo is null || selection.AppInfo.Value?.GetChild("extended")?.GetChild("publisher")?.ToString() != "Paradox Interactive") continue;
+                if (selection.AppInfo?.Value?.GetChild("extended")?.GetChild("publisher")?.ToString() != "Paradox Interactive") continue;
                 paradoxLauncher.ExtraDlc.Add(new(selection.Id, selection.Name, selection.SelectedDlc));
             }
             if (!paradoxLauncher.ExtraDlc.Any())
                 foreach (ProgramSelection selection in ProgramSelection.AllUsable)
                 {
                     if (selection == paradoxLauncher) continue;
-                    if (selection.AppInfo is null || selection.AppInfo.Value?.GetChild("extended")?.GetChild("publisher")?.ToString() != "Paradox Interactive") continue;
+                    if (selection.AppInfo?.Value?.GetChild("extended")?.GetChild("publisher")?.ToString() != "Paradox Interactive") continue;
                     paradoxLauncher.ExtraDlc.Add(new(selection.Id, selection.Name, selection.AllDlc));
                 }
         }

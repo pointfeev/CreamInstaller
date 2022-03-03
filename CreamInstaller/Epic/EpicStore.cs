@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Drawing;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -26,7 +27,15 @@ internal static class EpicStore
             string product = null;
             try { product = element.CatalogNs.Mappings[0].PageSlug; } catch { }
             string icon = null;
-            try { icon = element.KeyImages[0].Url; } catch { }
+            for (int i = 0; i < element.KeyImages?.Length; i++)
+            {
+                KeyImage keyImage = element.KeyImages[i];
+                if (keyImage.Type == "Thumbnail")
+                {
+                    icon = keyImage.Url;
+                    break;
+                }
+            }
             (string id, string name, string product, string icon) app = (element.Items[0].Id, element.Title, product, icon);
             if (!dlcIds.Contains(app))
                 dlcIds.Add(app);

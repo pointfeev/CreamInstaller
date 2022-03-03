@@ -22,7 +22,6 @@ internal class Request
             elements {
                 id
                 title
-                offerType
                 items {
                     id
                 }
@@ -41,7 +40,6 @@ internal class Request
             elements {
                 id
                 title
-                offerType
                 items {
                     id
                 }
