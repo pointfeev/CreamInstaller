@@ -1,5 +1,4 @@
-### CreamInstaller: CreamAPI Generator & Installer
-
+### CreamInstaller: CreamAPI/ScreamAPI Installer & Configuration Generator
 
 ![Program Preview Image](https://i.imgur.com/VAx1LRa.png)
 
