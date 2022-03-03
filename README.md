@@ -9,7 +9,7 @@
 ###### The program utilizes CreamAPI v4.5.0.0 Hotfix and ScreamAPI v3.0.0 downloaded from those posts and embedded into the program itself; no download necessary on your part!
 ---
 #### Description:
-Automatically finds all installed Steam/Epic games and their respective Steamworks/EOS SDK DLL locations on the user's computer,
+Automatically finds all installed Steam/Epic games and their respective Steamworks/Epic Online Services DLL locations on the user's computer,
 automatically parses SteamCMD, Steam Store, and Epic Games Store for those games' DLCs, then provides a very simple graphical interface utilizing the gathered information.
 
 The primary function of the program is to **automatically generate and install CreamAPI or ScreamAPI** for whichever
@@ -17,7 +17,7 @@ games and DLCs the user selects, however through the use of the **right-click co
 * automatically repair the Paradox Launcher
 * open the parsed SteamCMD/GraphQL AppInfo in Notepad
 * refresh the parsed SteamCMD/GraphQL AppInfo
-* open Root directories or Steamworks/EOS SDK DLL directories in Explorer
+* open Root directories or Steamworks/Epic Online Services DLL directories in Explorer
 * open SteamDB/ScreamDB/Steam Store/Epic Games Store/Steam Community links in the default browser
 
 ---
