@@ -634,7 +634,7 @@ internal partial class SelectForm : CustomForm
                                     directory.GetScreamApiComponents(out string sdk, out string sdk_o, out string sdk64, out string sdk64_o, out string sApi);
                                     if (sApiJson is null && File.Exists(sApi))
                                         sApiJson = File.ReadAllBytes(sApi);
-                                    await InstallForm.UninstallCreamAPI(directory);
+                                    await InstallForm.UninstallScreamAPI(directory);
                                     if (properSdk is null && File.Exists(sdk) && !Properties.Resources.SDK.EqualsFile(sdk))
                                         properSdk = File.ReadAllBytes(sdk);
                                     if (properSdk64 is null && File.Exists(sdk64) && !Properties.Resources.SDK64.EqualsFile(sdk64))
@@ -686,7 +686,7 @@ internal partial class SelectForm : CustomForm
                                 }
                                 else
                                     new DialogForm(this).Show(SystemIcons.Error, "Paradox Launcher repair failed!"
-                                        + "\n\nAn original Steamworks API or EOS SDK file could not be found."
+                                        + "\n\nAn original Steamworks API or Epic Online Services SDK file could not be found."
                                         + "\nYou must reinstall Paradox Launcher to fix this issue.", "OK");
                             })));
                     }
@@ -696,7 +696,7 @@ internal partial class SelectForm : CustomForm
                     for (int i = 0; i < selection.DllDirectories.Count; i++)
                     {
                         string directory = selection.DllDirectories[i];
-                        nodeContextMenu.Items.Add(new ToolStripMenuItem($"Open {(selection.IsSteam ? "Steamworks API" : "EOS SDK")} Directory ({i + 1})", Image("File Explorer"),
+                        nodeContextMenu.Items.Add(new ToolStripMenuItem($"Open {(selection.IsSteam ? "Steamworks API" : "Epic Online Services SDK")} Directory ({i + 1})", Image("File Explorer"),
                             new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
                     }
                 }
