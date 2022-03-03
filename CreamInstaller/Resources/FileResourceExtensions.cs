@@ -10,7 +10,7 @@ internal static class FileResourceExtensions
         file.Write(resource);
     }
 
-    internal static bool Equals(byte[] resource, string filePath)
+    internal static bool EqualsFile(this byte[] resource, string filePath)
     {
         byte[] file = File.ReadAllBytes(filePath);
         if (resource.Length != file.Length)

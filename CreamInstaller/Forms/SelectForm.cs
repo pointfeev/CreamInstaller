@@ -9,9 +9,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using CreamInstaller.Classes;
+using CreamInstaller.Epic;
 using CreamInstaller.Forms.Components;
+using CreamInstaller.Paradox;
 using CreamInstaller.Resources;
+using CreamInstaller.Steam;
+using CreamInstaller.Utility;
 
 using Gameloop.Vdf.Linq;
 
@@ -79,152 +82,256 @@ internal partial class SelectForm : CustomForm
     }
 
     internal readonly List<Task> RunningTasks = new();
-    private async Task GetCreamApiApplicablePrograms(IProgress<int> progress)
+    private async Task GetApplicablePrograms(IProgress<int> progress)
     {
         if (Program.Canceled) return;
-        List<Tuple<int, string, string, int, string>> applicablePrograms = new();
-        if (Directory.Exists(SteamLibrary.ParadoxLauncherInstallPath))
-            applicablePrograms.Add(new(0, "Paradox Launcher", "", 0, SteamLibrary.ParadoxLauncherInstallPath));
-        List<string> gameLibraryDirectories = await SteamLibrary.GetLibraryDirectories();
-        foreach (string libraryDirectory in gameLibraryDirectories)
-        {
-            List<Tuple<int, string, string, int, string>> games = await SteamLibrary.GetGamesFromLibraryDirectory(libraryDirectory);
-            if (games is not null)
-                foreach (Tuple<int, string, string, int, string> game in games)
-                    if (!applicablePrograms.Any(_game => _game.Item1 == game.Item1))
-                        applicablePrograms.Add(game);
-        }
-
         int CompleteTasks = 0;
         RunningTasks.Clear(); // contains all running tasks including games AND their dlc
         RemainingGames.Clear(); // for display purposes only, otherwise ignorable
         RemainingDLCs.Clear(); // for display purposes only, otherwise ignorable
         List<Task> appTasks = new();
-        foreach (Tuple<int, string, string, int, string> program in applicablePrograms)
+        if (Directory.Exists(ParadoxLauncher.InstallPath))
         {
-            int appId = program.Item1;
-            string name = program.Item2;
-            string branch = program.Item3;
-            int buildId = program.Item4;
-            string directory = program.Item5;
-            ProgramSelection selection = ProgramSelection.FromAppId(appId);
-            if (Program.Canceled) return;
-            if (Program.IsGameBlocked(name, directory)) continue;
-            AddToRemainingGames(name);
-            Task task = Task.Run(async () =>
+            ProgramSelection selection = ProgramSelection.FromId("ParadoxLauncher");
+            selection ??= new();
+            if (allCheckBox.Checked) selection.Enabled = true;
+            selection.Usable = true;
+            selection.Id = "ParadoxLauncher";
+            selection.Name = "Paradox Launcher";
+            selection.RootDirectory = ParadoxLauncher.InstallPath;
+            List<string> steamDllDirectories = await SteamLibrary.GetDllDirectoriesFromGameDirectory(selection.RootDirectory);
+            selection.DllDirectories = steamDllDirectories ?? await EpicLibrary.GetDllDirectoriesFromGameDirectory(selection.RootDirectory);
+            selection.IsSteam = steamDllDirectories is not null;
+
+            TreeNode programNode = TreeNodes.Find(s => s.Name == selection.Id) ?? new();
+            programNode.Name = selection.Id;
+            programNode.Text = selection.Name;
+            programNode.Checked = selection.Enabled;
+            programNode.Remove();
+            selectionTreeView.Nodes.Add(programNode);
+        }
+        if (Directory.Exists(SteamLibrary.InstallPath))
+        {
+            List<Tuple<string, string, string, int, string>> steamGames = await SteamLibrary.GetGames();
+            foreach (Tuple<string, string, string, int, string> program in steamGames)
             {
+                string appId = program.Item1;
+                string name = program.Item2;
+                string branch = program.Item3;
+                int buildId = program.Item4;
+                string directory = program.Item5;
+                ProgramSelection selection = ProgramSelection.FromId(appId);
                 if (Program.Canceled) return;
-                List<string> dllDirectories = await SteamLibrary.GetDllDirectoriesFromGameDirectory(directory);
-                if (dllDirectories is null)
+                if (Program.IsGameBlocked(name, directory)) continue;
+                AddToRemainingGames(name);
+                Task task = Task.Run(async () =>
                 {
-                    RemoveFromRemainingGames(name);
-                    return;
-                }
-                VProperty appInfo = null;
-                if (appId > 0) appInfo = await SteamCMD.GetAppInfo(appId, branch, buildId);
-                if (appId > 0 && appInfo is null)
-                {
-                    RemoveFromRemainingGames(name);
-                    return;
-                }
-                if (Program.Canceled) return;
-                ConcurrentDictionary<int, (string name, string iconStaticId)> dlc = new();
-                List<Task> dlcTasks = new();
-                List<int> dlcIds = await SteamCMD.ParseDlcAppIds(appInfo);
-                await HttpClientManager.ParseSteamStoreDlcAppIds(appId, dlcIds);
-                if (dlcIds.Count > 0)
-                {
-                    foreach (int dlcAppId in dlcIds)
+                    if (Program.Canceled) return;
+                    List<string> dllDirectories = await SteamLibrary.GetDllDirectoriesFromGameDirectory(directory);
+                    if (dllDirectories is null)
                     {
-                        if (Program.Canceled) return;
-                        AddToRemainingDLCs(dlcAppId.ToString());
-                        Task task = Task.Run(async () =>
+                        RemoveFromRemainingGames(name);
+                        return;
+                    }
+                    VProperty appInfo = appInfo = await SteamCMD.GetAppInfo(appId, branch, buildId);
+                    if (appInfo is null)
+                    {
+                        RemoveFromRemainingGames(name);
+                        return;
+                    }
+                    if (Program.Canceled) return;
+                    ConcurrentDictionary<string, (string name, string iconStaticId)> dlc = new();
+                    List<Task> dlcTasks = new();
+                    List<string> dlcIds = await SteamCMD.ParseDlcAppIds(appInfo);
+                    await SteamStore.ParseDlcAppIds(appId, dlcIds);
+                    if (dlcIds.Count > 0)
+                    {
+                        foreach (string dlcAppId in dlcIds)
                         {
                             if (Program.Canceled) return;
-                            string dlcName = null;
-                            string dlcIconStaticId = null;
-                            VProperty dlcAppInfo = await SteamCMD.GetAppInfo(dlcAppId);
-                            if (dlcAppInfo is not null)
+                            AddToRemainingDLCs(dlcAppId);
+                            Task task = Task.Run(async () =>
                             {
-                                dlcName = dlcAppInfo.Value?.GetChild("common")?.GetChild("name")?.ToString();
-                                dlcIconStaticId = dlcAppInfo.Value?.GetChild("common")?.GetChild("icon")?.ToString();
-                                dlcIconStaticId ??= dlcAppInfo.Value?.GetChild("common")?.GetChild("logo_small")?.ToString();
-                                dlcIconStaticId ??= dlcAppInfo.Value?.GetChild("common")?.GetChild("logo")?.ToString();
-                            }
-                            if (Program.Canceled) return;
-                            if (!string.IsNullOrWhiteSpace(dlcName))
-                                dlc[dlcAppId] = (dlcName, dlcIconStaticId);
-                            RemoveFromRemainingDLCs(dlcAppId.ToString());
-                            progress.Report(++CompleteTasks);
-                        });
-                        dlcTasks.Add(task);
-                        RunningTasks.Add(task);
-                        progress.Report(-RunningTasks.Count);
-                        Thread.Sleep(10); // to reduce control & window freezing
-                    }
-                }
-                else if (appId > 0)
-                {
-                    RemoveFromRemainingGames(name);
-                    return;
-                }
-                if (Program.Canceled) return;
-                foreach (Task task in dlcTasks)
-                {
-                    if (Program.Canceled) return;
-                    await task;
-                }
-
-                selection ??= new();
-                selection.Usable = true;
-                selection.SteamAppId = appId;
-                selection.Name = name;
-                selection.RootDirectory = directory;
-                selection.SteamApiDllDirectories = dllDirectories;
-                selection.AppInfo = appInfo;
-                selection.IconStaticID = appInfo?.Value?.GetChild("common")?.GetChild("icon")?.ToString();
-                selection.ClientIconStaticID = appInfo?.Value?.GetChild("common")?.GetChild("clienticon")?.ToString();
-                if (allCheckBox.Checked) selection.Enabled = true;
-
-                if (Program.Canceled) return;
-                Program.Invoke(selectionTreeView, delegate
-                {
-                    if (Program.Canceled) return;
-                    TreeNode programNode = TreeNodes.Find(s => s.Name == "" + appId) ?? new();
-                    programNode.Name = "" + appId;
-                    programNode.Text = /*(appId > 0 ? $"[{appId}] " : "") +*/ name;
-                    programNode.Checked = selection.Enabled;
-                    programNode.Remove();
-                    selectionTreeView.Nodes.Add(programNode);
-                    if (appId == 0) // paradox launcher
-                    {
-                        // maybe add game and/or dlc choice here?
+                                if (Program.Canceled) return;
+                                string dlcName = null;
+                                string dlcIconStaticId = null;
+                                VProperty dlcAppInfo = await SteamCMD.GetAppInfo(dlcAppId);
+                                if (dlcAppInfo is not null)
+                                {
+                                    dlcName = dlcAppInfo.Value?.GetChild("common")?.GetChild("name")?.ToString();
+                                    dlcIconStaticId = dlcAppInfo.Value?.GetChild("common")?.GetChild("icon")?.ToString();
+                                    dlcIconStaticId ??= dlcAppInfo.Value?.GetChild("common")?.GetChild("logo_small")?.ToString();
+                                    dlcIconStaticId ??= dlcAppInfo.Value?.GetChild("common")?.GetChild("logo")?.ToString();
+                                }
+                                if (Program.Canceled) return;
+                                if (!string.IsNullOrWhiteSpace(dlcName))
+                                    dlc[dlcAppId] = (dlcName, dlcIconStaticId);
+                                RemoveFromRemainingDLCs(dlcAppId);
+                                progress.Report(++CompleteTasks);
+                            });
+                            dlcTasks.Add(task);
+                            RunningTasks.Add(task);
+                            progress.Report(-RunningTasks.Count);
+                            Thread.Sleep(10); // to reduce control & window freezing
+                        }
                     }
                     else
                     {
-                        foreach (KeyValuePair<int, (string name, string iconStaticId)> pair in dlc)
+                        RemoveFromRemainingGames(name);
+                        return;
+                    }
+                    if (Program.Canceled) return;
+                    foreach (Task task in dlcTasks)
+                    {
+                        if (Program.Canceled) return;
+                        await task;
+                    }
+
+                    selection ??= new();
+                    if (allCheckBox.Checked) selection.Enabled = true;
+                    selection.Usable = true;
+                    selection.Id = appId;
+                    selection.Name = name;
+                    selection.RootDirectory = directory;
+                    selection.DllDirectories = dllDirectories;
+                    selection.IsSteam = true;
+                    selection.AppInfo = appInfo;
+                    selection.IconStaticID = appInfo?.Value?.GetChild("common")?.GetChild("icon")?.ToString();
+                    selection.ClientIconStaticID = appInfo?.Value?.GetChild("common")?.GetChild("clienticon")?.ToString();
+
+                    if (Program.Canceled) return;
+                    Program.Invoke(selectionTreeView, delegate
+                    {
+                        if (Program.Canceled) return;
+                        TreeNode programNode = TreeNodes.Find(s => s.Name == appId) ?? new();
+                        programNode.Name = appId;
+                        programNode.Text = name;
+                        programNode.Checked = selection.Enabled;
+                        programNode.Remove();
+                        selectionTreeView.Nodes.Add(programNode);
+                        foreach (KeyValuePair<string, (string name, string iconStaticId)> pair in dlc)
                         {
                             if (Program.Canceled || programNode is null) return;
-                            int appId = pair.Key;
+                            string appId = pair.Key;
                             (string name, string iconStaticId) dlcApp = pair.Value;
-                            selection.AllSteamDlc[appId] = dlcApp;
-                            if (allCheckBox.Checked) selection.SelectedSteamDlc[appId] = dlcApp;
-                            TreeNode dlcNode = TreeNodes.Find(s => s.Name == "" + appId) ?? new();
-                            dlcNode.Name = appId.ToString();
+                            selection.AllDlc[appId] = dlcApp;
+                            if (allCheckBox.Checked) selection.SelectedDlc[appId] = dlcApp;
+                            TreeNode dlcNode = TreeNodes.Find(s => s.Name == appId) ?? new();
+                            dlcNode.Name = appId;
                             dlcNode.Text = dlcApp.name;
-                            dlcNode.Checked = selection.SelectedSteamDlc.ContainsKey(appId);
+                            dlcNode.Checked = selection.SelectedDlc.ContainsKey(appId);
                             dlcNode.Remove();
                             programNode.Nodes.Add(dlcNode);
                         }
-                    }
+                    });
+                    if (Program.Canceled) return;
+                    RemoveFromRemainingGames(name);
+                    progress.Report(++CompleteTasks);
                 });
+                appTasks.Add(task);
+                RunningTasks.Add(task);
+                progress.Report(-RunningTasks.Count);
+            }
+        }
+        if (Directory.Exists(EpicLibrary.EpicAppDataPath))
+        {
+            List<Manifest> epicGames = await EpicLibrary.GetGames();
+            Dictionary<string, List<string>> games = new();
+            foreach (Manifest manifest in epicGames)
+            {
+                string id = manifest.CatalogNamespace;
+                string name = manifest.DisplayName;
+                string directory = manifest.InstallLocation;
+                ProgramSelection selection = ProgramSelection.FromId(id);
                 if (Program.Canceled) return;
-                RemoveFromRemainingGames(name);
-                progress.Report(++CompleteTasks);
-            });
-            appTasks.Add(task);
-            RunningTasks.Add(task);
-            progress.Report(-RunningTasks.Count);
+                if (Program.IsGameBlocked(name, directory)) continue;
+                AddToRemainingGames(name);
+                Task task = Task.Run(async () =>
+                {
+                    if (Program.Canceled) return;
+                    List<string> dllDirectories = await EpicLibrary.GetDllDirectoriesFromGameDirectory(directory);
+                    if (dllDirectories is null)
+                    {
+                        RemoveFromRemainingGames(name);
+                        return;
+                    }
+                    if (Program.Canceled) return;
+                    ConcurrentDictionary<string, string> dlc = new();
+                    List<Task> dlcTasks = new();
+                    List<(string id, string name)> dlcIds = await EpicStore.ParseDlcAppIds(id);
+                    if (dlcIds.Count > 0)
+                    {
+                        foreach ((string id, string name) in dlcIds)
+                        {
+                            if (Program.Canceled) return;
+                            AddToRemainingDLCs(id);
+                            Task task = Task.Run(() =>
+                            {
+                                if (Program.Canceled) return;
+                                dlc[id] = name;
+                                RemoveFromRemainingDLCs(id);
+                                progress.Report(++CompleteTasks);
+                            });
+                            dlcTasks.Add(task);
+                            RunningTasks.Add(task);
+                            progress.Report(-RunningTasks.Count);
+                            Thread.Sleep(10); // to reduce control & window freezing
+                        }
+                    }
+                    else
+                    {
+                        RemoveFromRemainingGames(name);
+                        return;
+                    }
+                    if (Program.Canceled) return;
+                    foreach (Task task in dlcTasks)
+                    {
+                        if (Program.Canceled) return;
+                        await task;
+                    }
+
+                    selection ??= new();
+                    if (allCheckBox.Checked) selection.Enabled = true;
+                    selection.Usable = true;
+                    selection.Id = id;
+                    selection.Name = name;
+                    selection.RootDirectory = directory;
+                    selection.DllDirectories = dllDirectories;
+
+                    if (Program.Canceled) return;
+                    Program.Invoke(selectionTreeView, delegate
+                    {
+                        if (Program.Canceled) return;
+                        TreeNode programNode = TreeNodes.Find(s => s.Name == id) ?? new();
+                        programNode.Name = id;
+                        programNode.Text = name;
+                        programNode.Checked = selection.Enabled;
+                        programNode.Remove();
+                        selectionTreeView.Nodes.Add(programNode);
+                        foreach (KeyValuePair<string, string> pair in dlc)
+                        {
+                            if (Program.Canceled || programNode is null) return;
+                            string dlcId = pair.Key;
+                            string dlcName = pair.Value;
+                            (string name, string iconStaticId) dlcApp = (dlcName, null); // temporary?
+                            selection.AllDlc[dlcId] = dlcApp;
+                            if (allCheckBox.Checked) selection.SelectedDlc[dlcId] = dlcApp;
+                            TreeNode dlcNode = TreeNodes.Find(s => s.Name == dlcId) ?? new();
+                            dlcNode.Name = dlcId;
+                            dlcNode.Text = dlcName;
+                            dlcNode.Checked = selection.SelectedDlc.ContainsKey(dlcId);
+                            dlcNode.Remove();
+                            programNode.Nodes.Add(dlcNode);
+                        }
+                    });
+                    if (Program.Canceled) return;
+                    RemoveFromRemainingGames(name);
+                    progress.Report(++CompleteTasks);
+                });
+                appTasks.Add(task);
+                RunningTasks.Add(task);
+                progress.Report(-RunningTasks.Count);
+            }
         }
         foreach (Task task in appTasks)
         {
@@ -267,17 +374,19 @@ internal partial class SelectForm : CustomForm
                 progressBar.Value = p;
             };
 
-            progressLabel.Text = $"Setting up SteamCMD . . . ";
-            await SteamCMD.Setup(iProgress);
-
+            if (Directory.Exists(SteamLibrary.InstallPath))
+            {
+                progressLabel.Text = $"Setting up SteamCMD . . . ";
+                await SteamCMD.Setup(iProgress);
+            }
             setup = false;
             progressLabel.Text = "Gathering and caching your applicable games and their DLCs . . . ";
             ProgramSelection.ValidateAll();
             TreeNodes.ForEach(node =>
             {
-                if (!int.TryParse(node.Name, out int appId) || node.Parent is null && ProgramSelection.FromAppId(appId) is null) node.Remove();
+                if (!int.TryParse(node.Name, out int appId) || node.Parent is null && ProgramSelection.FromId(node.Name) is null) node.Remove();
             });
-            await GetCreamApiApplicablePrograms(iProgress);
+            await GetApplicablePrograms(iProgress);
             await SteamCMD.Cleanup();
 
             HideProgressBar();
@@ -302,21 +411,23 @@ internal partial class SelectForm : CustomForm
     {
         if (e.Action == TreeViewAction.Unknown) return;
         TreeNode node = e.Node;
-        if (node is not null && int.TryParse(node.Name, out int appId))
+        if (node is not null)
         {
-            ProgramSelection selection = ProgramSelection.FromAppId(appId);
+            string appId = node.Name;
+            ProgramSelection selection = ProgramSelection.FromId(appId);
             if (selection is null)
             {
                 TreeNode parent = node.Parent;
-                if (parent is not null && int.TryParse(parent.Name, out int gameAppId))
+                if (parent is not null)
                 {
-                    ProgramSelection.FromAppId(gameAppId).ToggleDlc(appId, node.Checked);
+                    string gameAppId = parent.Name;
+                    ProgramSelection.FromId(gameAppId).ToggleDlc(appId, node.Checked);
                     parent.Checked = parent.Nodes.Cast<TreeNode>().ToList().Any(treeNode => treeNode.Checked);
                 }
             }
             else
             {
-                if (selection.AllSteamDlc.Any())
+                if (selection.AllDlc.Any())
                 {
                     selection.ToggleAllDlc(node.Checked);
                     node.Nodes.Cast<TreeNode>().ToList().ForEach(treeNode => treeNode.Checked = node.Checked);
@@ -345,10 +456,19 @@ internal partial class SelectForm : CustomForm
 
     private class TreeNodeSorter : IComparer
     {
-        public int Compare(object a, object b) =>
-            !int.TryParse((a as TreeNode).Name, out int A) ? 1
-            : !int.TryParse((b as TreeNode).Name, out int B) ? 0
-            : A > B ? 1 : 0;
+        public int Compare(object a, object b)
+        {
+            string aId = (a as TreeNode).Name;
+            string bId = (b as TreeNode).Name;
+            return aId == "ParadoxLauncher" ? -1
+                : bId == "ParadoxLauncher" ? 1
+                : !int.TryParse(aId, out _) && !int.TryParse(bId, out _) ? string.Compare(aId, bId)
+                : !int.TryParse(aId, out int A) ? 1
+                : !int.TryParse(bId, out int B) ? -1
+                : A > B ? 1
+                : A < B ? -1
+                : 0;
+        }
     }
 
     private void ShowProgressBar()
@@ -389,11 +509,11 @@ internal partial class SelectForm : CustomForm
         Dictionary<string, Image> images = new();
         Task.Run(async () =>
         {
-            if (Directory.Exists(SteamLibrary.ParadoxLauncherInstallPath))
+            if (Directory.Exists(ParadoxLauncher.InstallPath))
             {
-                foreach (string file in Directory.GetFiles(SteamLibrary.ParadoxLauncherInstallPath, "*.exe"))
+                foreach (string file in Directory.GetFiles(ParadoxLauncher.InstallPath, "*.exe"))
                 {
-                    images["Paradox Launcher"] = IconGrabber.GetFileIconImage(file);
+                    images["Icon_ParadoxLauncher"] = IconGrabber.GetFileIconImage(file);
                     break;
                 }
             }
@@ -405,7 +525,7 @@ internal partial class SelectForm : CustomForm
             images["Steam Community"] = await HttpClientManager.GetImageFromUrl("https://steamcommunity.com/favicon.ico");
         });
         Image Image(string identifier) => images.GetValueOrDefault(identifier, null);
-        void TrySetImageAsync(ToolStripMenuItem menuItem, int appId, string iconStaticId, bool client = false) =>
+        void TrySetImageAsync(ToolStripMenuItem menuItem, string appId, string iconStaticId, bool client = false) =>
             Task.Run(async () =>
             {
                 menuItem.Image = client ? await IconGrabber.GetSteamClientIcon(appId, iconStaticId) : await IconGrabber.GetSteamIcon(appId, iconStaticId);
@@ -415,33 +535,33 @@ internal partial class SelectForm : CustomForm
         {
             TreeNode node = e.Node;
             TreeNode parentNode = node.Parent;
-            if (!int.TryParse(node.Name, out int appId)) return;
-            ProgramSelection selection = ProgramSelection.FromAppId(appId);
-            (int gameAppId, (string name, string iconStaticId) app)? dlc = null;
-            if (selection is null) dlc = ProgramSelection.GetDlcFromAppId(appId);
+            string id = node.Name;
+            ProgramSelection selection = ProgramSelection.FromId(id);
+            (string gameAppId, (string name, string iconStaticId) app)? dlc = null;
+            if (selection is null) dlc = ProgramSelection.GetDlcFromId(id);
             if (e.Button == MouseButtons.Right && node.Bounds.Contains(e.Location))
             {
                 selectionTreeView.SelectedNode = node;
                 nodeContextMenu.Items.Clear();
-                ToolStripMenuItem header = new(selection?.Name ?? node.Text, Image(appId == 0 ? "Paradox Launcher" : "Icon_" + node.Name));
+                ToolStripMenuItem header = new(selection?.Name ?? node.Text, Image("Icon_" + id));
                 if (header.Image is null)
                 {
                     string iconStaticId = dlc?.app.iconStaticId ?? selection?.IconStaticID;
                     if (iconStaticId is not null)
-                        TrySetImageAsync(header, appId, iconStaticId);
+                        TrySetImageAsync(header, id, iconStaticId);
                     else if (dlc is not null)
                     {
-                        int gameAppId = dlc.Value.gameAppId;
+                        string gameAppId = dlc.Value.gameAppId;
                         header.Image = Image("Icon_" + gameAppId);
-                        ProgramSelection gameSelection = ProgramSelection.FromAppId(gameAppId);
+                        ProgramSelection gameSelection = ProgramSelection.FromId(gameAppId);
                         iconStaticId = gameSelection?.IconStaticID;
                         if (header.Image is null && iconStaticId is not null)
                             TrySetImageAsync(header, gameAppId, iconStaticId);
                     }
                 }
                 nodeContextMenu.Items.Add(header);
-                string appInfo = $@"{SteamCMD.AppInfoPath}\{appId}.vdf";
-                if (appId != 0 && Directory.Exists(Directory.GetDirectoryRoot(appInfo)) && File.Exists(appInfo))
+                string appInfo = $@"{SteamCMD.AppInfoPath}\{id}.vdf";
+                if (Directory.Exists(Directory.GetDirectoryRoot(appInfo)) && File.Exists(appInfo))
                 {
                     nodeContextMenu.Items.Add(new ToolStripSeparator());
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Open AppInfo", Image("Notepad"),
@@ -459,39 +579,54 @@ internal partial class SelectForm : CustomForm
                 }
                 if (selection is not null)
                 {
-                    if (appId == 0)
+                    if (id == "ParadoxLauncher")
                     {
                         nodeContextMenu.Items.Add(new ToolStripSeparator());
                         nodeContextMenu.Items.Add(new ToolStripMenuItem("Repair", Image("Command Prompt"),
                             new EventHandler(async (sender, e) =>
                             {
                                 if (!Program.IsProgramRunningDialog(this, selection)) return;
+
                                 byte[] cApiIni = null;
                                 byte[] properApi = null;
                                 byte[] properApi64 = null;
-                                foreach (string directory in selection.SteamApiDllDirectories)
+
+                                byte[] sApiJson = null;
+                                byte[] properSdk = null;
+                                byte[] properSdk64 = null;
+
+                                foreach (string directory in selection.DllDirectories)
                                 {
-                                    directory.GetApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string cApi);
+                                    directory.GetCreamApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string cApi);
                                     if (cApiIni is null && File.Exists(cApi))
                                         cApiIni = File.ReadAllBytes(cApi);
                                     await InstallForm.UninstallCreamAPI(directory);
-                                    if (properApi is null && File.Exists(api) && !FileResourceExtensions.Equals(Properties.Resources.API, api))
+                                    if (properApi is null && File.Exists(api) && !Properties.Resources.API.EqualsFile(api))
                                         properApi = File.ReadAllBytes(api);
-                                    if (properApi64 is null && File.Exists(api64) && !FileResourceExtensions.Equals(Properties.Resources.API64, api64))
+                                    if (properApi64 is null && File.Exists(api64) && !Properties.Resources.API64.EqualsFile(api64))
                                         properApi64 = File.ReadAllBytes(api64);
+
+                                    directory.GetScreamApiComponents(out string sdk, out string sdk_o, out string sdk64, out string sdk64_o, out string sApi);
+                                    if (sApiJson is null && File.Exists(sApi))
+                                        sApiJson = File.ReadAllBytes(sApi);
+                                    await InstallForm.UninstallCreamAPI(directory);
+                                    if (properSdk is null && File.Exists(sdk) && !Properties.Resources.SDK.EqualsFile(sdk))
+                                        properSdk = File.ReadAllBytes(sdk);
+                                    if (properSdk64 is null && File.Exists(sdk64) && !Properties.Resources.SDK64.EqualsFile(sdk64))
+                                        properSdk64 = File.ReadAllBytes(sdk64);
                                 }
-                                if (properApi is not null || properApi64 is not null)
+                                if (properApi is not null || properApi64 is not null || properSdk is not null || properSdk64 is not null)
                                 {
                                     bool neededRepair = false;
-                                    foreach (string directory in selection.SteamApiDllDirectories)
+                                    foreach (string directory in selection.DllDirectories)
                                     {
-                                        directory.GetApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string cApi);
-                                        if (properApi is not null && FileResourceExtensions.Equals(Properties.Resources.API, api))
+                                        directory.GetCreamApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string cApi);
+                                        if (properApi is not null && Properties.Resources.API.EqualsFile(api))
                                         {
                                             properApi.Write(api);
                                             neededRepair = true;
                                         }
-                                        if (properApi64 is not null && FileResourceExtensions.Equals(Properties.Resources.API64, api64))
+                                        if (properApi64 is not null && Properties.Resources.API64.EqualsFile(api64))
                                         {
                                             properApi64.Write(api64);
                                             neededRepair = true;
@@ -501,45 +636,66 @@ internal partial class SelectForm : CustomForm
                                             await InstallForm.InstallCreamAPI(directory, selection);
                                             cApiIni.Write(cApi);
                                         }
+
+                                        directory.GetScreamApiComponents(out string sdk, out string sdk_o, out string sdk64, out string sdk64_o, out string sApi);
+                                        if (properSdk is not null && Properties.Resources.SDK.EqualsFile(sdk))
+                                        {
+                                            properSdk.Write(sdk);
+                                            neededRepair = true;
+                                        }
+                                        if (properSdk64 is not null && Properties.Resources.SDK64.EqualsFile(sdk64))
+                                        {
+                                            properSdk64.Write(sdk64);
+                                            neededRepair = true;
+                                        }
+                                        if (sApiJson is not null)
+                                        {
+                                            await InstallForm.InstallScreamAPI(directory, selection);
+                                            sApiJson.Write(sApi);
+                                        }
                                     }
                                     if (neededRepair)
-                                        new DialogForm(this).Show("Paradox Launcher Repair", Icon, "Paradox Launcher successfully repaired!", "OK");
+                                        new DialogForm(this).Show(Icon, "Paradox Launcher successfully repaired!", "OK");
                                     else
-                                        new DialogForm(this).Show("Paradox Launcher Repair", SystemIcons.Information, "Paradox Launcher does not need to be repaired.", "OK");
+                                        new DialogForm(this).Show(SystemIcons.Information, "Paradox Launcher does not need to be repaired.", "OK");
                                 }
                                 else
-                                    new DialogForm(this).Show("Paradox Launcher Repair", SystemIcons.Error, "Paradox Launcher repair failed!"
-                                        + "\n\nAn original Steamworks API file could not be found."
+                                    new DialogForm(this).Show(SystemIcons.Error, "Paradox Launcher repair failed!"
+                                        + "\n\nAn original Steamworks API or EOS SDK file could not be found."
                                         + "\nYou must reinstall Paradox Launcher to fix this issue.", "OK");
                             })));
                     }
                     nodeContextMenu.Items.Add(new ToolStripSeparator());
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Open Root Directory", Image("File Explorer"),
                         new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(selection.RootDirectory))));
-                    for (int i = 0; i < selection.SteamApiDllDirectories.Count; i++)
+                    for (int i = 0; i < selection.DllDirectories.Count; i++)
                     {
-                        string directory = selection.SteamApiDllDirectories[i];
-                        nodeContextMenu.Items.Add(new ToolStripMenuItem($"Open Steamworks Directory ({i + 1})", Image("File Explorer"),
+                        string directory = selection.DllDirectories[i];
+                        nodeContextMenu.Items.Add(new ToolStripMenuItem($"Open {(selection.IsSteam ? "Steamworks API" : "EOS SDK")} Directory ({i + 1})", Image("File Explorer"),
                             new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
                     }
                 }
-                if (appId != 0)
+                if (id != "ParadoxLauncher" && selection is not null)
                 {
-                    nodeContextMenu.Items.Add(new ToolStripSeparator());
-                    nodeContextMenu.Items.Add(new ToolStripMenuItem("Open SteamDB", Image("SteamDB"),
-                        new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamdb.info/app/" + appId))));
-                    nodeContextMenu.Items.Add(new ToolStripMenuItem("Open Steam Store", Image("Steam Store"),
-                        new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://store.steampowered.com/app/" + appId))));
-                    if (selection is not null)
+                    if (selection.IsSteam)
                     {
-                        ToolStripMenuItem steamCommunity = new("Open Steam Community", Image("ClientIcon_" + node.Name),
-                            new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + appId)));
+                        nodeContextMenu.Items.Add(new ToolStripSeparator());
+                        nodeContextMenu.Items.Add(new ToolStripMenuItem("Open SteamDB", Image("SteamDB"),
+                            new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamdb.info/app/" + id))));
+                        nodeContextMenu.Items.Add(new ToolStripMenuItem("Open Steam Store", Image("Steam Store"),
+                            new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://store.steampowered.com/app/" + id))));
+                        ToolStripMenuItem steamCommunity = new("Open Steam Community", Image("ClientIcon_" + id),
+                        new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + id)));
                         nodeContextMenu.Items.Add(steamCommunity);
                         if (steamCommunity.Image is null)
                         {
                             steamCommunity.Image = Image("Steam Community");
-                            TrySetImageAsync(steamCommunity, appId, selection.ClientIconStaticID, true);
+                            TrySetImageAsync(steamCommunity, id, selection.ClientIconStaticID, true);
                         }
+                    }
+                    else
+                    {
+                        // Epic Games links?
                     }
                 }
                 nodeContextMenu.Show(selectionTreeView, e.Location);
@@ -548,52 +704,13 @@ internal partial class SelectForm : CustomForm
         OnLoad();
     }
 
-    private static void PopulateParadoxLauncherDlc(ProgramSelection paradoxLauncher = null)
-    {
-        paradoxLauncher ??= ProgramSelection.FromAppId(0);
-        if (paradoxLauncher is not null)
-        {
-            paradoxLauncher.ExtraSteamAppIdDlc.Clear();
-            foreach (ProgramSelection selection in ProgramSelection.AllUsableEnabled)
-            {
-                if (selection.Name == paradoxLauncher.Name) continue;
-                if (selection.AppInfo.Value?.GetChild("extended")?.GetChild("publisher")?.ToString() != "Paradox Interactive") continue;
-                paradoxLauncher.ExtraSteamAppIdDlc.Add(new(selection.SteamAppId, selection.Name, selection.SelectedSteamDlc));
-            }
-            if (!paradoxLauncher.ExtraSteamAppIdDlc.Any())
-                foreach (ProgramSelection selection in ProgramSelection.AllUsable)
-                {
-                    if (selection.Name == paradoxLauncher.Name) continue;
-                    if (selection.AppInfo.Value?.GetChild("extended")?.GetChild("publisher")?.ToString() != "Paradox Interactive") continue;
-                    paradoxLauncher.ExtraSteamAppIdDlc.Add(new(selection.SteamAppId, selection.Name, selection.AllSteamDlc));
-                }
-        }
-    }
-
-    private static bool ParadoxLauncherDlcDialog(Form form)
-    {
-        ProgramSelection paradoxLauncher = ProgramSelection.FromAppId(0);
-        if (paradoxLauncher is not null && paradoxLauncher.Enabled)
-        {
-            PopulateParadoxLauncherDlc(paradoxLauncher);
-            if (!paradoxLauncher.ExtraSteamAppIdDlc.Any())
-            {
-                return new DialogForm(form).Show(Program.ApplicationName, SystemIcons.Warning,
-                    $"WARNING: There are no installed games with DLC that can be added to the Paradox Launcher!" +
-                    "\n\nInstalling CreamAPI for the Paradox Launcher is pointless, since no DLC will be added to the configuration!",
-                    "Ignore", "Cancel") != DialogResult.OK;
-            }
-        }
-        return false;
-    }
-
     private void OnAccept(bool uninstall = false)
     {
         if (ProgramSelection.All.Any())
         {
             foreach (ProgramSelection selection in ProgramSelection.AllUsableEnabled)
                 if (!Program.IsProgramRunningDialog(this, selection)) return;
-            if (ParadoxLauncherDlcDialog(this)) return;
+            if (ParadoxLauncher.DlcDialog(this)) return;
             Hide();
             InstallForm installForm = new(this, uninstall);
             installForm.ShowDialog();
@@ -655,9 +772,9 @@ internal partial class SelectForm : CustomForm
         string blockedDirectoryExceptions = "";
         foreach (string name in Program.ProtectedGameDirectoryExceptions)
             blockedDirectoryExceptions += helpButtonListPrefix + name;
-        new DialogForm(this).Show(blockedGamesCheckBox.Text, SystemIcons.Information,
+        new DialogForm(this).Show(SystemIcons.Information,
             "Blocks the program from caching and displaying games protected by DLL checks," +
-            "\nanti-cheats, or that are confirmed not to be working with CreamAPI." +
+            "\nanti-cheats, or that are confirmed not to be working with CreamAPI or ScreamAPI." +
             "\n\nBlocked game names:" + blockedGames +
             "\n\nBlocked game sub-directories:" + blockedDirectories +
             "\n\nBlocked game sub-directory exceptions (not blocked):" + blockedDirectoryExceptions,

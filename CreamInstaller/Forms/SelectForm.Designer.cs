@@ -113,7 +113,7 @@ namespace CreamInstaller
             this.noneFoundLabel.Name = "noneFoundLabel";
             this.noneFoundLabel.Size = new System.Drawing.Size(554, 218);
             this.noneFoundLabel.TabIndex = 1002;
-            this.noneFoundLabel.Text = "No CreamAPI-applicable programs were found on your computer!";
+            this.noneFoundLabel.Text = "No CreamAPI-applicable or ScreamAPI-applicable programs were found on your computer!";
             this.noneFoundLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.noneFoundLabel.Visible = false;
             // 

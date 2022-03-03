@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
 
-using CreamInstaller.Classes;
 using CreamInstaller.Forms.Components;
+using CreamInstaller.Utility;
 
 using HtmlAgilityPack;
 
@@ -23,7 +23,7 @@ internal partial class MainForm : CustomForm
     internal MainForm() : base()
     {
         InitializeComponent();
-        Text = Program.ApplicationName;
+        Text = Program.ApplicationNameShort;
     }
 
     private static CancellationTokenSource cancellationTokenSource;
@@ -127,7 +127,7 @@ internal partial class MainForm : CustomForm
         {
             string FileName = Path.GetFileName(Program.CurrentProcessFilePath);
             if (FileName != "CreamInstaller.exe")
-                if (new DialogForm(this).Show(Program.ApplicationName, SystemIcons.Warning,
+                if (new DialogForm(this).Show(SystemIcons.Warning,
                     "WARNING: CreamInstaller.exe was renamed!" +
                     "\n\nThis will cause unwanted behavior when updating the program!",
                     "Ignore", "Abort") == DialogResult.Cancel)
