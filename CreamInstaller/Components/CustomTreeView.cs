@@ -34,7 +34,7 @@ internal class CustomTreeView : TreeView
         Font subFont = new(font.FontFamily, font.SizeInPoints, FontStyle.Regular, font.Unit, font.GdiCharSet, font.GdiVerticalFont);
 
         string subText = node.Name;
-        if (subText == "ParadoxLauncher")
+        if (string.IsNullOrWhiteSpace(subText) || subText == "ParadoxLauncher" || subText[0] == 'v' && Version.TryParse(subText[1..], out _))
             return;
 
         Size subSize = TextRenderer.MeasureText(graphics, subText, subFont);
