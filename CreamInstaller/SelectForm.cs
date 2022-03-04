@@ -260,7 +260,7 @@ internal partial class SelectForm : CustomForm
                         return;
                     }
                     if (Program.Canceled) return;
-                    /*ConcurrentDictionary<string, (string name, string product, string icon, string developer)> dlc = new();
+                    ConcurrentDictionary<string, (string name, string product, string icon, string developer)> dlc = new();
                     List<Task> dlcTasks = new();
                     List<(string id, string name, string product, string icon, string developer)> dlcIds = await EpicStore.ParseDlcIds(@namespace);
                     if (dlcIds.Count > 0)
@@ -292,7 +292,7 @@ internal partial class SelectForm : CustomForm
                     {
                         if (Program.Canceled) return;
                         await task;
-                    }*/
+                    }
 
                     selection ??= new();
                     if (allCheckBox.Checked) selection.Enabled = true;
@@ -301,13 +301,13 @@ internal partial class SelectForm : CustomForm
                     selection.Name = name;
                     selection.RootDirectory = directory;
                     selection.DllDirectories = dllDirectories;
-                    /*foreach (KeyValuePair<string, (string name, string product, string icon, string developer)> pair in dlc)
+                    foreach (KeyValuePair<string, (string name, string product, string icon, string developer)> pair in dlc)
                         if (pair.Value.name == selection.Name)
                         {
                             selection.ProductUrl = "https://www.epicgames.com/store/product/" + pair.Value.product;
                             selection.IconUrl = pair.Value.icon;
                             selection.Publisher = pair.Value.developer;
-                        }*/
+                        }
 
                     if (Program.Canceled) return;
                     Program.Invoke(selectionTreeView, delegate
