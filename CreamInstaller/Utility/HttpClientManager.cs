@@ -31,7 +31,10 @@ internal static class HttpClientManager
             document.LoadHtml(reader.ReadToEnd());
             return document;
         }
-        catch { return null; }
+        catch
+        {
+            return null;
+        }
     }
 
     internal static async Task<HtmlNodeCollection> GetDocumentNodes(string url, string xpath) => (await Get(url))?.DocumentNode?.SelectNodes(xpath);
@@ -42,8 +45,10 @@ internal static class HttpClientManager
         {
             return new Bitmap(await HttpClient.GetStreamAsync(url));
         }
-        catch { }
-        return null;
+        catch
+        {
+            return null;
+        }
     }
 
     internal static void Dispose() => HttpClient.Dispose();
