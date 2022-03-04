@@ -20,40 +20,20 @@ internal class Request
             }
         ) {
             elements {
-                id
                 title
-                items {
-                    id
-                }
                 keyImages {
                     type
                     url
+                }
+                items {
+                    id
+                    developer
                 }
                 catalogNs {
                     mappings(pageType: ""productHome"") {
                         pageSlug
                     }
                 }
-                developer
-            }
-        }
-        searchStore(category: ""games/edition/base"", namespace: $namespace) {
-            elements {
-                id
-                title
-                items {
-                    id
-                }
-                keyImages {
-                    type
-                    url
-                }
-                catalogNs {
-                    mappings(pageType: ""productHome"") {
-                        pageSlug
-                    }
-                }
-                developer
             }
         }
     }

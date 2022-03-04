@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -16,13 +17,12 @@ internal static class EpicStore
 {
     internal static async Task<List<(string id, string name, string product, string icon, string developer)>> ParseDlcIds(string categoryNamespace)
     {
+        // this method does not yet find ALL dlcs
         List<(string id, string name, string product, string icon, string developer)> dlcIds = new();
         Response response = await QueryGraphQL(categoryNamespace);
-        if (response is null)
-            return dlcIds;
+        if (response is null) return dlcIds;
         try { File.WriteAllText(ProgramData.AppInfoPath + @$"\{categoryNamespace}.json", JsonConvert.SerializeObject(response, Formatting.Indented)); } catch { }
         List<Element> elements = new(response.Data.Catalog.CatalogOffers.Elements);
-        elements.AddRange(response.Data.Catalog.SearchStore.Elements);
         foreach (Element element in elements)
         {
             string product = null;
@@ -37,9 +37,12 @@ internal static class EpicStore
                     break;
                 }
             }
-            (string id, string name, string product, string icon, string developer) app = (element.Items[0].Id, element.Title, product, icon, element.Developer);
-            if (!dlcIds.Contains(app))
-                dlcIds.Add(app);
+            foreach (Item item in element.Items)
+            {
+                (string id, string name, string product, string icon, string developer) app = (item.Id, element.Title, product, icon, item.Developer);
+                if (!dlcIds.Any(a => a.id == app.id))
+                    dlcIds.Add(app);
+            }
         }
         return dlcIds;
     }

@@ -18,28 +18,10 @@ public class Data
 public class Catalog
 {
     [JsonProperty(PropertyName = "catalogOffers")]
-    public SearchStore CatalogOffers { get; protected set; }
-
-    [JsonProperty(PropertyName = "searchStore")]
-    public SearchStore SearchStore { get; protected set; }
+    public CatalogOffers CatalogOffers { get; protected set; }
 }
 
 public class CatalogOffers
-{
-    [JsonProperty(PropertyName = "namespace")]
-    public string Namespace { get; protected set; }
-
-    [JsonProperty(PropertyName = "params")]
-    public Parameters Parameters { get; protected set; }
-}
-
-public class Parameters
-{
-    [JsonProperty(PropertyName = "count")]
-    public int Count { get; protected set; }
-}
-
-public class SearchStore
 {
     [JsonProperty(PropertyName = "elements")]
     public Element[] Elements { get; protected set; }
@@ -47,29 +29,26 @@ public class SearchStore
 
 public class Element
 {
-    [JsonProperty(PropertyName = "id")]
-    public string Id { get; protected set; }
-
     [JsonProperty(PropertyName = "title")]
     public string Title { get; protected set; }
-
-    [JsonProperty(PropertyName = "items")]
-    public Item[] Items { get; protected set; }
 
     [JsonProperty(PropertyName = "keyImages")]
     public KeyImage[] KeyImages { get; protected set; }
 
+    [JsonProperty(PropertyName = "items")]
+    public Item[] Items { get; protected set; }
+
     [JsonProperty(PropertyName = "catalogNs")]
     public CatalogNs CatalogNs { get; protected set; }
-
-    [JsonProperty(PropertyName = "developer")]
-    public string Developer { get; protected set; }
 }
 
 public class Item
 {
     [JsonProperty(PropertyName = "id")]
     public string Id { get; protected set; }
+
+    [JsonProperty(PropertyName = "developer")]
+    public string Developer { get; protected set; }
 }
 
 public class KeyImage

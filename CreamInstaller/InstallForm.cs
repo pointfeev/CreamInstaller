@@ -154,9 +154,9 @@ internal partial class InstallForm : CustomForm
         writer.WriteLine("  \"eos_logging\": false,");
         writer.WriteLine("  \"block_metrics\": false,");
         writer.WriteLine("  \"catalog_items\": {");
-        writer.WriteLine("    \"unlock_all\": false,");
-        writer.WriteLine("    \"override\": [");
-        KeyValuePair<string, (string name, string icon)> last = dlcApps.Last();
+        writer.WriteLine("    \"unlock_all\": true,"); //writer.WriteLine("    \"unlock_all\": false,");
+        writer.WriteLine("    \"override\": []"); //writer.WriteLine("    \"override\": [");
+        /*KeyValuePair<string, (string name, string icon)> last = dlcApps.Last();
         foreach (KeyValuePair<string, (string name, string icon)> pair in dlcApps)
         {
             string id = pair.Key;
@@ -165,23 +165,23 @@ internal partial class InstallForm : CustomForm
             if (installForm is not null)
                 installForm.UpdateUser($"Added DLC to ScreamAPI.json with id {id} ({name})", InstallationLog.Resource, info: false);
         }
-        writer.WriteLine("    ]");
+        writer.WriteLine("    ]");*/
         writer.WriteLine("  },");
         writer.WriteLine("  \"entitlements\": {");
-        writer.WriteLine("    \"unlock_all\": false,");
-        writer.WriteLine("    \"auto_inject\": false,");
-        writer.WriteLine("    \"inject\": [");
-        foreach (KeyValuePair<string, (string name, string icon)> pair in dlcApps)
+        writer.WriteLine("    \"unlock_all\": true,"); //writer.WriteLine("    \"unlock_all\": false,");
+        writer.WriteLine("    \"auto_inject\": true,"); //writer.WriteLine("    \"auto_inject\": false,");
+        writer.WriteLine("    \"inject\": []"); //writer.WriteLine("    \"inject\": [");
+        /*foreach (KeyValuePair<string, (string name, string icon)> pair in dlcApps)
         {
             string id = pair.Key;
             (string name, _) = pair.Value;
             writer.WriteLine($"      \"{id}\"{(pair.Equals(last) ? "" : ",")}");
-            if (installForm is not null)
-                installForm.UpdateUser($"Added DLC to ScreamAPI.json with id {id} ({name})", InstallationLog.Resource, info: false);
         }
-        writer.WriteLine("    ]");
+        writer.WriteLine("    ]");*/
         writer.WriteLine("  }");
         writer.WriteLine("}");
+        if (installForm is not null)
+            installForm.UpdateUser($"Created 'unlock_all: true' ScreamAPI.json configuration (temporary until I figure out how to properly get all DLC ids)", InstallationLog.Resource, info: false);
     }
 
     internal static async Task UninstallScreamAPI(string directory, InstallForm installForm = null) => await Task.Run(() =>

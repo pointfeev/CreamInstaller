@@ -15,7 +15,7 @@ internal static class HttpClientManager
     internal static void Setup()
     {
         HttpClient = new();
-        HttpClient.DefaultRequestHeaders.Add("user-agent", $"CreamInstaller-{Environment.MachineName}_{Environment.UserDomainName}_{Environment.UserName}");
+        HttpClient.DefaultRequestHeaders.Add("User-Agent", $"CreamInstaller-{Environment.MachineName}_{Environment.UserDomainName}_{Environment.UserName}");
     }
 
     internal static async Task<HtmlDocument> Get(string url)
