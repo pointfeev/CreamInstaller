@@ -261,7 +261,7 @@ internal partial class SelectForm : CustomForm
                     if (Program.Canceled) return;
                     ConcurrentDictionary<string, (string name, string product, string icon, string developer)> entitlements = new();
                     List<Task> dlcTasks = new();
-                    List<(string id, string name, string product, string icon, string developer)> entitlementIds = await EpicStore.QueryEntitlements(manifest);
+                    List<(string id, string name, string product, string icon, string developer)> entitlementIds = await EpicStore.QueryEntitlements(@namespace);
                     if (entitlementIds.Any())
                     {
                         foreach ((string id, string name, string product, string icon, string developer) in entitlementIds)

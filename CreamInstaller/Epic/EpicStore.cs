@@ -20,13 +20,12 @@ internal static class EpicStore
     {
     }*/
 
-    internal static async Task<List<(string id, string name, string product, string icon, string developer)>> QueryEntitlements(Manifest manifest)
+    internal static async Task<List<(string id, string name, string product, string icon, string developer)>> QueryEntitlements(string categoryNamespace)
     {
-        string @namespace = manifest.CatalogNamespace;
         List<(string id, string name, string product, string icon, string developer)> dlcIds = new();
-        Response response = await QueryGraphQL(@namespace);
+        Response response = await QueryGraphQL(categoryNamespace);
         if (response is null) return dlcIds;
-        try { File.WriteAllText(ProgramData.AppInfoPath + @$"\{@namespace}.json", JsonConvert.SerializeObject(response, Formatting.Indented)); } catch { }
+        try { File.WriteAllText(ProgramData.AppInfoPath + @$"\{categoryNamespace}.json", JsonConvert.SerializeObject(response, Formatting.Indented)); } catch { }
         List<Element> searchStore = new(response.Data.Catalog.SearchStore.Elements);
         foreach (Element element in searchStore)
         {
@@ -89,16 +88,23 @@ internal static class EpicStore
 
     private static async Task<Response> QueryGraphQL(string categoryNamespace)
     {
-        string encoded = HttpUtility.UrlEncode(categoryNamespace);
-        Request request = new(encoded);
-        string payload = JsonConvert.SerializeObject(request);
-        HttpContent content = new StringContent(payload);
-        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-        HttpClient client = HttpClientManager.HttpClient;
-        if (client is null) return null;
-        HttpResponseMessage httpResponse = await client.PostAsync("https://graphql.epicgames.com/graphql", content);
-        httpResponse.EnsureSuccessStatusCode();
-        string response = await httpResponse.Content.ReadAsStringAsync();
-        return JsonConvert.DeserializeObject<Response>(response);
+        try
+        {
+            string encoded = HttpUtility.UrlEncode(categoryNamespace);
+            Request request = new(encoded);
+            string payload = JsonConvert.SerializeObject(request);
+            HttpContent content = new StringContent(payload);
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            HttpClient client = HttpClientManager.HttpClient;
+            if (client is null) return null;
+            HttpResponseMessage httpResponse = await client.PostAsync("https://graphql.epicgames.com/graphql", content);
+            httpResponse.EnsureSuccessStatusCode();
+            string response = await httpResponse.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<Response>(response);
+        }
+        catch
+        {
+            return null;
+        }
     }
 }
