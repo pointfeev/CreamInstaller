@@ -18,19 +18,13 @@ public class Data
 public class Catalog
 {
     [JsonProperty(PropertyName = "searchStore")]
-    public SearchStore SearchStore { get; protected set; }
+    public ElementContainer SearchStore { get; protected set; }
 
     [JsonProperty(PropertyName = "catalogOffers")]
-    public CatalogOffers CatalogOffers { get; protected set; }
+    public ElementContainer CatalogOffers { get; protected set; }
 }
 
-public class SearchStore
-{
-    [JsonProperty(PropertyName = "elements")]
-    public Element[] Elements { get; protected set; }
-}
-
-public class CatalogOffers
+public class ElementContainer
 {
     [JsonProperty(PropertyName = "elements")]
     public Element[] Elements { get; protected set; }

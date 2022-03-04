@@ -15,18 +15,20 @@ namespace CreamInstaller.Epic;
 
 internal static class EpicStore
 {
-    // need a method to query catalog items
+    /* need a method to query catalog items
+    internal static async Task QueryCatalogItems(Manifest manifest)
+    {
+    }*/
 
     internal static async Task<List<(string id, string name, string product, string icon, string developer)>> QueryEntitlements(Manifest manifest)
     {
         string @namespace = manifest.CatalogNamespace;
-        string mainId = manifest.MainGameCatalogItemId;
         List<(string id, string name, string product, string icon, string developer)> dlcIds = new();
         Response response = await QueryGraphQL(@namespace);
         if (response is null) return dlcIds;
         try { File.WriteAllText(ProgramData.AppInfoPath + @$"\{@namespace}.json", JsonConvert.SerializeObject(response, Formatting.Indented)); } catch { }
-        List<Element> storeElements = new(response.Data.Catalog.SearchStore.Elements);
-        foreach (Element element in storeElements)
+        List<Element> searchStore = new(response.Data.Catalog.SearchStore.Elements);
+        foreach (Element element in searchStore)
         {
             string title = element.Title;
             string product = (element.CatalogNs is not null && element.CatalogNs.Mappings.Any())
@@ -44,8 +46,8 @@ internal static class EpicStore
             foreach (Item item in element.Items)
                 dlcIds.Populate(item.Id, title, product, icon, null, canOverwrite: element.Items.Length == 1);
         }
-        List<Element> catalogElements = new(response.Data.Catalog.CatalogOffers.Elements);
-        foreach (Element element in catalogElements)
+        List<Element> catalogOffers = new(response.Data.Catalog.CatalogOffers.Elements);
+        foreach (Element element in catalogOffers)
         {
             string title = element.Title;
             string product = (element.CatalogNs is not null && element.CatalogNs.Mappings.Any())
