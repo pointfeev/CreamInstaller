@@ -13,6 +13,21 @@ internal class Request
     [JsonProperty(PropertyName = "query")]
     private string _gqlQuery => @"query searchOffers($namespace: String!) {
     Catalog {
+        searchStore(category: ""*"", namespace: $namespace){
+            elements {
+                id
+                title
+                developer
+                items {
+                    id
+                }
+                catalogNs {
+                    mappings(pageType: ""productHome"") {
+                        pageSlug
+                    }
+                }
+            }
+        }
         catalogOffers(
             namespace: $namespace
             params: {
@@ -20,6 +35,7 @@ internal class Request
             }
         ) {
             elements {
+                id
                 title
                 keyImages {
                     type
@@ -27,6 +43,7 @@ internal class Request
                 }
                 items {
                     id
+                    title
                     developer
                 }
                 catalogNs {
@@ -52,15 +69,6 @@ internal class Request
 
     private class Variables
     {
-        [JsonProperty(PropertyName = "category")]
-        private string _category => "games/edition/base|bundles/games|editors|software/edition/base";
-
-        [JsonProperty(PropertyName = "count")]
-        private int _count => 1000;
-
-        [JsonProperty(PropertyName = "keywords")]
-        private string _keywords => "";
-
         [JsonProperty(PropertyName = "namespace")]
         private string _namespace { get; set; }
 

@@ -15,18 +15,41 @@ namespace CreamInstaller.Epic;
 
 internal static class EpicStore
 {
-    internal static async Task<List<(string id, string name, string product, string icon, string developer)>> ParseDlcIds(string categoryNamespace)
+    // need a method to query catalog items
+
+    internal static async Task<List<(string id, string name, string product, string icon, string developer)>> QueryEntitlements(Manifest manifest)
     {
-        // this method does not yet find ALL dlcs
+        string @namespace = manifest.CatalogNamespace;
+        string mainId = manifest.MainGameCatalogItemId;
         List<(string id, string name, string product, string icon, string developer)> dlcIds = new();
-        Response response = await QueryGraphQL(categoryNamespace);
+        Response response = await QueryGraphQL(@namespace);
         if (response is null) return dlcIds;
-        try { File.WriteAllText(ProgramData.AppInfoPath + @$"\{categoryNamespace}.json", JsonConvert.SerializeObject(response, Formatting.Indented)); } catch { }
-        List<Element> elements = new(response.Data.Catalog.CatalogOffers.Elements);
-        foreach (Element element in elements)
+        try { File.WriteAllText(ProgramData.AppInfoPath + @$"\{@namespace}.json", JsonConvert.SerializeObject(response, Formatting.Indented)); } catch { }
+        List<Element> storeElements = new(response.Data.Catalog.SearchStore.Elements);
+        foreach (Element element in storeElements)
         {
-            string product = null;
-            try { product = element.CatalogNs.Mappings[0].PageSlug; } catch { }
+            string title = element.Title;
+            string product = (element.CatalogNs is not null && element.CatalogNs.Mappings.Any())
+                ? element.CatalogNs.Mappings.First().PageSlug : null;
+            string icon = null;
+            for (int i = 0; i < element.KeyImages?.Length; i++)
+            {
+                KeyImage keyImage = element.KeyImages[i];
+                if (keyImage.Type == "DieselStoreFront")
+                {
+                    icon = keyImage.Url;
+                    break;
+                }
+            }
+            foreach (Item item in element.Items)
+                dlcIds.Populate(item.Id, title, product, icon, null, canOverwrite: element.Items.Length == 1);
+        }
+        List<Element> catalogElements = new(response.Data.Catalog.CatalogOffers.Elements);
+        foreach (Element element in catalogElements)
+        {
+            string title = element.Title;
+            string product = (element.CatalogNs is not null && element.CatalogNs.Mappings.Any())
+                ? element.CatalogNs.Mappings.First().PageSlug : null;
             string icon = null;
             for (int i = 0; i < element.KeyImages?.Length; i++)
             {
@@ -38,16 +61,31 @@ internal static class EpicStore
                 }
             }
             foreach (Item item in element.Items)
-            {
-                (string id, string name, string product, string icon, string developer) app = (item.Id, element.Title, product, icon, item.Developer);
-                if (!dlcIds.Any(a => a.id == app.id))
-                    dlcIds.Add(app);
-            }
+                dlcIds.Populate(item.Id, title, product, icon, item.Developer, canOverwrite: element.Items.Length == 1);
         }
         return dlcIds;
     }
 
-    internal static async Task<Response> QueryGraphQL(string categoryNamespace)
+    private static void Populate(this List<(string id, string name, string product, string icon, string developer)> dlcIds, string id, string title, string product, string icon, string developer, bool canOverwrite = false)
+    {
+        if (id == null) return;
+        bool found = false;
+        for (int i = 0; i < dlcIds.Count; i++)
+        {
+            (string id, string name, string product, string icon, string developer) app = dlcIds[i];
+            if (app.id == id)
+            {
+                found = true;
+                dlcIds[i] = canOverwrite
+                    ? (app.id, title ?? app.name, product ?? app.product, icon ?? app.icon, developer ?? app.developer)
+                    : (app.id, app.name ?? title, app.product ?? product, app.icon ?? icon, app.developer ?? developer);
+                break;
+            }
+        }
+        if (!found) dlcIds.Add((id, title, product, icon, developer));
+    }
+
+    private static async Task<Response> QueryGraphQL(string categoryNamespace)
     {
         string encoded = HttpUtility.UrlEncode(categoryNamespace);
         Request request = new(encoded);

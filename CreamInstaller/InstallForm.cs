@@ -53,22 +53,22 @@ internal partial class InstallForm : CustomForm
         }
     }
 
-    internal static void WriteCreamConfiguration(StreamWriter writer, string steamAppId, string name, SortedList<string, (string name, string icon)> steamDlcApps, InstallForm installForm = null)
+    internal static void WriteCreamConfiguration(StreamWriter writer, string appId, string name, SortedList<string, (DlcType type, string name, string icon)> dlc, InstallForm installForm = null)
     {
         writer.WriteLine($"; {name}");
         writer.WriteLine("[steam]");
-        writer.WriteLine($"appid = {steamAppId}");
+        writer.WriteLine($"appid = {appId}");
         writer.WriteLine();
         writer.WriteLine("[dlc]");
         if (installForm is not null)
-            installForm.UpdateUser($"Added game to cream_api.ini with appid {steamAppId} ({name})", InstallationLog.Resource, info: false);
-        foreach (KeyValuePair<string, (string name, string icon)> pair in steamDlcApps)
+            installForm.UpdateUser($"Added game to cream_api.ini with appid {appId} ({name})", InstallationLog.Resource, info: false);
+        foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in dlc)
         {
-            string appId = pair.Key;
-            (string dlcName, _) = pair.Value;
-            writer.WriteLine($"{appId} = {dlcName}");
+            string dlcId = pair.Key;
+            (_, string dlcName, _) = pair.Value;
+            writer.WriteLine($"{dlcId} = {dlcName}");
             if (installForm is not null)
-                installForm.UpdateUser($"Added DLC to cream_api.ini with appid {appId} ({dlcName})", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Added DLC to cream_api.ini with appid {dlcId} ({dlcName})", InstallationLog.Resource, info: false);
         }
     }
 
@@ -140,13 +140,13 @@ internal partial class InstallForm : CustomForm
         StreamWriter writer = new(cApi, true, Encoding.UTF8);
         if (selection.Id != "ParadoxLauncher")
             WriteCreamConfiguration(writer, selection.Id, selection.Name, selection.SelectedDlc, installForm);
-        foreach (Tuple<string, string, SortedList<string, (string name, string icon)>> extraAppDlc in selection.ExtraDlc)
+        foreach (Tuple<string, string, SortedList<string, (DlcType type, string name, string icon)>> extraAppDlc in selection.ExtraDlc)
             WriteCreamConfiguration(writer, extraAppDlc.Item1, extraAppDlc.Item2, extraAppDlc.Item3, installForm);
         writer.Flush();
         writer.Close();
     });
 
-    internal static void WriteScreamConfiguration(StreamWriter writer, SortedList<string, (string name, string icon)> dlcApps, InstallForm installForm = null)
+    internal static void WriteScreamConfiguration(StreamWriter writer, SortedList<string, (DlcType type, string name, string icon)> dlc, InstallForm installForm = null)
     {
         writer.WriteLine("{");
         writer.WriteLine("  \"version\": 2,");
@@ -154,34 +154,54 @@ internal partial class InstallForm : CustomForm
         writer.WriteLine("  \"eos_logging\": false,");
         writer.WriteLine("  \"block_metrics\": false,");
         writer.WriteLine("  \"catalog_items\": {");
-        writer.WriteLine("    \"unlock_all\": true,"); //writer.WriteLine("    \"unlock_all\": false,");
-        writer.WriteLine("    \"override\": []"); //writer.WriteLine("    \"override\": [");
-        /*KeyValuePair<string, (string name, string icon)> last = dlcApps.Last();
-        foreach (KeyValuePair<string, (string name, string icon)> pair in dlcApps)
+        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> catalogItems = dlc.Where(pair => pair.Value.type == DlcType.CatalogItem);
+        if (catalogItems.Any())
         {
-            string id = pair.Key;
-            (string name, _) = pair.Value;
-            writer.WriteLine($"      \"{id}\"{(pair.Equals(last) ? "" : ",")}");
-            if (installForm is not null)
-                installForm.UpdateUser($"Added DLC to ScreamAPI.json with id {id} ({name})", InstallationLog.Resource, info: false);
+            writer.WriteLine("    \"unlock_all\": false,");
+            writer.WriteLine("    \"override\": [");
+            KeyValuePair<string, (DlcType type, string name, string icon)> lastCatalogItem = catalogItems.Last();
+            foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in catalogItems)
+            {
+                string id = pair.Key;
+                (_, string name, _) = pair.Value;
+                writer.WriteLine($"      \"{id}\"{(pair.Equals(lastCatalogItem) ? "" : ",")}");
+                if (installForm is not null)
+                    installForm.UpdateUser($"Added catalog item to ScreamAPI.json with id {id} ({name})", InstallationLog.Resource, info: false);
+            }
+            writer.WriteLine("    ]");
         }
-        writer.WriteLine("    ]");*/
+        else
+        {
+            writer.WriteLine("    \"unlock_all\": true,");
+            writer.WriteLine("    \"override\": []");
+        }
         writer.WriteLine("  },");
         writer.WriteLine("  \"entitlements\": {");
-        writer.WriteLine("    \"unlock_all\": true,"); //writer.WriteLine("    \"unlock_all\": false,");
-        writer.WriteLine("    \"auto_inject\": true,"); //writer.WriteLine("    \"auto_inject\": false,");
-        writer.WriteLine("    \"inject\": []"); //writer.WriteLine("    \"inject\": [");
-        /*foreach (KeyValuePair<string, (string name, string icon)> pair in dlcApps)
+        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> entitlements = dlc.Where(pair => pair.Value.type == DlcType.Entitlement);
+        if (entitlements.Any())
         {
-            string id = pair.Key;
-            (string name, _) = pair.Value;
-            writer.WriteLine($"      \"{id}\"{(pair.Equals(last) ? "" : ",")}");
+            writer.WriteLine("    \"unlock_all\": false,");
+            writer.WriteLine("    \"auto_inject\": false,");
+            writer.WriteLine("    \"inject\": [");
+            KeyValuePair<string, (DlcType type, string name, string icon)> lastEntitlement = entitlements.Last();
+            foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in entitlements)
+            {
+                string id = pair.Key;
+                (_, string name, _) = pair.Value;
+                writer.WriteLine($"      \"{id}\"{(pair.Equals(lastEntitlement) ? "" : ",")}");
+                if (installForm is not null)
+                    installForm.UpdateUser($"Added entitlement to ScreamAPI.json with id {id} ({name})", InstallationLog.Resource, info: false);
+            }
+            writer.WriteLine("    ]");
         }
-        writer.WriteLine("    ]");*/
+        else
+        {
+            writer.WriteLine("    \"unlock_all\": true,");
+            writer.WriteLine("    \"auto_inject\": true,");
+            writer.WriteLine("    \"inject\": []");
+        }
         writer.WriteLine("  }");
         writer.WriteLine("}");
-        if (installForm is not null)
-            installForm.UpdateUser($"Created 'unlock_all: true' ScreamAPI.json configuration (temporary until I figure out how to properly get all DLC ids)", InstallationLog.Resource, info: false);
     }
 
     internal static async Task UninstallScreamAPI(string directory, InstallForm installForm = null) => await Task.Run(() =>
@@ -252,7 +272,7 @@ internal partial class InstallForm : CustomForm
         StreamWriter writer = new(sApi, true, Encoding.UTF8);
         if (selection.Id != "ParadoxLauncher")
             WriteScreamConfiguration(writer, selection.SelectedDlc, installForm);
-        foreach (Tuple<string, string, SortedList<string, (string name, string icon)>> extraAppDlc in selection.ExtraDlc)
+        foreach (Tuple<string, string, SortedList<string, (DlcType type, string name, string icon)>> extraAppDlc in selection.ExtraDlc)
             WriteScreamConfiguration(writer, extraAppDlc.Item3, installForm);
         writer.Flush();
         writer.Close();

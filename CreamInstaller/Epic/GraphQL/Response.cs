@@ -17,8 +17,17 @@ public class Data
 
 public class Catalog
 {
+    [JsonProperty(PropertyName = "searchStore")]
+    public SearchStore SearchStore { get; protected set; }
+
     [JsonProperty(PropertyName = "catalogOffers")]
     public CatalogOffers CatalogOffers { get; protected set; }
+}
+
+public class SearchStore
+{
+    [JsonProperty(PropertyName = "elements")]
+    public Element[] Elements { get; protected set; }
 }
 
 public class CatalogOffers
@@ -29,6 +38,9 @@ public class CatalogOffers
 
 public class Element
 {
+    [JsonProperty(PropertyName = "id")]
+    public string Id { get; protected set; }
+
     [JsonProperty(PropertyName = "title")]
     public string Title { get; protected set; }
 
@@ -46,6 +58,9 @@ public class Item
 {
     [JsonProperty(PropertyName = "id")]
     public string Id { get; protected set; }
+
+    [JsonProperty(PropertyName = "title")]
+    public string Title { get; protected set; }
 
     [JsonProperty(PropertyName = "developer")]
     public string Developer { get; protected set; }

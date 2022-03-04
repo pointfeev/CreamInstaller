@@ -7,6 +7,13 @@ using Gameloop.Vdf.Linq;
 
 namespace CreamInstaller;
 
+internal enum DlcType
+{
+    Default = 0,
+    CatalogItem = 1,
+    Entitlement = 2
+}
+
 internal class ProgramSelection
 {
     internal bool Enabled = false;
@@ -16,7 +23,6 @@ internal class ProgramSelection
     internal string Name = "Program";
 
     internal string ProductUrl = null;
-
     internal string IconUrl = null;
     internal string ClientIconUrl = null;
 
@@ -28,9 +34,9 @@ internal class ProgramSelection
     internal bool IsSteam = false;
     internal VProperty AppInfo = null;
 
-    internal readonly SortedList<string, (string name, string icon)> AllDlc = new();
-    internal readonly SortedList<string, (string name, string icon)> SelectedDlc = new();
-    internal readonly List<Tuple<string, string, SortedList<string, (string name, string icon)>>> ExtraDlc = new();
+    internal readonly SortedList<string, (DlcType type, string name, string icon)> AllDlc = new();
+    internal readonly SortedList<string, (DlcType type, string name, string icon)> SelectedDlc = new();
+    internal readonly List<Tuple<string, string, SortedList<string, (DlcType type, string name, string icon)>>> ExtraDlc = new(); // for Paradox Launcher
 
     internal bool AreDllsLocked
     {
@@ -57,36 +63,24 @@ internal class ProgramSelection
         }
     }
 
-    private void Toggle(string dlcAppId, (string name, string icon) dlcApp, bool enabled)
+    private void Toggle(string dlcAppId, (DlcType type, string name, string icon) dlcApp, bool enabled)
     {
         if (enabled) SelectedDlc[dlcAppId] = dlcApp;
         else SelectedDlc.Remove(dlcAppId);
     }
 
-    internal void ToggleDlc(string dlcAppId, bool enabled)
+    internal void ToggleDlc(string dlcId, bool enabled)
     {
-        foreach (KeyValuePair<string, (string name, string icon)> pair in AllDlc)
+        foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in AllDlc)
         {
             string appId = pair.Key;
-            (string name, string icon) dlcApp = pair.Value;
-            if (appId == dlcAppId)
+            (DlcType type, string name, string icon) dlcApp = pair.Value;
+            if (appId == dlcId)
             {
                 Toggle(appId, dlcApp, enabled);
                 break;
             }
         }
-        Enabled = SelectedDlc.Any();
-    }
-
-    internal void ToggleAllDlc(bool enabled)
-    {
-        if (!enabled) SelectedDlc.Clear();
-        else foreach (KeyValuePair<string, (string name, string icon)> pair in AllDlc)
-            {
-                string appId = pair.Key;
-                (string name, string icon) dlcApp = pair.Value;
-                Toggle(appId, dlcApp, enabled);
-            }
         Enabled = SelectedDlc.Any();
     }
 
@@ -118,13 +112,13 @@ internal class ProgramSelection
 
     internal static List<ProgramSelection> AllUsableEnabled => AllUsable.FindAll(s => s.Enabled);
 
-    internal static ProgramSelection FromId(string id) => AllUsable.Find(s => s.Id == id);
+    internal static ProgramSelection FromId(string gameId) => AllUsable.Find(s => s.Id == gameId);
 
-    internal static (string gameAppId, (string name, string icon) app)? GetDlcFromId(string appId)
+    internal static (string gameId, (DlcType type, string name, string icon) app)? GetDlcFromId(string dlcId)
     {
         foreach (ProgramSelection selection in AllUsable)
-            foreach (KeyValuePair<string, (string name, string icon)> pair in selection.AllDlc)
-                if (pair.Key == appId) return (selection.Id, pair.Value);
+            foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in selection.AllDlc)
+                if (pair.Key == dlcId) return (selection.Id, pair.Value);
         return null;
     }
 }
