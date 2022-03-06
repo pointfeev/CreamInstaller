@@ -81,7 +81,7 @@ internal class ProgramSelection
                 break;
             }
         }
-        Enabled = SelectedDlc.Any();
+        Enabled = SelectedDlc.Any() || ExtraDlc.Any();
     }
 
     internal ProgramSelection() => All.Add(this);

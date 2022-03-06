@@ -196,7 +196,7 @@ internal partial class SelectForm : CustomForm
                     }
 
                     selection ??= new();
-                    selection.Enabled = allCheckBox.Checked || selection.SelectedDlc.Any();
+                    selection.Enabled = allCheckBox.Checked || selection.SelectedDlc.Any() || selection.ExtraDlc.Any();
                     selection.Usable = true;
                     selection.Id = appId;
                     selection.Name = name;
@@ -294,7 +294,7 @@ internal partial class SelectForm : CustomForm
                     }
 
                     selection ??= new();
-                    selection.Enabled = allCheckBox.Checked || selection.SelectedDlc.Any();
+                    selection.Enabled = allCheckBox.Checked || selection.SelectedDlc.Any() || selection.ExtraDlc.Any();
                     selection.Usable = true;
                     selection.Id = @namespace;
                     selection.Name = name;
@@ -471,6 +471,12 @@ internal partial class SelectForm : CustomForm
             ProgramSelection selection = ProgramSelection.FromId(gameId);
             if (selection is not null)
                 selection.ToggleDlc(node.Name, node.Checked);
+        }
+        else
+        {
+            ProgramSelection selection = ProgramSelection.FromId(node.Name);
+            if (selection is not null)
+                selection.Enabled = node.Checked;
         }
     }
 
