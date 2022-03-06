@@ -18,15 +18,18 @@ namespace CreamInstaller.Steam;
 
 internal static class SteamCMD
 {
-    internal static readonly int ProcessLimit = 20;
+    internal static readonly int ProcessLimit = 30;
 
     internal static string DirectoryPath => ProgramData.DirectoryPath;
     internal static string AppInfoPath => ProgramData.AppInfoPath;
 
     internal static readonly string FilePath = DirectoryPath + @"\steamcmd.exe";
 
+    private static readonly Dictionary<string, int> AttemptCount = new(); // the more app_updates, the longer SteamCMD should wait for app_info_print
+    private static string GetArguments(string appId) => $@"@ShutdownOnFailedCommand 0 +force_install_dir {DirectoryPath} +login anonymous +app_info_print {appId} " + string.Concat(Enumerable.Repeat("+app_update 4 ", AttemptCount[appId])) + "+quit";
+
     private static readonly int[] locks = new int[ProcessLimit];
-    internal static async Task<string> Run(string command) => await Task.Run(() =>
+    internal static async Task<string> Run(string appId) => await Task.Run(() =>
     {
     wait_for_lock:
         if (Program.Canceled) return "";
@@ -35,6 +38,13 @@ internal static class SteamCMD
             if (Program.Canceled) return "";
             if (Interlocked.CompareExchange(ref locks[i], 1, 0) == 0)
             {
+                if (appId is not null)
+                {
+                    if (AttemptCount.ContainsKey(appId))
+                        AttemptCount[appId]++;
+                    else
+                        AttemptCount[appId] = 0;
+                }
                 if (Program.Canceled) return "";
                 List<string> logs = new();
                 ProcessStartInfo processStartInfo = new()
@@ -44,20 +54,55 @@ internal static class SteamCMD
                     RedirectStandardInput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
-                    Arguments = command,
+                    Arguments = appId is null ? "+quit" : GetArguments(appId),
                     CreateNoWindow = true,
                     StandardInputEncoding = Encoding.UTF8,
                     StandardOutputEncoding = Encoding.UTF8,
                     StandardErrorEncoding = Encoding.UTF8
                 };
-                using Process process = Process.Start(processStartInfo);
-                process.OutputDataReceived += (object sender, DataReceivedEventArgs e) => logs.Add(e.Data);
-                process.BeginOutputReadLine();
-                process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => logs.Add(e.Data);
-                process.BeginErrorReadLine();
-                process.WaitForExit();
+                Process process = Process.Start(processStartInfo);
+                string output = "";
+                string appInfo = "";
+                bool appInfoStarted = false;
+                DateTime lastOutput = DateTime.UtcNow;
+                while (true)
+                {
+                    if (Program.Canceled)
+                    {
+                        process.Kill(true);
+                        process.Close();
+                        break;
+                    }
+                    Thread.Sleep(0);
+                    int c = process.StandardOutput.Read();
+                    if (c != -1)
+                    {
+                        lastOutput = DateTime.UtcNow;
+                        char ch = (char)c;
+                        if (ch == '{') appInfoStarted = true;
+                        if (appInfoStarted) appInfo += ch;
+                        else output += ch;
+                    }
+                    DateTime now = DateTime.UtcNow;
+                    TimeSpan timeDiff = now - lastOutput;
+                    if (timeDiff.TotalSeconds > 0.1)
+                    {
+                        process.Kill(true);
+                        process.Close();
+                        if (output.Contains($"No app info for AppID {appId} found, requesting..."))
+                        {
+                            AttemptCount[appId]++;
+                            processStartInfo.Arguments = GetArguments(appId);
+                            process = Process.Start(processStartInfo);
+                            appInfoStarted = false;
+                            output = "";
+                            appInfo = "";
+                        }
+                        else break;
+                    }
+                }
                 Interlocked.Decrement(ref locks[i]);
-                return string.Join("\r\n", logs);
+                return appInfo;
             }
             Thread.Sleep(0);
         }
@@ -92,7 +137,7 @@ internal static class SteamCMD
             int cur = 0;
             progress.Report(cur);
             watcher.Changed += (sender, e) => progress.Report(++cur);
-            await Run($@"+quit");
+            await Run(null);
             watcher.Dispose();
         }
     }
@@ -168,8 +213,7 @@ internal static class SteamCMD
         if (File.Exists(appUpdateFile)) output = File.ReadAllText(appUpdateFile, Encoding.UTF8);
         else
         {
-            // we add app_update 4 to allow the app_info_print to finish
-            output = await Run($@"@ShutdownOnFailedCommand 0 +force_install_dir {DirectoryPath} +login anonymous +app_info_print {appId} +app_update 4 +quit");
+            output = await Run(appId);
             int openBracket = output.IndexOf("{");
             int closeBracket = output.LastIndexOf("}");
             if (openBracket != -1 && closeBracket != -1)
@@ -178,17 +222,14 @@ internal static class SteamCMD
                 output = output.Replace("ERROR! Failed to install app '4' (Invalid platform)", "");
                 File.WriteAllText(appUpdateFile, output, Encoding.UTF8);
             }
+            else goto restart;
         }
         if (Program.Canceled || output is null) return null;
-        if (!ValveDataFile.TryDeserialize(output, out VProperty appInfo))
+        if (!ValveDataFile.TryDeserialize(output, out VProperty appInfo) || appInfo.Value is VValue)
         {
             File.Delete(appUpdateFile);
-            //new DialogForm(null).Show("GetAppInfo", SystemIcons.Information, "Deserialize exception:\n\n" + output, "OK");
             goto restart;
         }
-        if (appInfo.Value is VValue)
-            //new DialogForm(null).Show("GetAppInfo", SystemIcons.Information, "VValue exception:\n\n" + output, "OK");
-            goto restart;
         if (appInfo is null || appInfo.Value?.Children()?.ToList()?.Count == 0) return appInfo;
         VToken type = appInfo.Value?.GetChild("common")?.GetChild("type");
         if (type is null || type.ToString() == "Game")
@@ -243,6 +284,7 @@ internal static class SteamCMD
                 {
                     process.Kill(true);
                     process.WaitForExit();
+                    process.Close();
                 }
                 catch { }
             }));

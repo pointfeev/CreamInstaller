@@ -81,12 +81,21 @@ internal partial class SelectForm : CustomForm
         });
     }
 
-    internal readonly List<Task> RunningTasks = new();
     private async Task GetApplicablePrograms(IProgress<int> progress)
     {
+        int TotalGameCount = 0;
+        int CompleteGameCount = 0;
+        void AddToRemainingGames(string gameName)
+        {
+            this.AddToRemainingGames(gameName);
+            progress.Report(-++TotalGameCount);
+        }
+        void RemoveFromRemainingGames(string gameName)
+        {
+            this.RemoveFromRemainingGames(gameName);
+            progress.Report(++CompleteGameCount);
+        }
         if (Program.Canceled) return;
-        int CompleteTasks = 0;
-        RunningTasks.Clear(); // contains all running tasks including games AND their dlc
         RemainingGames.Clear(); // for display purposes only, otherwise ignorable
         RemainingDLCs.Clear(); // for display purposes only, otherwise ignorable
         List<Task> appTasks = new();
@@ -169,11 +178,8 @@ internal partial class SelectForm : CustomForm
                                 if (!string.IsNullOrWhiteSpace(dlcName))
                                     dlc[dlcAppId] = (DlcType.Default, dlcName, dlcIconStaticId);
                                 RemoveFromRemainingDLCs(dlcAppId);
-                                progress.Report(++CompleteTasks);
                             });
                             dlcTasks.Add(task);
-                            RunningTasks.Add(task);
-                            progress.Report(-RunningTasks.Count);
                             Thread.Sleep(10); // to reduce control & window freezing
                         }
                     }
@@ -230,11 +236,8 @@ internal partial class SelectForm : CustomForm
                     });
                     if (Program.Canceled) return;
                     RemoveFromRemainingGames(name);
-                    progress.Report(++CompleteTasks);
                 });
                 appTasks.Add(task);
-                RunningTasks.Add(task);
-                progress.Report(-RunningTasks.Count);
             }
         }
         if (Directory.Exists(EpicLibrary.EpicAppDataPath))
@@ -273,11 +276,8 @@ internal partial class SelectForm : CustomForm
                                 if (Program.Canceled) return;
                                 entitlements[id] = (name, product, icon, developer);
                                 RemoveFromRemainingDLCs(id);
-                                progress.Report(++CompleteTasks);
                             });
                             dlcTasks.Add(task);
-                            RunningTasks.Add(task);
-                            progress.Report(-RunningTasks.Count);
                             Thread.Sleep(10); // to reduce control & window freezing
                         }
                     }
@@ -350,11 +350,8 @@ internal partial class SelectForm : CustomForm
                     });
                     if (Program.Canceled) return;
                     RemoveFromRemainingGames(name);
-                    progress.Report(++CompleteTasks);
                 });
                 appTasks.Add(task);
-                RunningTasks.Add(task);
-                progress.Report(-RunningTasks.Count);
             }
         }
         foreach (Task task in appTasks)
@@ -362,7 +359,6 @@ internal partial class SelectForm : CustomForm
             if (Program.Canceled) return;
             await task;
         }
-        progress.Report(RunningTasks.Count);
     }
 
     private async void OnLoad()
