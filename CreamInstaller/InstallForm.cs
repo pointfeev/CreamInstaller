@@ -74,70 +74,70 @@ internal partial class InstallForm : CustomForm
 
     internal static async Task UninstallCreamAPI(string directory, InstallForm installForm = null) => await Task.Run(() =>
     {
-        directory.GetCreamApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string cApi);
-        if (File.Exists(api_o))
+        directory.GetCreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+        if (File.Exists(sdk32_o))
         {
-            if (File.Exists(api))
+            if (File.Exists(sdk32))
             {
-                File.Delete(api);
+                File.Delete(sdk32);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Deleted file: {Path.GetFileName(api)}", InstallationLog.Resource, info: false);
+                    installForm.UpdateUser($"Deleted file: {Path.GetFileName(sdk32)}", InstallationLog.Resource, info: false);
             }
-            File.Move(api_o, api);
+            File.Move(sdk32_o, sdk32);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(api_o)} -> {Path.GetFileName(api)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk32_o)} -> {Path.GetFileName(sdk32)}", InstallationLog.Resource, info: false);
         }
-        if (File.Exists(api64_o))
+        if (File.Exists(sdk64_o))
         {
-            if (File.Exists(api64))
+            if (File.Exists(sdk64))
             {
-                File.Delete(api64);
+                File.Delete(sdk64);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Deleted file: {Path.GetFileName(api64)}", InstallationLog.Resource, info: false);
+                    installForm.UpdateUser($"Deleted file: {Path.GetFileName(sdk64)}", InstallationLog.Resource, info: false);
             }
-            File.Move(api64_o, api64);
+            File.Move(sdk64_o, sdk64);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(api64_o)} -> {Path.GetFileName(api64)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk64_o)} -> {Path.GetFileName(sdk64)}", InstallationLog.Resource, info: false);
         }
-        if (File.Exists(cApi))
+        if (File.Exists(config))
         {
-            File.Delete(cApi);
+            File.Delete(config);
             if (installForm is not null)
-                installForm.UpdateUser($"Deleted file: {Path.GetFileName(cApi)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Deleted file: {Path.GetFileName(config)}", InstallationLog.Resource, info: false);
         }
     });
 
     internal static async Task InstallCreamAPI(string directory, ProgramSelection selection, InstallForm installForm = null) => await Task.Run(() =>
     {
-        directory.GetCreamApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string cApi);
-        if (File.Exists(api) && !File.Exists(api_o))
+        directory.GetCreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+        if (File.Exists(sdk32) && !File.Exists(sdk32_o))
         {
-            File.Move(api, api_o);
+            File.Move(sdk32, sdk32_o);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(api)} -> {Path.GetFileName(api_o)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk32)} -> {Path.GetFileName(sdk32_o)}", InstallationLog.Resource, info: false);
         }
-        if (File.Exists(api_o))
+        if (File.Exists(sdk32_o))
         {
-            Properties.Resources.API.Write(api);
+            Properties.Resources.Steamworks32.Write(sdk32);
             if (installForm is not null)
-                installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(api)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(sdk32)}", InstallationLog.Resource, info: false);
         }
-        if (File.Exists(api64) && !File.Exists(api64_o))
+        if (File.Exists(sdk64) && !File.Exists(sdk64_o))
         {
-            File.Move(api64, api64_o);
+            File.Move(sdk64, sdk64_o);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(api64)} -> {Path.GetFileName(api64_o)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk64)} -> {Path.GetFileName(sdk64_o)}", InstallationLog.Resource, info: false);
         }
-        if (File.Exists(api64_o))
+        if (File.Exists(sdk64_o))
         {
-            Properties.Resources.API64.Write(api64);
+            Properties.Resources.Steamworks64.Write(sdk64);
             if (installForm is not null)
-                installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(api64)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(sdk64)}", InstallationLog.Resource, info: false);
         }
         if (installForm is not null)
             installForm.UpdateUser("Generating CreamAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
-        File.Create(cApi).Close();
-        StreamWriter writer = new(cApi, true, Encoding.UTF8);
+        File.Create(config).Close();
+        StreamWriter writer = new(config, true, Encoding.UTF8);
         if (selection.Id != "ParadoxLauncher")
             WriteCreamConfiguration(writer, selection.Id, selection.Name, selection.SelectedDlc, installForm);
         foreach (Tuple<string, string, SortedList<string, (DlcType type, string name, string icon)>> extraAppDlc in selection.ExtraDlc)
@@ -206,18 +206,18 @@ internal partial class InstallForm : CustomForm
 
     internal static async Task UninstallScreamAPI(string directory, InstallForm installForm = null) => await Task.Run(() =>
     {
-        directory.GetScreamApiComponents(out string sdk, out string sdk_o, out string sdk64, out string sdk64_o, out string sApi);
-        if (File.Exists(sdk_o))
+        directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+        if (File.Exists(sdk32_o))
         {
-            if (File.Exists(sdk))
+            if (File.Exists(sdk32))
             {
-                File.Delete(sdk);
+                File.Delete(sdk32);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Deleted file: {Path.GetFileName(sdk)}", InstallationLog.Resource, info: false);
+                    installForm.UpdateUser($"Deleted file: {Path.GetFileName(sdk32)}", InstallationLog.Resource, info: false);
             }
-            File.Move(sdk_o, sdk);
+            File.Move(sdk32_o, sdk32);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk_o)} -> {Path.GetFileName(sdk)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk32_o)} -> {Path.GetFileName(sdk32)}", InstallationLog.Resource, info: false);
         }
         if (File.Exists(sdk64_o))
         {
@@ -231,28 +231,28 @@ internal partial class InstallForm : CustomForm
             if (installForm is not null)
                 installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk64_o)} -> {Path.GetFileName(sdk64)}", InstallationLog.Resource, info: false);
         }
-        if (File.Exists(sApi))
+        if (File.Exists(config))
         {
-            File.Delete(sApi);
+            File.Delete(config);
             if (installForm is not null)
-                installForm.UpdateUser($"Deleted file: {Path.GetFileName(sApi)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Deleted file: {Path.GetFileName(config)}", InstallationLog.Resource, info: false);
         }
     });
 
     internal static async Task InstallScreamAPI(string directory, ProgramSelection selection, InstallForm installForm = null) => await Task.Run(() =>
     {
-        directory.GetScreamApiComponents(out string sdk, out string sdk_o, out string sdk64, out string sdk64_o, out string sApi);
-        if (File.Exists(sdk) && !File.Exists(sdk_o))
+        directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+        if (File.Exists(sdk32) && !File.Exists(sdk32_o))
         {
-            File.Move(sdk, sdk_o);
+            File.Move(sdk32, sdk32_o);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk)} -> {Path.GetFileName(sdk_o)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk32)} -> {Path.GetFileName(sdk32_o)}", InstallationLog.Resource, info: false);
         }
-        if (File.Exists(sdk_o))
+        if (File.Exists(sdk32_o))
         {
-            Properties.Resources.SDK.Write(sdk);
+            Properties.Resources.EpicOnlineServices32.Write(sdk32);
             if (installForm is not null)
-                installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(sdk)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(sdk32)}", InstallationLog.Resource, info: false);
         }
         if (File.Exists(sdk64) && !File.Exists(sdk64_o))
         {
@@ -262,14 +262,14 @@ internal partial class InstallForm : CustomForm
         }
         if (File.Exists(sdk64_o))
         {
-            Properties.Resources.SDK64.Write(sdk64);
+            Properties.Resources.EpicOnlineServices64.Write(sdk64);
             if (installForm is not null)
                 installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(sdk64)}", InstallationLog.Resource, info: false);
         }
         if (installForm is not null)
             installForm.UpdateUser("Generating ScreamAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
-        File.Create(sApi).Close();
-        StreamWriter writer = new(sApi, true, Encoding.UTF8);
+        File.Create(config).Close();
+        StreamWriter writer = new(config, true, Encoding.UTF8);
         if (selection.Id != "ParadoxLauncher")
             WriteScreamConfiguration(writer, selection.SelectedDlc, installForm);
         foreach (Tuple<string, string, SortedList<string, (DlcType type, string name, string icon)>> extraAppDlc in selection.ExtraDlc)

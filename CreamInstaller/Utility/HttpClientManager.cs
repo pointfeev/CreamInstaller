@@ -41,6 +41,8 @@ internal static class HttpClientManager
 
     internal static async Task<HtmlNodeCollection> GetDocumentNodes(string url, string xpath) => (await EnsureGet(url))?.ToHtmlDocument()?.DocumentNode?.SelectNodes(xpath);
 
+    internal static HtmlNodeCollection GetDocumentNodes(this HtmlAgilityPack.HtmlDocument htmlDocument, string xpath) => htmlDocument.DocumentNode?.SelectNodes(xpath);
+
     internal static async Task<Image> GetImageFromUrl(string url)
     {
         try

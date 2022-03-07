@@ -43,19 +43,19 @@ internal class ProgramSelection
         {
             foreach (string directory in DllDirectories)
             {
-                directory.GetCreamApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string cApi);
-                if (api.IsFilePathLocked()
-                    || api_o.IsFilePathLocked()
-                    || api64.IsFilePathLocked()
-                    || api64_o.IsFilePathLocked()
-                    || cApi.IsFilePathLocked())
-                    return true;
-                directory.GetScreamApiComponents(out string sdk, out string sdk_o, out string sdk64, out string sdk64_o, out string sApi);
-                if (sdk.IsFilePathLocked()
-                    || sdk_o.IsFilePathLocked()
+                directory.GetCreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+                if (sdk32.IsFilePathLocked()
+                    || sdk32_o.IsFilePathLocked()
                     || sdk64.IsFilePathLocked()
                     || sdk64_o.IsFilePathLocked()
-                    || sApi.IsFilePathLocked())
+                    || config.IsFilePathLocked())
+                    return true;
+                directory.GetScreamApiComponents(out sdk32, out sdk32_o, out sdk64, out sdk64_o, out config);
+                if (sdk32.IsFilePathLocked()
+                    || sdk32_o.IsFilePathLocked()
+                    || sdk64.IsFilePathLocked()
+                    || sdk64_o.IsFilePathLocked()
+                    || config.IsFilePathLocked())
                     return true;
             }
             return false;

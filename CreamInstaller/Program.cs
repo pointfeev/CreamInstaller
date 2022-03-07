@@ -58,22 +58,22 @@ internal static class Program
         return false;
     }
 
-    internal static void GetCreamApiComponents(this string directory, out string api, out string api_o, out string api64, out string api64_o, out string cApi)
+    internal static void GetCreamApiComponents(this string directory, out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config)
     {
-        api = directory + @"\steam_api.dll";
-        api_o = directory + @"\steam_api_o.dll";
-        api64 = directory + @"\steam_api64.dll";
-        api64_o = directory + @"\steam_api64_o.dll";
-        cApi = directory + @"\cream_api.ini";
+        sdk32 = directory + @"\steam_api.dll";
+        sdk32_o = directory + @"\steam_api_o.dll";
+        sdk64 = directory + @"\steam_api64.dll";
+        sdk64_o = directory + @"\steam_api64_o.dll";
+        config = directory + @"\cream_api.ini";
     }
 
-    internal static void GetScreamApiComponents(this string directory, out string sdk, out string sdk_o, out string sdk64, out string sdk64_o, out string sApi)
+    internal static void GetScreamApiComponents(this string directory, out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config)
     {
-        sdk = directory + @"\EOSSDK-Win32-Shipping.dll";
-        sdk_o = directory + @"\EOSSDK-Win32-Shipping_o.dll";
+        sdk32 = directory + @"\EOSSDK-Win32-Shipping.dll";
+        sdk32_o = directory + @"\EOSSDK-Win32-Shipping_o.dll";
         sdk64 = directory + @"\EOSSDK-Win64-Shipping.dll";
         sdk64_o = directory + @"\EOSSDK-Win64-Shipping_o.dll";
-        sApi = directory + @"\ScreamAPI.json";
+        config = directory + @"\ScreamAPI.json";
     }
 
     [STAThread]

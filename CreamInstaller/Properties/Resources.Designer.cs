@@ -63,9 +63,9 @@ namespace CreamInstaller.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] API {
+        internal static byte[] EpicOnlineServices32 {
             get {
-                object obj = ResourceManager.GetObject("API", resourceCulture);
+                object obj = ResourceManager.GetObject("EpicOnlineServices32", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -73,9 +73,9 @@ namespace CreamInstaller.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] API64 {
+        internal static byte[] EpicOnlineServices64 {
             get {
-                object obj = ResourceManager.GetObject("API64", resourceCulture);
+                object obj = ResourceManager.GetObject("EpicOnlineServices64", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -93,9 +93,9 @@ namespace CreamInstaller.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] SDK {
+        internal static byte[] Steamworks32 {
             get {
-                object obj = ResourceManager.GetObject("SDK", resourceCulture);
+                object obj = ResourceManager.GetObject("Steamworks32", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -103,9 +103,9 @@ namespace CreamInstaller.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] SDK64 {
+        internal static byte[] Steamworks64 {
             get {
-                object obj = ResourceManager.GetObject("SDK64", resourceCulture);
+                object obj = ResourceManager.GetObject("Steamworks64", resourceCulture);
                 return ((byte[])(obj));
             }
         }

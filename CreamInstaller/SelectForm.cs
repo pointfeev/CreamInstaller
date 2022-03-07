@@ -635,72 +635,68 @@ internal partial class SelectForm : CustomForm
                             new EventHandler(async (sender, e) =>
                             {
                                 if (!Program.IsProgramRunningDialog(this, selection)) return;
-
-                                byte[] cApiIni = null;
-                                byte[] properApi = null;
-                                byte[] properApi64 = null;
-
-                                byte[] sApiJson = null;
-                                byte[] properSdk = null;
-                                byte[] properSdk64 = null;
-
+                                byte[] creamConfig = null;
+                                byte[] steamOriginalSdk32 = null;
+                                byte[] steamOriginalSdk64 = null;
+                                byte[] screamConfig = null;
+                                byte[] epicOriginalSdk32 = null;
+                                byte[] epicOriginalSdk64 = null;
                                 foreach (string directory in selection.DllDirectories)
                                 {
-                                    directory.GetCreamApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string cApi);
-                                    if (cApiIni is null && File.Exists(cApi))
-                                        cApiIni = File.ReadAllBytes(cApi);
+                                    directory.GetCreamApiComponents(out string sdk32, out string _, out string sdk64, out string _, out string config);
+                                    if (creamConfig is null && File.Exists(config))
+                                        creamConfig = File.ReadAllBytes(config);
                                     await InstallForm.UninstallCreamAPI(directory);
-                                    if (properApi is null && File.Exists(api) && !Properties.Resources.API.EqualsFile(api))
-                                        properApi = File.ReadAllBytes(api);
-                                    if (properApi64 is null && File.Exists(api64) && !Properties.Resources.API64.EqualsFile(api64))
-                                        properApi64 = File.ReadAllBytes(api64);
-
-                                    directory.GetScreamApiComponents(out string sdk, out string sdk_o, out string sdk64, out string sdk64_o, out string sApi);
-                                    if (sApiJson is null && File.Exists(sApi))
-                                        sApiJson = File.ReadAllBytes(sApi);
+                                    if (steamOriginalSdk32 is null && File.Exists(sdk32) && !Properties.Resources.Steamworks32.EqualsFile(sdk32))
+                                        steamOriginalSdk32 = File.ReadAllBytes(sdk32);
+                                    if (steamOriginalSdk64 is null && File.Exists(sdk64) && !Properties.Resources.Steamworks64.EqualsFile(sdk64))
+                                        steamOriginalSdk64 = File.ReadAllBytes(sdk64);
+                                    directory.GetScreamApiComponents(out sdk32, out string _, out sdk64, out string _, out config);
+                                    if (screamConfig is null && File.Exists(config))
+                                        screamConfig = File.ReadAllBytes(config);
                                     await InstallForm.UninstallScreamAPI(directory);
-                                    if (properSdk is null && File.Exists(sdk) && !Properties.Resources.SDK.EqualsFile(sdk))
-                                        properSdk = File.ReadAllBytes(sdk);
-                                    if (properSdk64 is null && File.Exists(sdk64) && !Properties.Resources.SDK64.EqualsFile(sdk64))
-                                        properSdk64 = File.ReadAllBytes(sdk64);
+                                    if (epicOriginalSdk32 is null && File.Exists(sdk32) && !Properties.Resources.EpicOnlineServices32.EqualsFile(sdk32))
+                                        epicOriginalSdk32 = File.ReadAllBytes(sdk32);
+                                    if (epicOriginalSdk64 is null && File.Exists(sdk64) && !Properties.Resources.EpicOnlineServices64.EqualsFile(sdk64))
+                                        epicOriginalSdk64 = File.ReadAllBytes(sdk64);
                                 }
-                                if (properApi is not null || properApi64 is not null || properSdk is not null || properSdk64 is not null)
+                                if (steamOriginalSdk32 is not null || steamOriginalSdk64 is not null || epicOriginalSdk32 is not null || epicOriginalSdk64 is not null)
                                 {
                                     bool neededRepair = false;
                                     foreach (string directory in selection.DllDirectories)
                                     {
-                                        directory.GetCreamApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string cApi);
-                                        if (properApi is not null && Properties.Resources.API.EqualsFile(api))
+                                        directory.GetCreamApiComponents(out string sdk32, out string _, out string sdk64, out string _, out string config);
+                                        if (steamOriginalSdk32 is not null && Properties.Resources.Steamworks32.EqualsFile(sdk32))
                                         {
-                                            properApi.Write(api);
+                                            steamOriginalSdk32.Write(sdk32);
                                             neededRepair = true;
                                         }
-                                        if (properApi64 is not null && Properties.Resources.API64.EqualsFile(api64))
+                                        if (steamOriginalSdk64 is not null && Properties.Resources.Steamworks64.EqualsFile(sdk64))
                                         {
-                                            properApi64.Write(api64);
+                                            steamOriginalSdk64.Write(sdk64);
                                             neededRepair = true;
                                         }
-                                        if (cApiIni is not null)
+                                        if (creamConfig is not null)
                                         {
                                             await InstallForm.InstallCreamAPI(directory, selection);
-                                            cApiIni.Write(cApi);
+                                            creamConfig.Write(config);
                                         }
 
-                                        directory.GetScreamApiComponents(out string sdk, out string sdk_o, out string sdk64, out string sdk64_o, out string sApi);
-                                        if (properSdk is not null && Properties.Resources.SDK.EqualsFile(sdk))
+                                        directory.GetScreamApiComponents(out sdk32, out string _, out sdk64, out string _, out config);
+                                        if (epicOriginalSdk32 is not null && Properties.Resources.EpicOnlineServices32.EqualsFile(sdk32))
                                         {
-                                            properSdk.Write(sdk);
+                                            epicOriginalSdk32.Write(sdk32);
                                             neededRepair = true;
                                         }
-                                        if (properSdk64 is not null && Properties.Resources.SDK64.EqualsFile(sdk64))
+                                        if (epicOriginalSdk64 is not null && Properties.Resources.EpicOnlineServices64.EqualsFile(sdk64))
                                         {
-                                            properSdk64.Write(sdk64);
+                                            epicOriginalSdk64.Write(sdk64);
                                             neededRepair = true;
                                         }
-                                        if (sApiJson is not null)
+                                        if (screamConfig is not null)
                                         {
                                             await InstallForm.InstallScreamAPI(directory, selection);
-                                            sApiJson.Write(sApi);
+                                            screamConfig.Write(config);
                                         }
                                     }
                                     if (neededRepair)
