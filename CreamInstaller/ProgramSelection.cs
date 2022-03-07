@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using CreamInstaller.Components;
+
 namespace CreamInstaller;
 
 internal enum DlcType
@@ -31,8 +33,8 @@ internal class ProgramSelection
 
     internal bool IsSteam = false;
 
-    internal readonly SortedList<string, (DlcType type, string name, string icon)> AllDlc = new();
-    internal readonly SortedList<string, (DlcType type, string name, string icon)> SelectedDlc = new();
+    internal readonly SortedList<string, (DlcType type, string name, string icon)> AllDlc = new(AppIdComparer.Comparer);
+    internal readonly SortedList<string, (DlcType type, string name, string icon)> SelectedDlc = new(AppIdComparer.Comparer);
     internal readonly List<Tuple<string, string, SortedList<string, (DlcType type, string name, string icon)>>> ExtraDlc = new(); // for Paradox Launcher
 
     internal bool AreDllsLocked

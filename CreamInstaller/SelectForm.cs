@@ -503,19 +503,7 @@ internal partial class SelectForm : CustomForm
 
     private class TreeNodeSorter : IComparer
     {
-        public int Compare(object a, object b)
-        {
-            string aId = (a as TreeNode).Name;
-            string bId = (b as TreeNode).Name;
-            return aId == "ParadoxLauncher" ? -1
-                : bId == "ParadoxLauncher" ? 1
-                : !int.TryParse(aId, out _) && !int.TryParse(bId, out _) ? string.Compare(aId, bId)
-                : !int.TryParse(aId, out int A) ? 1
-                : !int.TryParse(bId, out int B) ? -1
-                : A > B ? 1
-                : A < B ? -1
-                : 0;
-        }
+        public int Compare(object a, object b) => AppIdComparer.Comparer.Compare((a as TreeNode).Name, (b as TreeNode).Name);
     }
 
     private void ShowProgressBar()
