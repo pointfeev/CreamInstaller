@@ -654,8 +654,6 @@ internal partial class SelectForm : CustomForm
         selectionTreeView.NodeMouseClick += (sender, e) =>
         {
             int cmi = ++contextMenuIndex;
-            do { Thread.Sleep(0); } while (!Program.Canceled && nodeContextMenu.Visible);
-            if (cmi != contextMenuIndex || Program.Canceled) return;
             TreeNode node = null;
             try
             {
@@ -818,20 +816,23 @@ internal partial class SelectForm : CustomForm
                     AddToContextMenu(cmi, new ContextMenuItem("Open SteamDB", "SteamDB",
                         new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamdb.info/app/" + id))));
                 }
-                if (selection is not null && selection.IsSteam)
+                if (selection is not null)
                 {
-                    AddToContextMenu(cmi, new ContextMenuItem("Open Steam Store", "Steam Store",
-                        new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
-                    AddToContextMenu(cmi, new ContextMenuItem("Open Steam Community", (id, selection.SubIconUrl, true), "Steam Community",
-                        new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + id))));
-                }
-                else
-                {
-                    AddToContextMenu(cmi, new ToolStripSeparator());
-                    AddToContextMenu(cmi, new ContextMenuItem("Open ScreamDB", "ScreamDB",
-                        new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://scream-db.web.app/offers/" + id))));
-                    AddToContextMenu(cmi, new ContextMenuItem("Open Epic Games Store", "Epic Games",
-                        new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
+                    if (selection.IsSteam)
+                    {
+                        AddToContextMenu(cmi, new ContextMenuItem("Open Steam Store", "Steam Store",
+                            new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
+                        AddToContextMenu(cmi, new ContextMenuItem("Open Steam Community", (id, selection.SubIconUrl, true), "Steam Community",
+                            new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + id))));
+                    }
+                    else
+                    {
+                        AddToContextMenu(cmi, new ToolStripSeparator());
+                        AddToContextMenu(cmi, new ContextMenuItem("Open ScreamDB", "ScreamDB",
+                            new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://scream-db.web.app/offers/" + id))));
+                        AddToContextMenu(cmi, new ContextMenuItem("Open Epic Games Store", "Epic Games",
+                            new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
+                    }
                 }
             }
             if (cmi != contextMenuIndex) return;
