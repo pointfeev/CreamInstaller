@@ -77,7 +77,13 @@ internal partial class MainForm : CustomForm
             }
             catch { }
         }
-        if (latestVersion is not null)
+        if (latestVersion is null)
+        {
+            updateManager.Dispose();
+            updateManager = null;
+            StartProgram();
+        }
+        else
         {
             Size = new(420, 300);
             label1.Text = $"An update is available: v{latestVersion}";
@@ -112,10 +118,6 @@ internal partial class MainForm : CustomForm
                 }
             versions = null;
         }
-        updateManager.Dispose();
-        updateManager = null;
-
-        StartProgram();
     }
 
     private void OnLoad(object sender, EventArgs _)
