@@ -2,8 +2,8 @@
 
 ![Program Preview Image](https://i.imgur.com/VAx1LRa.png)
 
-###### Refer to [this post](https://cs.rin.ru/forum/viewtopic.php?f=29&t=70576) if you don't know what CreamAPI is! ;)
-###### Refer to [this post](https://cs.rin.ru/forum/viewtopic.php?f=29&t=106474) if you don't know what ScreamAPI is! ;)
+###### Refer to [this post](https://cs.rin.ru/forum/viewtopic.php?f=29&t=70576) if you don't know what CreamAPI is! ;;)
+###### Refer to [this post](https://cs.rin.ru/forum/viewtopic.php?f=29&t=106474) and/or [this repository](https://github.com/acidicoala/ScreamAPI) if you don't know what ScreamAPI is! ;)
 
 ###### The program utilizes CreamAPI v4.5.0.0 Hotfix and ScreamAPI v3.0.0 downloaded from those posts and embedded into the program itself; no download necessary on your part!
 ---
