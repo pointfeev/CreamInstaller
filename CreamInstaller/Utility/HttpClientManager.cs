@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Drawing;
-using System.IO;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 using HtmlAgilityPack;
 
@@ -15,21 +14,17 @@ internal static class HttpClientManager
     internal static void Setup()
     {
         HttpClient = new();
-        HttpClient.DefaultRequestHeaders.Add("User-Agent", $"CreamInstaller-{Environment.MachineName}_{Environment.UserDomainName}_{Environment.UserName}");
+        HttpClient.DefaultRequestHeaders.Add("User-Agent", $"{Environment.MachineName}CI{Application.ProductVersion.Replace(".", "")}{Environment.UserName}");
     }
 
-    internal static async Task<HtmlDocument> Get(string url)
+    internal static async Task<string> EnsureGet(string url)
     {
         try
         {
             using HttpRequestMessage request = new(HttpMethod.Get, url);
             using HttpResponseMessage response = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
-            using Stream stream = await response.Content.ReadAsStreamAsync();
-            using StreamReader reader = new(stream, Encoding.UTF8);
-            HtmlDocument document = new();
-            document.LoadHtml(reader.ReadToEnd());
-            return document;
+            return await response.Content.ReadAsStringAsync();
         }
         catch
         {
@@ -37,7 +32,14 @@ internal static class HttpClientManager
         }
     }
 
-    internal static async Task<HtmlNodeCollection> GetDocumentNodes(string url, string xpath) => (await Get(url))?.DocumentNode?.SelectNodes(xpath);
+    internal static HtmlAgilityPack.HtmlDocument ToHtmlDocument(this string html)
+    {
+        HtmlAgilityPack.HtmlDocument document = new();
+        document.LoadHtml(html);
+        return document;
+    }
+
+    internal static async Task<HtmlNodeCollection> GetDocumentNodes(string url, string xpath) => (await EnsureGet(url))?.ToHtmlDocument()?.DocumentNode?.SelectNodes(xpath);
 
     internal static async Task<Image> GetImageFromUrl(string url)
     {

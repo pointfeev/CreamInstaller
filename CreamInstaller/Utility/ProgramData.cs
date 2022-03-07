@@ -14,7 +14,7 @@ internal static class ProgramData
     internal static readonly string AppInfoPath = DirectoryPath + @"\appinfo";
     internal static readonly string AppInfoVersionPath = AppInfoPath + @"\version.txt";
 
-    internal static readonly Version MinimumAppInfoVersion = Version.Parse("2.4.0.0");
+    internal static readonly Version MinimumAppInfoVersion = Version.Parse("3.2.0.0");
 
     internal static async Task Setup() => await Task.Run(() =>
     {

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-using Gameloop.Vdf.Linq;
-
 namespace CreamInstaller;
 
 internal enum DlcType
@@ -24,7 +22,7 @@ internal class ProgramSelection
 
     internal string ProductUrl = null;
     internal string IconUrl = null;
-    internal string ClientIconUrl = null;
+    internal string SubIconUrl = null;
 
     internal string Publisher = null;
 
@@ -32,7 +30,6 @@ internal class ProgramSelection
     internal List<string> DllDirectories = null;
 
     internal bool IsSteam = false;
-    internal VProperty AppInfo = null;
 
     internal readonly SortedList<string, (DlcType type, string name, string icon)> AllDlc = new();
     internal readonly SortedList<string, (DlcType type, string name, string icon)> SelectedDlc = new();

@@ -1,24 +1,61 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Threading.Tasks;
 
 using CreamInstaller.Utility;
 
-using HtmlAgilityPack;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace CreamInstaller.Steam;
 
 internal static class SteamStore
 {
-    internal static async Task ParseDlcAppIds(string appId, List<string> dlcIds)
+    internal static async Task<List<string>> ParseDlcAppIds(AppData appData) => await Task.Run(() =>
     {
-        // currently this is only really needed to get DLC that release without changing game buildid (very rare)
-        // it also finds things which aren't really connected to the game itself, and thus not needed (usually soundtracks, collections, packs, etc.)
-        HtmlNodeCollection nodes = await HttpClientManager.GetDocumentNodes(
-                        $"https://store.steampowered.com/dlc/{appId}",
-                        "//div[@class='recommendation']/div/a");
-        if (nodes is not null)
-            foreach (HtmlNode node in nodes)
-                if (int.TryParse(node.Attributes?["data-ds-appid"]?.Value, out int dlcAppId) && dlcAppId > 0 && !dlcIds.Contains("" + dlcAppId))
-                    dlcIds.Add("" + dlcAppId);
+        List<string> dlcIds = new();
+        if (appData.dlc is null) return dlcIds;
+        foreach (int appId in appData.dlc)
+            dlcIds.Add(appId.ToString());
+        return dlcIds;
+    });
+
+    internal static async Task<AppData> QueryStoreAPI(string appId)
+    {
+        if (Program.Canceled) return null;
+        string response = await HttpClientManager.EnsureGet($"https://store.steampowered.com/api/appdetails?appids={appId}");
+        string cacheFile = ProgramData.AppInfoPath + @$"\{appId}.json";
+        if (response is not null)
+        {
+            IDictionary<string, JToken> apps = (dynamic)JsonConvert.DeserializeObject(response);
+            foreach (KeyValuePair<string, JToken> app in apps)
+            {
+                try
+                {
+                    AppData data = JsonConvert.DeserializeObject<AppDetails>(app.Value.ToString()).data;
+                    try
+                    {
+                        File.WriteAllText(cacheFile, JsonConvert.SerializeObject(data, Formatting.Indented));
+                    }
+                    catch { }
+                    return data;
+                }
+                catch (Exception e)
+                {
+                    new DialogForm(null).Show(SystemIcons.Error, "Unsuccessful deserialization of query for appid " + appId + ":\n\n" + e.ToString(), "FUCK");
+                }
+            }
+        }
+        if (Directory.Exists(Directory.GetDirectoryRoot(cacheFile)) && File.Exists(cacheFile))
+        {
+            try
+            {
+                return JsonConvert.DeserializeObject<AppData>(File.ReadAllText(cacheFile));
+            }
+            catch { }
+        }
+        return null;
     }
 }

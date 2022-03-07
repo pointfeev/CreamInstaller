@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -18,15 +19,17 @@ namespace CreamInstaller.Steam;
 
 internal static class SteamCMD
 {
-    internal static readonly int ProcessLimit = 30;
+    internal static readonly int ProcessLimit = 20;
 
     internal static string DirectoryPath => ProgramData.DirectoryPath;
     internal static string AppInfoPath => ProgramData.AppInfoPath;
 
     internal static readonly string FilePath = DirectoryPath + @"\steamcmd.exe";
 
-    private static readonly Dictionary<string, int> AttemptCount = new(); // the more app_updates, the longer SteamCMD should wait for app_info_print
-    private static string GetArguments(string appId) => $@"@ShutdownOnFailedCommand 0 +force_install_dir {DirectoryPath} +login anonymous +app_info_print {appId} " + string.Concat(Enumerable.Repeat("+app_update 4 ", AttemptCount[appId])) + "+quit";
+    private static readonly ConcurrentDictionary<string, int> AttemptCount = new(); // the more app_updates, the longer SteamCMD should wait for app_info_print
+    private static string GetArguments(string appId) => AttemptCount.TryGetValue(appId, out int attempts)
+        ? $@"@ShutdownOnFailedCommand 0 +force_install_dir {DirectoryPath} +login anonymous +app_info_print {appId} " + string.Concat(Enumerable.Repeat("+app_update 4 ", attempts)) + "+quit"
+        : $"+login anonymous +app_info_print {appId} +quit";
 
     private static readonly int[] locks = new int[ProcessLimit];
     internal static async Task<string> Run(string appId) => await Task.Run(() =>

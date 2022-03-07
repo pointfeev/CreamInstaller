@@ -142,8 +142,9 @@ internal partial class SelectForm : CustomForm
                         RemoveFromRemainingGames(name);
                         return;
                     }
+                    AppData appData = await SteamStore.QueryStoreAPI(appId);
                     VProperty appInfo = appInfo = await SteamCMD.GetAppInfo(appId, branch, buildId);
-                    if (appInfo is null)
+                    if (appInfo is null || appData is null)
                     {
                         RemoveFromRemainingGames(name);
                         return;
@@ -151,8 +152,8 @@ internal partial class SelectForm : CustomForm
                     if (Program.Canceled) return;
                     ConcurrentDictionary<string, (DlcType type, string name, string icon)> dlc = new();
                     List<Task> dlcTasks = new();
-                    List<string> dlcIds = await SteamCMD.ParseDlcAppIds(appInfo);
-                    await SteamStore.ParseDlcAppIds(appId, dlcIds);
+                    List<string> dlcIds = await SteamStore.ParseDlcAppIds(appData);
+                    dlcIds.AddRange(await SteamCMD.ParseDlcAppIds(appInfo));
                     if (dlcIds.Count > 0)
                     {
                         foreach (string dlcAppId in dlcIds)
@@ -163,20 +164,30 @@ internal partial class SelectForm : CustomForm
                             {
                                 if (Program.Canceled) return;
                                 string dlcName = null;
-                                string dlcIconStaticId = null;
-                                VProperty dlcAppInfo = await SteamCMD.GetAppInfo(dlcAppId);
-                                if (dlcAppInfo is not null)
+                                string dlcIcon = null;
+                                AppData dlcAppData = await SteamStore.QueryStoreAPI(dlcAppId);
+                                if (dlcAppData is not null)
                                 {
-                                    dlcName = dlcAppInfo.Value?.GetChild("common")?.GetChild("name")?.ToString();
-                                    dlcIconStaticId = dlcAppInfo.Value?.GetChild("common")?.GetChild("icon")?.ToString();
-                                    dlcIconStaticId ??= dlcAppInfo.Value?.GetChild("common")?.GetChild("logo_small")?.ToString();
-                                    dlcIconStaticId ??= dlcAppInfo.Value?.GetChild("common")?.GetChild("logo")?.ToString();
-                                    if (dlcIconStaticId is not null)
-                                        dlcIconStaticId = IconGrabber.SteamAppImagesPath + @$"\{dlcAppId}\{dlcIconStaticId}.jpg";
+                                    dlcName = dlcAppData.name;
+                                    dlcIcon = dlcAppData.header_image;
+                                }
+                                else
+                                {
+                                    VProperty dlcAppInfo = await SteamCMD.GetAppInfo(dlcAppId);
+                                    if (dlcAppInfo is not null)
+                                    {
+                                        dlcName = dlcAppInfo.Value?.GetChild("common")?.GetChild("name")?.ToString();
+                                        string dlcIconStaticId = dlcAppInfo.Value?.GetChild("common")?.GetChild("icon")?.ToString();
+                                        dlcIconStaticId ??= dlcAppInfo.Value?.GetChild("common")?.GetChild("logo_small")?.ToString();
+                                        dlcIconStaticId ??= dlcAppInfo.Value?.GetChild("common")?.GetChild("logo")?.ToString();
+                                        if (dlcIconStaticId is not null)
+                                            dlcIcon = IconGrabber.SteamAppImagesPath + @$"\{dlcAppId}\{dlcIconStaticId}.jpg";
+                                    }
                                 }
                                 if (Program.Canceled) return;
-                                if (!string.IsNullOrWhiteSpace(dlcName))
-                                    dlc[dlcAppId] = (DlcType.Default, dlcName, dlcIconStaticId);
+                                if (string.IsNullOrWhiteSpace(dlcName))
+                                    return; //dlcName = "Unknown DLC";
+                                dlc[dlcAppId] = (DlcType.Default, dlcName, dlcIcon);
                                 RemoveFromRemainingDLCs(dlcAppId);
                             });
                             dlcTasks.Add(task);
@@ -195,6 +206,7 @@ internal partial class SelectForm : CustomForm
                         await task;
                     }
 
+                    name = appData.name ?? name;
                     selection ??= new();
                     selection.Enabled = allCheckBox.Checked || selection.SelectedDlc.Any() || selection.ExtraDlc.Any();
                     selection.Usable = true;
@@ -203,11 +215,10 @@ internal partial class SelectForm : CustomForm
                     selection.RootDirectory = directory;
                     selection.DllDirectories = dllDirectories;
                     selection.IsSteam = true;
-                    selection.AppInfo = appInfo;
                     selection.ProductUrl = "https://store.steampowered.com/app/" + appId;
-                    selection.IconUrl = IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("icon")?.ToString()}.jpg";
-                    selection.ClientIconUrl = IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("clienticon")?.ToString()}.ico";
-                    selection.Publisher = appInfo?.Value?.GetChild("extended")?.GetChild("publisher")?.ToString();
+                    selection.IconUrl = IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("clienticon")?.ToString()}.ico";
+                    selection.SubIconUrl = appData.header_image ?? IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("icon")?.ToString()}.jpg";
+                    selection.Publisher = appData.publishers[0] ?? appInfo?.Value?.GetChild("extended")?.GetChild("publisher")?.ToString();
 
                     if (Program.Canceled) return;
                     Program.Invoke(selectionTreeView, delegate
@@ -600,30 +611,30 @@ internal partial class SelectForm : CustomForm
                     }
                 }
                 nodeContextMenu.Items.Add(header);
-                string appInfo = $@"{SteamCMD.AppInfoPath}\{id}.vdf";
-                string appInfoEpic = $@"{SteamCMD.AppInfoPath}\{id}.json";
-                if (Directory.Exists(Directory.GetDirectoryRoot(appInfo)) && (File.Exists(appInfo) || File.Exists(appInfoEpic)))
+                string appInfoVDF = $@"{SteamCMD.AppInfoPath}\{id}.vdf";
+                string appInfoJSON = $@"{SteamCMD.AppInfoPath}\{id}.json";
+                if (Directory.Exists(Directory.GetDirectoryRoot(appInfoVDF)) && (File.Exists(appInfoVDF) || File.Exists(appInfoJSON)))
                 {
                     nodeContextMenu.Items.Add(new ToolStripSeparator());
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Open AppInfo", Image("Notepad"),
                         new EventHandler((sender, e) =>
                         {
-                            if (File.Exists(appInfo))
-                                Diagnostics.OpenFileInNotepad(appInfo);
-                            else
-                                Diagnostics.OpenFileInNotepad(appInfoEpic);
+                            if (File.Exists(appInfoVDF))
+                                Diagnostics.OpenFileInNotepad(appInfoVDF);
+                            else if (File.Exists(appInfoJSON))
+                                Diagnostics.OpenFileInNotepad(appInfoJSON);
                         })));
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Refresh AppInfo", Image("Command Prompt"),
                         new EventHandler((sender, e) =>
                         {
                             try
                             {
-                                File.Delete(appInfo);
+                                File.Delete(appInfoVDF);
                             }
                             catch { }
                             try
                             {
-                                File.Delete(appInfoEpic);
+                                File.Delete(appInfoJSON);
                             }
                             catch { }
                             OnLoad();
@@ -713,7 +724,7 @@ internal partial class SelectForm : CustomForm
                                 }
                                 else
                                     new DialogForm(this).Show(SystemIcons.Error, "Paradox Launcher repair failed!"
-                                        + "\n\nAn original Steamworks API or Epic Online Services SDK file could not be found."
+                                        + "\n\nAn original Steamworks/Epic Online Services SDK file could not be found."
                                         + "\nYou must reinstall Paradox Launcher to fix this issue.", "OK");
                             })));
                     }
@@ -723,17 +734,21 @@ internal partial class SelectForm : CustomForm
                     for (int i = 0; i < selection.DllDirectories.Count; i++)
                     {
                         string directory = selection.DllDirectories[i];
-                        nodeContextMenu.Items.Add(new ToolStripMenuItem($"Open {(selection.IsSteam ? "Steamworks API" : "Epic Online Services SDK")} Directory ({i + 1})", Image("File Explorer"),
+                        nodeContextMenu.Items.Add(new ToolStripMenuItem($"Open {(selection.IsSteam ? "Steamworks" : "Epic Online Services")} SDK Directory ({i + 1})", Image("File Explorer"),
                             new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
                     }
+                }
+                ProgramSelection dlcParentSelection = dlc.HasValue ? ProgramSelection.FromId(dlc.Value.gameAppId) : null;
+                if (selection is not null || dlcParentSelection is not null && dlcParentSelection.IsSteam)
+                {
+                    nodeContextMenu.Items.Add(new ToolStripSeparator());
+                    nodeContextMenu.Items.Add(new ToolStripMenuItem("Open SteamDB", Image("SteamDB"),
+                        new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamdb.info/app/" + id))));
                 }
                 if (id != "ParadoxLauncher" && selection is not null)
                 {
                     if (selection.IsSteam)
                     {
-                        nodeContextMenu.Items.Add(new ToolStripSeparator());
-                        nodeContextMenu.Items.Add(new ToolStripMenuItem("Open SteamDB", Image("SteamDB"),
-                            new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamdb.info/app/" + id))));
                         nodeContextMenu.Items.Add(new ToolStripMenuItem("Open Steam Store", Image("Steam Store"),
                             new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
                         ToolStripMenuItem steamCommunity = new("Open Steam Community", Image("ClientIcon_" + id),
@@ -742,7 +757,7 @@ internal partial class SelectForm : CustomForm
                         if (steamCommunity.Image is null)
                         {
                             steamCommunity.Image = Image("Steam Community");
-                            TrySetImageAsync(steamCommunity, id, selection.ClientIconUrl, true);
+                            TrySetImageAsync(steamCommunity, id, selection.SubIconUrl, true);
                         }
                     }
                     else

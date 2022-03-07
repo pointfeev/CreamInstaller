@@ -14,6 +14,8 @@ internal partial class DialogForm : CustomForm
     {
         if (customFormIcon is not null)
             Icon = customFormIcon;
+        if (descriptionIcon is null)
+            descriptionIcon = Icon;
         icon.Image = descriptionIcon.ToBitmap();
         descriptionLabel.Text = descriptionText;
         acceptButton.Text = acceptButtonText;

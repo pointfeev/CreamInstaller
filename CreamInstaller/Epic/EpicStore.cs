@@ -24,8 +24,20 @@ internal static class EpicStore
     {
         List<(string id, string name, string product, string icon, string developer)> dlcIds = new();
         Response response = await QueryGraphQL(categoryNamespace);
+        string cacheFile = ProgramData.AppInfoPath + @$"\{categoryNamespace}.json";
+        if (response is null)
+            if (Directory.Exists(Directory.GetDirectoryRoot(cacheFile)) && File.Exists(cacheFile))
+                try
+                {
+                    response = JsonConvert.DeserializeObject<Response>(File.ReadAllText(cacheFile));
+                }
+                catch { }
         if (response is null) return dlcIds;
-        try { File.WriteAllText(ProgramData.AppInfoPath + @$"\{categoryNamespace}.json", JsonConvert.SerializeObject(response, Formatting.Indented)); } catch { }
+        try
+        {
+            File.WriteAllText(cacheFile, JsonConvert.SerializeObject(response, Formatting.Indented));
+        }
+        catch { }
         List<Element> searchStore = new(response.Data.Catalog.SearchStore.Elements);
         foreach (Element element in searchStore)
         {
