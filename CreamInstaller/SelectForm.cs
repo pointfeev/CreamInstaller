@@ -214,8 +214,8 @@ internal partial class SelectForm : CustomForm
                     selection.DllDirectories = dllDirectories;
                     selection.IsSteam = true;
                     selection.ProductUrl = "https://store.steampowered.com/app/" + appId;
-                    selection.IconUrl = IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("clienticon")?.ToString()}.ico";
-                    selection.SubIconUrl = appData.header_image ?? IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("icon")?.ToString()}.jpg";
+                    selection.IconUrl = IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("icon")?.ToString()}.jpg";
+                    selection.SubIconUrl = appData.header_image ?? IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("clienticon")?.ToString()}.ico";
                     selection.Publisher = appData.publishers[0] ?? appInfo?.Value?.GetChild("extended")?.GetChild("publisher")?.ToString();
 
                     if (Program.Canceled) return;
@@ -654,18 +654,16 @@ internal partial class SelectForm : CustomForm
         selectionTreeView.NodeMouseClick += (sender, e) =>
         {
             int cmi = ++contextMenuIndex;
-            TreeNode node = null;
+            TreeNode node = e.Node;
+            if (node is null || e.Button != MouseButtons.Right)
+                return;
             try
             {
-                node = e.Node;
-                if (node is null || !node.Bounds.Contains(e.Location) || e.Button != MouseButtons.Right)
+                if (!node.Bounds.Contains(e.Location))
                     return;
-                selectionTreeView.SelectedNode = node;
             }
-            catch
-            {
-                return;
-            }
+            catch { }
+            selectionTreeView.SelectedNode = node;
             string id = node.Name;
             ProgramSelection selection = ProgramSelection.FromId(id);
             (string gameAppId, (DlcType type, string name, string icon) app)? dlc = null;
