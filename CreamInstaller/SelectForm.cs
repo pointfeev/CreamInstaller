@@ -738,7 +738,7 @@ internal partial class SelectForm : CustomForm
                     }
                 }
                 ProgramSelection dlcParentSelection = dlc.HasValue ? ProgramSelection.FromId(dlc.Value.gameAppId) : null;
-                if (selection is not null || dlcParentSelection is not null && dlcParentSelection.IsSteam)
+                if (selection is not null && selection.IsSteam || dlcParentSelection is not null && dlcParentSelection.IsSteam)
                 {
                     nodeContextMenu.Items.Add(new ToolStripSeparator());
                     nodeContextMenu.Items.Add(new ToolStripMenuItem("Open SteamDB", Image("SteamDB"),
