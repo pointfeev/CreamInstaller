@@ -205,12 +205,11 @@ internal partial class SelectForm : CustomForm
                         await task;
                     }
 
-                    name = appData.name ?? name;
                     selection ??= new();
                     selection.Enabled = allCheckBox.Checked || selection.SelectedDlc.Any() || selection.ExtraDlc.Any();
                     selection.Usable = true;
                     selection.Id = appId;
-                    selection.Name = name;
+                    selection.Name = appData.name ?? name;
                     selection.RootDirectory = directory;
                     selection.DllDirectories = dllDirectories;
                     selection.IsSteam = true;
@@ -225,7 +224,7 @@ internal partial class SelectForm : CustomForm
                         if (Program.Canceled) return;
                         TreeNode programNode = TreeNodes.Find(s => s.Name == appId) ?? new();
                         programNode.Name = appId;
-                        programNode.Text = name;
+                        programNode.Text = appData.name ?? name;
                         programNode.Checked = selection.Enabled;
                         programNode.Remove();
                         selectionTreeView.Nodes.Add(programNode);
