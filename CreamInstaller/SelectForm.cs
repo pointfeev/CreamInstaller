@@ -185,9 +185,8 @@ internal partial class SelectForm : CustomForm
                                     }
                                 }
                                 if (Program.Canceled) return;
-                                if (string.IsNullOrWhiteSpace(dlcName))
-                                    return; //dlcName = "Unknown DLC";
-                                dlc[dlcAppId] = (DlcType.Default, dlcName, dlcIcon);
+                                if (!string.IsNullOrWhiteSpace(dlcName))
+                                    dlc[dlcAppId] = (DlcType.Default, dlcName, dlcIcon);
                                 RemoveFromRemainingDLCs(dlcAppId);
                             });
                             dlcTasks.Add(task);
