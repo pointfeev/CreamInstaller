@@ -144,7 +144,7 @@ internal partial class SelectForm : CustomForm
                     }
                     AppData appData = await SteamStore.QueryStoreAPI(appId);
                     VProperty appInfo = appInfo = await SteamCMD.GetAppInfo(appId, branch, buildId);
-                    if (appInfo is null || appData is null)
+                    if (appData is null && appInfo is null)
                     {
                         RemoveFromRemainingGames(name);
                         return;
@@ -152,8 +152,9 @@ internal partial class SelectForm : CustomForm
                     if (Program.Canceled) return;
                     ConcurrentDictionary<string, (DlcType type, string name, string icon)> dlc = new();
                     List<Task> dlcTasks = new();
-                    List<string> dlcIds = await SteamStore.ParseDlcAppIds(appData);
-                    dlcIds.AddRange(await SteamCMD.ParseDlcAppIds(appInfo));
+                    List<string> dlcIds = new();
+                    if (appData is not null) dlcIds.AddRange(await SteamStore.ParseDlcAppIds(appData));
+                    if (appInfo is not null) dlcIds.AddRange(await SteamCMD.ParseDlcAppIds(appInfo));
                     if (dlcIds.Count > 0)
                     {
                         foreach (string dlcAppId in dlcIds)
@@ -209,14 +210,14 @@ internal partial class SelectForm : CustomForm
                     selection.Enabled = allCheckBox.Checked || selection.SelectedDlc.Any() || selection.ExtraDlc.Any();
                     selection.Usable = true;
                     selection.Id = appId;
-                    selection.Name = appData.name ?? name;
+                    selection.Name = appData?.name ?? name;
                     selection.RootDirectory = directory;
                     selection.DllDirectories = dllDirectories;
                     selection.IsSteam = true;
                     selection.ProductUrl = "https://store.steampowered.com/app/" + appId;
                     selection.IconUrl = IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("icon")?.ToString()}.jpg";
-                    selection.SubIconUrl = appData.header_image ?? IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("clienticon")?.ToString()}.ico";
-                    selection.Publisher = appData.publishers[0] ?? appInfo?.Value?.GetChild("extended")?.GetChild("publisher")?.ToString();
+                    selection.SubIconUrl = appData?.header_image ?? IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("clienticon")?.ToString()}.ico";
+                    selection.Publisher = appData?.publishers[0] ?? appInfo?.Value?.GetChild("extended")?.GetChild("publisher")?.ToString();
 
                     if (Program.Canceled) return;
                     Program.Invoke(selectionTreeView, delegate
@@ -224,7 +225,7 @@ internal partial class SelectForm : CustomForm
                         if (Program.Canceled) return;
                         TreeNode programNode = TreeNodes.Find(s => s.Name == appId) ?? new();
                         programNode.Name = appId;
-                        programNode.Text = appData.name ?? name;
+                        programNode.Text = appData?.name ?? name;
                         programNode.Checked = selection.Enabled;
                         programNode.Remove();
                         selectionTreeView.Nodes.Add(programNode);
