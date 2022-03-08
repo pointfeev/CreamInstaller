@@ -146,11 +146,9 @@ internal static class SteamCMD
     }
 
     internal static readonly string AppCachePath = DirectoryPath + @"\appcache";
-    internal static readonly string ConfigPath = DirectoryPath + @"\config";
     internal static readonly string DumpsPath = DirectoryPath + @"\dumps";
     internal static readonly string LogsPath = DirectoryPath + @"\logs";
     internal static readonly string SteamAppsPath = DirectoryPath + @"\steamapps";
-    internal static readonly string UserDataPath = DirectoryPath + @"\userdata";
 
     internal static async Task Cleanup() => await Task.Run(async () =>
     {
@@ -176,12 +174,7 @@ internal static class SteamCMD
         catch { }
         try
         {
-            if (Directory.Exists(AppCachePath)) Directory.Delete(AppCachePath, true);
-        }
-        catch { }
-        try
-        {
-            if (Directory.Exists(ConfigPath)) Directory.Delete(ConfigPath, true);
+            if (Directory.Exists(AppCachePath)) Directory.Delete(AppCachePath, true); // this is definitely needed, so SteamCMD gets the latest information for us
         }
         catch { }
         try
@@ -196,12 +189,7 @@ internal static class SteamCMD
         catch { }
         try
         {
-            if (Directory.Exists(SteamAppsPath)) Directory.Delete(SteamAppsPath, true);
-        }
-        catch { }
-        try
-        {
-            if (Directory.Exists(UserDataPath)) Directory.Delete(UserDataPath, true);
+            if (Directory.Exists(SteamAppsPath)) Directory.Delete(SteamAppsPath, true); // this is just a useless folder created from +app_update 4
         }
         catch { }
     });
