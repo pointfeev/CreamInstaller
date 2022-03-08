@@ -536,133 +536,17 @@ internal partial class SelectForm : CustomForm
             + progressBar.Size.Height);
     }
 
-    internal class ContextMenuItem : ToolStripMenuItem
-    {
-        private static readonly ConcurrentDictionary<string, Image> images = new();
-
-        private static async Task TryImageIdentifier(ContextMenuItem item, string imageIdentifier) => await Task.Run(async () =>
-        {
-            if (images.TryGetValue(imageIdentifier, out Image image) && image is not null) item.Image = image;
-            else
-            {
-                switch (imageIdentifier)
-                {
-                    case "Paradox Launcher":
-                        if (Directory.Exists(ParadoxLauncher.InstallPath))
-                            foreach (string file in Directory.GetFiles(ParadoxLauncher.InstallPath, "*.exe"))
-                            {
-                                image = IconGrabber.GetFileIconImage(file);
-                                break;
-                            }
-                        break;
-                    case "Notepad":
-                        image = IconGrabber.GetNotepadImage();
-                        break;
-                    case "Command Prompt":
-                        image = IconGrabber.GetCommandPromptImage();
-                        break;
-                    case "File Explorer":
-                        image = IconGrabber.GetFileExplorerImage();
-                        break;
-                    case "SteamDB":
-                        image = await HttpClientManager.GetImageFromUrl("https://steamdb.info/favicon.ico");
-                        break;
-                    case "Steam Store":
-                        image = await HttpClientManager.GetImageFromUrl("https://store.steampowered.com/favicon.ico");
-                        break;
-                    case "Steam Community":
-                        image = await HttpClientManager.GetImageFromUrl("https://steamcommunity.com/favicon.ico");
-                        break;
-                    case "ScreamDB":
-                        image = await HttpClientManager.GetImageFromUrl("https://scream-db.web.app/favicon.ico");
-                        break;
-                    case "Epic Games":
-                        image = await HttpClientManager.GetImageFromUrl("https://www.epicgames.com/favicon.ico");
-                        break;
-                    default:
-                        return;
-                }
-                if (image is not null)
-                {
-                    images[imageIdentifier] = image;
-                    item.Image = image;
-                }
-            }
-        });
-
-        private static async Task TryImageIdentifierInfo(ContextMenuItem item, (string id, string iconUrl, bool sub) imageIdentifierInfo, Action onFail = null) => await Task.Run(async () =>
-        {
-            (string id, string iconUrl, bool sub) = imageIdentifierInfo;
-            string imageIdentifier = sub ? "SubIcon_" + id : "Icon_" + id;
-            if (images.TryGetValue(imageIdentifier, out Image image) && image is not null) item.Image = image;
-            else
-            {
-                image = await HttpClientManager.GetImageFromUrl(iconUrl);
-                if (image is not null)
-                {
-                    images[imageIdentifier] = image;
-                    item.Image = image;
-                }
-                else if (onFail is not null)
-                    onFail();
-            }
-        });
-
-        private readonly EventHandler OnClickEvent;
-        protected override void OnClick(EventArgs e)
-        {
-            base.OnClick(e);
-            if (OnClickEvent is null) return;
-            OnClickEvent.Invoke(this, e);
-        }
-
-        internal ContextMenuItem(string text, EventHandler onClick = null)
-        {
-            Text = text;
-            OnClickEvent = onClick;
-        }
-
-        internal ContextMenuItem(string text, string imageIdentifier, EventHandler onClick = null)
-            : this(text, onClick) => _ = TryImageIdentifier(this, imageIdentifier);
-
-        internal ContextMenuItem(string text, (string id, string iconUrl, bool sub) imageIdentifierInfo, EventHandler onClick = null)
-            : this(text, onClick) => _ = TryImageIdentifierInfo(this, imageIdentifierInfo);
-
-        internal ContextMenuItem(string text, (string id, string iconUrl, bool sub) imageIdentifierInfo, string imageIdentifierFallback, EventHandler onClick = null)
-            : this(text, onClick) => _ = TryImageIdentifierInfo(this, imageIdentifierInfo, async () => await TryImageIdentifier(this, imageIdentifierFallback));
-
-        internal ContextMenuItem(string text, (string id, string iconUrl, bool sub) imageIdentifierInfo, (string id, string iconUrl, bool sub) imageIdentifierInfoFallback, EventHandler onClick = null)
-            : this(text, onClick) => _ = TryImageIdentifierInfo(this, imageIdentifierInfo, async () => await TryImageIdentifierInfo(this, imageIdentifierInfoFallback));
-    }
-
     private void OnLoad(object sender, EventArgs _)
     {
         HideProgressBar();
         selectionTreeView.TreeViewNodeSorter = new TreeNodeSorter();
         selectionTreeView.AfterCheck += OnTreeViewNodeCheckedChanged;
-        int contextMenuIndex = 0;
-        void ClearContextMenu(int cmi)
-        {
-            if (cmi != contextMenuIndex || Program.Canceled) return;
-            nodeContextMenu.Items.Clear();
-        }
-        void AddToContextMenu(int cmi, ToolStripItem item)
-        {
-            if (cmi != contextMenuIndex || Program.Canceled) return;
-            nodeContextMenu.Items.Add(item);
-        }
         selectionTreeView.NodeMouseClick += (sender, e) =>
         {
-            int cmi = ++contextMenuIndex;
             TreeNode node = e.Node;
-            if (node is null || e.Button != MouseButtons.Right)
+            if (node is null || !node.Bounds.Contains(e.Location) || e.Button != MouseButtons.Right || e.Clicks != 1)
                 return;
-            try
-            {
-                if (!node.Bounds.Contains(e.Location))
-                    return;
-            }
-            catch { }
+            ContextMenuStrip contextMenuStrip = new();
             selectionTreeView.SelectedNode = node;
             string id = node.Name;
             ProgramSelection selection = ProgramSelection.FromId(id);
@@ -672,23 +556,20 @@ internal partial class SelectForm : CustomForm
             if (dlc is not null) dlcParentSelection = ProgramSelection.FromId(dlc.Value.gameAppId);
             if (selection is null && dlcParentSelection is null)
                 return;
-            ClearContextMenu(cmi);
             ContextMenuItem header = null;
             if (id == "ParadoxLauncher")
                 header = new(node.Text, "Paradox Launcher");
             else if (selection is not null)
                 header = new(node.Text, (id, selection.IconUrl, false));
             else if (dlc is not null)
-            {
                 header = new(node.Text, (id, dlc.Value.app.icon, false), (id, dlcParentSelection.IconUrl, false));
-            }
-            AddToContextMenu(cmi, header ?? new ContextMenuItem(node.Text));
+            contextMenuStrip.Items.Add(header ?? new ContextMenuItem(node.Text));
             string appInfoVDF = $@"{SteamCMD.AppInfoPath}\{id}.vdf";
             string appInfoJSON = $@"{SteamCMD.AppInfoPath}\{id}.json";
             if (Directory.Exists(Directory.GetDirectoryRoot(appInfoVDF)) && (File.Exists(appInfoVDF) || File.Exists(appInfoJSON)))
             {
-                AddToContextMenu(cmi, new ToolStripSeparator());
-                AddToContextMenu(cmi, new ContextMenuItem("Open AppInfo", "Notepad",
+                contextMenuStrip.Items.Add(new ToolStripSeparator());
+                contextMenuStrip.Items.Add(new ContextMenuItem("Open AppInfo", "Notepad",
                     new EventHandler((sender, e) =>
                     {
                         if (File.Exists(appInfoVDF))
@@ -696,7 +577,7 @@ internal partial class SelectForm : CustomForm
                         else if (File.Exists(appInfoJSON))
                             Diagnostics.OpenFileInNotepad(appInfoJSON);
                     })));
-                AddToContextMenu(cmi, new ContextMenuItem("Refresh AppInfo", "Command Prompt",
+                contextMenuStrip.Items.Add(new ContextMenuItem("Refresh AppInfo", "Command Prompt",
                     new EventHandler((sender, e) =>
                     {
                         try
@@ -716,8 +597,8 @@ internal partial class SelectForm : CustomForm
             {
                 if (id == "ParadoxLauncher")
                 {
-                    AddToContextMenu(cmi, new ToolStripSeparator());
-                    AddToContextMenu(cmi, new ContextMenuItem("Repair", "Command Prompt",
+                    contextMenuStrip.Items.Add(new ToolStripSeparator());
+                    contextMenuStrip.Items.Add(new ContextMenuItem("Repair", "Command Prompt",
                         new EventHandler(async (sender, e) =>
                         {
                             if (!Program.IsProgramRunningDialog(this, selection)) return;
@@ -796,13 +677,13 @@ internal partial class SelectForm : CustomForm
                                     + "\nYou must reinstall Paradox Launcher to fix this issue.", "OK");
                         })));
                 }
-                AddToContextMenu(cmi, new ToolStripSeparator());
-                AddToContextMenu(cmi, new ContextMenuItem("Open Root Directory", "File Explorer",
+                contextMenuStrip.Items.Add(new ToolStripSeparator());
+                contextMenuStrip.Items.Add(new ContextMenuItem("Open Root Directory", "File Explorer",
                     new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(selection.RootDirectory))));
                 for (int i = 0; i < selection.DllDirectories.Count; i++)
                 {
                     string directory = selection.DllDirectories[i];
-                    AddToContextMenu(cmi, new ContextMenuItem($"Open {(selection.IsSteam ? "Steamworks" : "Epic Online Services")} SDK Directory ({i + 1})", "File Explorer",
+                    contextMenuStrip.Items.Add(new ContextMenuItem($"Open {(selection.IsSteam ? "Steamworks" : "Epic Online Services")} SDK Directory ({i + 1})", "File Explorer",
                         new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
                 }
             }
@@ -810,31 +691,30 @@ internal partial class SelectForm : CustomForm
             {
                 if (selection is not null && selection.IsSteam || dlcParentSelection is not null && dlcParentSelection.IsSteam)
                 {
-                    AddToContextMenu(cmi, new ToolStripSeparator());
-                    AddToContextMenu(cmi, new ContextMenuItem("Open SteamDB", "SteamDB",
+                    contextMenuStrip.Items.Add(new ToolStripSeparator());
+                    contextMenuStrip.Items.Add(new ContextMenuItem("Open SteamDB", "SteamDB",
                         new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamdb.info/app/" + id))));
                 }
                 if (selection is not null)
                 {
                     if (selection.IsSteam)
                     {
-                        AddToContextMenu(cmi, new ContextMenuItem("Open Steam Store", "Steam Store",
+                        contextMenuStrip.Items.Add(new ContextMenuItem("Open Steam Store", "Steam Store",
                             new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
-                        AddToContextMenu(cmi, new ContextMenuItem("Open Steam Community", (id, selection.SubIconUrl, true), "Steam Community",
+                        contextMenuStrip.Items.Add(new ContextMenuItem("Open Steam Community", (id, selection.SubIconUrl, true), "Steam Community",
                             new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + id))));
                     }
                     else
                     {
-                        AddToContextMenu(cmi, new ToolStripSeparator());
-                        AddToContextMenu(cmi, new ContextMenuItem("Open ScreamDB", "ScreamDB",
+                        contextMenuStrip.Items.Add(new ToolStripSeparator());
+                        contextMenuStrip.Items.Add(new ContextMenuItem("Open ScreamDB", "ScreamDB",
                             new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://scream-db.web.app/offers/" + id))));
-                        AddToContextMenu(cmi, new ContextMenuItem("Open Epic Games Store", "Epic Games",
+                        contextMenuStrip.Items.Add(new ContextMenuItem("Open Epic Games Store", "Epic Games",
                             new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
                     }
                 }
             }
-            if (cmi != contextMenuIndex) return;
-            nodeContextMenu.Show(selectionTreeView, e.Location);
+            contextMenuStrip.Show(selectionTreeView, e.Location);
         };
         OnLoad();
     }

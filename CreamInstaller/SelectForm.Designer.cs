@@ -49,7 +49,6 @@ namespace CreamInstaller
             this.progressLabel = new System.Windows.Forms.Label();
             this.scanButton = new System.Windows.Forms.Button();
             this.uninstallButton = new System.Windows.Forms.Button();
-            this.nodeContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.progressLabelGames = new System.Windows.Forms.Label();
             this.progressLabelDLCs = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
@@ -261,11 +260,6 @@ namespace CreamInstaller
             this.uninstallButton.UseVisualStyleBackColor = true;
             this.uninstallButton.Click += new System.EventHandler(this.OnUninstall);
             // 
-            // nodeContextMenu
-            // 
-            this.nodeContextMenu.Name = "nodeContextMenu";
-            this.nodeContextMenu.Size = new System.Drawing.Size(61, 4);
-            // 
             // progressLabelGames
             // 
             this.progressLabelGames.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
@@ -338,7 +332,6 @@ namespace CreamInstaller
         private FlowLayoutPanel flowLayoutPanel1;
         private FlowLayoutPanel flowLayoutPanel2;
         private Button uninstallButton;
-        private ContextMenuStrip nodeContextMenu;
         private Label progressLabelGames;
         private Label progressLabelDLCs;
     }
