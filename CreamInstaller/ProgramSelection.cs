@@ -16,22 +16,22 @@ internal enum DlcType
 
 internal class ProgramSelection
 {
-    internal bool Enabled = false;
+    internal bool Enabled;
     internal bool Usable = true;
 
     internal string Id = "0";
     internal string Name = "Program";
 
-    internal string ProductUrl = null;
-    internal string IconUrl = null;
-    internal string SubIconUrl = null;
+    internal string ProductUrl;
+    internal string IconUrl;
+    internal string SubIconUrl;
 
-    internal string Publisher = null;
+    internal string Publisher;
 
-    internal string RootDirectory = null;
-    internal List<string> DllDirectories = null;
+    internal string RootDirectory;
+    internal List<string> DllDirectories;
 
-    internal bool IsSteam = false;
+    internal bool IsSteam;
 
     internal readonly SortedList<string, (DlcType type, string name, string icon)> AllDlc = new(AppIdComparer.Comparer);
     internal readonly SortedList<string, (DlcType type, string name, string icon)> SelectedDlc = new(AppIdComparer.Comparer);

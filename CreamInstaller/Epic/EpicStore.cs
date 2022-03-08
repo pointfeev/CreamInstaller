@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -50,7 +51,7 @@ internal static class EpicStore
                 KeyImage keyImage = element.KeyImages[i];
                 if (keyImage.Type == "DieselStoreFront")
                 {
-                    icon = keyImage.Url;
+                    icon = keyImage.Url.ToString();
                     break;
                 }
             }
@@ -69,7 +70,7 @@ internal static class EpicStore
                 KeyImage keyImage = element.KeyImages[i];
                 if (keyImage.Type == "Thumbnail")
                 {
-                    icon = keyImage.Url;
+                    icon = keyImage.Url.ToString();
                     break;
                 }
             }
@@ -105,11 +106,11 @@ internal static class EpicStore
             string encoded = HttpUtility.UrlEncode(categoryNamespace);
             Request request = new(encoded);
             string payload = JsonConvert.SerializeObject(request);
-            HttpContent content = new StringContent(payload);
+            using HttpContent content = new StringContent(payload);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             HttpClient client = HttpClientManager.HttpClient;
             if (client is null) return null;
-            HttpResponseMessage httpResponse = await client.PostAsync("https://graphql.epicgames.com/graphql", content);
+            HttpResponseMessage httpResponse = await client.PostAsync(new Uri("https://graphql.epicgames.com/graphql"), content);
             httpResponse.EnsureSuccessStatusCode();
             string response = await httpResponse.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<Response>(response);

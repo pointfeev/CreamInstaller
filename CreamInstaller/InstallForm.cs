@@ -15,8 +15,8 @@ namespace CreamInstaller;
 
 internal partial class InstallForm : CustomForm
 {
-    internal bool Reselecting = false;
-    internal bool Uninstalling = false;
+    internal bool Reselecting;
+    internal bool Uninstalling;
 
     internal InstallForm(IWin32Window owner, bool uninstall = false) : base(owner)
     {

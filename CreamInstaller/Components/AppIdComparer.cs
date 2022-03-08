@@ -10,7 +10,7 @@ internal class AppIdComparer : IComparer<string>
     public int Compare(string a, string b) =>
         a == "ParadoxLauncher" ? -1
       : b == "ParadoxLauncher" ? 1
-      : !int.TryParse(a, out _) && !int.TryParse(b, out _) ? string.Compare(a, b)
+      : !int.TryParse(a, out _) && !int.TryParse(b, out _) ? string.Compare(a, b, System.StringComparison.Ordinal)
       : !int.TryParse(a, out int A) ? 1
       : !int.TryParse(b, out int B) ? -1
       : A > B ? 1

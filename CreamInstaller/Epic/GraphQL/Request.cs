@@ -1,17 +1,16 @@
-﻿
+﻿#pragma warning disable IDE0051 // Remove unused private members
+#pragma warning disable IDE0052 // Remove unread private members
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes
+#pragma warning disable CA1822 // Mark members as static
+
 using Newtonsoft.Json;
 
 namespace CreamInstaller.Epic.GraphQL;
 
 internal class Request
 {
-#pragma warning disable IDE0051 // Remove unused private members
-#pragma warning disable CA1822 // Mark members as static
-#pragma warning disable IDE0052 // Remove unread private members
-#pragma warning disable IDE1006 // Naming Styles
-
     [JsonProperty(PropertyName = "query")]
-    private string _gqlQuery => @"query searchOffers($namespace: String!) {
+    private string Query => @"query searchOffers($namespace: String!) {
     Catalog {
         searchStore(category: ""*"", namespace: $namespace){
             elements {
@@ -57,26 +56,22 @@ internal class Request
 }";
 
     [JsonProperty(PropertyName = "variables")]
-    private Variables _variables { get; set; }
+    private Variables Vars { get; set; }
 
-    internal Request(string _namespace) => _variables = new Variables(_namespace);
+    internal Request(string @namespace) => Vars = new Variables(@namespace);
 
     private class Headers
     {
         [JsonProperty(PropertyName = "Content-Type")]
-        private string _contentType => "application/graphql";
+        private string ContentType => "application/graphql";
+
     }
 
     private class Variables
     {
         [JsonProperty(PropertyName = "namespace")]
-        private string _namespace { get; set; }
+        private string Namespace { get; set; }
 
-        internal Variables(string _namespace) => this._namespace = _namespace;
+        internal Variables(string @namespace) => Namespace = @namespace;
     }
-
-#pragma warning restore IDE0051 // Remove unused private members
-#pragma warning restore CA1822 // Mark members as static
-#pragma warning restore IDE0052 // Remove unread private members
-#pragma warning restore IDE1006 // Naming Styles
 }

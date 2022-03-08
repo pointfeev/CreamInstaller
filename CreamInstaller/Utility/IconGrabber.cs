@@ -8,11 +8,11 @@ internal static class IconGrabber
 {
     internal static Icon ToIcon(this Image image)
     {
-        Bitmap dialogIconBitmap = new(image, new Size(image.Width, image.Height));
+        using Bitmap dialogIconBitmap = new(image, new Size(image.Width, image.Height));
         return Icon.FromHandle(dialogIconBitmap.GetHicon());
     }
 
-    internal static readonly string SteamAppImagesPath = "https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/apps/";
+    internal const string SteamAppImagesPath = "https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/apps/";
 
     internal static Image GetFileIconImage(string path) => File.Exists(path) ? Icon.ExtractAssociatedIcon(path).ToBitmap() : null;
 

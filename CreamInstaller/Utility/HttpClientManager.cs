@@ -47,7 +47,7 @@ internal static class HttpClientManager
     {
         try
         {
-            return new Bitmap(await HttpClient.GetStreamAsync(url));
+            return new Bitmap(await HttpClient.GetStreamAsync(new Uri(url)));
         }
         catch
         {

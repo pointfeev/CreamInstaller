@@ -1,4 +1,7 @@
-﻿
+﻿#pragma warning disable CA1819 // Properties should not return arrays
+
+using System;
+
 using Newtonsoft.Json;
 
 namespace CreamInstaller.Epic.GraphQL;
@@ -6,10 +9,10 @@ namespace CreamInstaller.Epic.GraphQL;
 public class Response
 {
     [JsonProperty(PropertyName = "data")]
-    public Data Data { get; protected set; }
+    public ResponseData Data { get; protected set; }
 }
 
-public class Data
+public class ResponseData
 {
     [JsonProperty(PropertyName = "Catalog")]
     public Catalog Catalog { get; protected set; }
@@ -66,7 +69,7 @@ public class KeyImage
     public string Type { get; protected set; }
 
     [JsonProperty(PropertyName = "url")]
-    public string Url { get; protected set; }
+    public Uri Url { get; protected set; }
 }
 
 public class CatalogNs

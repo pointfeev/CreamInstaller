@@ -19,7 +19,7 @@ namespace CreamInstaller.Steam;
 
 internal static class SteamCMD
 {
-    internal static readonly int ProcessLimit = 20;
+    internal const int ProcessLimit = 20;
 
     internal static string DirectoryPath => ProgramData.DirectoryPath;
     internal static string AppInfoPath => ProgramData.AppInfoPath;
@@ -123,7 +123,7 @@ internal static class SteamCMD
         {
             using (HttpClient httpClient = new())
             {
-                byte[] file = await httpClient.GetByteArrayAsync("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip");
+                byte[] file = await httpClient.GetByteArrayAsync(new Uri("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip"));
                 file.Write(ArchivePath);
             }
             ZipFile.ExtractToDirectory(ArchivePath, DirectoryPath);

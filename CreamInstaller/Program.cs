@@ -48,7 +48,8 @@ internal static class Program
     {
         if (selection.AreDllsLocked)
         {
-            if (new DialogForm(form).Show(SystemIcons.Error,
+            using DialogForm dialogForm = new(form);
+            if (dialogForm.Show(SystemIcons.Error,
             $"ERROR: {selection.Name} is currently running!" +
             "\n\nPlease close the program/game to continue . . . ",
             "Retry", "Cancel") == DialogResult.OK)
@@ -79,7 +80,7 @@ internal static class Program
     [STAThread]
     private static void Main()
     {
-        Mutex mutex = new(true, "CreamInstaller", out bool createdNew);
+        using Mutex mutex = new(true, "CreamInstaller", out bool createdNew);
         if (createdNew)
         {
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
@@ -90,7 +91,8 @@ internal static class Program
             try
             {
                 HttpClientManager.Setup();
-                Application.Run(new MainForm());
+                using MainForm form = new();
+                Application.Run(form);
             }
             catch (Exception e)
             {
@@ -104,7 +106,7 @@ internal static class Program
 
     internal static void Invoke(this Control control, MethodInvoker methodInvoker) => control.Invoke(methodInvoker);
 
-    internal static bool Canceled = false;
+    internal static bool Canceled;
     internal static async void Cleanup(bool cancel = true)
     {
         Canceled = cancel;

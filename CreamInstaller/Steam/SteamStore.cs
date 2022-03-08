@@ -44,7 +44,8 @@ internal static class SteamStore
                 }
                 catch (Exception e)
                 {
-                    new DialogForm(null).Show(SystemIcons.Error, "Unsuccessful deserialization of query for appid " + appId + ":\n\n" + e.ToString(), "FUCK");
+                    using DialogForm dialogForm = new(null);
+                    dialogForm.Show(SystemIcons.Error, "Unsuccessful deserialization of query for appid " + appId + ":\n\n" + e.ToString(), "FUCK");
                 }
             }
         }

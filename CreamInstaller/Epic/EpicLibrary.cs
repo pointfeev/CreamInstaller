@@ -10,7 +10,7 @@ namespace CreamInstaller.Epic;
 
 internal static class EpicLibrary
 {
-    private static string epicAppDataPath = null;
+    private static string epicAppDataPath;
     internal static string EpicAppDataPath
     {
         get

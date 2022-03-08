@@ -29,9 +29,9 @@ internal class CustomTreeView : TreeView
 
         Graphics graphics = e.Graphics;
         Color backColor = BackColor;
-        SolidBrush brush = new(backColor);
+        using SolidBrush brush = new(backColor);
         Font font = Font;
-        Font subFont = new(font.FontFamily, font.SizeInPoints, FontStyle.Regular, font.Unit, font.GdiCharSet, font.GdiVerticalFont);
+        using Font subFont = new(font.FontFamily, font.SizeInPoints, FontStyle.Regular, font.Unit, font.GdiCharSet, font.GdiVerticalFont);
 
         string subText = node.Name;
         if (string.IsNullOrWhiteSpace(subText) || subText == "ParadoxLauncher"

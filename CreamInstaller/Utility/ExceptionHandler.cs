@@ -40,12 +40,16 @@ internal static class ExceptionHandler
     }
 }
 
-internal class CustomMessageException : Exception
+public class CustomMessageException : Exception
 {
     private readonly string message;
-    public override string Message => message ?? "CustomMessageException";
+    public override string Message => message;
 
     public override string ToString() => Message;
 
-    internal CustomMessageException(string message) => this.message = message;
+    public CustomMessageException() => message = "CustomMessageException";
+
+    public CustomMessageException(string message) => this.message = message;
+
+    public CustomMessageException(string message, Exception _) => this.message = message;
 }

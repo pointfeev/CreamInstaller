@@ -573,10 +573,10 @@ internal partial class SelectForm : CustomForm
                 contextMenuStrip.Items.Add(new ContextMenuItem("Open AppInfo", "Notepad",
                     new EventHandler((sender, e) =>
                     {
-                        if (File.Exists(appInfoVDF))
-                            Diagnostics.OpenFileInNotepad(appInfoVDF);
-                        else if (File.Exists(appInfoJSON))
+                        if (File.Exists(appInfoJSON))
                             Diagnostics.OpenFileInNotepad(appInfoJSON);
+                        else if (File.Exists(appInfoVDF))
+                            Diagnostics.OpenFileInNotepad(appInfoVDF);
                     })));
                 contextMenuStrip.Items.Add(new ContextMenuItem("Refresh AppInfo", "Command Prompt",
                     new EventHandler((sender, e) =>
@@ -728,7 +728,7 @@ internal partial class SelectForm : CustomForm
                 if (!Program.IsProgramRunningDialog(this, selection)) return;
             if (ParadoxLauncher.DlcDialog(this)) return;
             Hide();
-            InstallForm installForm = new(this, uninstall);
+            using InstallForm installForm = new(this, uninstall);
             installForm.ShowDialog();
             if (installForm.Reselecting)
             {
@@ -788,7 +788,8 @@ internal partial class SelectForm : CustomForm
         string blockedDirectoryExceptions = "";
         foreach (string name in Program.ProtectedGameDirectoryExceptions)
             blockedDirectoryExceptions += helpButtonListPrefix + name;
-        new DialogForm(this).Show(SystemIcons.Information,
+        using DialogForm form = new(this);
+        form.Show(SystemIcons.Information,
             "Blocks the program from caching and displaying games protected by DLL checks," +
             "\nanti-cheats, or that are confirmed not to be working with CreamAPI or ScreamAPI." +
             "\n\nBlocked game names:" + blockedGames +

@@ -13,7 +13,7 @@ namespace CreamInstaller.Steam;
 
 internal static class SteamLibrary
 {
-    private static string installPath = null;
+    private static string installPath;
     internal static string InstallPath
     {
         get

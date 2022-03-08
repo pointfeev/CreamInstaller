@@ -8,7 +8,7 @@ namespace CreamInstaller.Paradox;
 
 internal static class ParadoxLauncher
 {
-    private static string installPath = null;
+    private static string installPath;
     internal static string InstallPath
     {
         get
@@ -47,7 +47,8 @@ internal static class ParadoxLauncher
             PopulateDlc(paradoxLauncher);
             if (!paradoxLauncher.ExtraDlc.Any())
             {
-                return new DialogForm(form).Show(SystemIcons.Warning,
+                using DialogForm dialogForm = new(form);
+                return dialogForm.Show(SystemIcons.Warning,
                     $"WARNING: There are no installed games with DLC that can be added to the Paradox Launcher!" +
                     "\n\nInstalling CreamAPI/ScreamAPI for the Paradox Launcher is pointless, since no DLC will be added to the configuration!",
                     "Ignore", "Cancel") != DialogResult.OK;

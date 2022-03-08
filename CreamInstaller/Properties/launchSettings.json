@@ -2,6 +2,7 @@
   "profiles": {
     "CreamInstaller": {
       "commandName": "Project",
+      "hotReloadEnabled": true,
       "nativeDebugging": false
     }
   }

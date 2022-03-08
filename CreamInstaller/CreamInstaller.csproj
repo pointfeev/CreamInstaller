@@ -7,16 +7,12 @@
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
 		<Version>3.2.2.0</Version>
 		<PackageIcon>Resources\ini.ico</PackageIcon>
-		<PackageIconUrl />
-		<Description />
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<Copyright>2021, pointfeev (https://github.com/pointfeev)</Copyright>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<PackageProjectUrl>https://github.com/pointfeev/CreamInstaller</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/pointfeev/CreamInstaller</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<PackageReleaseNotes />
-		<PackageTags>steam, dlc</PackageTags>
 		<AssemblyName>CreamInstaller</AssemblyName>
 		<Company>CreamInstaller</Company>
 		<Product>CreamAPI/ScreamAPI Installer &amp; Configuration Generator</Product>
@@ -25,11 +21,19 @@
 		<StartupObject>CreamInstaller.Program</StartupObject>
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 		<SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
+		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+		<SignAssembly>False</SignAssembly>
+		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+		<AnalysisLevel>latest-all</AnalysisLevel>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<DebugType>embedded</DebugType>
 		<DebugSymbols>true</DebugSymbols>
 		<DefineConstants>TRACE</DefineConstants>
+		<CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Gameloop.Vdf" Version="0.6.1" />

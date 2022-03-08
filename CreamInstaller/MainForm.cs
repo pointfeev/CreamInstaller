@@ -37,12 +37,13 @@ internal partial class MainForm : CustomForm
             cancellationTokenSource = null;
         }
         Hide();
-        new SelectForm(this).ShowDialog();
+        using SelectForm form = new(this);
+        form.ShowDialog();
         Close();
     }
 
-    private static UpdateManager updateManager = null;
-    private static Version latestVersion = null;
+    private static UpdateManager updateManager;
+    private static Version latestVersion;
     private static IReadOnlyList<Version> versions;
 
     private async void OnLoad()
@@ -127,7 +128,9 @@ internal partial class MainForm : CustomForm
         {
             string FileName = Path.GetFileName(Program.CurrentProcessFilePath);
             if (FileName != "CreamInstaller.exe")
-                if (new DialogForm(this).Show(SystemIcons.Warning,
+            {
+                using DialogForm form = new(this);
+                if (form.Show(SystemIcons.Warning,
                     "WARNING: CreamInstaller.exe was renamed!" +
                     "\n\nThis will cause unwanted behavior when updating the program!",
                     "Ignore", "Abort") == DialogResult.Cancel)
@@ -135,6 +138,7 @@ internal partial class MainForm : CustomForm
                     Application.Exit();
                     return;
                 }
+            }
             OnLoad();
         }
         catch (Exception e)
