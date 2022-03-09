@@ -42,8 +42,8 @@
 		<PackageReference Include="Onova" Version="2.6.2" />
 	</ItemGroup>
 	<ItemGroup>
-		<Compile Update="MainForm.cs" />
-		<Compile Update="SelectForm.cs" />
+		<Compile Update="Forms\MainForm.cs" />
+		<Compile Update="Forms\SelectForm.cs" />
 		<Compile Update="Properties\Resources.Designer.cs">
 			<DesignTime>True</DesignTime>
 			<AutoGen>True</AutoGen>
