@@ -96,6 +96,7 @@ internal partial class SelectForm : CustomForm
             progress.Report(++CompleteGameCount);
         }
         if (Program.Canceled) return;
+        List<TreeNode> treeNodes = TreeNodes;
         RemainingGames.Clear(); // for display purposes only, otherwise ignorable
         RemainingDLCs.Clear(); // for display purposes only, otherwise ignorable
         List<Task> appTasks = new();
@@ -112,7 +113,7 @@ internal partial class SelectForm : CustomForm
             selection.DllDirectories = steamDllDirectories ?? await EpicLibrary.GetDllDirectoriesFromGameDirectory(selection.RootDirectory);
             selection.IsSteam = steamDllDirectories is not null;
 
-            TreeNode programNode = TreeNodes.Find(s => s.Name == selection.Id) ?? new();
+            TreeNode programNode = treeNodes.Find(s => s.Name == selection.Id) ?? new();
             programNode.Name = selection.Id;
             programNode.Text = selection.Name;
             programNode.Checked = selection.Enabled;
@@ -129,6 +130,7 @@ internal partial class SelectForm : CustomForm
                 string branch = program.Item3;
                 int buildId = program.Item4;
                 string directory = program.Item5;
+                Thread.Sleep(0);
                 ProgramSelection selection = ProgramSelection.FromId(appId);
                 if (Program.Canceled) return;
                 if (Program.IsGameBlocked(name, directory)) continue;
@@ -136,14 +138,15 @@ internal partial class SelectForm : CustomForm
                 Task task = Task.Run(async () =>
                 {
                     if (Program.Canceled) return;
+                    Thread.Sleep(0);
                     List<string> dllDirectories = await SteamLibrary.GetDllDirectoriesFromGameDirectory(directory);
                     if (dllDirectories is null)
                     {
                         RemoveFromRemainingGames(name);
                         return;
                     }
-                    AppData appData = await SteamStore.QueryStoreAPI(appId);
-                    VProperty appInfo = appInfo = await SteamCMD.GetAppInfo(appId, branch, buildId);
+                    AppData appData = await SteamStore.QueryStoreAPI(appId, 60);
+                    VProperty appInfo = await SteamCMD.GetAppInfo(appId, branch, buildId);
                     if (appData is null && appInfo is null)
                     {
                         RemoveFromRemainingGames(name);
@@ -164,6 +167,7 @@ internal partial class SelectForm : CustomForm
                             Task task = Task.Run(async () =>
                             {
                                 if (Program.Canceled) return;
+                                Thread.Sleep(0);
                                 string dlcName = null;
                                 string dlcIcon = null;
                                 AppData dlcAppData = await SteamStore.QueryStoreAPI(dlcAppId);
@@ -223,7 +227,8 @@ internal partial class SelectForm : CustomForm
                     Program.Invoke(selectionTreeView, delegate
                     {
                         if (Program.Canceled) return;
-                        TreeNode programNode = TreeNodes.Find(s => s.Name == appId) ?? new();
+                        Thread.Sleep(0);
+                        TreeNode programNode = treeNodes.Find(s => s.Name == appId) ?? new();
                         programNode.Name = appId;
                         programNode.Text = appData?.name ?? name;
                         programNode.Checked = selection.Enabled;
@@ -232,11 +237,12 @@ internal partial class SelectForm : CustomForm
                         foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in dlc)
                         {
                             if (Program.Canceled || programNode is null) return;
+                            Thread.Sleep(0);
                             string appId = pair.Key;
                             (DlcType type, string name, string icon) dlcApp = pair.Value;
                             selection.AllDlc[appId] = dlcApp;
                             if (allCheckBox.Checked) selection.SelectedDlc[appId] = dlcApp;
-                            TreeNode dlcNode = TreeNodes.Find(s => s.Name == appId) ?? new();
+                            TreeNode dlcNode = treeNodes.Find(s => s.Name == appId) ?? new();
                             dlcNode.Name = appId;
                             dlcNode.Text = dlcApp.name;
                             dlcNode.Checked = selection.SelectedDlc.ContainsKey(appId);
@@ -258,6 +264,7 @@ internal partial class SelectForm : CustomForm
                 string @namespace = manifest.CatalogNamespace;
                 string name = manifest.DisplayName;
                 string directory = manifest.InstallLocation;
+                Thread.Sleep(0);
                 ProgramSelection selection = ProgramSelection.FromId(@namespace);
                 if (Program.Canceled) return;
                 if (Program.IsGameBlocked(name, directory)) continue;
@@ -265,6 +272,7 @@ internal partial class SelectForm : CustomForm
                 Task task = Task.Run(async () =>
                 {
                     if (Program.Canceled) return;
+                    Thread.Sleep(0);
                     List<string> dllDirectories = await EpicLibrary.GetDllDirectoriesFromGameDirectory(directory);
                     if (dllDirectories is null)
                     {
@@ -280,6 +288,7 @@ internal partial class SelectForm : CustomForm
                         foreach ((string id, string name, string product, string icon, string developer) in entitlementIds)
                         {
                             if (Program.Canceled) return;
+                            Thread.Sleep(0);
                             AddToRemainingDLCs(id);
                             Task task = Task.Run(() =>
                             {
@@ -311,24 +320,28 @@ internal partial class SelectForm : CustomForm
                     selection.RootDirectory = directory;
                     selection.DllDirectories = dllDirectories;
                     foreach (KeyValuePair<string, (string name, string product, string icon, string developer)> pair in entitlements)
+                    {
+                        Thread.Sleep(0);
                         if (pair.Value.name == selection.Name)
                         {
                             selection.ProductUrl = "https://www.epicgames.com/store/product/" + pair.Value.product;
                             selection.IconUrl = pair.Value.icon;
                             selection.Publisher = pair.Value.developer;
                         }
+                    }
 
                     if (Program.Canceled) return;
                     Program.Invoke(selectionTreeView, delegate
                     {
                         if (Program.Canceled) return;
-                        TreeNode programNode = TreeNodes.Find(s => s.Name == @namespace) ?? new();
+                        Thread.Sleep(0);
+                        TreeNode programNode = treeNodes.Find(s => s.Name == @namespace) ?? new();
                         programNode.Name = @namespace;
                         programNode.Text = name;
                         programNode.Checked = selection.Enabled;
                         programNode.Remove();
                         selectionTreeView.Nodes.Add(programNode);
-                        /*TreeNode catalogItemsNode = TreeNodes.Find(s => s.Name == @namespace + "_catalogItems") ?? new();
+                        /*TreeNode catalogItemsNode = treeNodes.Find(s => s.Name == @namespace + "_catalogItems") ?? new();
                         catalogItemsNode.Name = @namespace + "_catalogItems";
                         catalogItemsNode.Text = "Catalog Items";
                         catalogItemsNode.Checked = selection.SelectedDlc.Any(pair => pair.Value.type == DlcType.CatalogItem);
@@ -336,7 +349,7 @@ internal partial class SelectForm : CustomForm
                         programNode.Nodes.Add(catalogItemsNode);*/
                         if (entitlements.Any())
                         {
-                            /*TreeNode entitlementsNode = TreeNodes.Find(s => s.Name == @namespace + "_entitlements") ?? new();
+                            /*TreeNode entitlementsNode = treeNodes.Find(s => s.Name == @namespace + "_entitlements") ?? new();
                             entitlementsNode.Name = @namespace + "_entitlements";
                             entitlementsNode.Text = "Entitlements";
                             entitlementsNode.Checked = selection.SelectedDlc.Any(pair => pair.Value.type == DlcType.Entitlement);
@@ -345,11 +358,12 @@ internal partial class SelectForm : CustomForm
                             foreach (KeyValuePair<string, (string name, string product, string icon, string developer)> pair in entitlements)
                             {
                                 if (Program.Canceled || programNode is null/* || entitlementsNode is null*/) return;
+                                Thread.Sleep(0);
                                 string dlcId = pair.Key;
                                 (DlcType type, string name, string icon) dlcApp = (DlcType.Entitlement, pair.Value.name, pair.Value.icon);
                                 selection.AllDlc[dlcId] = dlcApp;
                                 if (allCheckBox.Checked) selection.SelectedDlc[dlcId] = dlcApp;
-                                TreeNode dlcNode = TreeNodes.Find(s => s.Name == dlcId) ?? new();
+                                TreeNode dlcNode = treeNodes.Find(s => s.Name == dlcId) ?? new();
                                 dlcNode.Name = dlcId;
                                 dlcNode.Text = dlcApp.name;
                                 dlcNode.Checked = selection.SelectedDlc.ContainsKey(dlcId);
@@ -413,11 +427,7 @@ internal partial class SelectForm : CustomForm
             setup = false;
             progressLabel.Text = "Gathering and caching your applicable games and their DLCs . . . ";
             ProgramSelection.ValidateAll();
-            TreeNodes.ForEach(node =>
-            {
-                if (node.Parent is null && ProgramSelection.FromId(node.Name) is null)
-                    node.Remove();
-            });
+            TreeNodes.ForEach(node => node.Remove());
             await GetApplicablePrograms(iProgress);
             await SteamCMD.Cleanup();
 

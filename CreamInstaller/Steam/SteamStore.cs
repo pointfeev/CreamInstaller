@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 using CreamInstaller.Utility;
@@ -22,30 +24,38 @@ internal static class SteamStore
         return dlcIds;
     });
 
-    internal static async Task<AppData> QueryStoreAPI(string appId)
+    private static readonly ConcurrentDictionary<string, DateTime> lastQueries = new();
+    internal static async Task<AppData> QueryStoreAPI(string appId, int cooldown = 10)
     {
         if (Program.Canceled) return null;
-        string response = await HttpClientManager.EnsureGet($"https://store.steampowered.com/api/appdetails?appids={appId}");
+        Thread.Sleep(0);
         string cacheFile = ProgramData.AppInfoPath + @$"\{appId}.json";
-        if (response is not null)
+        DateTime now = DateTime.UtcNow;
+        if (!lastQueries.TryGetValue(appId, out DateTime lastQuery) || (now - lastQuery).TotalSeconds > cooldown)
         {
-            IDictionary<string, JToken> apps = (dynamic)JsonConvert.DeserializeObject(response);
-            foreach (KeyValuePair<string, JToken> app in apps)
+            lastQueries[appId] = now;
+            string response = await HttpClientManager.EnsureGet($"https://store.steampowered.com/api/appdetails?appids={appId}");
+            if (response is not null)
             {
-                try
+                IDictionary<string, JToken> apps = (dynamic)JsonConvert.DeserializeObject(response);
+                foreach (KeyValuePair<string, JToken> app in apps)
                 {
-                    AppData data = JsonConvert.DeserializeObject<AppDetails>(app.Value.ToString()).data;
+                    Thread.Sleep(0);
                     try
                     {
-                        File.WriteAllText(cacheFile, JsonConvert.SerializeObject(data, Formatting.Indented));
+                        AppData data = JsonConvert.DeserializeObject<AppDetails>(app.Value.ToString()).data;
+                        try
+                        {
+                            File.WriteAllText(cacheFile, JsonConvert.SerializeObject(data, Formatting.Indented));
+                        }
+                        catch { }
+                        return data;
                     }
-                    catch { }
-                    return data;
-                }
-                catch (Exception e)
-                {
-                    using DialogForm dialogForm = new(null);
-                    dialogForm.Show(SystemIcons.Error, "Unsuccessful deserialization of query for appid " + appId + ":\n\n" + e.ToString(), "FUCK");
+                    catch (Exception e)
+                    {
+                        using DialogForm dialogForm = new(null);
+                        dialogForm.Show(SystemIcons.Error, "Unsuccessful deserialization of query for appid " + appId + ":\n\n" + e.ToString(), "FUCK");
+                    }
                 }
             }
         }
