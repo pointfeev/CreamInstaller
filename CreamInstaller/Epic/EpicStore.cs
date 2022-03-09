@@ -32,13 +32,20 @@ internal static class EpicStore
                 {
                     response = JsonConvert.DeserializeObject<Response>(File.ReadAllText(cacheFile));
                 }
-                catch { }
+                catch
+                {
+                    File.Delete(cacheFile);
+                }
         if (response is null) return dlcIds;
         try
         {
             File.WriteAllText(cacheFile, JsonConvert.SerializeObject(response, Formatting.Indented));
         }
-        catch { }
+        catch //(Exception e)
+        {
+            //using DialogForm dialogForm = new(null);
+            //dialogForm.Show(SystemIcons.Error, "Unsuccessful serialization of query for category namespace " + categoryNamespace + ":\n\n" + e.ToString(), "FUCK");
+        }
         List<Element> searchStore = new(response.Data.Catalog.SearchStore.Elements);
         foreach (Element element in searchStore)
         {

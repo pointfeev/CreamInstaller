@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -44,17 +43,24 @@ internal static class SteamStore
                     try
                     {
                         AppData data = JsonConvert.DeserializeObject<AppDetails>(app.Value.ToString()).data;
-                        try
+                        if (data is not null)
                         {
-                            File.WriteAllText(cacheFile, JsonConvert.SerializeObject(data, Formatting.Indented));
+                            try
+                            {
+                                File.WriteAllText(cacheFile, JsonConvert.SerializeObject(data, Formatting.Indented));
+                            }
+                            catch //(Exception e)
+                            {
+                                //using DialogForm dialogForm = new(null);
+                                //dialogForm.Show(SystemIcons.Error, "Unsuccessful serialization of query for appid " + appId + ":\n\n" + e.ToString(), "FUCK");
+                            }
+                            return data;
                         }
-                        catch { }
-                        return data;
                     }
-                    catch (Exception e)
+                    catch //(Exception e)
                     {
-                        using DialogForm dialogForm = new(null);
-                        dialogForm.Show(SystemIcons.Error, "Unsuccessful deserialization of query for appid " + appId + ":\n\n" + e.ToString(), "FUCK");
+                        //using DialogForm dialogForm = new(null);
+                        //dialogForm.Show(SystemIcons.Error, "Unsuccessful deserialization of query for appid " + appId + ":\n\n" + e.ToString(), "FUCK");
                     }
                 }
             }
@@ -65,7 +71,10 @@ internal static class SteamStore
             {
                 return JsonConvert.DeserializeObject<AppData>(File.ReadAllText(cacheFile));
             }
-            catch { }
+            catch
+            {
+                File.Delete(cacheFile);
+            }
         }
         return null;
     }

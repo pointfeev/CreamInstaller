@@ -387,66 +387,57 @@ internal partial class SelectForm : CustomForm
 
     private async void OnLoad()
     {
-    retry:
-        try
+        Program.Canceled = false;
+        blockedGamesCheckBox.Enabled = false;
+        blockProtectedHelpButton.Enabled = false;
+        cancelButton.Enabled = true;
+        scanButton.Enabled = false;
+        noneFoundLabel.Visible = false;
+        allCheckBox.Enabled = false;
+        installButton.Enabled = false;
+        uninstallButton.Enabled = installButton.Enabled;
+        selectionTreeView.Enabled = false;
+        ShowProgressBar();
+
+        bool setup = true;
+        int maxProgress = 0;
+        int curProgress = 0;
+        Progress<int> progress = new();
+        IProgress<int> iProgress = progress;
+        progress.ProgressChanged += (sender, _progress) =>
         {
-            Program.Canceled = false;
-            blockedGamesCheckBox.Enabled = false;
-            blockProtectedHelpButton.Enabled = false;
-            cancelButton.Enabled = true;
-            scanButton.Enabled = false;
-            noneFoundLabel.Visible = false;
-            allCheckBox.Enabled = false;
-            installButton.Enabled = false;
-            uninstallButton.Enabled = installButton.Enabled;
-            selectionTreeView.Enabled = false;
-            ShowProgressBar();
+            if (Program.Canceled) return;
+            if (_progress < 0 || _progress > maxProgress) maxProgress = -_progress;
+            else curProgress = _progress;
+            int p = Math.Max(Math.Min((int)((float)(curProgress / (float)maxProgress) * 100), 100), 0);
+            progressLabel.Text = setup ? $"Setting up SteamCMD . . . {p}%"
+                : $"Gathering and caching your applicable games and their DLCs . . . {p}%";
+            progressBar.Value = p;
+        };
 
-            bool setup = true;
-            int maxProgress = 0;
-            int curProgress = 0;
-            Progress<int> progress = new();
-            IProgress<int> iProgress = progress;
-            progress.ProgressChanged += (sender, _progress) =>
-            {
-                if (Program.Canceled) return;
-                if (_progress < 0 || _progress > maxProgress) maxProgress = -_progress;
-                else curProgress = _progress;
-                int p = Math.Max(Math.Min((int)((float)(curProgress / (float)maxProgress) * 100), 100), 0);
-                progressLabel.Text = setup ? $"Setting up SteamCMD . . . {p}%"
-                    : $"Gathering and caching your applicable games and their DLCs . . . {p}%";
-                progressBar.Value = p;
-            };
-
-            await ProgramData.Setup();
-            if (Directory.Exists(SteamLibrary.InstallPath))
-            {
-                progressLabel.Text = $"Setting up SteamCMD . . . ";
-                await SteamCMD.Setup(iProgress);
-            }
-            setup = false;
-            progressLabel.Text = "Gathering and caching your applicable games and their DLCs . . . ";
-            ProgramSelection.ValidateAll();
-            TreeNodes.ForEach(node => node.Remove());
-            await GetApplicablePrograms(iProgress);
-            await SteamCMD.Cleanup();
-
-            HideProgressBar();
-            selectionTreeView.Enabled = ProgramSelection.All.Any();
-            allCheckBox.Enabled = selectionTreeView.Enabled;
-            noneFoundLabel.Visible = !selectionTreeView.Enabled;
-            installButton.Enabled = ProgramSelection.AllUsableEnabled.Any();
-            uninstallButton.Enabled = installButton.Enabled;
-            cancelButton.Enabled = false;
-            scanButton.Enabled = true;
-            blockedGamesCheckBox.Enabled = true;
-            blockProtectedHelpButton.Enabled = true;
-        }
-        catch (Exception e)
+        await ProgramData.Setup();
+        if (Directory.Exists(SteamLibrary.InstallPath))
         {
-            if (ExceptionHandler.OutputException(e)) goto retry;
-            Close();
+            progressLabel.Text = $"Setting up SteamCMD . . . ";
+            await SteamCMD.Setup(iProgress);
         }
+        setup = false;
+        progressLabel.Text = "Gathering and caching your applicable games and their DLCs . . . ";
+        ProgramSelection.ValidateAll();
+        TreeNodes.ForEach(node => node.Remove());
+        await GetApplicablePrograms(iProgress);
+        await SteamCMD.Cleanup();
+
+        HideProgressBar();
+        selectionTreeView.Enabled = ProgramSelection.All.Any();
+        allCheckBox.Enabled = selectionTreeView.Enabled;
+        noneFoundLabel.Visible = !selectionTreeView.Enabled;
+        installButton.Enabled = ProgramSelection.AllUsableEnabled.Any();
+        uninstallButton.Enabled = installButton.Enabled;
+        cancelButton.Enabled = false;
+        scanButton.Enabled = true;
+        blockedGamesCheckBox.Enabled = true;
+        blockProtectedHelpButton.Enabled = true;
     }
 
     private void OnTreeViewNodeCheckedChanged(object sender, TreeViewEventArgs e)
@@ -549,185 +540,198 @@ internal partial class SelectForm : CustomForm
 
     private void OnLoad(object sender, EventArgs _)
     {
-        HideProgressBar();
-        selectionTreeView.TreeViewNodeSorter = new TreeNodeSorter();
-        selectionTreeView.AfterCheck += OnTreeViewNodeCheckedChanged;
-        selectionTreeView.NodeMouseClick += (sender, e) =>
+    retry:
+        try
         {
-            TreeNode node = e.Node;
-            if (node is null || !node.Bounds.Contains(e.Location) || e.Button != MouseButtons.Right || e.Clicks != 1)
-                return;
-            ContextMenuStrip contextMenuStrip = new();
-            selectionTreeView.SelectedNode = node;
-            string id = node.Name;
-            ProgramSelection selection = ProgramSelection.FromId(id);
-            (string gameAppId, (DlcType type, string name, string icon) app)? dlc = null;
-            if (selection is null) dlc = ProgramSelection.GetDlcFromId(id);
-            ProgramSelection dlcParentSelection = null;
-            if (dlc is not null) dlcParentSelection = ProgramSelection.FromId(dlc.Value.gameAppId);
-            if (selection is null && dlcParentSelection is null)
-                return;
-            ContextMenuItem header = null;
-            if (id == "ParadoxLauncher")
-                header = new(node.Text, "Paradox Launcher");
-            else if (selection is not null)
-                header = new(node.Text, (id, selection.IconUrl, false));
-            else if (dlc is not null)
-                header = new(node.Text, (id, dlc.Value.app.icon, false), (id, dlcParentSelection.IconUrl, false));
-            contextMenuStrip.Items.Add(header ?? new ContextMenuItem(node.Text));
-            string appInfoVDF = $@"{SteamCMD.AppInfoPath}\{id}.vdf";
-            string appInfoJSON = $@"{SteamCMD.AppInfoPath}\{id}.json";
-            if (Directory.Exists(Directory.GetDirectoryRoot(appInfoVDF)) && (File.Exists(appInfoVDF) || File.Exists(appInfoJSON)))
+            HideProgressBar();
+            selectionTreeView.TreeViewNodeSorter = new TreeNodeSorter();
+            selectionTreeView.AfterCheck += OnTreeViewNodeCheckedChanged;
+            selectionTreeView.NodeMouseClick += (sender, e) =>
             {
-                contextMenuStrip.Items.Add(new ToolStripSeparator());
-                contextMenuStrip.Items.Add(new ContextMenuItem("Open AppInfo", "Notepad",
-                    new EventHandler((sender, e) =>
-                    {
-                        if (File.Exists(appInfoJSON))
-                            Diagnostics.OpenFileInNotepad(appInfoJSON);
-                        else if (File.Exists(appInfoVDF))
-                            Diagnostics.OpenFileInNotepad(appInfoVDF);
-                    })));
-                contextMenuStrip.Items.Add(new ContextMenuItem("Refresh AppInfo", "Command Prompt",
-                    new EventHandler((sender, e) =>
-                    {
-                        try
-                        {
-                            File.Delete(appInfoVDF);
-                        }
-                        catch { }
-                        try
-                        {
-                            File.Delete(appInfoJSON);
-                        }
-                        catch { }
-                        OnLoad();
-                    })));
-            }
-            if (selection is not null)
-            {
+                TreeNode node = e.Node;
+                if (node is null || !node.Bounds.Contains(e.Location) || e.Button != MouseButtons.Right || e.Clicks != 1)
+                    return;
+                ContextMenuStrip contextMenuStrip = new();
+                selectionTreeView.SelectedNode = node;
+                string id = node.Name;
+                ProgramSelection selection = ProgramSelection.FromId(id);
+                (string gameAppId, (DlcType type, string name, string icon) app)? dlc = null;
+                if (selection is null) dlc = ProgramSelection.GetDlcFromId(id);
+                ProgramSelection dlcParentSelection = null;
+                if (dlc is not null) dlcParentSelection = ProgramSelection.FromId(dlc.Value.gameAppId);
+                if (selection is null && dlcParentSelection is null)
+                    return;
+                ContextMenuItem header = null;
                 if (id == "ParadoxLauncher")
+                    header = new(node.Text, "Paradox Launcher");
+                else if (selection is not null)
+                    header = new(node.Text, (id, selection.IconUrl, false));
+                else if (dlc is not null)
+                    header = new(node.Text, (id, dlc.Value.app.icon, false), (id, dlcParentSelection.IconUrl, false));
+                contextMenuStrip.Items.Add(header ?? new ContextMenuItem(node.Text));
+                string appInfoVDF = $@"{SteamCMD.AppInfoPath}\{id}.vdf";
+                string appInfoJSON = $@"{SteamCMD.AppInfoPath}\{id}.json";
+                if (Directory.Exists(Directory.GetDirectoryRoot(appInfoVDF)) && (File.Exists(appInfoVDF) || File.Exists(appInfoJSON)))
                 {
-                    contextMenuStrip.Items.Add(new ToolStripSeparator());
-                    contextMenuStrip.Items.Add(new ContextMenuItem("Repair", "Command Prompt",
-                        new EventHandler(async (sender, e) =>
-                        {
-                            if (!Program.IsProgramRunningDialog(this, selection)) return;
-                            byte[] creamConfig = null;
-                            byte[] steamOriginalSdk32 = null;
-                            byte[] steamOriginalSdk64 = null;
-                            byte[] screamConfig = null;
-                            byte[] epicOriginalSdk32 = null;
-                            byte[] epicOriginalSdk64 = null;
-                            foreach (string directory in selection.DllDirectories)
+                    List<ContextMenuItem> queries = new();
+                    if (File.Exists(appInfoJSON))
+                        queries.Add(new ContextMenuItem((selection is null || selection.IsSteam) ? "Open Steam Store Query" : "Open Epic GraphQL Query", "Notepad",
+                            new EventHandler((sender, e) => Diagnostics.OpenFileInNotepad(appInfoJSON))));
+                    if (File.Exists(appInfoVDF))
+                        queries.Add(new ContextMenuItem("Open SteamCMD Query", "Notepad",
+                            new EventHandler((sender, e) => Diagnostics.OpenFileInNotepad(appInfoVDF))));
+                    if (queries.Any())
+                    {
+                        contextMenuStrip.Items.Add(new ToolStripSeparator());
+                        foreach (ContextMenuItem query in queries)
+                            contextMenuStrip.Items.Add(query);
+                        contextMenuStrip.Items.Add(new ContextMenuItem("Refresh Queries", "Command Prompt",
+                            new EventHandler((sender, e) =>
                             {
-                                directory.GetCreamApiComponents(out string sdk32, out string _, out string sdk64, out string _, out string config);
-                                if (creamConfig is null && File.Exists(config))
-                                    creamConfig = File.ReadAllBytes(config);
-                                await InstallForm.UninstallCreamAPI(directory);
-                                if (steamOriginalSdk32 is null && File.Exists(sdk32) && !Properties.Resources.Steamworks32.EqualsFile(sdk32))
-                                    steamOriginalSdk32 = File.ReadAllBytes(sdk32);
-                                if (steamOriginalSdk64 is null && File.Exists(sdk64) && !Properties.Resources.Steamworks64.EqualsFile(sdk64))
-                                    steamOriginalSdk64 = File.ReadAllBytes(sdk64);
-                                directory.GetScreamApiComponents(out sdk32, out string _, out sdk64, out string _, out config);
-                                if (screamConfig is null && File.Exists(config))
-                                    screamConfig = File.ReadAllBytes(config);
-                                await InstallForm.UninstallScreamAPI(directory);
-                                if (epicOriginalSdk32 is null && File.Exists(sdk32) && !Properties.Resources.EpicOnlineServices32.EqualsFile(sdk32))
-                                    epicOriginalSdk32 = File.ReadAllBytes(sdk32);
-                                if (epicOriginalSdk64 is null && File.Exists(sdk64) && !Properties.Resources.EpicOnlineServices64.EqualsFile(sdk64))
-                                    epicOriginalSdk64 = File.ReadAllBytes(sdk64);
-                            }
-                            if (steamOriginalSdk32 is not null || steamOriginalSdk64 is not null || epicOriginalSdk32 is not null || epicOriginalSdk64 is not null)
-                            {
-                                bool neededRepair = false;
-                                foreach (string directory in selection.DllDirectories)
+                                try
                                 {
-                                    directory.GetCreamApiComponents(out string sdk32, out string _, out string sdk64, out string _, out string config);
-                                    if (steamOriginalSdk32 is not null && Properties.Resources.Steamworks32.EqualsFile(sdk32))
-                                    {
-                                        steamOriginalSdk32.Write(sdk32);
-                                        neededRepair = true;
-                                    }
-                                    if (steamOriginalSdk64 is not null && Properties.Resources.Steamworks64.EqualsFile(sdk64))
-                                    {
-                                        steamOriginalSdk64.Write(sdk64);
-                                        neededRepair = true;
-                                    }
-                                    if (creamConfig is not null)
-                                    {
-                                        await InstallForm.InstallCreamAPI(directory, selection);
-                                        creamConfig.Write(config);
-                                    }
-
-                                    directory.GetScreamApiComponents(out sdk32, out string _, out sdk64, out string _, out config);
-                                    if (epicOriginalSdk32 is not null && Properties.Resources.EpicOnlineServices32.EqualsFile(sdk32))
-                                    {
-                                        epicOriginalSdk32.Write(sdk32);
-                                        neededRepair = true;
-                                    }
-                                    if (epicOriginalSdk64 is not null && Properties.Resources.EpicOnlineServices64.EqualsFile(sdk64))
-                                    {
-                                        epicOriginalSdk64.Write(sdk64);
-                                        neededRepair = true;
-                                    }
-                                    if (screamConfig is not null)
-                                    {
-                                        await InstallForm.InstallScreamAPI(directory, selection);
-                                        screamConfig.Write(config);
-                                    }
+                                    File.Delete(appInfoVDF);
                                 }
-                                if (neededRepair)
-                                    new DialogForm(this).Show(Icon, "Paradox Launcher successfully repaired!", "OK");
-                                else
-                                    new DialogForm(this).Show(SystemIcons.Information, "Paradox Launcher does not need to be repaired.", "OK");
-                            }
-                            else
-                                new DialogForm(this).Show(SystemIcons.Error, "Paradox Launcher repair failed!"
-                                    + "\n\nAn original Steamworks/Epic Online Services SDK file could not be found."
-                                    + "\nYou must reinstall Paradox Launcher to fix this issue.", "OK");
-                        })));
-                }
-                contextMenuStrip.Items.Add(new ToolStripSeparator());
-                contextMenuStrip.Items.Add(new ContextMenuItem("Open Root Directory", "File Explorer",
-                    new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(selection.RootDirectory))));
-                for (int i = 0; i < selection.DllDirectories.Count; i++)
-                {
-                    string directory = selection.DllDirectories[i];
-                    contextMenuStrip.Items.Add(new ContextMenuItem($"Open {(selection.IsSteam ? "Steamworks" : "Epic Online Services")} SDK Directory ({i + 1})", "File Explorer",
-                        new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
-                }
-            }
-            if (id != "ParadoxLauncher")
-            {
-                if (selection is not null && selection.IsSteam || dlcParentSelection is not null && dlcParentSelection.IsSteam)
-                {
-                    contextMenuStrip.Items.Add(new ToolStripSeparator());
-                    contextMenuStrip.Items.Add(new ContextMenuItem("Open SteamDB", "SteamDB",
-                        new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamdb.info/app/" + id))));
+                                catch { }
+                                try
+                                {
+                                    File.Delete(appInfoJSON);
+                                }
+                                catch { }
+                                OnLoad();
+                            })));
+                    }
                 }
                 if (selection is not null)
                 {
-                    if (selection.IsSteam)
-                    {
-                        contextMenuStrip.Items.Add(new ContextMenuItem("Open Steam Store", "Steam Store",
-                            new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
-                        contextMenuStrip.Items.Add(new ContextMenuItem("Open Steam Community", (id, selection.SubIconUrl, true), "Steam Community",
-                            new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + id))));
-                    }
-                    else
+                    if (id == "ParadoxLauncher")
                     {
                         contextMenuStrip.Items.Add(new ToolStripSeparator());
-                        contextMenuStrip.Items.Add(new ContextMenuItem("Open ScreamDB", "ScreamDB",
-                            new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://scream-db.web.app/offers/" + id))));
-                        contextMenuStrip.Items.Add(new ContextMenuItem("Open Epic Games Store", "Epic Games",
-                            new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
+                        contextMenuStrip.Items.Add(new ContextMenuItem("Repair", "Command Prompt",
+                            new EventHandler(async (sender, e) =>
+                            {
+                                if (!Program.IsProgramRunningDialog(this, selection)) return;
+                                byte[] creamConfig = null;
+                                byte[] steamOriginalSdk32 = null;
+                                byte[] steamOriginalSdk64 = null;
+                                byte[] screamConfig = null;
+                                byte[] epicOriginalSdk32 = null;
+                                byte[] epicOriginalSdk64 = null;
+                                foreach (string directory in selection.DllDirectories)
+                                {
+                                    directory.GetCreamApiComponents(out string sdk32, out string _, out string sdk64, out string _, out string config);
+                                    if (creamConfig is null && File.Exists(config))
+                                        creamConfig = File.ReadAllBytes(config);
+                                    await InstallForm.UninstallCreamAPI(directory);
+                                    if (steamOriginalSdk32 is null && File.Exists(sdk32) && !Properties.Resources.Steamworks32.EqualsFile(sdk32))
+                                        steamOriginalSdk32 = File.ReadAllBytes(sdk32);
+                                    if (steamOriginalSdk64 is null && File.Exists(sdk64) && !Properties.Resources.Steamworks64.EqualsFile(sdk64))
+                                        steamOriginalSdk64 = File.ReadAllBytes(sdk64);
+                                    directory.GetScreamApiComponents(out sdk32, out string _, out sdk64, out string _, out config);
+                                    if (screamConfig is null && File.Exists(config))
+                                        screamConfig = File.ReadAllBytes(config);
+                                    await InstallForm.UninstallScreamAPI(directory);
+                                    if (epicOriginalSdk32 is null && File.Exists(sdk32) && !Properties.Resources.EpicOnlineServices32.EqualsFile(sdk32))
+                                        epicOriginalSdk32 = File.ReadAllBytes(sdk32);
+                                    if (epicOriginalSdk64 is null && File.Exists(sdk64) && !Properties.Resources.EpicOnlineServices64.EqualsFile(sdk64))
+                                        epicOriginalSdk64 = File.ReadAllBytes(sdk64);
+                                }
+                                if (steamOriginalSdk32 is not null || steamOriginalSdk64 is not null || epicOriginalSdk32 is not null || epicOriginalSdk64 is not null)
+                                {
+                                    bool neededRepair = false;
+                                    foreach (string directory in selection.DllDirectories)
+                                    {
+                                        directory.GetCreamApiComponents(out string sdk32, out string _, out string sdk64, out string _, out string config);
+                                        if (steamOriginalSdk32 is not null && Properties.Resources.Steamworks32.EqualsFile(sdk32))
+                                        {
+                                            steamOriginalSdk32.Write(sdk32);
+                                            neededRepair = true;
+                                        }
+                                        if (steamOriginalSdk64 is not null && Properties.Resources.Steamworks64.EqualsFile(sdk64))
+                                        {
+                                            steamOriginalSdk64.Write(sdk64);
+                                            neededRepair = true;
+                                        }
+                                        if (creamConfig is not null)
+                                        {
+                                            await InstallForm.InstallCreamAPI(directory, selection);
+                                            creamConfig.Write(config);
+                                        }
+
+                                        directory.GetScreamApiComponents(out sdk32, out string _, out sdk64, out string _, out config);
+                                        if (epicOriginalSdk32 is not null && Properties.Resources.EpicOnlineServices32.EqualsFile(sdk32))
+                                        {
+                                            epicOriginalSdk32.Write(sdk32);
+                                            neededRepair = true;
+                                        }
+                                        if (epicOriginalSdk64 is not null && Properties.Resources.EpicOnlineServices64.EqualsFile(sdk64))
+                                        {
+                                            epicOriginalSdk64.Write(sdk64);
+                                            neededRepair = true;
+                                        }
+                                        if (screamConfig is not null)
+                                        {
+                                            await InstallForm.InstallScreamAPI(directory, selection);
+                                            screamConfig.Write(config);
+                                        }
+                                    }
+                                    if (neededRepair)
+                                        new DialogForm(this).Show(Icon, "Paradox Launcher successfully repaired!", "OK");
+                                    else
+                                        new DialogForm(this).Show(SystemIcons.Information, "Paradox Launcher does not need to be repaired.", "OK");
+                                }
+                                else
+                                    new DialogForm(this).Show(SystemIcons.Error, "Paradox Launcher repair failed!"
+                                        + "\n\nAn original Steamworks/Epic Online Services SDK file could not be found."
+                                        + "\nYou must reinstall Paradox Launcher to fix this issue.", "OK");
+                            })));
+                    }
+                    contextMenuStrip.Items.Add(new ToolStripSeparator());
+                    contextMenuStrip.Items.Add(new ContextMenuItem("Open Root Directory", "File Explorer",
+                        new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(selection.RootDirectory))));
+                    for (int i = 0; i < selection.DllDirectories.Count; i++)
+                    {
+                        string directory = selection.DllDirectories[i];
+                        contextMenuStrip.Items.Add(new ContextMenuItem($"Open {(selection.IsSteam ? "Steamworks" : "Epic Online Services")} SDK Directory ({i + 1})", "File Explorer",
+                            new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
                     }
                 }
-            }
-            contextMenuStrip.Show(selectionTreeView, e.Location);
-        };
-        OnLoad();
+                if (id != "ParadoxLauncher")
+                {
+                    if (selection is not null && selection.IsSteam || dlcParentSelection is not null && dlcParentSelection.IsSteam)
+                    {
+                        contextMenuStrip.Items.Add(new ToolStripSeparator());
+                        contextMenuStrip.Items.Add(new ContextMenuItem("Open SteamDB", "SteamDB",
+                            new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamdb.info/app/" + id))));
+                    }
+                    if (selection is not null)
+                    {
+                        if (selection.IsSteam)
+                        {
+                            contextMenuStrip.Items.Add(new ContextMenuItem("Open Steam Store", "Steam Store",
+                                new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
+                            contextMenuStrip.Items.Add(new ContextMenuItem("Open Steam Community", (id, selection.SubIconUrl, true), "Steam Community",
+                                new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + id))));
+                        }
+                        else
+                        {
+                            contextMenuStrip.Items.Add(new ToolStripSeparator());
+                            contextMenuStrip.Items.Add(new ContextMenuItem("Open ScreamDB", "ScreamDB",
+                                new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://scream-db.web.app/offers/" + id))));
+                            contextMenuStrip.Items.Add(new ContextMenuItem("Open Epic Games Store", "Epic Games",
+                                new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
+                        }
+                    }
+                }
+                contextMenuStrip.Show(selectionTreeView, e.Location);
+            };
+            OnLoad();
+        }
+        catch (Exception e)
+        {
+            if (ExceptionHandler.OutputException(e)) goto retry;
+            Close();
+        }
     }
 
     private void OnAccept(bool uninstall = false)
