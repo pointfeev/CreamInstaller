@@ -5,7 +5,7 @@
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Resources\ini.ico</ApplicationIcon>
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-		<Version>3.2.2.4</Version>
+		<Version>3.2.2.5</Version>
 		<PackageIcon>Resources\ini.ico</PackageIcon>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<Copyright>2021, pointfeev (https://github.com/pointfeev)</Copyright>
