@@ -99,6 +99,7 @@ internal partial class MainForm : CustomForm
                     TreeNode root = new($"v{version}");
                     root.Name = root.Text;
                     changelogTreeView.Nodes.Add(root);
+                    if (changelogTreeView.Nodes.Count > 0) changelogTreeView.Nodes[0].EnsureVisible();
                     _ = Task.Run(async () =>
                     {
                         HtmlNodeCollection nodes = await HttpClientManager.GetDocumentNodes(
@@ -113,11 +114,11 @@ internal partial class MainForm : CustomForm
                                     change.Text = HttpUtility.HtmlDecode(node.InnerText);
                                     root.Nodes.Add(change);
                                     root.Expand();
+                                    if (changelogTreeView.Nodes.Count > 0) changelogTreeView.Nodes[0].EnsureVisible();
                                 });
                             }
                     });
                 }
-            versions = null;
         }
     }
 
