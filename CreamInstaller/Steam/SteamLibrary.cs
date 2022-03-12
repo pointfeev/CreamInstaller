@@ -68,11 +68,11 @@ internal static class SteamLibrary
     {
         List<Tuple<string, string, string, int, string>> games = new();
         if (Program.Canceled || !Directory.Exists(libraryDirectory)) return null;
-        string[] files = Directory.GetFiles(libraryDirectory);
+        string[] files = Directory.GetFiles(libraryDirectory, "*.acf");
         foreach (string file in files)
         {
             if (Program.Canceled) return null;
-            if (Path.GetExtension(file) == ".acf" && ValveDataFile.TryDeserialize(File.ReadAllText(file, Encoding.UTF8), out VProperty result))
+            if (ValveDataFile.TryDeserialize(File.ReadAllText(file, Encoding.UTF8), out VProperty result))
             {
                 string appId = result.Value.GetChild("appid")?.ToString();
                 string installdir = result.Value.GetChild("installdir")?.ToString();

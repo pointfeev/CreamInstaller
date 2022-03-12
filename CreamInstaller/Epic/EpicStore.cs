@@ -16,36 +16,42 @@ namespace CreamInstaller.Epic;
 
 internal static class EpicStore
 {
+    //private const int COOLDOWN_CATALOG_ITEM = 600;
+
     /* need a method to query catalog items
     internal static async Task QueryCatalogItems(Manifest manifest)
     {
     }*/
 
+    private const int COOLDOWN_ENTITLEMENT = 600;
     internal static async Task<List<(string id, string name, string product, string icon, string developer)>> QueryEntitlements(string categoryNamespace)
     {
         List<(string id, string name, string product, string icon, string developer)> dlcIds = new();
-        Response response = await QueryGraphQL(categoryNamespace);
         string cacheFile = ProgramData.AppInfoPath + @$"\{categoryNamespace}.json";
+        bool cachedExists = Directory.Exists(Directory.GetDirectoryRoot(cacheFile)) && File.Exists(cacheFile);
+        Response response = null;
+        if (!cachedExists || ProgramData.CheckCooldown(categoryNamespace, COOLDOWN_ENTITLEMENT))
+        {
+            response = await QueryGraphQL(categoryNamespace);
+            try
+            {
+                File.WriteAllText(cacheFile, JsonConvert.SerializeObject(response, Formatting.Indented));
+            }
+            catch { }
+        }
+        else if (cachedExists)
+        {
+            try
+            {
+                response = JsonConvert.DeserializeObject<Response>(File.ReadAllText(cacheFile));
+            }
+            catch
+            {
+                File.Delete(cacheFile);
+            }
+        }
         if (response is null)
-            if (Directory.Exists(Directory.GetDirectoryRoot(cacheFile)) && File.Exists(cacheFile))
-                try
-                {
-                    response = JsonConvert.DeserializeObject<Response>(File.ReadAllText(cacheFile));
-                }
-                catch
-                {
-                    File.Delete(cacheFile);
-                }
-        if (response is null) return dlcIds;
-        try
-        {
-            File.WriteAllText(cacheFile, JsonConvert.SerializeObject(response, Formatting.Indented));
-        }
-        catch //(Exception e)
-        {
-            //using DialogForm dialogForm = new(null);
-            //dialogForm.Show(SystemIcons.Error, "Unsuccessful serialization of query for category namespace " + categoryNamespace + ":\n\n" + e.ToString(), "FUCK");
-        }
+            return dlcIds;
         List<Element> searchStore = new(response.Data.Catalog.SearchStore.Elements);
         foreach (Element element in searchStore)
         {

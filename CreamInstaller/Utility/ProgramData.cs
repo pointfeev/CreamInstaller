@@ -16,6 +16,8 @@ internal static class ProgramData
 
     internal static readonly Version MinimumAppInfoVersion = Version.Parse("3.2.0.0");
 
+    internal static readonly string CooldownPath = DirectoryPath + @"\cooldown";
+
     internal static async Task Setup() => await Task.Run(() =>
     {
         if (Directory.Exists(DirectoryPathOld))
@@ -30,5 +32,45 @@ internal static class ProgramData
             Directory.CreateDirectory(AppInfoPath);
             File.WriteAllText(AppInfoVersionPath, Application.ProductVersion, Encoding.UTF8);
         }
+        if (!Directory.Exists(CooldownPath))
+            Directory.CreateDirectory(CooldownPath);
     });
+
+    internal static bool CheckCooldown(string identifier, int cooldown)
+    {
+        DateTime now = DateTime.UtcNow;
+        DateTime lastCheck = GetCooldown(identifier) ?? now;
+        bool cooldownOver = (now - lastCheck).TotalSeconds > cooldown;
+        if (cooldownOver || now == lastCheck)
+            SetCooldown(identifier, now);
+        return cooldownOver;
+    }
+    private static DateTime? GetCooldown(string identifier)
+    {
+        if (Directory.Exists(CooldownPath))
+        {
+            string cooldownFile = CooldownPath + @$"\{identifier}.txt";
+            if (File.Exists(cooldownFile))
+            {
+                try
+                {
+                    if (DateTime.TryParse(File.ReadAllText(cooldownFile), out DateTime cooldown))
+                        return cooldown;
+                }
+                catch { }
+            }
+        }
+        return null;
+    }
+    private static void SetCooldown(string identifier, DateTime time)
+    {
+        if (!Directory.Exists(CooldownPath))
+            Directory.CreateDirectory(CooldownPath);
+        string cooldownFile = CooldownPath + @$"\{identifier}.txt";
+        try
+        {
+            File.WriteAllText(cooldownFile, time.ToString());
+        }
+        catch { }
+    }
 }

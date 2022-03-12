@@ -144,7 +144,7 @@ internal partial class SelectForm : CustomForm
                         RemoveFromRemainingGames(name);
                         return;
                     }
-                    AppData appData = await SteamStore.QueryStoreAPI(appId, 60);
+                    AppData appData = await SteamStore.QueryStoreAPI(appId);
                     VProperty appInfo = await SteamCMD.GetAppInfo(appId, branch, buildId);
                     if (appData is null && appInfo is null)
                     {
@@ -169,7 +169,7 @@ internal partial class SelectForm : CustomForm
                                 Thread.Sleep(0);
                                 string dlcName = null;
                                 string dlcIcon = null;
-                                AppData dlcAppData = await SteamStore.QueryStoreAPI(dlcAppId);
+                                AppData dlcAppData = await SteamStore.QueryStoreAPI(dlcAppId, true);
                                 if (dlcAppData is not null)
                                 {
                                     dlcName = dlcAppData.name;

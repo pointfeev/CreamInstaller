@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 
 using CreamInstaller.Utility;
@@ -23,23 +20,22 @@ internal static class SteamStore
         return dlcIds;
     });
 
-    private static readonly ConcurrentDictionary<string, DateTime> lastQueries = new();
-    internal static async Task<AppData> QueryStoreAPI(string appId, int cooldown = 10)
+    private const int COOLDOWN_GAME = 600;
+    private const int COOLDOWN_DLC = 1200;
+
+    internal static async Task<AppData> QueryStoreAPI(string appId, bool isDlc = false)
     {
         if (Program.Canceled) return null;
-        Thread.Sleep(0);
         string cacheFile = ProgramData.AppInfoPath + @$"\{appId}.json";
-        DateTime now = DateTime.UtcNow;
-        if (!lastQueries.TryGetValue(appId, out DateTime lastQuery) || (now - lastQuery).TotalSeconds > cooldown)
+        bool cachedExists = Directory.Exists(Directory.GetDirectoryRoot(cacheFile)) && File.Exists(cacheFile);
+        if (!cachedExists || ProgramData.CheckCooldown(appId, isDlc ? COOLDOWN_DLC : COOLDOWN_GAME))
         {
-            lastQueries[appId] = now;
             string response = await HttpClientManager.EnsureGet($"https://store.steampowered.com/api/appdetails?appids={appId}");
             if (response is not null)
             {
                 IDictionary<string, JToken> apps = (dynamic)JsonConvert.DeserializeObject(response);
                 foreach (KeyValuePair<string, JToken> app in apps)
                 {
-                    Thread.Sleep(0);
                     try
                     {
                         AppData data = JsonConvert.DeserializeObject<AppDetails>(app.Value.ToString()).data;
@@ -65,7 +61,7 @@ internal static class SteamStore
                 }
             }
         }
-        if (Directory.Exists(Directory.GetDirectoryRoot(cacheFile)) && File.Exists(cacheFile))
+        if (cachedExists)
         {
             try
             {

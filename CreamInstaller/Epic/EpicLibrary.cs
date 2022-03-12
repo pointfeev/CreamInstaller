@@ -27,21 +27,18 @@ internal static class EpicLibrary
         if (!Directory.Exists(EpicAppDataPath)) return games;
         string manifests = EpicAppDataPath + @"\Manifests";
         if (!Directory.Exists(manifests)) return games;
-        string[] files = Directory.GetFiles(manifests);
+        string[] files = Directory.GetFiles(manifests, "*.item");
         foreach (string file in files)
         {
             if (Program.Canceled) return games;
-            if (Path.GetExtension(file) == ".item")
+            string json = File.ReadAllText(file);
+            try
             {
-                string json = File.ReadAllText(file);
-                try
-                {
-                    Manifest manifest = JsonSerializer.Deserialize<Manifest>(json);
-                    if (manifest is not null && manifest.CatalogItemId == manifest.MainGameCatalogItemId)
-                        games.Add(manifest);
-                }
-                catch { };
+                Manifest manifest = JsonSerializer.Deserialize<Manifest>(json);
+                if (manifest is not null && manifest.CatalogItemId == manifest.MainGameCatalogItemId)
+                    games.Add(manifest);
             }
+            catch { };
         }
         return games;
     });
