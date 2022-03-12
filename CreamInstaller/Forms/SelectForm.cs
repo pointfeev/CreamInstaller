@@ -612,10 +612,11 @@ internal partial class SelectForm : CustomForm
                     contextMenuStrip.Items.Add(new ToolStripSeparator());
                     contextMenuStrip.Items.Add(new ContextMenuItem("Open Root Directory", "File Explorer",
                         new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(selection.RootDirectory))));
-                    for (int i = 0; i < selection.DllDirectories.Count; i++)
+                    List<string> directories = selection.DllDirectories.ToList();
+                    for (int i = 0; i < directories.Count; i++)
                     {
-                        string directory = selection.DllDirectories[i];
-                        contextMenuStrip.Items.Add(new ContextMenuItem($"Open {(selection.IsSteam ? "Steamworks" : "Epic Online Services")} SDK Directory ({i + 1})", "File Explorer",
+                        string directory = directories[i];
+                        contextMenuStrip.Items.Add(new ContextMenuItem($"Open {(selection.IsSteam ? "Steamworks" : "Epic Online Services")} SDK Directory #{i + 1}", "File Explorer",
                             new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
                     }
                 }
