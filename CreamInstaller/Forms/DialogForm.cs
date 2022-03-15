@@ -30,7 +30,7 @@ internal partial class DialogForm : CustomForm
         return ShowDialog();
     }
 
-    internal void OnResize(object s, EventArgs e) =>
+    private void OnResize(object s, EventArgs e) =>
         Text = TextRenderer.MeasureText(Program.ApplicationName, Font).Width > Size.Width - 100
             ? Program.ApplicationNameShort
             : Program.ApplicationName;

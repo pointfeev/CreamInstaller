@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Win32;
@@ -31,6 +32,7 @@ internal static class EpicLibrary
         foreach (string file in files)
         {
             if (Program.Canceled) return games;
+            Thread.Sleep(0);
             string json = File.ReadAllText(file);
             try
             {
@@ -58,6 +60,7 @@ internal static class EpicLibrary
         foreach (string _directory in directories)
         {
             if (Program.Canceled) return null;
+            Thread.Sleep(0);
             try
             {
                 List<string> moreDllDirectories = await GetDllDirectoriesFromGameDirectory(_directory);

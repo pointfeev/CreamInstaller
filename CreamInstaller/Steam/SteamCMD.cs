@@ -36,9 +36,11 @@ internal static class SteamCMD
     {
     wait_for_lock:
         if (Program.Canceled) return "";
+        Thread.Sleep(0);
         for (int i = 0; i < locks.Length; i++)
         {
             if (Program.Canceled) return "";
+            Thread.Sleep(0);
             if (Interlocked.CompareExchange(ref locks[i], 1, 0) == 0)
             {
                 if (appId is not null)
@@ -107,7 +109,7 @@ internal static class SteamCMD
                 Interlocked.Decrement(ref locks[i]);
                 return appInfo;
             }
-            Thread.Sleep(0);
+            Thread.Sleep(200);
         }
         Thread.Sleep(200);
         goto wait_for_lock;
@@ -121,11 +123,10 @@ internal static class SteamCMD
         await Cleanup();
         if (!File.Exists(FilePath))
         {
-            using (HttpClient httpClient = new())
-            {
-                byte[] file = await httpClient.GetByteArrayAsync(new Uri("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip"));
-                file.Write(ArchivePath);
-            }
+            HttpClient httpClient = HttpClientManager.HttpClient;
+            if (httpClient is null) return;
+            byte[] file = await httpClient.GetByteArrayAsync(new Uri("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip"));
+            file.Write(ArchivePath);
             ZipFile.ExtractToDirectory(ArchivePath, DirectoryPath);
             File.Delete(ArchivePath);
         }

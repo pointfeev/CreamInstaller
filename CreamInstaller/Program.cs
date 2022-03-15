@@ -26,11 +26,11 @@ internal static class Program
     internal static readonly string[] ProtectedGameDirectories = { @"\EasyAntiCheat", @"\BattlEye" }; // DLL detections
     internal static readonly string[] ProtectedGameDirectoryExceptions = { "Arma 3" }; // Arma 3's BattlEye doesn't detect DLL changes?
 
-    internal static bool IsGameBlocked(string name, string directory)
+    internal static bool IsGameBlocked(string name, string directory = null)
     {
         if (!BlockProtectedGames) return false;
         if (ProtectedGameNames.Contains(name)) return true;
-        if (!ProtectedGameDirectoryExceptions.Contains(name))
+        if (directory is not null && !ProtectedGameDirectoryExceptions.Contains(name))
             foreach (string path in ProtectedGameDirectories)
                 if (Directory.Exists(directory + path)) return true;
         return false;

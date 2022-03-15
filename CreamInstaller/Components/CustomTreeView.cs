@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -14,10 +15,16 @@ internal class CustomTreeView : TreeView
             base.WndProc(ref m);
     }
 
+    private class TreeNodeSorter : IComparer
+    {
+        public int Compare(object a, object b) => AppIdComparer.Comparer.Compare((a as TreeNode).Name, (b as TreeNode).Name);
+    }
+
     internal CustomTreeView() : base()
     {
         DrawMode = TreeViewDrawMode.OwnerDrawAll;
         DrawNode += new DrawTreeNodeEventHandler(DrawTreeNode);
+        TreeViewNodeSorter = new TreeNodeSorter();
     }
 
     private void DrawTreeNode(object sender, DrawTreeNodeEventArgs e)
@@ -35,7 +42,7 @@ internal class CustomTreeView : TreeView
 
         string subText = node.Name;
         if (string.IsNullOrWhiteSpace(subText) || subText == "ParadoxLauncher"
-            || ProgramSelection.FromId(subText) is null && ProgramSelection.GetDlcFromId(subText) is null)
+            || node.Tag is null && ProgramSelection.FromId(subText) is null && ProgramSelection.GetDlcFromId(subText) is null)
             return;
 
         Size subSize = TextRenderer.MeasureText(graphics, subText, subFont);

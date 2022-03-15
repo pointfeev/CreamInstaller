@@ -101,7 +101,19 @@ internal class ProgramSelection
         if (!DllDirectories.Any()) All.Remove(this);
     }
 
+    internal void Validate(List<(string platform, string id, string name)> programsToScan)
+    {
+        if (programsToScan is null || !programsToScan.Any(p => p.id == Id))
+        {
+            All.Remove(this);
+            return;
+        }
+        Validate();
+    }
+
     internal static void ValidateAll() => AllSafe.ForEach(selection => selection.Validate());
+
+    internal static void ValidateAll(List<(string platform, string id, string name)> programsToScan) => AllSafe.ForEach(selection => selection.Validate(programsToScan));
 
     internal static List<ProgramSelection> All = new();
 

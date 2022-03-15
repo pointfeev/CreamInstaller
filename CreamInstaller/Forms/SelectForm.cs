@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
@@ -82,6 +81,7 @@ internal partial class SelectForm : CustomForm
 
     private async Task GetApplicablePrograms(IProgress<int> progress)
     {
+        if (ProgramsToScan is null || !ProgramsToScan.Any()) return;
         int TotalGameCount = 0;
         int CompleteGameCount = 0;
         void AddToRemainingGames(string gameName)
@@ -99,7 +99,7 @@ internal partial class SelectForm : CustomForm
         RemainingGames.Clear(); // for display purposes only, otherwise ignorable
         RemainingDLCs.Clear(); // for display purposes only, otherwise ignorable
         List<Task> appTasks = new();
-        if (Directory.Exists(ParadoxLauncher.InstallPath))
+        if (Directory.Exists(ParadoxLauncher.InstallPath) && ProgramsToScan.Any(c => c.platform == "Paradox" && c.id == "ParadoxLauncher"))
         {
             ProgramSelection selection = ProgramSelection.FromId("ParadoxLauncher");
             selection ??= new();
@@ -119,7 +119,7 @@ internal partial class SelectForm : CustomForm
             programNode.Remove();
             selectionTreeView.Nodes.Add(programNode);
         }
-        if (Directory.Exists(SteamLibrary.InstallPath))
+        if (Directory.Exists(SteamLibrary.InstallPath) && ProgramsToScan.Any(c => c.platform == "Steam"))
         {
             List<Tuple<string, string, string, int, string>> steamGames = await SteamLibrary.GetGames();
             foreach (Tuple<string, string, string, int, string> program in steamGames)
@@ -129,10 +129,9 @@ internal partial class SelectForm : CustomForm
                 string branch = program.Item3;
                 int buildId = program.Item4;
                 string directory = program.Item5;
-                Thread.Sleep(0);
-                ProgramSelection selection = ProgramSelection.FromId(appId);
                 if (Program.Canceled) return;
-                if (Program.IsGameBlocked(name, directory)) continue;
+                Thread.Sleep(0);
+                if (Program.IsGameBlocked(name, directory) || !ProgramsToScan.Any(c => c.id == appId)) continue;
                 AddToRemainingGames(name);
                 Task task = Task.Run(async () =>
                 {
@@ -162,6 +161,7 @@ internal partial class SelectForm : CustomForm
                         foreach (string dlcAppId in dlcIds)
                         {
                             if (Program.Canceled) return;
+                            Thread.Sleep(0);
                             AddToRemainingDLCs(dlcAppId);
                             Task task = Task.Run(async () =>
                             {
@@ -209,7 +209,7 @@ internal partial class SelectForm : CustomForm
                         await task;
                     }
 
-                    selection ??= new();
+                    ProgramSelection selection = ProgramSelection.FromId(appId) ?? new();
                     selection.Enabled = allCheckBox.Checked || selection.SelectedDlc.Any() || selection.ExtraDlc.Any();
                     selection.Usable = true;
                     selection.Id = appId;
@@ -255,7 +255,7 @@ internal partial class SelectForm : CustomForm
                 appTasks.Add(task);
             }
         }
-        if (Directory.Exists(EpicLibrary.EpicAppDataPath))
+        if (Directory.Exists(EpicLibrary.EpicAppDataPath) && ProgramsToScan.Any(c => c.platform == "Epic"))
         {
             List<Manifest> epicGames = await EpicLibrary.GetGames();
             foreach (Manifest manifest in epicGames)
@@ -263,10 +263,9 @@ internal partial class SelectForm : CustomForm
                 string @namespace = manifest.CatalogNamespace;
                 string name = manifest.DisplayName;
                 string directory = manifest.InstallLocation;
-                Thread.Sleep(0);
-                ProgramSelection selection = ProgramSelection.FromId(@namespace);
                 if (Program.Canceled) return;
-                if (Program.IsGameBlocked(name, directory)) continue;
+                Thread.Sleep(0);
+                if (Program.IsGameBlocked(name, directory) || !ProgramsToScan.Any(c => c.id == @namespace)) continue;
                 AddToRemainingGames(name);
                 Task task = Task.Run(async () =>
                 {
@@ -292,6 +291,7 @@ internal partial class SelectForm : CustomForm
                             Task task = Task.Run(() =>
                             {
                                 if (Program.Canceled) return;
+                                Thread.Sleep(0);
                                 entitlements[id] = (name, product, icon, developer);
                                 RemoveFromRemainingDLCs(id);
                             });
@@ -311,7 +311,7 @@ internal partial class SelectForm : CustomForm
                         await task;
                     }
 
-                    selection ??= new();
+                    ProgramSelection selection = ProgramSelection.FromId(@namespace) ?? new();
                     selection.Enabled = allCheckBox.Checked || selection.SelectedDlc.Any() || selection.ExtraDlc.Any();
                     selection.Usable = true;
                     selection.Id = @namespace;
@@ -356,7 +356,7 @@ internal partial class SelectForm : CustomForm
                             programNode.Nodes.Add(entitlementsNode);*/
                             foreach (KeyValuePair<string, (string name, string product, string icon, string developer)> pair in entitlements)
                             {
-                                if (Program.Canceled || programNode is null/* || entitlementsNode is null*/) return;
+                                if (programNode is null/* || entitlementsNode is null*/) return;
                                 Thread.Sleep(0);
                                 string dlcId = pair.Key;
                                 (DlcType type, string name, string icon) dlcApp = (DlcType.Entitlement, pair.Value.name, pair.Value.icon);
@@ -384,7 +384,8 @@ internal partial class SelectForm : CustomForm
         }
     }
 
-    private async void OnLoad()
+    private List<(string platform, string id, string name)> ProgramsToScan;
+    private async void OnLoad(bool selectGamesToScan = false)
     {
         Program.Canceled = false;
         blockedGamesCheckBox.Enabled = false;
@@ -396,7 +397,32 @@ internal partial class SelectForm : CustomForm
         installButton.Enabled = false;
         uninstallButton.Enabled = installButton.Enabled;
         selectionTreeView.Enabled = false;
+        progressLabel.Text = "Waiting for user to select which programs/games to scan . . .";
         ShowProgressBar();
+
+        if (ProgramsToScan is null || !ProgramsToScan.Any() || selectGamesToScan)
+        {
+            List<(string platform, string id, string name, bool alreadySelected)> gameChoices = new();
+            if (Directory.Exists(ParadoxLauncher.InstallPath))
+                gameChoices.Add(("Paradox", "ParadoxLauncher", "Paradox Launcher", ProgramsToScan is not null && ProgramsToScan.Any(p => p.id == "ParadoxLauncher")));
+            if (Directory.Exists(SteamLibrary.InstallPath))
+                foreach (Tuple<string, string, string, int, string> program in await SteamLibrary.GetGames())
+                    if (!Program.IsGameBlocked(program.Item1, program.Item5))
+                        gameChoices.Add(("Steam", program.Item1, program.Item2, ProgramsToScan is not null && ProgramsToScan.Any(p => p.id == program.Item1)));
+            if (Directory.Exists(EpicLibrary.EpicAppDataPath))
+                foreach (Manifest manifest in await EpicLibrary.GetGames())
+                    if (!Program.IsGameBlocked(manifest.DisplayName, manifest.InstallLocation))
+                        gameChoices.Add(("Epic", manifest.CatalogNamespace, manifest.DisplayName, ProgramsToScan is not null && ProgramsToScan.Any(p => p.id == manifest.CatalogNamespace)));
+            if (gameChoices.Any())
+            {
+                using SelectDialogForm form = new(this);
+                List<(string platform, string id, string name)> choices = form.QueryUser("Choose which programs/games to scan:", gameChoices);
+                if (choices is not null) ProgramsToScan = choices;
+                noneFoundLabel.Text = "None of the chosen programs/games were CreamAPI-applicable or ScreamAPI-applicable!\n\nPress the \"Rescan Programs / Games\" button to re-choose.";
+            }
+            else
+                noneFoundLabel.Text = "No CreamAPI-applicable or ScreamAPI-applicable programs/games were found on your computer!";
+        }
 
         bool setup = true;
         int maxProgress = 0;
@@ -406,6 +432,7 @@ internal partial class SelectForm : CustomForm
         progress.ProgressChanged += (sender, _progress) =>
         {
             if (Program.Canceled) return;
+            Thread.Sleep(0);
             if (_progress < 0 || _progress > maxProgress) maxProgress = -_progress;
             else curProgress = _progress;
             int p = Math.Max(Math.Min((int)((float)(curProgress / (float)maxProgress) * 100), 100), 0);
@@ -415,14 +442,14 @@ internal partial class SelectForm : CustomForm
         };
 
         await ProgramData.Setup();
-        if (Directory.Exists(SteamLibrary.InstallPath))
+        if (Directory.Exists(SteamLibrary.InstallPath) && ProgramsToScan is not null && ProgramsToScan.Any(c => c.platform == "Steam"))
         {
             progressLabel.Text = $"Setting up SteamCMD . . . ";
             await SteamCMD.Setup(iProgress);
         }
         setup = false;
         progressLabel.Text = "Gathering and caching your applicable games and their DLCs . . . ";
-        ProgramSelection.ValidateAll();
+        ProgramSelection.ValidateAll(ProgramsToScan);
         TreeNodes.ForEach(node => node.Remove());
         await GetApplicablePrograms(iProgress);
         await SteamCMD.Cleanup();
@@ -502,11 +529,6 @@ internal partial class SelectForm : CustomForm
         return treeNodes;
     }
 
-    private class TreeNodeSorter : IComparer
-    {
-        public int Compare(object a, object b) => AppIdComparer.Comparer.Compare((a as TreeNode).Name, (b as TreeNode).Name);
-    }
-
     private void ShowProgressBar()
     {
         progressBar.Value = 0;
@@ -543,7 +565,6 @@ internal partial class SelectForm : CustomForm
         try
         {
             HideProgressBar();
-            selectionTreeView.TreeViewNodeSorter = new TreeNodeSorter();
             selectionTreeView.AfterCheck += OnTreeViewNodeCheckedChanged;
             selectionTreeView.NodeMouseClick += (sender, e) =>
             {
@@ -649,7 +670,7 @@ internal partial class SelectForm : CustomForm
                 }
                 contextMenuStrip.Show(selectionTreeView, e.Location);
             };
-            OnLoad();
+            OnLoad(true);
         }
         catch (Exception e)
         {
@@ -682,7 +703,7 @@ internal partial class SelectForm : CustomForm
 
     private void OnUninstall(object sender, EventArgs e) => OnAccept(true);
 
-    private void OnScan(object sender, EventArgs e) => OnLoad();
+    private void OnScan(object sender, EventArgs e) => OnLoad(true);
 
     private void OnCancel(object sender, EventArgs e)
     {
@@ -711,7 +732,7 @@ internal partial class SelectForm : CustomForm
     private void OnBlockProtectedGamesCheckBoxChanged(object sender, EventArgs e)
     {
         Program.BlockProtectedGames = blockedGamesCheckBox.Checked;
-        OnLoad();
+        OnLoad(true);
     }
 
     private readonly string helpButtonListPrefix = "\n    •  ";
