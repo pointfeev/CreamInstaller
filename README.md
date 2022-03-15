@@ -21,7 +21,7 @@ games and DLCs the user selects, however through the use of the **right-click co
 
 ---
 #### Features:
-* Automatic downloading and installing of SteamCMD (if Steam is installed). *for gathering appinfo such as name, buildid, listofdlc, depots*
+* Automatic downloading and installing of SteamCMD (if a Steam game is chosen). *for gathering appinfo such as name, buildid, listofdlc, depots*
 * Automatic gathering and caching of appinfo for **ALL** installed Steam and Epic games and **ALL** of their DLCs.
 * Automatic generation of cream_api.ini/ScreamAPI.json configuration and installation of CreamAPI/ScreamAPI DLLs.
 * Automatic uninstallation of CreamAPI/ScreamAPI DLLs and cream_api.ini/ScreamAPI.json configuration.
@@ -35,10 +35,10 @@ games and DLCs the user selects, however through the use of the **right-click co
 ---
 #### Usage:
 1. Start the program executable.
-2. Choose which programs/games the program should scan for DLC.
-3. Wait for the program to download and install SteamCMD (if you have Steam installed). *very fast, depends on internet speed*
-4. Wait for the program to gather and cache installed Steam and Epic games and their DLCs. *may take a good amount of time on the first run, depends on how many games you have installed and how many DLCs they have*
-5. **CAREFULLY** select what games and DLCs you wish to unlock. *CreamAPI and ScreamAPI are not tested for every game!*
+2. Choose which programs/games the program should scan for DLC. *the program automatically gathers all installed games from Steam and Epic directories*
+3. Wait for the program to download and install SteamCMD (if you chose a Steam game). *very fast, depends on internet speed*
+4. Wait for the program to gather and cache the chosen Steam/Epic games' appinfo & DLCs. *may take a good amount of time on the first run, depends on how many games you chose and how many DLCs they have*
+5. **CAREFULLY** select which games' DLCs you wish to unlock. *CreamAPI and ScreamAPI are not tested for every game!*
 6. Click the **Generate and Install** button.
 7. Click the **OK** button to close the program.
 8. If CreamAPI or ScreamAPI don't work for any of the games you installed them on, simply go back to step 4 and select what games you wish you **revert** changes to, and instead click the **Uninstall** button this time.
