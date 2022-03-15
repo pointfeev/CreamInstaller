@@ -50,7 +50,7 @@ namespace CreamInstaller
             this.acceptButton.Name = "acceptButton";
             this.acceptButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
             this.acceptButton.Size = new System.Drawing.Size(61, 24);
-            this.acceptButton.TabIndex = 0;
+            this.acceptButton.TabIndex = 1;
             this.acceptButton.Text = "OK";
             this.acceptButton.UseVisualStyleBackColor = true;
             // 
@@ -105,7 +105,7 @@ namespace CreamInstaller
             this.allCheckBox.Margin = new System.Windows.Forms.Padding(3, 0, 0, 0);
             this.allCheckBox.Name = "allCheckBox";
             this.allCheckBox.Size = new System.Drawing.Size(34, 19);
-            this.allCheckBox.TabIndex = 1;
+            this.allCheckBox.TabIndex = 2;
             this.allCheckBox.Text = "All";
             this.allCheckBox.CheckedChanged += new System.EventHandler(this.OnAllCheckBoxChanged);
             // 
@@ -120,7 +120,7 @@ namespace CreamInstaller
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
             this.cancelButton.Size = new System.Drawing.Size(81, 24);
-            this.cancelButton.TabIndex = 4;
+            this.cancelButton.TabIndex = 0;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             // 
