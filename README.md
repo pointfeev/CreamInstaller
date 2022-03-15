@@ -41,7 +41,7 @@ games and DLCs the user selects, however through the use of the **right-click co
 5. **CAREFULLY** select which games' DLCs you wish to unlock. *CreamAPI and ScreamAPI are not tested for every game!*
 6. Click the **Generate and Install** button.
 7. Click the **OK** button to close the program.
-8. If CreamAPI or ScreamAPI don't work for any of the games you installed them on, simply go back to step 4 and select what games you wish you **revert** changes to, and instead click the **Uninstall** button this time.
+8. If CreamAPI or ScreamAPI don't work for any of the games you installed them on, simply go back to step 5 and select what games you wish you **revert** changes to, and instead click the **Uninstall** button this time.
 
 ---
 ##### Bugs/Crashes/Issues:
