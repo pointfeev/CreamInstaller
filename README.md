@@ -35,12 +35,13 @@ games and DLCs the user selects, however through the use of the **right-click co
 ---
 #### Usage:
 1. Start the program executable.
-2. Wait for the program to download and install SteamCMD (if you have Steam installed). *very fast, depends on internet speed*
-3. Wait for the program to gather and cache installed Steam and Epic games and their DLCs. *may take a good amount of time on the first run, depends on how many games you have installed and how many DLCs they have*
-4. **CAREFULLY** select what games and DLCs you wish to unlock. *CreamAPI and ScreamAPI are not tested for every game!*
-5. Click the **Generate and Install** button.
-6. Click the **OK** button to close the program.
-7. If CreamAPI or ScreamAPI don't work for any of the games you installed them on, simply go back to step 4 and select what games you wish you **revert** changes to, and instead click the **Uninstall** button this time.
+2. Choose which programs/games the program should scan for DLC.
+3. Wait for the program to download and install SteamCMD (if you have Steam installed). *very fast, depends on internet speed*
+4. Wait for the program to gather and cache installed Steam and Epic games and their DLCs. *may take a good amount of time on the first run, depends on how many games you have installed and how many DLCs they have*
+5. **CAREFULLY** select what games and DLCs you wish to unlock. *CreamAPI and ScreamAPI are not tested for every game!*
+6. Click the **Generate and Install** button.
+7. Click the **OK** button to close the program.
+8. If CreamAPI or ScreamAPI don't work for any of the games you installed them on, simply go back to step 4 and select what games you wish you **revert** changes to, and instead click the **Uninstall** button this time.
 
 ---
 ##### Bugs/Crashes/Issues:
