@@ -416,7 +416,7 @@ internal partial class SelectForm : CustomForm
             if (gameChoices.Any())
             {
                 using SelectDialogForm form = new(this);
-                List<(string platform, string id, string name)> choices = form.QueryUser("Choose which programs/games to scan:", gameChoices);
+                List<(string platform, string id, string name)> choices = form.QueryUser("Choose which programs/games to scan for DLC:", gameChoices);
                 if (choices is not null) ProgramsToScan = choices;
                 noneFoundLabel.Text = "None of the chosen programs/games were CreamAPI-applicable or ScreamAPI-applicable!\n\nPress the \"Rescan Programs / Games\" button to re-choose.";
             }
