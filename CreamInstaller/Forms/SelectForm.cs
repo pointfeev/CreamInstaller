@@ -471,8 +471,8 @@ internal partial class SelectForm : CustomForm
         if (e.Action == TreeViewAction.Unknown) return;
         TreeNode node = e.Node;
         if (node is null) return;
-        CheckNode(node);
-        SyncNodeParents(node);
+        SyncNode(node);
+        SyncNodeAncestors(node);
         SyncNodeDescendants(node);
         allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
         allCheckBox.Checked = TreeNodes.TrueForAll(treeNode => treeNode.Checked);
@@ -481,13 +481,13 @@ internal partial class SelectForm : CustomForm
         uninstallButton.Enabled = installButton.Enabled;
     }
 
-    private static void SyncNodeParents(TreeNode node)
+    private static void SyncNodeAncestors(TreeNode node)
     {
         TreeNode parentNode = node.Parent;
         if (parentNode is not null)
         {
-            parentNode.Checked = parentNode.Nodes.Cast<TreeNode>().ToList().Any(childNode => childNode.Checked);
-            SyncNodeParents(parentNode);
+            parentNode.Checked = parentNode.Nodes.Cast<TreeNode>().Any(childNode => childNode.Checked);
+            SyncNodeAncestors(parentNode);
         }
     }
 
@@ -495,11 +495,11 @@ internal partial class SelectForm : CustomForm
         node.Nodes.Cast<TreeNode>().ToList().ForEach(childNode =>
         {
             childNode.Checked = node.Checked;
-            CheckNode(childNode);
+            SyncNode(childNode);
             SyncNodeDescendants(childNode);
         });
 
-    private static void CheckNode(TreeNode node)
+    private static void SyncNode(TreeNode node)
     {
         (string gameId, (DlcType type, string name, string icon) app)? dlc = ProgramSelection.GetDlcFromId(node.Name);
         if (dlc.HasValue)
@@ -591,6 +591,7 @@ internal partial class SelectForm : CustomForm
                 contextMenuStrip.Items.Add(header ?? new ContextMenuItem(node.Text));
                 string appInfoVDF = $@"{SteamCMD.AppInfoPath}\{id}.vdf";
                 string appInfoJSON = $@"{SteamCMD.AppInfoPath}\{id}.json";
+                string cooldown = $@"{ProgramData.CooldownPath}\{id}.txt";
                 if (Directory.Exists(Directory.GetDirectoryRoot(appInfoVDF)) && (File.Exists(appInfoVDF) || File.Exists(appInfoJSON)))
                 {
                     List<ContextMenuItem> queries = new();
@@ -616,6 +617,11 @@ internal partial class SelectForm : CustomForm
                                 try
                                 {
                                     File.Delete(appInfoJSON);
+                                }
+                                catch { }
+                                try
+                                {
+                                    File.Delete(cooldown);
                                 }
                                 catch { }
                                 OnLoad();
