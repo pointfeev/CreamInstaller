@@ -88,6 +88,7 @@ internal partial class SelectForm : CustomForm
         {
             this.AddToRemainingGames(gameName);
             progress.Report(-++TotalGameCount);
+            progress.Report(CompleteGameCount);
         }
         void RemoveFromRemainingGames(string gameName)
         {
