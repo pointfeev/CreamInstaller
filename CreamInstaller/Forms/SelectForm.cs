@@ -404,6 +404,8 @@ internal partial class SelectForm : CustomForm
         progressLabel.Text = "Waiting for user to select which programs/games to scan . . .";
         ShowProgressBar();
 
+        await ProgramData.Setup();
+
         bool scan = forceScan;
         if (!scan && (ProgramsToScan is null || !ProgramsToScan.Any() || forceProvideChoices))
         {
@@ -454,7 +456,6 @@ internal partial class SelectForm : CustomForm
                     : $"Gathering and caching your applicable games and their DLCs . . . {p}%";
                 progressBar.Value = p;
             };
-            await ProgramData.Setup();
             if (Directory.Exists(SteamLibrary.InstallPath) && ProgramsToScan is not null && ProgramsToScan.Any(c => c.platform == "Steam"))
             {
                 progressLabel.Text = $"Setting up SteamCMD . . . ";
