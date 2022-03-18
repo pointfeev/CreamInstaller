@@ -285,17 +285,20 @@ internal partial class InstallForm : CustomForm
         int cur = 0;
         foreach (string directory in selection.DllDirectories)
         {
-            UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} {(selection.IsSteam ? "CreamAPI" : "ScreamAPI")}" +
+            string platform = selection.Platform == Platform.Steam ? "CreamAPI"
+                : selection.Platform == Platform.Epic ? "ScreamAPI"
+                : throw new InvalidPlatformException(selection.Platform);
+            UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} {platform}" +
                 $" {(Uninstalling ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
-            if (!Program.IsProgramRunningDialog(this, selection)) throw new OperationCanceledException();
-            if (selection.IsSteam)
+            if (Program.Canceled || !Program.IsProgramRunningDialog(this, selection)) throw new CustomMessageException("The operation was canceled.");
+            if (platform == "CreamAPI")
             {
                 if (Uninstalling)
                     await UninstallCreamAPI(directory, this);
                 else
                     await InstallCreamAPI(directory, selection, this);
             }
-            else
+            else if (platform == "ScreamAPI")
             {
                 if (Uninstalling)
                     await UninstallScreamAPI(directory, this);
@@ -309,13 +312,13 @@ internal partial class InstallForm : CustomForm
 
     private async Task Operate()
     {
-        List<ProgramSelection> programSelections = ProgramSelection.AllUsableEnabled;
+        List<ProgramSelection> programSelections = ProgramSelection.AllEnabled;
         OperationsCount = programSelections.Count;
         CompleteOperationsCount = 0;
         List<ProgramSelection> disabledSelections = new();
         foreach (ProgramSelection selection in programSelections)
         {
-            if (!Program.IsProgramRunningDialog(this, selection)) throw new OperationCanceledException();
+            if (Program.Canceled || !Program.IsProgramRunningDialog(this, selection)) throw new CustomMessageException("The operation was canceled.");
             try
             {
                 await OperateFor(selection);
@@ -330,17 +333,18 @@ internal partial class InstallForm : CustomForm
             ++CompleteOperationsCount;
         }
         Program.Cleanup();
-        List<ProgramSelection> FailedSelections = ProgramSelection.AllUsableEnabled;
+        List<ProgramSelection> FailedSelections = ProgramSelection.AllEnabled;
         if (FailedSelections.Any())
             if (FailedSelections.Count == 1) throw new CustomMessageException($"Operation failed for {FailedSelections.First().Name}.");
             else throw new CustomMessageException($"Operation failed for {FailedSelections.Count} programs.");
         foreach (ProgramSelection selection in disabledSelections) selection.Enabled = true;
     }
 
-    private readonly int ProgramCount = ProgramSelection.AllUsableEnabled.Count;
+    private readonly int ProgramCount = ProgramSelection.AllEnabled.Count;
 
     private async void Start()
     {
+        Program.Canceled = false;
         acceptButton.Enabled = false;
         retryButton.Enabled = false;
         cancelButton.Enabled = true;

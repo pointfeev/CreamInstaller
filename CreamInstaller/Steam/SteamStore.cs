@@ -27,7 +27,7 @@ internal static class SteamStore
     {
         if (Program.Canceled) return null;
         string cacheFile = ProgramData.AppInfoPath + @$"\{appId}.json";
-        bool cachedExists = Directory.Exists(Directory.GetDirectoryRoot(cacheFile)) && File.Exists(cacheFile);
+        bool cachedExists = File.Exists(cacheFile);
         if (!cachedExists || ProgramData.CheckCooldown(appId, isDlc ? COOLDOWN_DLC : COOLDOWN_GAME))
         {
             string response = await HttpClientManager.EnsureGet($"https://store.steampowered.com/api/appdetails?appids={appId}");

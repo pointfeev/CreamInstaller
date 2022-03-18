@@ -147,6 +147,7 @@ internal static class SteamCMD
     }
 
     internal static readonly string AppCachePath = DirectoryPath + @"\appcache";
+    internal static readonly string ConfigPath = DirectoryPath + @"\config";
     internal static readonly string DumpsPath = DirectoryPath + @"\dumps";
     internal static readonly string LogsPath = DirectoryPath + @"\logs";
     internal static readonly string SteamAppsPath = DirectoryPath + @"\steamapps";
@@ -155,6 +156,21 @@ internal static class SteamCMD
     {
         if (!Directory.Exists(DirectoryPath)) return;
         await Kill();
+        try
+        {
+            string[] ntfsFiles = Directory.GetFiles(DirectoryPath, "*.ntfs_transaction_failed");
+            foreach (string file in ntfsFiles) File.Delete(file);
+        }
+        catch { }
+        try
+        {
+            if (Directory.Exists(ConfigPath))
+            {
+                string[] tmpFiles = Directory.GetFiles(ConfigPath, "*.tmp");
+                foreach (string file in tmpFiles) File.Delete(file);
+            }
+        }
+        catch { }
         try
         {
             string[] oldFiles = Directory.GetFiles(DirectoryPath, "*.old");

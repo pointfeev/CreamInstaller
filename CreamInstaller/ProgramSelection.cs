@@ -7,7 +7,20 @@ using CreamInstaller.Components;
 
 namespace CreamInstaller;
 
-internal enum DlcType
+public enum Platform
+{
+    Steam = 0,
+    Epic = 1
+}
+public class InvalidPlatformException : Exception
+{
+    public InvalidPlatformException() : base("Invalid platform!") { }
+    public InvalidPlatformException(Platform platform) : base($"Invalid platform ({platform})!") { }
+    public InvalidPlatformException(string message) : base(message) { }
+    public InvalidPlatformException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public enum DlcType
 {
     Default = 0,
     CatalogItem = 1,
@@ -17,7 +30,7 @@ internal enum DlcType
 internal class ProgramSelection
 {
     internal bool Enabled;
-    internal bool Usable = true;
+    internal Platform Platform = (Platform)(-1);
 
     internal string Id = "0";
     internal string Name = "Program";
@@ -30,8 +43,6 @@ internal class ProgramSelection
 
     internal string RootDirectory;
     internal List<string> DllDirectories;
-
-    internal bool IsSteam;
 
     internal readonly SortedList<string, (DlcType type, string name, string icon)> AllDlc = new(AppIdComparer.Comparer);
     internal readonly SortedList<string, (DlcType type, string name, string icon)> SelectedDlc = new(AppIdComparer.Comparer);
@@ -119,15 +130,13 @@ internal class ProgramSelection
 
     internal static List<ProgramSelection> AllSafe => All.ToList();
 
-    internal static List<ProgramSelection> AllUsable => All.FindAll(s => s.Usable);
+    internal static List<ProgramSelection> AllEnabled => AllSafe.FindAll(s => s.Enabled);
 
-    internal static List<ProgramSelection> AllUsableEnabled => AllUsable.FindAll(s => s.Enabled);
-
-    internal static ProgramSelection FromId(string gameId) => AllUsable.Find(s => s.Id == gameId);
+    internal static ProgramSelection FromId(string gameId) => AllSafe.Find(s => s.Id == gameId);
 
     internal static (string gameId, (DlcType type, string name, string icon) app)? GetDlcFromId(string dlcId)
     {
-        foreach (ProgramSelection selection in AllUsable)
+        foreach (ProgramSelection selection in AllSafe)
             foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in selection.AllDlc)
                 if (pair.Key == dlcId) return (selection.Id, pair.Value);
         return null;

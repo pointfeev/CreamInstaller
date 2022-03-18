@@ -19,13 +19,16 @@ internal static class Diagnostics
         }
     }
 
-    internal static string GetNotepadPath() => NotepadPlusPlusPath is not null ? NotepadPlusPlusPath + @"\notepad++.exe"
-        : Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\notepad.exe";
+    internal static string GetNotepadPath()
+    {
+        string npp = NotepadPlusPlusPath + @"\notepad++.exe";
+        return File.Exists(npp) ? npp : Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\notepad.exe";
+    }
 
     internal static void OpenFileInNotepad(string path)
     {
         string npp = NotepadPlusPlusPath + @"\notepad++.exe";
-        if (Directory.Exists(NotepadPlusPlusPath) && File.Exists(npp))
+        if (File.Exists(npp))
             OpenFileInNotepadPlusPlus(npp, path);
         else
             OpenFileInWindowsNotepad(path);

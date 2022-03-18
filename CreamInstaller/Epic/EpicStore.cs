@@ -28,7 +28,7 @@ internal static class EpicStore
     {
         List<(string id, string name, string product, string icon, string developer)> dlcIds = new();
         string cacheFile = ProgramData.AppInfoPath + @$"\{categoryNamespace}.json";
-        bool cachedExists = Directory.Exists(Directory.GetDirectoryRoot(cacheFile)) && File.Exists(cacheFile);
+        bool cachedExists = File.Exists(cacheFile);
         Response response = null;
         if (!cachedExists || ProgramData.CheckCooldown(categoryNamespace, COOLDOWN_ENTITLEMENT))
         {

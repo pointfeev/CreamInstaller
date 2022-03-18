@@ -1,8 +1,6 @@
 ﻿
 using System.Windows.Forms;
 
-using CreamInstaller.Components;
-
 namespace CreamInstaller
 {
     partial class SelectForm
@@ -33,7 +31,6 @@ namespace CreamInstaller
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             this.installButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -42,7 +39,7 @@ namespace CreamInstaller
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.blockedGamesCheckBox = new System.Windows.Forms.CheckBox();
             this.blockProtectedHelpButton = new System.Windows.Forms.Button();
-            this.selectionTreeView = new CustomTreeView();
+            this.selectionTreeView = new CreamInstaller.Components.CustomTreeView();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.allCheckBox = new System.Windows.Forms.CheckBox();
             this.progressBar = new System.Windows.Forms.ProgressBar();
@@ -161,17 +158,17 @@ namespace CreamInstaller
             // 
             // selectionTreeView
             // 
-            this.selectionTreeView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.selectionTreeView.BackColor = System.Drawing.SystemColors.Control;
             this.selectionTreeView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.selectionTreeView.CheckBoxes = true;
+            this.selectionTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.selectionTreeView.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawAll;
             this.selectionTreeView.Enabled = false;
             this.selectionTreeView.FullRowSelect = true;
-            this.selectionTreeView.Location = new System.Drawing.Point(6, 22);
+            this.selectionTreeView.Location = new System.Drawing.Point(3, 19);
             this.selectionTreeView.Name = "selectionTreeView";
-            this.selectionTreeView.Size = new System.Drawing.Size(548, 280);
+            this.selectionTreeView.Size = new System.Drawing.Size(554, 218);
+            this.selectionTreeView.Sorted = true;
             this.selectionTreeView.TabIndex = 1001;
             // 
             // flowLayoutPanel2
@@ -189,6 +186,8 @@ namespace CreamInstaller
             // allCheckBox
             // 
             this.allCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.allCheckBox.Checked = true;
+            this.allCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.allCheckBox.Enabled = false;
             this.allCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.allCheckBox.Location = new System.Drawing.Point(3, 0);
@@ -199,28 +198,12 @@ namespace CreamInstaller
             this.allCheckBox.Text = "All";
             this.allCheckBox.CheckedChanged += new System.EventHandler(this.OnAllCheckBoxChanged);
             // 
-            // selectionTreeView
-            // 
-            this.selectionTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.selectionTreeView.Location = new System.Drawing.Point(3, 19);
-            this.selectionTreeView.Size = new System.Drawing.Size(554, 218);
-            this.selectionTreeView.BackColor = System.Drawing.SystemColors.Control;
-            this.selectionTreeView.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.selectionTreeView.CheckBoxes = true;
-            this.selectionTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.selectionTreeView.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawAll;
-            this.selectionTreeView.Enabled = false;
-            this.selectionTreeView.FullRowSelect = true;
-            this.selectionTreeView.LineColor = System.Drawing.Color.Empty;
-            this.selectionTreeView.Name = "selectionTreeView";
-            this.selectionTreeView.TabIndex = 1001;
-            // 
-            // progressBar1
+            // progressBar
             // 
             this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.progressBar.Location = new System.Drawing.Point(12, 297);
-            this.progressBar.Name = "progressBar1";
+            this.progressBar.Name = "progressBar";
             this.progressBar.Size = new System.Drawing.Size(560, 23);
             this.progressBar.TabIndex = 9;
             // 
@@ -271,13 +254,13 @@ namespace CreamInstaller
             this.progressLabelGames.TabIndex = 11;
             this.progressLabelGames.Text = "Remaining games (2): Game 1, Game 2";
             // 
-            // progressLabelDLC
+            // progressLabelDLCs
             // 
             this.progressLabelDLCs.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.progressLabelDLCs.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.progressLabelDLCs.Location = new System.Drawing.Point(12, 282);
-            this.progressLabelDLCs.Name = "progressLabelDLC";
+            this.progressLabelDLCs.Name = "progressLabelDLCs";
             this.progressLabelDLCs.Size = new System.Drawing.Size(560, 12);
             this.progressLabelDLCs.TabIndex = 10004;
             this.progressLabelDLCs.Text = "Remaining DLC (2): 123456, 654321";
@@ -326,7 +309,7 @@ namespace CreamInstaller
         private System.Windows.Forms.CheckBox allCheckBox;
         private Button scanButton;
         private Label noneFoundLabel;
-        private CustomTreeView selectionTreeView;
+        private CreamInstaller.Components.CustomTreeView selectionTreeView;
         private CheckBox blockedGamesCheckBox;
         private Button blockProtectedHelpButton;
         private FlowLayoutPanel flowLayoutPanel1;

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -17,6 +19,8 @@ internal static class ProgramData
     internal static readonly Version MinimumAppInfoVersion = Version.Parse("3.2.0.0");
 
     internal static readonly string CooldownPath = DirectoryPath + @"\cooldown";
+
+    internal static readonly string ChoicesPath = DirectoryPath + @"\choices.txt";
 
     internal static async Task Setup() => await Task.Run(() =>
     {
@@ -70,6 +74,27 @@ internal static class ProgramData
         try
         {
             File.WriteAllText(cooldownFile, time.ToString());
+        }
+        catch { }
+    }
+
+    internal static List<string> ReadChoices()
+    {
+        if (!File.Exists(ChoicesPath)) return new();
+        try
+        {
+            return File.ReadAllLines(ChoicesPath).ToList();
+        }
+        catch
+        {
+            return new();
+        }
+    }
+    internal static void WriteChoices(List<string> choices)
+    {
+        try
+        {
+            File.WriteAllLines(ChoicesPath, choices.ToArray());
         }
         catch { }
     }
