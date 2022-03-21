@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using CreamInstaller.Components;
+using CreamInstaller.Paradox;
 using CreamInstaller.Resources;
 using CreamInstaller.Utility;
 
@@ -61,14 +62,14 @@ internal partial class InstallForm : CustomForm
         writer.WriteLine();
         writer.WriteLine("[dlc]");
         if (installForm is not null)
-            installForm.UpdateUser($"Added game to cream_api.ini with appid {appId} ({name})", InstallationLog.Resource, info: false);
+            installForm.UpdateUser($"Added game to cream_api.ini with appid {appId} ({name})", InstallationLog.Action, info: false);
         foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in dlc)
         {
             string dlcId = pair.Key;
             (_, string dlcName, _) = pair.Value;
             writer.WriteLine($"{dlcId} = {dlcName}");
             if (installForm is not null)
-                installForm.UpdateUser($"Added DLC to cream_api.ini with appid {dlcId} ({dlcName})", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Added DLC to cream_api.ini with appid {dlcId} ({dlcName})", InstallationLog.Action, info: false);
         }
     }
 
@@ -81,11 +82,11 @@ internal partial class InstallForm : CustomForm
             {
                 File.Delete(sdk32);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Deleted file: {Path.GetFileName(sdk32)}", InstallationLog.Resource, info: false);
+                    installForm.UpdateUser($"Deleted file: {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
             }
             File.Move(sdk32_o, sdk32);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk32_o)} -> {Path.GetFileName(sdk32)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk32_o)} -> {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
         }
         if (File.Exists(sdk64_o))
         {
@@ -93,17 +94,17 @@ internal partial class InstallForm : CustomForm
             {
                 File.Delete(sdk64);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Deleted file: {Path.GetFileName(sdk64)}", InstallationLog.Resource, info: false);
+                    installForm.UpdateUser($"Deleted file: {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
             }
             File.Move(sdk64_o, sdk64);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk64_o)} -> {Path.GetFileName(sdk64)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk64_o)} -> {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
         }
         if (File.Exists(config))
         {
             File.Delete(config);
             if (installForm is not null)
-                installForm.UpdateUser($"Deleted file: {Path.GetFileName(config)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Deleted file: {Path.GetFileName(config)}", InstallationLog.Action, info: false);
         }
     });
 
@@ -114,25 +115,25 @@ internal partial class InstallForm : CustomForm
         {
             File.Move(sdk32, sdk32_o);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk32)} -> {Path.GetFileName(sdk32_o)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk32)} -> {Path.GetFileName(sdk32_o)}", InstallationLog.Action, info: false);
         }
         if (File.Exists(sdk32_o))
         {
             Properties.Resources.Steamworks32.Write(sdk32);
             if (installForm is not null)
-                installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(sdk32)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
         }
         if (File.Exists(sdk64) && !File.Exists(sdk64_o))
         {
             File.Move(sdk64, sdk64_o);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk64)} -> {Path.GetFileName(sdk64_o)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk64)} -> {Path.GetFileName(sdk64_o)}", InstallationLog.Action, info: false);
         }
         if (File.Exists(sdk64_o))
         {
             Properties.Resources.Steamworks64.Write(sdk64);
             if (installForm is not null)
-                installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(sdk64)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
         }
         if (installForm is not null)
             installForm.UpdateUser("Generating CreamAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
@@ -166,7 +167,7 @@ internal partial class InstallForm : CustomForm
                 (_, string name, _) = pair.Value;
                 writer.WriteLine($"      \"{id}\"{(pair.Equals(lastCatalogItem) ? "" : ",")}");
                 if (installForm is not null)
-                    installForm.UpdateUser($"Added catalog item to ScreamAPI.json with id {id} ({name})", InstallationLog.Resource, info: false);
+                    installForm.UpdateUser($"Added catalog item to ScreamAPI.json with id {id} ({name})", InstallationLog.Action, info: false);
             }
             writer.WriteLine("    ]");
         }
@@ -190,7 +191,7 @@ internal partial class InstallForm : CustomForm
                 (_, string name, _) = pair.Value;
                 writer.WriteLine($"      \"{id}\"{(pair.Equals(lastEntitlement) ? "" : ",")}");
                 if (installForm is not null)
-                    installForm.UpdateUser($"Added entitlement to ScreamAPI.json with id {id} ({name})", InstallationLog.Resource, info: false);
+                    installForm.UpdateUser($"Added entitlement to ScreamAPI.json with id {id} ({name})", InstallationLog.Action, info: false);
             }
             writer.WriteLine("    ]");
         }
@@ -213,11 +214,11 @@ internal partial class InstallForm : CustomForm
             {
                 File.Delete(sdk32);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Deleted file: {Path.GetFileName(sdk32)}", InstallationLog.Resource, info: false);
+                    installForm.UpdateUser($"Deleted file: {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
             }
             File.Move(sdk32_o, sdk32);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk32_o)} -> {Path.GetFileName(sdk32)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk32_o)} -> {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
         }
         if (File.Exists(sdk64_o))
         {
@@ -225,17 +226,17 @@ internal partial class InstallForm : CustomForm
             {
                 File.Delete(sdk64);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Deleted file: {Path.GetFileName(sdk64)}", InstallationLog.Resource, info: false);
+                    installForm.UpdateUser($"Deleted file: {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
             }
             File.Move(sdk64_o, sdk64);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk64_o)} -> {Path.GetFileName(sdk64)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk64_o)} -> {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
         }
         if (File.Exists(config))
         {
             File.Delete(config);
             if (installForm is not null)
-                installForm.UpdateUser($"Deleted file: {Path.GetFileName(config)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Deleted file: {Path.GetFileName(config)}", InstallationLog.Action, info: false);
         }
     });
 
@@ -246,25 +247,25 @@ internal partial class InstallForm : CustomForm
         {
             File.Move(sdk32, sdk32_o);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk32)} -> {Path.GetFileName(sdk32_o)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk32)} -> {Path.GetFileName(sdk32_o)}", InstallationLog.Action, info: false);
         }
         if (File.Exists(sdk32_o))
         {
             Properties.Resources.EpicOnlineServices32.Write(sdk32);
             if (installForm is not null)
-                installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(sdk32)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
         }
         if (File.Exists(sdk64) && !File.Exists(sdk64_o))
         {
             File.Move(sdk64, sdk64_o);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk64)} -> {Path.GetFileName(sdk64_o)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk64)} -> {Path.GetFileName(sdk64_o)}", InstallationLog.Action, info: false);
         }
         if (File.Exists(sdk64_o))
         {
             Properties.Resources.EpicOnlineServices64.Write(sdk64);
             if (installForm is not null)
-                installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(sdk64)}", InstallationLog.Resource, info: false);
+                installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
         }
         if (installForm is not null)
             installForm.UpdateUser("Generating ScreamAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
@@ -283,11 +284,33 @@ internal partial class InstallForm : CustomForm
         UpdateProgress(0);
         int count = selection.DllDirectories.Count;
         int cur = 0;
+        int code = 0;
+        if (selection.Id == "ParadoxLauncher")
+        {
+            UpdateUser($"Repairing Paradox Launcher . . . ", InstallationLog.Operation);
+            code = await ParadoxLauncher.Repair(this, selection);
+            switch (code)
+            {
+                case -2:
+                    throw new CustomMessageException("Repair failed! The Paradox Launcher is currently running!");
+                case -1:
+                    throw new CustomMessageException("Repair failed! " +
+                        "An original Steamworks/Epic Online Services SDK file could not be found. " +
+                        "You must reinstall Paradox Launcher to fix this issue.");
+                case 0:
+                    UpdateUser("Paradox Launcher does not need to be repaired.", InstallationLog.Action);
+                    break;
+                case 1:
+                    UpdateUser("Paradox Launcher successfully repaired!", InstallationLog.Success);
+                    break;
+            }
+        }
+        if (code < 0) throw new CustomMessageException("Repair failed!");
+        string platform = selection.Platform == Platform.Steam ? "CreamAPI"
+            : selection.Platform == Platform.Epic ? "ScreamAPI"
+            : throw new InvalidPlatformException(selection.Platform);
         foreach (string directory in selection.DllDirectories)
         {
-            string platform = selection.Platform == Platform.Steam ? "CreamAPI"
-                : selection.Platform == Platform.Epic ? "ScreamAPI"
-                : throw new InvalidPlatformException(selection.Platform);
             UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} {platform}" +
                 $" {(Uninstalling ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
             if (Program.Canceled || !Program.IsProgramRunningDialog(this, selection)) throw new CustomMessageException("The operation was canceled.");

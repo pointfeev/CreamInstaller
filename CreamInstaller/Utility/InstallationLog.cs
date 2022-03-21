@@ -7,7 +7,7 @@ internal static class InstallationLog
 {
     internal static readonly Color Background = Color.DarkSlateGray;
     internal static readonly Color Operation = Color.LightGray;
-    internal static readonly Color Resource = Color.LightBlue;
+    internal static readonly Color Action = Color.LightBlue;
     internal static readonly Color Success = Color.LightGreen;
     internal static readonly Color Cleanup = Color.YellowGreen;
     internal static readonly Color Warning = Color.Yellow;

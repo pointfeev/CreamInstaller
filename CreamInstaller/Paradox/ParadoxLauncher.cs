@@ -61,9 +61,9 @@ internal static class ParadoxLauncher
         return false;
     }
 
-    internal static async Task Repair(Form form, ProgramSelection selection)
+    internal static async Task<int> Repair(Form form, ProgramSelection selection)
     {
-        if (!Program.IsProgramRunningDialog(form, selection)) return;
+        if (!Program.IsProgramRunningDialog(form, selection)) return -2;
         byte[] creamConfig = null;
         byte[] steamOriginalSdk32 = null;
         byte[] steamOriginalSdk64 = null;
@@ -130,13 +130,22 @@ internal static class ParadoxLauncher
                 }
             }
             if (neededRepair)
-                dialogForm.Show(form.Icon, "Paradox Launcher successfully repaired!", "OK");
+            {
+                if (form is not InstallForm) dialogForm.Show(form.Icon, "Paradox Launcher successfully repaired!", "OK");
+                return 1;
+            }
             else
-                dialogForm.Show(SystemIcons.Information, "Paradox Launcher does not need to be repaired.", "OK");
+            {
+                if (form is not InstallForm) dialogForm.Show(SystemIcons.Information, "Paradox Launcher does not need to be repaired.", "OK");
+                return 0;
+            }
         }
         else
-            dialogForm.Show(SystemIcons.Error, "Paradox Launcher repair failed!"
+        {
+            if (form is not InstallForm) dialogForm.Show(SystemIcons.Error, "Paradox Launcher repair failed!"
                 + "\n\nAn original Steamworks/Epic Online Services SDK file could not be found."
                 + "\nYou must reinstall Paradox Launcher to fix this issue.", "OK");
+            return -1;
+        }
     }
 }
