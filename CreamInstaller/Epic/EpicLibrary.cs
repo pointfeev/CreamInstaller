@@ -28,7 +28,6 @@ internal static class EpicLibrary
     internal static async Task<List<Manifest>> GetGames() => await Task.Run(() =>
     {
         List<Manifest> games = new();
-        if (!Directory.Exists(EpicManifestsPath)) return games;
         string manifests = EpicManifestsPath;
         if (!Directory.Exists(manifests)) return games;
         string[] files = Directory.GetFiles(manifests, "*.item");
