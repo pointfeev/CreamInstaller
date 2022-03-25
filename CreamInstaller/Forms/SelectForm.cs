@@ -260,7 +260,7 @@ internal partial class SelectForm : CustomForm
                 appTasks.Add(task);
             }
         }
-        if (Directory.Exists(EpicLibrary.EpicAppDataPath) && ProgramsToScan.Any(c => c.platform == "Epic"))
+        if (Directory.Exists(EpicLibrary.EpicManifestsPath) && ProgramsToScan.Any(c => c.platform == "Epic"))
         {
             List<Manifest> epicGames = await EpicLibrary.GetGames();
             foreach (Manifest manifest in epicGames)
@@ -417,7 +417,7 @@ internal partial class SelectForm : CustomForm
                 foreach (Tuple<string, string, string, int, string> program in await SteamLibrary.GetGames())
                     if (!Program.IsGameBlocked(program.Item1, program.Item5))
                         gameChoices.Add(("Steam", program.Item1, program.Item2, ProgramsToScan is not null && ProgramsToScan.Any(p => p.id == program.Item1)));
-            if (Directory.Exists(EpicLibrary.EpicAppDataPath))
+            if (Directory.Exists(EpicLibrary.EpicManifestsPath))
                 foreach (Manifest manifest in await EpicLibrary.GetGames())
                     if (!Program.IsGameBlocked(manifest.DisplayName, manifest.InstallLocation))
                         gameChoices.Add(("Epic", manifest.CatalogNamespace, manifest.DisplayName, ProgramsToScan is not null && ProgramsToScan.Any(p => p.id == manifest.CatalogNamespace)));

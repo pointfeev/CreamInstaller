@@ -11,22 +11,25 @@ namespace CreamInstaller.Epic;
 
 internal static class EpicLibrary
 {
-    private static string epicAppDataPath;
-    internal static string EpicAppDataPath
+    private static string epicManifestsPath;
+    internal static string EpicManifestsPath
     {
         get
         {
-            epicAppDataPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Epic Games\EpicGamesLauncher", "AppDataPath", null) as string;
-            epicAppDataPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Epic Games\EpicGamesLauncher", "AppDataPath", null) as string;
-            return epicAppDataPath;
+            epicManifestsPath ??= Registry.GetValue(@"HKEY_CURRENT_USER\Software\Epic Games\EOS", "ModSdkMetadataDir", null) as string;
+            epicManifestsPath ??= Registry.GetValue(@"HKEY_CURRENT_USER\Software\Wow6432Node\Epic Games\EOS", "ModSdkMetadataDir", null) as string;
+            epicManifestsPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Epic Games\EpicGamesLauncher", "AppDataPath", null) as string;
+            epicManifestsPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Epic Games\EpicGamesLauncher", "AppDataPath", null) as string;
+            if (epicManifestsPath.EndsWith(@"\Data")) epicManifestsPath += @"\Manifests";
+            return epicManifestsPath;
         }
     }
 
     internal static async Task<List<Manifest>> GetGames() => await Task.Run(() =>
     {
         List<Manifest> games = new();
-        if (!Directory.Exists(EpicAppDataPath)) return games;
-        string manifests = EpicAppDataPath + @"\Manifests";
+        if (!Directory.Exists(EpicManifestsPath)) return games;
+        string manifests = EpicManifestsPath;
         if (!Directory.Exists(manifests)) return games;
         string[] files = Directory.GetFiles(manifests, "*.item");
         foreach (string file in files)
