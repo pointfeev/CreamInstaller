@@ -55,7 +55,7 @@ internal static class ParadoxLauncher
                 return dialogForm.Show(SystemIcons.Warning,
                     $"WARNING: There are no installed games with DLC that can be added to the Paradox Launcher!" +
                     "\n\nInstalling CreamAPI/ScreamAPI for the Paradox Launcher is pointless, since no DLC will be added to the configuration!",
-                    "Ignore", "Cancel") != DialogResult.OK;
+                    "Ignore", "Cancel", customFormText: "Paradox Launcher") != DialogResult.OK;
             }
         }
         return false;
@@ -131,12 +131,12 @@ internal static class ParadoxLauncher
             }
             if (neededRepair)
             {
-                if (form is not InstallForm) dialogForm.Show(form.Icon, "Paradox Launcher successfully repaired!", "OK");
+                if (form is not InstallForm) dialogForm.Show(form.Icon, "Paradox Launcher successfully repaired!", "OK", customFormText: "Paradox Launcher");
                 return 1;
             }
             else
             {
-                if (form is not InstallForm) dialogForm.Show(SystemIcons.Information, "Paradox Launcher does not need to be repaired.", "OK");
+                if (form is not InstallForm) dialogForm.Show(SystemIcons.Information, "Paradox Launcher does not need to be repaired.", "OK", customFormText: "Paradox Launcher");
                 return 0;
             }
         }
@@ -144,7 +144,7 @@ internal static class ParadoxLauncher
         {
             if (form is not InstallForm) dialogForm.Show(SystemIcons.Error, "Paradox Launcher repair failed!"
                 + "\n\nAn original Steamworks/Epic Online Services SDK file could not be found."
-                + "\nYou must reinstall Paradox Launcher to fix this issue.", "OK");
+                + "\nYou must reinstall Paradox Launcher to fix this issue.", "OK", customFormText: "Paradox Launcher");
             return -1;
         }
     }

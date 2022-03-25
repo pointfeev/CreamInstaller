@@ -144,7 +144,7 @@ internal partial class MainForm : CustomForm
         }
         catch (Exception e)
         {
-            if (ExceptionHandler.OutputException(e)) goto retry;
+            if (e.HandleException(form: this)) goto retry;
             Close();
         }
     }

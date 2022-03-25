@@ -87,6 +87,9 @@ internal static class Program
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.ApplicationExit += new(OnApplicationExit);
+            Application.ThreadException += new((s, e) => e.Exception?.HandleFatalException());
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            AppDomain.CurrentDomain.UnhandledException += new((s, e) => (e.ExceptionObject as Exception)?.HandleFatalException());
         retry:
             try
             {
@@ -96,7 +99,7 @@ internal static class Program
             }
             catch (Exception e)
             {
-                if (ExceptionHandler.OutputException(e)) goto retry;
+                if (e.HandleException()) goto retry;
                 Application.Exit();
                 return;
             }

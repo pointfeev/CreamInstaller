@@ -55,5 +55,5 @@ internal static class HttpClientManager
         }
     }
 
-    internal static void Dispose() => HttpClient.Dispose();
+    internal static void Dispose() => HttpClient?.Dispose();
 }

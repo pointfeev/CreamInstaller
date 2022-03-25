@@ -10,10 +10,8 @@ internal partial class DialogForm : CustomForm
 {
     internal DialogForm(IWin32Window owner) : base(owner) => InitializeComponent();
 
-    internal DialogResult Show(Icon descriptionIcon, string descriptionText, string acceptButtonText, string cancelButtonText = null, Icon customFormIcon = null)
+    internal DialogResult Show(Icon descriptionIcon, string descriptionText, string acceptButtonText, string cancelButtonText = null, string customFormText = null, Icon customFormIcon = null)
     {
-        if (customFormIcon is not null)
-            Icon = customFormIcon;
         if (descriptionIcon is null)
             descriptionIcon = Icon;
         icon.Image = descriptionIcon.ToBitmap();
@@ -25,8 +23,15 @@ internal partial class DialogForm : CustomForm
             cancelButton.Visible = false;
         }
         else cancelButton.Text = cancelButtonText;
-        OnResize(null, null);
-        Resize += OnResize;
+        if (customFormText is not null)
+            Text = customFormText;
+        else
+        {
+            OnResize(null, null);
+            Resize += OnResize;
+        }
+        if (customFormIcon is not null)
+            Icon = customFormIcon;
         return ShowDialog();
     }
 

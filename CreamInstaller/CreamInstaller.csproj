@@ -5,7 +5,7 @@
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Resources\ini.ico</ApplicationIcon>
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-		<Version>3.4.0.5</Version>
+		<Version>3.4.1.0</Version>
 		<PackageIcon>Resources\ini.ico</PackageIcon>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<Copyright>2021, pointfeev (https://github.com/pointfeev)</Copyright>
@@ -36,7 +36,7 @@
 	  <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Gameloop.Vdf" Version="0.6.2" />
+		<PackageReference Include="Gameloop.Vdf" Version="0.6.1" />
 		<PackageReference Include="HtmlAgilityPack" Version="1.11.42" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="Onova" Version="2.6.2" />

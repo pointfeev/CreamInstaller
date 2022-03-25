@@ -706,7 +706,7 @@ internal partial class SelectForm : CustomForm
         }
         catch (Exception e)
         {
-            if (ExceptionHandler.OutputException(e)) goto retry;
+            if (e.HandleException(form: this)) goto retry;
             Close();
         }
     }
@@ -786,6 +786,6 @@ internal partial class SelectForm : CustomForm
             "\n\nBlocked game names:" + blockedGames +
             "\n\nBlocked game sub-directories:" + blockedDirectories +
             "\n\nBlocked game sub-directory exceptions (not blocked):" + blockedDirectoryExceptions,
-            "OK");
+            "OK", customFormText: "Block Protected Games");
     }
 }
