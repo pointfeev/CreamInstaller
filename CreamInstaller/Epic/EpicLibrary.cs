@@ -20,7 +20,7 @@ internal static class EpicLibrary
             epicManifestsPath ??= Registry.GetValue(@"HKEY_CURRENT_USER\Software\Wow6432Node\Epic Games\EOS", "ModSdkMetadataDir", null) as string;
             epicManifestsPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Epic Games\EpicGamesLauncher", "AppDataPath", null) as string;
             epicManifestsPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Epic Games\EpicGamesLauncher", "AppDataPath", null) as string;
-            if (epicManifestsPath.EndsWith(@"\Data")) epicManifestsPath += @"\Manifests";
+            if (epicManifestsPath is not null && epicManifestsPath.EndsWith(@"\Data")) epicManifestsPath += @"\Manifests";
             return epicManifestsPath;
         }
     }
