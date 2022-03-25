@@ -415,7 +415,7 @@ internal partial class SelectForm : CustomForm
                 gameChoices.Add(("Paradox", "ParadoxLauncher", "Paradox Launcher", ProgramsToScan is not null && ProgramsToScan.Any(p => p.id == "ParadoxLauncher")));
             if (Directory.Exists(SteamLibrary.InstallPath))
                 foreach (Tuple<string, string, string, int, string> program in await SteamLibrary.GetGames())
-                    if (!Program.IsGameBlocked(program.Item1, program.Item5))
+                    if (!Program.IsGameBlocked(program.Item2, program.Item5))
                         gameChoices.Add(("Steam", program.Item1, program.Item2, ProgramsToScan is not null && ProgramsToScan.Any(p => p.id == program.Item1)));
             if (Directory.Exists(EpicLibrary.EpicManifestsPath))
                 foreach (Manifest manifest in await EpicLibrary.GetGames())
@@ -771,7 +771,7 @@ internal partial class SelectForm : CustomForm
     private void OnBlockProtectedGamesHelpButtonClicked(object sender, EventArgs e)
     {
         string blockedGames = "";
-        foreach (string name in Program.ProtectedGameNames)
+        foreach (string name in Program.ProtectedGames)
             blockedGames += helpButtonListPrefix + name;
         string blockedDirectories = "";
         foreach (string path in Program.ProtectedGameDirectories)
@@ -783,7 +783,7 @@ internal partial class SelectForm : CustomForm
         form.Show(SystemIcons.Information,
             "Blocks the program from caching and displaying games protected by DLL checks," +
             "\nanti-cheats, or that are confirmed not to be working with CreamAPI or ScreamAPI." +
-            "\n\nBlocked game names:" + blockedGames +
+            "\n\nBlocked games:" + blockedGames +
             "\n\nBlocked game sub-directories:" + blockedDirectories +
             "\n\nBlocked game sub-directory exceptions (not blocked):" + blockedDirectoryExceptions,
             "OK", customFormText: "Block Protected Games");

@@ -22,14 +22,14 @@ internal static class Program
     internal static readonly string CurrentProcessFilePath = CurrentProcess.MainModule.FileName;
 
     internal static bool BlockProtectedGames = true;
-    internal static readonly string[] ProtectedGameNames = { "PAYDAY 2", "Call to Arms" }; // non-functioning CreamAPI/ScreamAPI or DLL detections
+    internal static readonly string[] ProtectedGames = { "PAYDAY 2", "Call to Arms" }; // non-functioning CreamAPI/ScreamAPI or DLL detections
     internal static readonly string[] ProtectedGameDirectories = { @"\EasyAntiCheat", @"\BattlEye" }; // DLL detections
     internal static readonly string[] ProtectedGameDirectoryExceptions = { "Arma 3" }; // Arma 3's BattlEye doesn't detect DLL changes?
 
     internal static bool IsGameBlocked(string name, string directory = null)
     {
         if (!BlockProtectedGames) return false;
-        if (ProtectedGameNames.Contains(name)) return true;
+        if (ProtectedGames.Contains(name)) return true;
         if (directory is not null && !ProtectedGameDirectoryExceptions.Contains(name))
             foreach (string path in ProtectedGameDirectories)
                 if (Directory.Exists(directory + path)) return true;
