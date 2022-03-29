@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -51,11 +52,13 @@ internal partial class InstallForm : CustomForm
                 if (logTextBox.Text.Length > 0) logTextBox.AppendText(Environment.NewLine, color);
                 logTextBox.AppendText(text, color);
             });
+            Thread.Sleep(0);
         }
     }
 
     internal static void WriteCreamConfiguration(StreamWriter writer, string appId, string name, SortedList<string, (DlcType type, string name, string icon)> dlc, InstallForm installForm = null)
     {
+        Thread.Sleep(0);
         writer.WriteLine($"; {name}");
         writer.WriteLine("[steam]");
         writer.WriteLine($"appid = {appId}");
@@ -65,6 +68,7 @@ internal partial class InstallForm : CustomForm
             installForm.UpdateUser($"Added game to cream_api.ini with appid {appId} ({name})", InstallationLog.Action, info: false);
         foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in dlc)
         {
+            Thread.Sleep(0);
             string dlcId = pair.Key;
             (_, string dlcName, _) = pair.Value;
             writer.WriteLine($"{dlcId} = {dlcName}");
@@ -141,21 +145,24 @@ internal partial class InstallForm : CustomForm
         StreamWriter writer = new(config, true, Encoding.UTF8);
         if (selection.Id != "ParadoxLauncher")
             WriteCreamConfiguration(writer, selection.Id, selection.Name, selection.SelectedDlc, installForm);
-        foreach (Tuple<string, string, SortedList<string, (DlcType type, string name, string icon)>> extraAppDlc in selection.ExtraDlc)
-            WriteCreamConfiguration(writer, extraAppDlc.Item1, extraAppDlc.Item2, extraAppDlc.Item3, installForm);
+        foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc) in selection.ExtraDlc)
+            WriteCreamConfiguration(writer, id, name, dlc, installForm);
         writer.Flush();
         writer.Close();
     });
 
-    internal static void WriteScreamConfiguration(StreamWriter writer, SortedList<string, (DlcType type, string name, string icon)> dlc, InstallForm installForm = null)
+    internal static void WriteScreamConfiguration(StreamWriter writer, SortedList<string, (DlcType type, string name, string icon)> dlc, List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> extraDlc, InstallForm installForm = null)
     {
+        Thread.Sleep(0);
         writer.WriteLine("{");
         writer.WriteLine("  \"version\": 2,");
         writer.WriteLine("  \"logging\": false,");
         writer.WriteLine("  \"eos_logging\": false,");
         writer.WriteLine("  \"block_metrics\": false,");
         writer.WriteLine("  \"catalog_items\": {");
-        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> catalogItems = dlc.Where(pair => pair.Value.type == DlcType.CatalogItem);
+        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> catalogItems = dlc.Where(pair => pair.Value.type == DlcType.EpicCatalogItem);
+        foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> _dlc) in extraDlc)
+            catalogItems = catalogItems.Concat(_dlc.Where(pair => pair.Value.type == DlcType.EpicCatalogItem));
         if (catalogItems.Any())
         {
             writer.WriteLine("    \"unlock_all\": false,");
@@ -163,6 +170,7 @@ internal partial class InstallForm : CustomForm
             KeyValuePair<string, (DlcType type, string name, string icon)> lastCatalogItem = catalogItems.Last();
             foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in catalogItems)
             {
+                Thread.Sleep(0);
                 string id = pair.Key;
                 (_, string name, _) = pair.Value;
                 writer.WriteLine($"      \"{id}\"{(pair.Equals(lastCatalogItem) ? "" : ",")}");
@@ -178,7 +186,9 @@ internal partial class InstallForm : CustomForm
         }
         writer.WriteLine("  },");
         writer.WriteLine("  \"entitlements\": {");
-        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> entitlements = dlc.Where(pair => pair.Value.type == DlcType.Entitlement);
+        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> entitlements = dlc.Where(pair => pair.Value.type == DlcType.EpicEntitlement);
+        foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> _dlc) in extraDlc)
+            entitlements = entitlements.Concat(_dlc.Where(pair => pair.Value.type == DlcType.EpicEntitlement));
         if (entitlements.Any())
         {
             writer.WriteLine("    \"unlock_all\": false,");
@@ -187,6 +197,7 @@ internal partial class InstallForm : CustomForm
             KeyValuePair<string, (DlcType type, string name, string icon)> lastEntitlement = entitlements.Last();
             foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in entitlements)
             {
+                Thread.Sleep(0);
                 string id = pair.Key;
                 (_, string name, _) = pair.Value;
                 writer.WriteLine($"      \"{id}\"{(pair.Equals(lastEntitlement) ? "" : ",")}");
@@ -271,10 +282,7 @@ internal partial class InstallForm : CustomForm
             installForm.UpdateUser("Generating ScreamAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
         File.Create(config).Close();
         StreamWriter writer = new(config, true, Encoding.UTF8);
-        if (selection.Id != "ParadoxLauncher")
-            WriteScreamConfiguration(writer, selection.SelectedDlc, installForm);
-        foreach (Tuple<string, string, SortedList<string, (DlcType type, string name, string icon)>> extraAppDlc in selection.ExtraDlc)
-            WriteScreamConfiguration(writer, extraAppDlc.Item3, installForm);
+        WriteScreamConfiguration(writer, selection.SelectedDlc, selection.ExtraDlc, installForm);
         writer.Flush();
         writer.Close();
     });
@@ -306,27 +314,36 @@ internal partial class InstallForm : CustomForm
             }
         }
         if (code < 0) throw new CustomMessageException("Repair failed!");
-        string platform = selection.Platform == Platform.Steam ? "CreamAPI"
-            : selection.Platform == Platform.Epic ? "ScreamAPI"
-            : throw new InvalidPlatformException(selection.Platform);
         foreach (string directory in selection.DllDirectories)
         {
-            UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} {platform}" +
-                $" {(Uninstalling ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
-            if (Program.Canceled || !Program.IsProgramRunningDialog(this, selection)) throw new CustomMessageException("The operation was canceled.");
-            if (platform == "CreamAPI")
+            Thread.Sleep(0);
+            if (selection.IsSteam && selection.SelectedDlc.Any(d => d.Value.type is DlcType.Steam)
+                || selection.ExtraDlc.Any(item => item.dlc.Any(dlc => dlc.Value.type is DlcType.Steam)))
             {
-                if (Uninstalling)
-                    await UninstallCreamAPI(directory, this);
-                else
-                    await InstallCreamAPI(directory, selection, this);
+                directory.GetCreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+                if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
+                {
+                    UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} CreamAPI" +
+                        $" {(Uninstalling ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+                    if (Uninstalling)
+                        await UninstallCreamAPI(directory, this);
+                    else
+                        await InstallCreamAPI(directory, selection, this);
+                }
             }
-            else if (platform == "ScreamAPI")
+            if (selection.IsEpic && selection.SelectedDlc.Any(d => d.Value.type is DlcType.EpicCatalogItem or DlcType.EpicEntitlement)
+                || selection.ExtraDlc.Any(item => item.dlc.Any(dlc => dlc.Value.type is DlcType.EpicCatalogItem or DlcType.EpicEntitlement)))
             {
-                if (Uninstalling)
-                    await UninstallScreamAPI(directory, this);
-                else
-                    await InstallScreamAPI(directory, selection, this);
+                directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+                if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
+                {
+                    UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} ScreamAPI" +
+                        $" {(Uninstalling ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+                    if (Uninstalling)
+                        await UninstallScreamAPI(directory, this);
+                    else
+                        await InstallScreamAPI(directory, selection, this);
+                }
             }
             UpdateProgress(++cur / count * 100);
         }
@@ -342,6 +359,7 @@ internal partial class InstallForm : CustomForm
         foreach (ProgramSelection selection in programSelections)
         {
             if (Program.Canceled || !Program.IsProgramRunningDialog(this, selection)) throw new CustomMessageException("The operation was canceled.");
+            Thread.Sleep(0);
             try
             {
                 await OperateFor(selection);

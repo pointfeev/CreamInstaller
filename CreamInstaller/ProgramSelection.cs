@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -7,30 +6,16 @@ using CreamInstaller.Components;
 
 namespace CreamInstaller;
 
-public enum Platform
-{
-    Steam = 0,
-    Epic = 1
-}
-public class InvalidPlatformException : Exception
-{
-    public InvalidPlatformException() : base("Invalid platform!") { }
-    public InvalidPlatformException(Platform platform) : base($"Invalid platform ({platform})!") { }
-    public InvalidPlatformException(string message) : base(message) { }
-    public InvalidPlatformException(string message, Exception innerException) : base(message, innerException) { }
-}
-
 public enum DlcType
 {
-    Default = 0,
-    CatalogItem = 1,
-    Entitlement = 2
+    Steam = 0,
+    EpicCatalogItem = 1,
+    EpicEntitlement = 2
 }
 
 internal class ProgramSelection
 {
     internal bool Enabled;
-    internal Platform Platform = (Platform)(-1);
 
     internal string Id = "0";
     internal string Name = "Program";
@@ -44,9 +29,12 @@ internal class ProgramSelection
     internal string RootDirectory;
     internal List<string> DllDirectories;
 
+    internal bool IsSteam;
+    internal bool IsEpic;
+
     internal readonly SortedList<string, (DlcType type, string name, string icon)> AllDlc = new(AppIdComparer.Comparer);
     internal readonly SortedList<string, (DlcType type, string name, string icon)> SelectedDlc = new(AppIdComparer.Comparer);
-    internal readonly List<Tuple<string, string, SortedList<string, (DlcType type, string name, string icon)>>> ExtraDlc = new(); // for Paradox Launcher
+    internal readonly List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> ExtraDlc = new(); // for Paradox Launcher
 
     internal bool AreDllsLocked
     {

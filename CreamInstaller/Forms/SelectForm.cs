@@ -103,9 +103,7 @@ internal partial class SelectForm : CustomForm
         if (Directory.Exists(ParadoxLauncher.InstallPath) && ProgramsToScan.Any(c => c.platform == "Paradox" && c.id == "ParadoxLauncher"))
         {
             List<string> steamDllDirectories = await SteamLibrary.GetDllDirectoriesFromGameDirectory(ParadoxLauncher.InstallPath);
-            List<string> epicDllDirectories = null;
-            if (steamDllDirectories is null)
-                epicDllDirectories = await EpicLibrary.GetDllDirectoriesFromGameDirectory(ParadoxLauncher.InstallPath);
+            List<string> epicDllDirectories = await EpicLibrary.GetDllDirectoriesFromGameDirectory(ParadoxLauncher.InstallPath);
             if (steamDllDirectories is not null || epicDllDirectories is not null)
             {
                 ProgramSelection selection = ProgramSelection.FromId("ParadoxLauncher");
@@ -115,7 +113,8 @@ internal partial class SelectForm : CustomForm
                 selection.Name = "Paradox Launcher";
                 selection.RootDirectory = ParadoxLauncher.InstallPath;
                 selection.DllDirectories = steamDllDirectories ?? epicDllDirectories;
-                selection.Platform = steamDllDirectories is not null ? Platform.Steam : Platform.Epic;
+                selection.IsSteam = steamDllDirectories is not null;
+                selection.IsEpic = epicDllDirectories is not null;
 
                 TreeNode programNode = treeNodes.Find(s => s.Name == selection.Id) ?? new();
                 programNode.Name = selection.Id;
@@ -196,7 +195,7 @@ internal partial class SelectForm : CustomForm
                                 }
                                 if (Program.Canceled) return;
                                 if (!string.IsNullOrWhiteSpace(dlcName))
-                                    dlc[dlcAppId] = (DlcType.Default, dlcName, dlcIcon);
+                                    dlc[dlcAppId] = (DlcType.Steam, dlcName, dlcIcon);
                                 RemoveFromRemainingDLCs(dlcAppId);
                             });
                             dlcTasks.Add(task);
@@ -217,11 +216,11 @@ internal partial class SelectForm : CustomForm
 
                     ProgramSelection selection = ProgramSelection.FromId(appId) ?? new();
                     selection.Enabled = allCheckBox.Checked || selection.SelectedDlc.Any() || selection.ExtraDlc.Any();
-                    selection.Platform = Platform.Steam;
                     selection.Id = appId;
                     selection.Name = appData?.name ?? name;
                     selection.RootDirectory = directory;
                     selection.DllDirectories = dllDirectories;
+                    selection.IsSteam = true;
                     selection.ProductUrl = "https://store.steampowered.com/app/" + appId;
                     selection.IconUrl = IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("icon")?.ToString()}.jpg";
                     selection.SubIconUrl = appData?.header_image ?? IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("clienticon")?.ToString()}.ico";
@@ -318,11 +317,11 @@ internal partial class SelectForm : CustomForm
 
                     ProgramSelection selection = ProgramSelection.FromId(@namespace) ?? new();
                     selection.Enabled = allCheckBox.Checked || selection.SelectedDlc.Any() || selection.ExtraDlc.Any();
-                    selection.Platform = Platform.Epic;
                     selection.Id = @namespace;
                     selection.Name = name;
                     selection.RootDirectory = directory;
                     selection.DllDirectories = dllDirectories;
+                    selection.IsEpic = true;
                     foreach (KeyValuePair<string, (string name, string product, string icon, string developer)> pair in entitlements)
                     {
                         Thread.Sleep(0);
@@ -364,7 +363,7 @@ internal partial class SelectForm : CustomForm
                                 if (programNode is null/* || entitlementsNode is null*/) return;
                                 Thread.Sleep(0);
                                 string dlcId = pair.Key;
-                                (DlcType type, string name, string icon) dlcApp = (DlcType.Entitlement, pair.Value.name, pair.Value.icon);
+                                (DlcType type, string name, string icon) dlcApp = (DlcType.EpicEntitlement, pair.Value.name, pair.Value.icon);
                                 selection.AllDlc[dlcId] = dlcApp;
                                 if (allCheckBox.Checked) selection.SelectedDlc[dlcId] = dlcApp;
                                 TreeNode dlcNode = treeNodes.Find(s => s.Name == dlcId) ?? new();
@@ -614,10 +613,8 @@ internal partial class SelectForm : CustomForm
                     List<ContextMenuItem> queries = new();
                     if (File.Exists(appInfoJSON))
                     {
-                        string platform = (selection is null || selection.Platform == Platform.Steam) ? "Steam Store"
-                            : selection.Platform == Platform.Epic ? "Epic GraphQL"
-                            : throw new InvalidPlatformException(selection.Platform);
-                        queries.Add(new ContextMenuItem($"Open {platform} Query", "Notepad",
+                        string platform = (selection is null || selection.IsSteam) ? "Steam Store " : selection.IsEpic ? "Epic GraphQL " : "";
+                        queries.Add(new ContextMenuItem($"Open {platform}Query", "Notepad",
                             new EventHandler((sender, e) => Diagnostics.OpenFileInNotepad(appInfoJSON))));
                     }
                     if (File.Exists(appInfoVDF))
@@ -662,20 +659,32 @@ internal partial class SelectForm : CustomForm
                     contextMenuStrip.Items.Add(new ContextMenuItem("Open Root Directory", "File Explorer",
                         new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(selection.RootDirectory))));
                     List<string> directories = selection.DllDirectories.ToList();
-                    string platform = selection.Platform == Platform.Steam ? "Steamworks"
-                        : selection.Platform == Platform.Epic ? "Epic Online Services"
-                        : throw new InvalidPlatformException(selection.Platform);
-                    for (int i = 0; i < directories.Count; i++)
-                    {
-                        string directory = directories[i];
-                        contextMenuStrip.Items.Add(new ContextMenuItem($"Open {platform} SDK Directory #{i + 1}", "File Explorer",
-                            new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
-                    }
+                    if (selection.IsSteam)
+                        for (int i = 0; i < directories.Count; i++)
+                        {
+                            string directory = directories[i];
+                            directory.GetCreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+                            if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
+                            {
+                                contextMenuStrip.Items.Add(new ContextMenuItem($"Open Steamworks SDK Directory #{i + 1}", "File Explorer",
+                                    new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
+                            }
+                        }
+                    if (selection.IsEpic)
+                        for (int i = 0; i < directories.Count; i++)
+                        {
+                            string directory = directories[i];
+                            directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+                            if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
+                            {
+                                contextMenuStrip.Items.Add(new ContextMenuItem($"Open Epic Online Services SDK Directory #{i + 1}", "File Explorer",
+                                    new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
+                            }
+                        }
                 }
                 if (id != "ParadoxLauncher")
                 {
-                    if (selection is not null && selection.Platform == Platform.Steam
-                        || dlcParentSelection is not null && dlcParentSelection.Platform == Platform.Steam)
+                    if (selection is not null && selection.IsSteam || dlcParentSelection is not null && dlcParentSelection.IsSteam)
                     {
                         contextMenuStrip.Items.Add(new ToolStripSeparator());
                         contextMenuStrip.Items.Add(new ContextMenuItem("Open SteamDB", "SteamDB",
@@ -683,14 +692,14 @@ internal partial class SelectForm : CustomForm
                     }
                     if (selection is not null)
                     {
-                        if (selection.Platform == Platform.Steam)
+                        if (selection.IsSteam)
                         {
                             contextMenuStrip.Items.Add(new ContextMenuItem("Open Steam Store", "Steam Store",
                                 new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
                             contextMenuStrip.Items.Add(new ContextMenuItem("Open Steam Community", (id, selection.SubIconUrl, true), "Steam Community",
                                 new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + id))));
                         }
-                        else if (selection.Platform == Platform.Epic)
+                        else if (selection.IsEpic)
                         {
                             contextMenuStrip.Items.Add(new ToolStripSeparator());
                             contextMenuStrip.Items.Add(new ContextMenuItem("Open ScreamDB", "ScreamDB",
