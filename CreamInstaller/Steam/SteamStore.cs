@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 using CreamInstaller.Utility;
@@ -33,7 +34,7 @@ internal static class SteamStore
             string response = await HttpClientManager.EnsureGet($"https://store.steampowered.com/api/appdetails?appids={appId}");
             if (response is not null)
             {
-                IDictionary<string, JToken> apps = (dynamic)JsonConvert.DeserializeObject(response);
+                IDictionary<string, JToken> apps = JsonConvert.DeserializeObject(response) as dynamic;
                 foreach (KeyValuePair<string, JToken> app in apps)
                 {
                     try
@@ -71,6 +72,11 @@ internal static class SteamStore
             {
                 File.Delete(cacheFile);
             }
+        }
+        if (!isDlc)
+        {
+            Thread.Sleep(1000);
+            return await QueryStoreAPI(appId);
         }
         return null;
     }

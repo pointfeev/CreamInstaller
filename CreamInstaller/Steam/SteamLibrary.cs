@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -25,18 +24,18 @@ internal static class SteamLibrary
         }
     }
 
-    internal static async Task<List<Tuple<string, string, string, int, string>>> GetGames() => await Task.Run(async () =>
+    internal static async Task<List<(string appId, string name, string branch, int buildId, string gameDirectory)>> GetGames() => await Task.Run(async () =>
     {
-        List<Tuple<string, string, string, int, string>> games = new();
+        List<(string appId, string name, string branch, int buildId, string gameDirectory)> games = new();
         List<string> gameLibraryDirectories = await GetLibraryDirectories();
         foreach (string libraryDirectory in gameLibraryDirectories)
         {
             if (Program.Canceled) return games;
             Thread.Sleep(0);
-            List<Tuple<string, string, string, int, string>> directoryGames = await GetGamesFromLibraryDirectory(libraryDirectory);
+            List<(string appId, string name, string branch, int buildId, string gameDirectory)> directoryGames = await GetGamesFromLibraryDirectory(libraryDirectory);
             if (directoryGames is not null)
-                foreach (Tuple<string, string, string, int, string> game in directoryGames)
-                    if (!games.Any(_game => _game.Item1 == game.Item1))
+                foreach ((string appId, string name, string branch, int buildId, string gameDirectory) game in directoryGames)
+                    if (!games.Any(_game => _game.appId == game.appId))
                         games.Add(game);
         }
         return games;
@@ -68,9 +67,9 @@ internal static class SteamLibrary
         return !dllDirectories.Any() ? null : dllDirectories;
     });
 
-    internal static async Task<List<Tuple<string, string, string, int, string>>> GetGamesFromLibraryDirectory(string libraryDirectory) => await Task.Run(() =>
+    internal static async Task<List<(string appId, string name, string branch, int buildId, string gameDirectory)>> GetGamesFromLibraryDirectory(string libraryDirectory) => await Task.Run(() =>
     {
-        List<Tuple<string, string, string, int, string>> games = new();
+        List<(string appId, string name, string branch, int buildId, string gameDirectory)> games = new();
         if (Program.Canceled || !Directory.Exists(libraryDirectory)) return null;
         string[] files = Directory.GetFiles(libraryDirectory, "*.acf");
         foreach (string file in files)
@@ -93,7 +92,7 @@ internal static class SteamLibrary
                 string gameDirectory = libraryDirectory + @"\common\" + installdir;
                 if (!int.TryParse(appId, out int appIdInt)) continue;
                 if (!int.TryParse(buildId, out int buildIdInt)) continue;
-                games.Add(new(appId, name, branch, buildIdInt, gameDirectory));
+                games.Add((appId, name, branch, buildIdInt, gameDirectory));
             }
         }
         return !games.Any() ? null : games;

@@ -126,29 +126,32 @@ internal partial class SelectForm : CustomForm
         }
         if (Directory.Exists(SteamLibrary.InstallPath) && ProgramsToScan.Any(c => c.platform == "Steam"))
         {
-            List<Tuple<string, string, string, int, string>> steamGames = await SteamLibrary.GetGames();
-            foreach (Tuple<string, string, string, int, string> program in steamGames)
+            List<(string appId, string name, string branch, int buildId, string gameDirectory)> steamGames = await SteamLibrary.GetGames();
+            int totalGames = steamGames.Count;
+            int gamesChecked = 0;
+            foreach ((string appId, string name, string branch, int buildId, string gameDirectory) in steamGames)
             {
-                string appId = program.Item1;
-                string name = program.Item2;
-                string branch = program.Item3;
-                int buildId = program.Item4;
-                string directory = program.Item5;
                 if (Program.Canceled) return;
                 Thread.Sleep(0);
-                if (Program.IsGameBlocked(name, directory) || !ProgramsToScan.Any(c => c.id == appId)) continue;
+                if (Program.IsGameBlocked(name, gameDirectory) || !ProgramsToScan.Any(c => c.id == appId))
+                {
+                    gamesChecked++;
+                    continue;
+                }
                 AddToRemainingGames(name);
                 Task task = Task.Run(async () =>
                 {
                     if (Program.Canceled) return;
                     Thread.Sleep(0);
-                    List<string> dllDirectories = await SteamLibrary.GetDllDirectoriesFromGameDirectory(directory);
+                    List<string> dllDirectories = await SteamLibrary.GetDllDirectoriesFromGameDirectory(gameDirectory);
                     if (dllDirectories is null)
                     {
+                        gamesChecked++;
                         RemoveFromRemainingGames(name);
                         return;
                     }
                     AppData appData = await SteamStore.QueryStoreAPI(appId);
+                    gamesChecked++;
                     VProperty appInfo = await SteamCMD.GetAppInfo(appId, branch, buildId);
                     if (appData is null && appInfo is null)
                     {
@@ -171,7 +174,8 @@ internal partial class SelectForm : CustomForm
                             Task task = Task.Run(async () =>
                             {
                                 if (Program.Canceled) return;
-                                Thread.Sleep(0);
+                                do Thread.Sleep(10); while (!Program.Canceled && gamesChecked < totalGames); // give games steam store api limit priority
+                                if (Program.Canceled) return;
                                 string dlcName = null;
                                 string dlcIcon = null;
                                 AppData dlcAppData = await SteamStore.QueryStoreAPI(dlcAppId, true);
@@ -218,7 +222,7 @@ internal partial class SelectForm : CustomForm
                     selection.Enabled = allCheckBox.Checked || selection.SelectedDlc.Any() || selection.ExtraDlc.Any();
                     selection.Id = appId;
                     selection.Name = appData?.name ?? name;
-                    selection.RootDirectory = directory;
+                    selection.RootDirectory = gameDirectory;
                     selection.DllDirectories = dllDirectories;
                     selection.IsSteam = true;
                     selection.ProductUrl = "https://store.steampowered.com/app/" + appId;
@@ -413,9 +417,9 @@ internal partial class SelectForm : CustomForm
             if (Directory.Exists(ParadoxLauncher.InstallPath))
                 gameChoices.Add(("Paradox", "ParadoxLauncher", "Paradox Launcher", ProgramsToScan is not null && ProgramsToScan.Any(p => p.id == "ParadoxLauncher")));
             if (Directory.Exists(SteamLibrary.InstallPath))
-                foreach (Tuple<string, string, string, int, string> program in await SteamLibrary.GetGames())
-                    if (!Program.IsGameBlocked(program.Item2, program.Item5))
-                        gameChoices.Add(("Steam", program.Item1, program.Item2, ProgramsToScan is not null && ProgramsToScan.Any(p => p.id == program.Item1)));
+                foreach ((string appId, string name, string branch, int buildId, string gameDirectory) in await SteamLibrary.GetGames())
+                    if (!Program.IsGameBlocked(name, gameDirectory))
+                        gameChoices.Add(("Steam", appId, name, ProgramsToScan is not null && ProgramsToScan.Any(p => p.id == appId)));
             if (Directory.Exists(EpicLibrary.EpicManifestsPath))
                 foreach (Manifest manifest in await EpicLibrary.GetGames())
                     if (!Program.IsGameBlocked(manifest.DisplayName, manifest.InstallLocation))
