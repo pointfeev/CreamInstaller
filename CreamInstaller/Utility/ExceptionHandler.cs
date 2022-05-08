@@ -18,8 +18,8 @@ internal static class ExceptionHandler
             for (int i = 0; i < Math.Min(stackTrace.Length, 3); i++)
             {
                 string line = stackTrace[i];
-                int atNum = line.IndexOf("at ");
-                int inNum = line.IndexOf("in ");
+                int atNum = line.LastIndexOf("at ");
+                int inNum = line.LastIndexOf("in ");
                 int ciNum = line.LastIndexOf(@"CreamInstaller\");
                 int lineNum = line.LastIndexOf(":line ");
                 if (line is not null && atNum != -1)

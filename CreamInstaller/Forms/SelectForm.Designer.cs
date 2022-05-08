@@ -109,7 +109,8 @@ namespace CreamInstaller
             this.noneFoundLabel.Name = "noneFoundLabel";
             this.noneFoundLabel.Size = new System.Drawing.Size(554, 218);
             this.noneFoundLabel.TabIndex = 1002;
-            this.noneFoundLabel.Text = "No CreamAPI-applicable or ScreamAPI-applicable programs were found on your computer!";
+            this.noneFoundLabel.Text = "No CreamAPI-applicable or ScreamAPI-applicable programs were found on your comput" +
+    "er!";
             this.noneFoundLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.noneFoundLabel.Visible = false;
             // 
@@ -123,12 +124,12 @@ namespace CreamInstaller
             this.flowLayoutPanel1.Location = new System.Drawing.Point(224, -1);
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(165, 19);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(179, 20);
             this.flowLayoutPanel1.TabIndex = 1005;
             // 
             // blockedGamesCheckBox
             // 
-            this.blockedGamesCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.blockedGamesCheckBox.AutoSize = true;
             this.blockedGamesCheckBox.Checked = true;
             this.blockedGamesCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.blockedGamesCheckBox.Enabled = false;
@@ -136,7 +137,7 @@ namespace CreamInstaller
             this.blockedGamesCheckBox.Location = new System.Drawing.Point(3, 0);
             this.blockedGamesCheckBox.Margin = new System.Windows.Forms.Padding(3, 0, 0, 0);
             this.blockedGamesCheckBox.Name = "blockedGamesCheckBox";
-            this.blockedGamesCheckBox.Size = new System.Drawing.Size(140, 19);
+            this.blockedGamesCheckBox.Size = new System.Drawing.Size(154, 20);
             this.blockedGamesCheckBox.TabIndex = 1003;
             this.blockedGamesCheckBox.Text = "Block Protected Games";
             this.blockedGamesCheckBox.UseVisualStyleBackColor = true;
@@ -147,7 +148,7 @@ namespace CreamInstaller
             this.blockProtectedHelpButton.Enabled = false;
             this.blockProtectedHelpButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.blockProtectedHelpButton.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.blockProtectedHelpButton.Location = new System.Drawing.Point(143, 0);
+            this.blockProtectedHelpButton.Location = new System.Drawing.Point(157, 0);
             this.blockProtectedHelpButton.Margin = new System.Windows.Forms.Padding(0, 0, 3, 0);
             this.blockProtectedHelpButton.Name = "blockProtectedHelpButton";
             this.blockProtectedHelpButton.Size = new System.Drawing.Size(19, 19);
@@ -293,6 +294,7 @@ namespace CreamInstaller
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.flowLayoutPanel1.ResumeLayout(false);
+            this.flowLayoutPanel1.PerformLayout();
             this.flowLayoutPanel2.ResumeLayout(false);
             this.ResumeLayout(false);
 

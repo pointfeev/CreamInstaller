@@ -107,7 +107,7 @@ internal static class SteamCMD
                     }
                 }
                 Interlocked.Decrement(ref locks[i]);
-                return appInfo;
+                return appInfo ?? "";
             }
             Thread.Sleep(200);
         }
@@ -221,10 +221,10 @@ internal static class SteamCMD
         if (File.Exists(appUpdateFile)) output = File.ReadAllText(appUpdateFile, Encoding.UTF8);
         else
         {
-            output = await Run(appId);
+            output = await Run(appId) ?? "";
             int openBracket = output.IndexOf("{");
             int closeBracket = output.LastIndexOf("}");
-            if (openBracket != -1 && closeBracket != -1)
+            if (!string.IsNullOrEmpty(output) && openBracket != -1 && closeBracket != -1)
             {
                 output = $"\"{appId}\"\n" + output[openBracket..(1 + closeBracket)];
                 output = output.Replace("ERROR! Failed to install app '4' (Invalid platform)", "");
