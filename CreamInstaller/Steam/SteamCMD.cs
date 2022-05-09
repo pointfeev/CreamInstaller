@@ -224,7 +224,7 @@ internal static class SteamCMD
             output = await Run(appId) ?? "";
             int openBracket = output.IndexOf("{");
             int closeBracket = output.LastIndexOf("}");
-            if (!string.IsNullOrEmpty(output) && openBracket != -1 && closeBracket != -1)
+            if (openBracket != -1 && closeBracket != -1 && closeBracket > openBracket)
             {
                 output = $"\"{appId}\"\n" + output[openBracket..(1 + closeBracket)];
                 output = output.Replace("ERROR! Failed to install app '4' (Invalid platform)", "");
