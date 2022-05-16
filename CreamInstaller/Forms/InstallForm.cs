@@ -56,30 +56,38 @@ internal partial class InstallForm : CustomForm
         }
     }
 
-    internal static void WriteCreamConfiguration(StreamWriter writer, string appId, string name, SortedList<string, (DlcType type, string name, string icon)> dlc, InstallForm installForm = null)
+    internal static void WriteSmokeConfiguration(StreamWriter writer, SortedList<string, (DlcType type, string name, string icon)> dlc, List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> extraDlc, InstallForm installForm = null)
     {
         Thread.Sleep(0);
-        writer.WriteLine($"; {name}");
-        writer.WriteLine("[steam]");
-        writer.WriteLine($"appid = {appId}");
-        writer.WriteLine();
-        writer.WriteLine("[dlc]");
-        if (installForm is not null)
-            installForm.UpdateUser($"Added game to cream_api.ini with appid {appId} ({name})", InstallationLog.Action, info: false);
-        foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in dlc)
+        writer.WriteLine("{");
+        writer.WriteLine("  \"$version\": 1,");
+        writer.WriteLine("  \"logging\": false,");
+        writer.WriteLine("  \"hook_steamclient\": true,");
+        writer.WriteLine("  \"unlock_all\": true,");
+        writer.WriteLine("  \"override\": [],");
+        writer.WriteLine("  \"dlc_ids\": [");
+        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> dlcs = dlc.ToList();
+        foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> _dlc) in extraDlc)
+            dlcs = dlcs.Concat(_dlc);
+        KeyValuePair<string, (DlcType type, string name, string icon)> lastDlc = dlcs.Last();
+        foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in dlcs)
         {
             Thread.Sleep(0);
             string dlcId = pair.Key;
             (_, string dlcName, _) = pair.Value;
-            writer.WriteLine($"{dlcId} = {dlcName}");
+            writer.WriteLine($"    {dlcId}{(pair.Equals(lastDlc) ? "" : ",")}");
             if (installForm is not null)
-                installForm.UpdateUser($"Added DLC to cream_api.ini with appid {dlcId} ({dlcName})", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Added DLC to SmokeAPI.json with appid {dlcId} ({dlcName})", InstallationLog.Action, info: false);
         }
+        writer.WriteLine("  ],");
+        writer.WriteLine("  \"auto_inject_inventory\": true,");
+        writer.WriteLine("  \"inventory_items\": []");
+        writer.WriteLine("}");
     }
 
-    internal static async Task UninstallCreamAPI(string directory, InstallForm installForm = null) => await Task.Run(() =>
+    internal static async Task UninstallSmokeAPI(string directory, InstallForm installForm = null) => await Task.Run(() =>
     {
-        directory.GetCreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+        directory.GetSmokeApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
         if (File.Exists(sdk32_o))
         {
             if (File.Exists(sdk32))
@@ -112,9 +120,9 @@ internal partial class InstallForm : CustomForm
         }
     });
 
-    internal static async Task InstallCreamAPI(string directory, ProgramSelection selection, InstallForm installForm = null) => await Task.Run(() =>
+    internal static async Task InstallSmokeAPI(string directory, ProgramSelection selection, InstallForm installForm = null) => await Task.Run(() =>
     {
-        directory.GetCreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+        directory.GetSmokeApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
         if (File.Exists(sdk32) && !File.Exists(sdk32_o))
         {
             File.Move(sdk32, sdk32_o);
@@ -140,13 +148,10 @@ internal partial class InstallForm : CustomForm
                 installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
         }
         if (installForm is not null)
-            installForm.UpdateUser("Generating CreamAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+            installForm.UpdateUser("Generating SmokeAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
         File.Create(config).Close();
         StreamWriter writer = new(config, true, Encoding.UTF8);
-        if (selection.Id != "ParadoxLauncher")
-            WriteCreamConfiguration(writer, selection.Id, selection.Name, selection.SelectedDlc, installForm);
-        foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc) in selection.ExtraDlc)
-            WriteCreamConfiguration(writer, id, name, dlc, installForm);
+        WriteSmokeConfiguration(writer, selection.SelectedDlc, selection.ExtraDlc, installForm);
         writer.Flush();
         writer.Close();
     });
@@ -320,15 +325,15 @@ internal partial class InstallForm : CustomForm
             if (selection.IsSteam && selection.SelectedDlc.Any(d => d.Value.type is DlcType.Steam)
                 || selection.ExtraDlc.Any(item => item.dlc.Any(dlc => dlc.Value.type is DlcType.Steam)))
             {
-                directory.GetCreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+                directory.GetSmokeApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
                 if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
                 {
-                    UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} CreamAPI" +
+                    UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} SmokeAPI" +
                         $" {(Uninstalling ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
                     if (Uninstalling)
-                        await UninstallCreamAPI(directory, this);
+                        await UninstallSmokeAPI(directory, this);
                     else
-                        await InstallCreamAPI(directory, selection, this);
+                        await InstallSmokeAPI(directory, selection, this);
                 }
             }
             if (selection.IsEpic && selection.SelectedDlc.Any(d => d.Value.type is DlcType.EpicCatalogItem or DlcType.EpicEntitlement)
@@ -394,11 +399,11 @@ internal partial class InstallForm : CustomForm
         try
         {
             await Operate();
-            UpdateUser($"CreamAPI/ScreamAPI successfully {(Uninstalling ? "uninstalled" : "installed and generated")} for " + ProgramCount + " program(s).", InstallationLog.Success);
+            UpdateUser($"SmokeAPI/ScreamAPI successfully {(Uninstalling ? "uninstalled" : "installed and generated")} for " + ProgramCount + " program(s).", InstallationLog.Success);
         }
         catch (Exception exception)
         {
-            UpdateUser($"CreamAPI/ScreamAPI {(Uninstalling ? "uninstallation" : "installation and/or generation")} failed: " + exception.ToString(), InstallationLog.Error);
+            UpdateUser($"SmokeAPI/ScreamAPI {(Uninstalling ? "uninstallation" : "installation and/or generation")} failed: " + exception.ToString(), InstallationLog.Error);
             retryButton.Enabled = true;
         }
         userProgressBar.Value = userProgressBar.Maximum;

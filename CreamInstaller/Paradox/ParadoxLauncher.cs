@@ -54,7 +54,7 @@ internal static class ParadoxLauncher
                 using DialogForm dialogForm = new(form);
                 return dialogForm.Show(SystemIcons.Warning,
                     $"WARNING: There are no installed games with DLC that can be added to the Paradox Launcher!" +
-                    "\n\nInstalling CreamAPI/ScreamAPI for the Paradox Launcher is pointless, since no DLC will be added to the configuration!",
+                    "\n\nInstalling SmokeAPI/ScreamAPI for the Paradox Launcher is pointless, since no DLC will be added to the configuration!",
                     "Ignore", "Cancel", customFormText: "Paradox Launcher") != DialogResult.OK;
             }
         }
@@ -72,10 +72,10 @@ internal static class ParadoxLauncher
         byte[] epicOriginalSdk64 = null;
         foreach (string directory in selection.DllDirectories)
         {
-            directory.GetCreamApiComponents(out string sdk32, out string _, out string sdk64, out string _, out string config);
+            directory.GetSmokeApiComponents(out string sdk32, out string _, out string sdk64, out string _, out string config);
             if (creamConfig is null && File.Exists(config))
                 creamConfig = File.ReadAllBytes(config);
-            await InstallForm.UninstallCreamAPI(directory);
+            await InstallForm.UninstallSmokeAPI(directory);
             if (steamOriginalSdk32 is null && File.Exists(sdk32) && !Properties.Resources.Steamworks32.EqualsFile(sdk32))
                 steamOriginalSdk32 = File.ReadAllBytes(sdk32);
             if (steamOriginalSdk64 is null && File.Exists(sdk64) && !Properties.Resources.Steamworks64.EqualsFile(sdk64))
@@ -95,7 +95,7 @@ internal static class ParadoxLauncher
             bool neededRepair = false;
             foreach (string directory in selection.DllDirectories)
             {
-                directory.GetCreamApiComponents(out string sdk32, out string _, out string sdk64, out string _, out string config);
+                directory.GetSmokeApiComponents(out string sdk32, out string _, out string sdk64, out string _, out string config);
                 if (steamOriginalSdk32 is not null && Properties.Resources.Steamworks32.EqualsFile(sdk32))
                 {
                     steamOriginalSdk32.Write(sdk32);
@@ -108,7 +108,7 @@ internal static class ParadoxLauncher
                 }
                 if (creamConfig is not null)
                 {
-                    await InstallForm.InstallCreamAPI(directory, selection);
+                    await InstallForm.InstallSmokeAPI(directory, selection);
                     creamConfig.Write(config);
                 }
 

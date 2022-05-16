@@ -433,13 +433,13 @@ internal partial class SelectForm : CustomForm
                 if (scan)
                 {
                     ProgramsToScan = choices;
-                    noneFoundLabel.Text = "None of the chosen programs/games were CreamAPI-applicable or ScreamAPI-applicable!" + retry;
+                    noneFoundLabel.Text = "None of the chosen programs/games were SmokeAPI-applicable or ScreamAPI-applicable!" + retry;
                 }
                 else
                     noneFoundLabel.Text = "You didn't choose any programs/games!" + retry;
             }
             else
-                noneFoundLabel.Text = "No CreamAPI-applicable or ScreamAPI-applicable programs/games were found on your computer!";
+                noneFoundLabel.Text = "No SmokeAPI-applicable or ScreamAPI-applicable programs/games were found on your computer!";
         }
 
         if (scan)
@@ -667,7 +667,7 @@ internal partial class SelectForm : CustomForm
                         for (int i = 0; i < directories.Count; i++)
                         {
                             string directory = directories[i];
-                            directory.GetCreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+                            directory.GetSmokeApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
                             if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
                             {
                                 contextMenuStrip.Items.Add(new ContextMenuItem($"Open Steamworks SDK Directory #{i + 1}", "File Explorer",
@@ -795,7 +795,7 @@ internal partial class SelectForm : CustomForm
         using DialogForm form = new(this);
         form.Show(SystemIcons.Information,
             "Blocks the program from caching and displaying games protected by DLL checks," +
-            "\nanti-cheats, or that are confirmed not to be working with CreamAPI or ScreamAPI." +
+            "\nanti-cheats, or that are confirmed not to be working with SmokeAPI or ScreamAPI." +
             "\n\nBlocked games:" + blockedGames +
             "\n\nBlocked game sub-directories:" + blockedDirectories +
             "\n\nBlocked game sub-directory exceptions (not blocked):" + blockedDirectoryExceptions,

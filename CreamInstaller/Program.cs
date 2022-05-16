@@ -22,7 +22,7 @@ internal static class Program
     internal static readonly string CurrentProcessFilePath = CurrentProcess.MainModule.FileName;
 
     internal static bool BlockProtectedGames = true;
-    internal static readonly string[] ProtectedGames = { "PAYDAY 2", "Call to Arms", "RimWorld" }; // non-functioning CreamAPI/ScreamAPI or DLL detections
+    internal static readonly string[] ProtectedGames = { "PAYDAY 2", "Call to Arms" }; // non-functioning SmokeAPI/ScreamAPI or DLL detections
     internal static readonly string[] ProtectedGameDirectories = { @"\EasyAntiCheat", @"\BattlEye" }; // DLL detections
     internal static readonly string[] ProtectedGameDirectoryExceptions = { "Arma 3" }; // Arma 3's BattlEye doesn't detect DLL changes?
 
@@ -59,13 +59,13 @@ internal static class Program
         return false;
     }
 
-    internal static void GetCreamApiComponents(this string directory, out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config)
+    internal static void GetSmokeApiComponents(this string directory, out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config)
     {
         sdk32 = directory + @"\steam_api.dll";
         sdk32_o = directory + @"\steam_api_o.dll";
         sdk64 = directory + @"\steam_api64.dll";
         sdk64_o = directory + @"\steam_api64_o.dll";
-        config = directory + @"\cream_api.ini";
+        config = directory + @"\SmokeAPI.json";
     }
 
     internal static void GetScreamApiComponents(this string directory, out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config)

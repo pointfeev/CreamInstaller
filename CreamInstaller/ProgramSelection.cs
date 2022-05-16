@@ -42,7 +42,7 @@ internal class ProgramSelection
         {
             foreach (string directory in DllDirectories)
             {
-                directory.GetCreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+                directory.GetSmokeApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
                 if (sdk32.IsFilePathLocked()
                     || sdk32_o.IsFilePathLocked()
                     || sdk64.IsFilePathLocked()

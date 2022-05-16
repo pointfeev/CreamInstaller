@@ -45,7 +45,7 @@ internal static class SteamLibrary
     {
         List<string> dllDirectories = new();
         if (Program.Canceled || !Directory.Exists(gameDirectory)) return null;
-        gameDirectory.GetCreamApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string cApi);
+        gameDirectory.GetSmokeApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string cApi);
         if (File.Exists(api)
             || File.Exists(api_o)
             || File.Exists(api64)
