@@ -56,14 +56,14 @@ internal partial class InstallForm : CustomForm
         }
     }
 
-    internal static void WriteSmokeConfiguration(StreamWriter writer, SortedList<string, (DlcType type, string name, string icon)> dlc, List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> extraDlc, InstallForm installForm = null)
+    internal static void WriteSmokeConfiguration(StreamWriter writer, bool unlockAll, SortedList<string, (DlcType type, string name, string icon)> dlc, List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> extraDlc, InstallForm installForm = null)
     {
         Thread.Sleep(0);
         writer.WriteLine("{");
         writer.WriteLine("  \"$version\": 1,");
         writer.WriteLine("  \"logging\": false,");
         writer.WriteLine("  \"hook_steamclient\": true,");
-        writer.WriteLine("  \"unlock_all\": true,");
+        writer.WriteLine("  \"unlock_all\": " + (unlockAll ? "true" : "false") + ",");
         writer.WriteLine("  \"override\": [],");
         writer.WriteLine("  \"dlc_ids\": [");
         IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> dlcs = dlc.ToList();
@@ -151,7 +151,7 @@ internal partial class InstallForm : CustomForm
             installForm.UpdateUser("Generating SmokeAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
         File.Create(config).Close();
         StreamWriter writer = new(config, true, Encoding.UTF8);
-        WriteSmokeConfiguration(writer, selection.SelectedDlc, selection.ExtraDlc, installForm);
+        WriteSmokeConfiguration(writer, selection.SelectedDlc.Count >= selection.AllDlc.Count, selection.SelectedDlc, selection.ExtraDlc, installForm);
         writer.Flush();
         writer.Close();
     });
