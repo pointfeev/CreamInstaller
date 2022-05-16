@@ -1,17 +1,17 @@
-### CreamInstaller: CreamAPI/ScreamAPI Installer & Configuration Generator
+### CreamInstaller: SmokeAPI/ScreamAPI Installer & Configuration Generator
 
 ![Program Preview Image](https://i.imgur.com/VAx1LRa.png)
 
-###### Refer to [this post](https://cs.rin.ru/forum/viewtopic.php?f=29&t=70576) if you don't know what CreamAPI is! ;;)
+###### Refer to [this post](https://cs.rin.ru/forum/viewtopic.php?f=29&t=122487) and/or [this repository](https://github.com/acidicoala/SmokeAPI) if you don't know what SmokeAPI is! ;;)
 ###### Refer to [this post](https://cs.rin.ru/forum/viewtopic.php?f=29&t=106474) and/or [this repository](https://github.com/acidicoala/ScreamAPI) if you don't know what ScreamAPI is! ;)
 
-###### The program utilizes CreamAPI v4.5.0.0 Hotfix and ScreamAPI v3.0.1 downloaded from those posts and embedded into the program itself; no download necessary on your part!
+###### The program utilizes SmokeAPI v1.0.0 and ScreamAPI v3.0.1 downloaded from those posts and embedded into the program itself; no download necessary on your part!
 ---
 #### Description:
 Automatically finds all installed Steam/Epic games and their respective Steamworks/Epic Online Services DLL locations on the user's computer,
 automatically parses SteamCMD, Steam Store, and Epic Games Store for those games' DLCs, then provides a very simple graphical interface utilizing the gathered information.
 
-The primary function of the program is to **automatically generate and install CreamAPI or ScreamAPI** for whichever
+The primary function of the program is to **automatically generate and install SmokeAPI or ScreamAPI** for whichever
 games and DLCs the user selects, however through the use of the **right-click context menu** the user can also:
 * automatically repair the Paradox Launcher
 * open the parsed SteamCMD/GraphQL AppInfo in Notepad
@@ -23,9 +23,9 @@ games and DLCs the user selects, however through the use of the **right-click co
 #### Features:
 * Automatic downloading and installing of SteamCMD (if a Steam game is chosen). *for gathering appinfo such as name, buildid, listofdlc, depots*
 * Automatic gathering and caching of appinfo for **ALL** installed Steam and Epic games and **ALL** of their DLCs.
-* Automatic generation of cream_api.ini/ScreamAPI.json configuration and installation of CreamAPI/ScreamAPI DLLs.
-* Automatic uninstallation of CreamAPI/ScreamAPI DLLs and cream_api.ini/ScreamAPI.json configuration.
-* Automatic repairing of the Paradox Launcher via the right-click context menu "Repair" option. *for when the launcher updates whilst you have CreamAPI or ScreamAPI installed to it*
+* Automatic generation of cream_api.ini/ScreamAPI.json configuration and installation of SmokeAPI/ScreamAPI DLLs.
+* Automatic uninstallation of SmokeAPI/ScreamAPI DLLs and cream_api.ini/ScreamAPI.json configuration.
+* Automatic repairing of the Paradox Launcher via the right-click context menu "Repair" option. *for when the launcher updates whilst you have SmokeAPI or ScreamAPI installed to it*
 
 ---
 #### Installation:
@@ -33,7 +33,7 @@ games and DLCs the user selects, however through the use of the **right-click co
 2. Extract the executable to anywhere on your computer you want. *it's completely self-contained*
 
 ---
-### **NOTE:** This program does not automatically download nor install actual DLC files for you. As the title of the program says, it's only a CreamAPI/ScreamAPI installer. Should the game you wish to unlock DLC for not already come with the DLCs installed (very many do not), you have to find, download, and install those yourself. Preferably, you should be referring to the proper cs.rin.ru post for the game(s) you're tinkering with; you'll usually find any answer to your problems there.
+### **NOTE:** This program does not automatically download nor install actual DLC files for you. As the title of the program says, it's only a SmokeAPI/ScreamAPI installer. Should the game you wish to unlock DLC for not already come with the DLCs installed (very many do not), you have to find, download, and install those yourself. Preferably, you should be referring to the proper cs.rin.ru post for the game(s) you're tinkering with; you'll usually find any answer to your problems there.
 
 ---
 #### Usage:
@@ -41,10 +41,10 @@ games and DLCs the user selects, however through the use of the **right-click co
 2. Choose which programs/games the program should scan for DLC. *the program automatically gathers all installed games from Steam and Epic directories*
 3. Wait for the program to download and install SteamCMD (if you chose a Steam game). *very fast, depends on internet speed*
 4. Wait for the program to gather and cache the chosen Steam/Epic games' appinfo & DLCs. *may take a good amount of time on the first run, depends on how many games you chose and how many DLCs they have*
-5. **CAREFULLY** select which games' DLCs you wish to unlock. *CreamAPI and ScreamAPI are not tested for every game!*
+5. **CAREFULLY** select which games' DLCs you wish to unlock. *SmokeAPI and ScreamAPI are not tested for every game!*
 6. Click the **Generate and Install** button.
 7. Click the **OK** button to close the program.
-8. If CreamAPI or ScreamAPI don't work for any of the games you installed them on, simply go back to step 5 and select what games you wish you **revert** changes to, and instead click the **Uninstall** button this time.
+8. If SmokeAPI or ScreamAPI don't work for any of the games you installed them on, simply go back to step 5 and select what games you wish you **revert** changes to, and instead click the **Uninstall** button this time.
 
 ---
 ##### Bugs/Crashes/Issues:
