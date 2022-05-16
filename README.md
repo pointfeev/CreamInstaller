@@ -1,6 +1,6 @@
 ### CreamInstaller: SmokeAPI/ScreamAPI Installer & Configuration Generator
 
-![Program Preview Image](https://i.imgur.com/VAx1LRa.png)
+![Program Preview Image](https://i.imgur.com/c8bAUwL.png)
 
 ###### Refer to [this post](https://cs.rin.ru/forum/viewtopic.php?f=29&t=122487) and/or [this repository](https://github.com/acidicoala/SmokeAPI) if you don't know what SmokeAPI is! ;;)
 ###### Refer to [this post](https://cs.rin.ru/forum/viewtopic.php?f=29&t=106474) and/or [this repository](https://github.com/acidicoala/ScreamAPI) if you don't know what ScreamAPI is! ;)
