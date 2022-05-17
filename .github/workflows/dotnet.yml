@@ -22,11 +22,11 @@ jobs:
       with:
         dotnet-version: 6.x.x
 
-    - name: Restore Project
+    - name: Restore
       run: dotnet restore
 
-    - name: Build Project
+    - name: Build
       run: dotnet build --no-restore --configuration Release
 
-    - name: Test Project
+    - name: Test
       run: dotnet test --no-build --verbosity normal --configuration Release
