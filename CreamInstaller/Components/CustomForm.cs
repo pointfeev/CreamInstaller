@@ -41,9 +41,9 @@ internal class CustomForm : Form
         using Bitmap bitmap = new(Size.Width - 14, Size.Height - 7);
         using Graphics graphics = Graphics.FromImage(bitmap);
         graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-        ImageCodecInfo jpeg = ImageCodecInfo.GetImageEncoders()[1];
         using EncoderParameters encoding = new(1);
-        encoding.Param[0] = new(Encoder.Quality, 100L);
+        using EncoderParameter encoderParam = new(Encoder.Quality, 100L);
+        encoding.Param[0] = encoderParam;
         graphics.CopyFromScreen(new(bounds.Left + 7, bounds.Top), Point.Empty, new(Size.Width - 14, Size.Height - 7));
         Clipboard.SetImage(bitmap);
         e.Handled = true;

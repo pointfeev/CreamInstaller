@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -226,8 +227,8 @@ internal partial class SelectForm : CustomForm
                     selection.DllDirectories = dllDirectories;
                     selection.IsSteam = true;
                     selection.ProductUrl = "https://store.steampowered.com/app/" + appId;
-                    selection.IconUrl = IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("icon")?.ToString()}.jpg";
-                    selection.SubIconUrl = appData?.header_image ?? IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("clienticon")?.ToString()}.ico";
+                    selection.IconUrl = IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("icon")}.jpg";
+                    selection.SubIconUrl = appData?.header_image ?? IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("clienticon")}.ico";
                     selection.Publisher = appData?.publishers[0] ?? appInfo?.Value?.GetChild("extended")?.GetChild("publisher")?.ToString();
 
                     if (Program.Canceled) return;
@@ -421,9 +422,8 @@ internal partial class SelectForm : CustomForm
                     if (!Program.IsGameBlocked(name, gameDirectory))
                         gameChoices.Add(("Steam", appId, name, ProgramsToScan is not null && ProgramsToScan.Any(p => p.id == appId)));
             if (Directory.Exists(EpicLibrary.EpicManifestsPath))
-                foreach (Manifest manifest in await EpicLibrary.GetGames())
-                    if (!Program.IsGameBlocked(manifest.DisplayName, manifest.InstallLocation))
-                        gameChoices.Add(("Epic", manifest.CatalogNamespace, manifest.DisplayName, ProgramsToScan is not null && ProgramsToScan.Any(p => p.id == manifest.CatalogNamespace)));
+                foreach (Manifest manifest in (await EpicLibrary.GetGames()).Where(m => !Program.IsGameBlocked(m.DisplayName, m.InstallLocation)))
+                    gameChoices.Add(("Epic", manifest.CatalogNamespace, manifest.DisplayName, ProgramsToScan is not null && ProgramsToScan.Any(p => p.id == manifest.CatalogNamespace)));
             if (gameChoices.Any())
             {
                 using SelectDialogForm form = new(this);
@@ -455,7 +455,7 @@ internal partial class SelectForm : CustomForm
                 Thread.Sleep(0);
                 if (_progress < 0 || _progress > maxProgress) maxProgress = -_progress;
                 else curProgress = _progress;
-                int p = Math.Max(Math.Min((int)((float)(curProgress / (float)maxProgress) * 100), 100), 0);
+                int p = Math.Max(Math.Min((int)((float)curProgress / maxProgress * 100), 100), 0);
                 progressLabel.Text = setup ? $"Setting up SteamCMD . . . {p}%"
                     : $"Gathering and caching your applicable games and their DLCs . . . {p}%";
                 progressBar.Value = p;
@@ -598,7 +598,8 @@ internal partial class SelectForm : CustomForm
                 (string gameAppId, (DlcType type, string name, string icon) app)? dlc = null;
                 if (selection is null) dlc = ProgramSelection.GetDlcFromId(id);
                 ProgramSelection dlcParentSelection = null;
-                if (dlc is not null) dlcParentSelection = ProgramSelection.FromId(dlc.Value.gameAppId);
+                if (dlc is not null)
+                    dlcParentSelection = ProgramSelection.FromId(dlc.Value.gameAppId);
                 if (selection is null && dlcParentSelection is null)
                     return;
                 ContextMenuItem header = null;
@@ -606,7 +607,7 @@ internal partial class SelectForm : CustomForm
                     header = new(node.Text, "Paradox Launcher");
                 else if (selection is not null)
                     header = new(node.Text, (id, selection.IconUrl, false));
-                else if (dlc is not null)
+                else if (dlc is not null && dlcParentSelection is not null)
                     header = new(node.Text, (id, dlc.Value.app.icon, false), (id, dlcParentSelection.IconUrl, false));
                 contextMenuStrip.Items.Add(header ?? new ContextMenuItem(node.Text));
                 string appInfoVDF = $@"{SteamCMD.AppInfoPath}\{id}.vdf";
@@ -783,15 +784,15 @@ internal partial class SelectForm : CustomForm
     private readonly string helpButtonListPrefix = "\n    •  ";
     private void OnBlockProtectedGamesHelpButtonClicked(object sender, EventArgs e)
     {
-        string blockedGames = "";
+        StringBuilder blockedGames = new();
         foreach (string name in Program.ProtectedGames)
-            blockedGames += helpButtonListPrefix + name;
-        string blockedDirectories = "";
+            blockedGames.Append(helpButtonListPrefix + name);
+        StringBuilder blockedDirectories = new();
         foreach (string path in Program.ProtectedGameDirectories)
-            blockedDirectories += helpButtonListPrefix + path;
-        string blockedDirectoryExceptions = "";
+            blockedDirectories.Append(helpButtonListPrefix + path);
+        StringBuilder blockedDirectoryExceptions = new();
         foreach (string name in Program.ProtectedGameDirectoryExceptions)
-            blockedDirectoryExceptions += helpButtonListPrefix + name;
+            blockedDirectoryExceptions.Append(helpButtonListPrefix + name);
         using DialogForm form = new(this);
         form.Show(SystemIcons.Information,
             "Blocks the program from caching and displaying games protected by DLL checks," +

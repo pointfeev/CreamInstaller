@@ -29,17 +29,11 @@ internal static class ParadoxLauncher
         if (paradoxLauncher is not null)
         {
             paradoxLauncher.ExtraDlc.Clear();
-            foreach (ProgramSelection selection in ProgramSelection.AllEnabled)
-            {
-                if (selection == paradoxLauncher || selection.Publisher != "Paradox Interactive") continue;
+            foreach (ProgramSelection selection in ProgramSelection.AllEnabled.Where(s => s != paradoxLauncher && s.Publisher == "Paradox Interactive"))
                 paradoxLauncher.ExtraDlc.Add(new(selection.Id, selection.Name, selection.SelectedDlc));
-            }
             if (!paradoxLauncher.ExtraDlc.Any())
-                foreach (ProgramSelection selection in ProgramSelection.AllSafe)
-                {
-                    if (selection == paradoxLauncher || selection.Publisher != "Paradox Interactive") continue;
+                foreach (ProgramSelection selection in ProgramSelection.AllSafe.Where(s => s != paradoxLauncher && s.Publisher == "Paradox Interactive"))
                     paradoxLauncher.ExtraDlc.Add(new(selection.Id, selection.Name, selection.AllDlc));
-                }
         }
     }
 

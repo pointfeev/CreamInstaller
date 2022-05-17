@@ -72,9 +72,8 @@ internal partial class SelectDialogForm : CustomForm
     private void OnAllCheckBoxChanged(object sender, EventArgs e)
     {
         bool shouldCheck = false;
-        foreach (TreeNode node in selectionTreeView.Nodes)
-            if (!node.Checked)
-                shouldCheck = true;
+        if (selectionTreeView.Nodes.Cast<TreeNode>().Any(n => !n.Checked))
+            shouldCheck = true;
         foreach (TreeNode node in selectionTreeView.Nodes)
         {
             node.Checked = shouldCheck;
@@ -98,9 +97,8 @@ internal partial class SelectDialogForm : CustomForm
     private void OnSave(object sender, EventArgs e)
     {
         List<string> choices = new();
-        foreach (TreeNode node in selectionTreeView.Nodes)
-            if (node.Checked)
-                choices.Add(node.Name);
+        foreach (TreeNode node in selectionTreeView.Nodes.Cast<TreeNode>().Where(n => n.Checked))
+            choices.Add(node.Name);
         ProgramData.WriteChoices(choices);
         loadButton.Enabled = File.Exists(ProgramData.ChoicesPath);
     }

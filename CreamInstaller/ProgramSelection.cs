@@ -114,7 +114,7 @@ internal class ProgramSelection
 
     internal static void ValidateAll(List<(string platform, string id, string name)> programsToScan) => AllSafe.ForEach(selection => selection.Validate(programsToScan));
 
-    internal static List<ProgramSelection> All = new();
+    internal static readonly List<ProgramSelection> All = new();
 
     internal static List<ProgramSelection> AllSafe => All.ToList();
 
@@ -125,8 +125,8 @@ internal class ProgramSelection
     internal static (string gameId, (DlcType type, string name, string icon) app)? GetDlcFromId(string dlcId)
     {
         foreach (ProgramSelection selection in AllSafe)
-            foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in selection.AllDlc)
-                if (pair.Key == dlcId) return (selection.Id, pair.Value);
+            foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in selection.AllDlc.Where(p => p.Key == dlcId))
+                return (selection.Id, pair.Value);
         return null;
     }
 }

@@ -18,7 +18,7 @@ namespace CreamInstaller;
 internal partial class InstallForm : CustomForm
 {
     internal bool Reselecting;
-    internal bool Uninstalling;
+    internal readonly bool Uninstalling;
 
     internal InstallForm(IWin32Window owner, bool uninstall = false) : base(owner)
     {
@@ -36,7 +36,7 @@ internal partial class InstallForm : CustomForm
         if (!userProgressBar.Disposing && !userProgressBar.IsDisposed)
             userProgressBar.Invoke(() =>
             {
-                int value = (int)((float)(CompleteOperationsCount / (float)OperationsCount) * 100) + progress / OperationsCount;
+                int value = (int)((float)CompleteOperationsCount / OperationsCount * 100) + progress / OperationsCount;
                 if (value < userProgressBar.Value) return;
                 userProgressBar.Value = value;
             });
@@ -374,7 +374,7 @@ internal partial class InstallForm : CustomForm
             }
             catch (Exception exception)
             {
-                UpdateUser($"Operation failed for {selection.Name}: " + exception.ToString(), InstallationLog.Error);
+                UpdateUser($"Operation failed for {selection.Name}: " + exception, InstallationLog.Error);
             }
             ++CompleteOperationsCount;
         }
@@ -403,7 +403,7 @@ internal partial class InstallForm : CustomForm
         }
         catch (Exception exception)
         {
-            UpdateUser($"SmokeAPI/ScreamAPI {(Uninstalling ? "uninstallation" : "installation and/or generation")} failed: " + exception.ToString(), InstallationLog.Error);
+            UpdateUser($"SmokeAPI/ScreamAPI {(Uninstalling ? "uninstallation" : "installation and/or generation")} failed: " + exception, InstallationLog.Error);
             retryButton.Enabled = true;
         }
         userProgressBar.Value = userProgressBar.Maximum;

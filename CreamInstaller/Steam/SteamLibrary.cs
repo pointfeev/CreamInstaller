@@ -34,9 +34,9 @@ internal static class SteamLibrary
             Thread.Sleep(0);
             List<(string appId, string name, string branch, int buildId, string gameDirectory)> directoryGames = await GetGamesFromLibraryDirectory(libraryDirectory);
             if (directoryGames is not null)
-                foreach ((string appId, string name, string branch, int buildId, string gameDirectory) game in directoryGames)
-                    if (!games.Any(_game => _game.appId == game.appId))
-                        games.Add(game);
+                foreach ((string appId, string name, string branch, int buildId, string gameDirectory) game in directoryGames
+                    .Where(game => !games.Any(_game => _game.appId == game.appId)))
+                    games.Add(game);
         }
         return games;
     });
@@ -111,14 +111,13 @@ internal static class SteamLibrary
                 gameDirectories.Add(libraryFolder);
                 string libraryFolders = libraryFolder + @"\libraryfolders.vdf";
                 if (File.Exists(libraryFolders) && ValveDataFile.TryDeserialize(File.ReadAllText(libraryFolders, Encoding.UTF8), out VProperty result))
-                    foreach (VProperty property in result.Value)
-                        if (int.TryParse(property.Key, out int _))
-                        {
-                            string path = property.Value.GetChild("path")?.ToString();
-                            if (string.IsNullOrWhiteSpace(path)) continue;
-                            path += @"\steamapps";
-                            if (Directory.Exists(path) && !gameDirectories.Contains(path)) gameDirectories.Add(path);
-                        }
+                    foreach (VProperty property in result.Value.Where(p => p is VProperty && int.TryParse((p as VProperty).Key, out int _)))
+                    {
+                        string path = property.Value.GetChild("path")?.ToString();
+                        if (string.IsNullOrWhiteSpace(path)) continue;
+                        path += @"\steamapps";
+                        if (Directory.Exists(path) && !gameDirectories.Contains(path)) gameDirectories.Add(path);
+                    }
             }
         }
         return gameDirectories;

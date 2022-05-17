@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -26,7 +27,7 @@ internal partial class MainForm : CustomForm
         Text = Program.ApplicationNameShort;
     }
 
-    private static CancellationTokenSource cancellationTokenSource;
+    private CancellationTokenSource cancellationTokenSource;
 
     private void StartProgram()
     {
@@ -42,9 +43,9 @@ internal partial class MainForm : CustomForm
         Close();
     }
 
-    private static UpdateManager updateManager;
-    private static Version latestVersion;
-    private static IReadOnlyList<Version> versions;
+    private UpdateManager updateManager;
+    private Version latestVersion;
+    private IReadOnlyList<Version> versions;
 
     private async void OnLoad()
     {
@@ -93,32 +94,31 @@ internal partial class MainForm : CustomForm
             updateButton.Click += new(OnUpdate);
             changelogTreeView.Visible = true;
             Version currentVersion = new(Application.ProductVersion);
-            foreach (Version version in versions)
-                if (version > currentVersion && !changelogTreeView.Nodes.ContainsKey(version.ToString()))
+            foreach (Version version in versions.Where(v => v > currentVersion && !changelogTreeView.Nodes.ContainsKey(v.ToString())))
+            {
+                TreeNode root = new($"v{version}");
+                root.Name = root.Text;
+                changelogTreeView.Nodes.Add(root);
+                if (changelogTreeView.Nodes.Count > 0) changelogTreeView.Nodes[0].EnsureVisible();
+                _ = Task.Run(async () =>
                 {
-                    TreeNode root = new($"v{version}");
-                    root.Name = root.Text;
-                    changelogTreeView.Nodes.Add(root);
-                    if (changelogTreeView.Nodes.Count > 0) changelogTreeView.Nodes[0].EnsureVisible();
-                    _ = Task.Run(async () =>
-                    {
-                        HtmlNodeCollection nodes = await HttpClientManager.GetDocumentNodes(
-                            $"https://github.com/pointfeev/CreamInstaller/releases/tag/v{version}",
-                            "//div[@data-test-selector='body-content']/ul/li");
-                        if (nodes is null) changelogTreeView.Nodes.Remove(root);
-                        else foreach (HtmlNode node in nodes)
+                    HtmlNodeCollection nodes = await HttpClientManager.GetDocumentNodes(
+                        $"https://github.com/pointfeev/CreamInstaller/releases/tag/v{version}",
+                        "//div[@data-test-selector='body-content']/ul/li");
+                    if (nodes is null) changelogTreeView.Nodes.Remove(root);
+                    else foreach (HtmlNode node in nodes)
+                        {
+                            Program.Invoke(changelogTreeView, delegate
                             {
-                                Program.Invoke(changelogTreeView, delegate
-                                {
-                                    TreeNode change = new();
-                                    change.Text = HttpUtility.HtmlDecode(node.InnerText);
-                                    root.Nodes.Add(change);
-                                    root.Expand();
-                                    if (changelogTreeView.Nodes.Count > 0) changelogTreeView.Nodes[0].EnsureVisible();
-                                });
-                            }
-                    });
-                }
+                                TreeNode change = new();
+                                change.Text = HttpUtility.HtmlDecode(node.InnerText);
+                                root.Nodes.Add(change);
+                                root.Expand();
+                                if (changelogTreeView.Nodes.Count > 0) changelogTreeView.Nodes[0].EnsureVisible();
+                            });
+                        }
+                });
+            }
         }
     }
 
@@ -192,5 +192,14 @@ internal partial class MainForm : CustomForm
         cancellationTokenSource.Cancel();
         updateManager.Dispose();
         updateManager = null;
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing && components is not null)
+            components.Dispose();
+        base.Dispose(disposing);
+        cancellationTokenSource?.Dispose();
+        updateManager?.Dispose();
     }
 }

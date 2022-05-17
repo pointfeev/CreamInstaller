@@ -35,31 +35,32 @@ internal static class SteamStore
             if (response is not null)
             {
                 IDictionary<string, JToken> apps = JsonConvert.DeserializeObject(response) as dynamic;
-                foreach (KeyValuePair<string, JToken> app in apps)
-                {
-                    try
+                if (apps is not null)
+                    foreach (KeyValuePair<string, JToken> app in apps)
                     {
-                        AppData data = JsonConvert.DeserializeObject<AppDetails>(app.Value.ToString()).data;
-                        if (data is not null)
+                        try
                         {
-                            try
+                            AppData data = JsonConvert.DeserializeObject<AppDetails>(app.Value.ToString()).data;
+                            if (data is not null)
                             {
-                                File.WriteAllText(cacheFile, JsonConvert.SerializeObject(data, Formatting.Indented));
+                                try
+                                {
+                                    File.WriteAllText(cacheFile, JsonConvert.SerializeObject(data, Formatting.Indented));
+                                }
+                                catch //(Exception e)
+                                {
+                                    //using DialogForm dialogForm = new(null);
+                                    //dialogForm.Show(SystemIcons.Error, "Unsuccessful serialization of query for appid " + appId + ":\n\n" + e.ToString(), "FUCK");
+                                }
+                                return data;
                             }
-                            catch //(Exception e)
-                            {
-                                //using DialogForm dialogForm = new(null);
-                                //dialogForm.Show(SystemIcons.Error, "Unsuccessful serialization of query for appid " + appId + ":\n\n" + e.ToString(), "FUCK");
-                            }
-                            return data;
+                        }
+                        catch //(Exception e)
+                        {
+                            //using DialogForm dialogForm = new(null);
+                            //dialogForm.Show(SystemIcons.Error, "Unsuccessful deserialization of query for appid " + appId + ":\n\n" + e.ToString(), "FUCK");
                         }
                     }
-                    catch //(Exception e)
-                    {
-                        //using DialogForm dialogForm = new(null);
-                        //dialogForm.Show(SystemIcons.Error, "Unsuccessful deserialization of query for appid " + appId + ":\n\n" + e.ToString(), "FUCK");
-                    }
-                }
             }
         }
         if (cachedExists)

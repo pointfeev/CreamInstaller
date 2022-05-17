@@ -175,7 +175,6 @@ namespace CreamInstaller
             this.Name = "SelectDialogForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "SelectDialogForm";
-            this.TopMost = true;
             this.groupBox.ResumeLayout(false);
             this.groupBox.PerformLayout();
             this.flowLayoutPanel2.ResumeLayout(false);
