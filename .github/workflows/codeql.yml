@@ -30,8 +30,19 @@ jobs:
         languages: ${{ matrix.language }}
         config-file: ./.github/codeql-config.yml
 
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v2
+    - name: Setup
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.x.x
+
+    - name: Restore
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+
+    - name: Test
+      run: dotnet test --no-build --verbosity normal --configuration Release
 
     - name: Analyze
       uses: github/codeql-action/analyze@v2
