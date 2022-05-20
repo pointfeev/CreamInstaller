@@ -5,7 +5,7 @@
 ###### Refer to [this post](https://cs.rin.ru/forum/viewtopic.php?f=29&t=122487) and/or [this repository](https://github.com/acidicoala/SmokeAPI) if you don't know what SmokeAPI is! ;;)
 ###### Refer to [this post](https://cs.rin.ru/forum/viewtopic.php?f=29&t=106474) and/or [this repository](https://github.com/acidicoala/ScreamAPI) if you don't know what ScreamAPI is! ;)
 
-###### The program utilizes SmokeAPI v1.0.0 and ScreamAPI v3.0.1 downloaded from those posts and embedded into the program itself; no download necessary on your part!
+###### The program utilizes SmokeAPI v1.0.1 and ScreamAPI v3.0.1 downloaded from those posts and embedded into the program itself; no download necessary on your part!
 ---
 #### Description:
 Automatically finds all installed Steam/Epic games and their respective Steamworks/Epic Online Services DLL locations on the user's computer,
