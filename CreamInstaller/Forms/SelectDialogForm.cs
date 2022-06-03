@@ -24,11 +24,13 @@ internal partial class SelectDialogForm : CustomForm
         selectionTreeView.AfterCheck += OnTreeNodeChecked;
         foreach ((string platform, string id, string name, bool alreadySelected) in choices)
         {
-            TreeNode node = new();
-            node.Tag = platform;
-            node.Name = id;
-            node.Text = name;
-            node.Checked = alreadySelected;
+            TreeNode node = new()
+            {
+                Tag = platform,
+                Name = id,
+                Text = name,
+                Checked = alreadySelected
+            };
             OnTreeNodeChecked(node);
             selectionTreeView.Nodes.Add(node);
         }

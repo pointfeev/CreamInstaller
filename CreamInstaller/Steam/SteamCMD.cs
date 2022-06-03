@@ -131,10 +131,12 @@ internal static class SteamCMD
         }
         if (!File.Exists(DllPath))
         {
-            FileSystemWatcher watcher = new(DirectoryPath);
-            watcher.Filter = "*";
-            watcher.IncludeSubdirectories = true;
-            watcher.EnableRaisingEvents = true;
+            FileSystemWatcher watcher = new(DirectoryPath)
+            {
+                Filter = "*",
+                IncludeSubdirectories = true,
+                EnableRaisingEvents = true
+            };
             if (File.Exists(DllPath)) progress.Report(-15); // update (not used at the moment)
             else progress.Report(-1660); // install
             int cur = 0;

@@ -110,8 +110,10 @@ internal partial class MainForm : CustomForm
                         {
                             Program.Invoke(changelogTreeView, delegate
                             {
-                                TreeNode change = new();
-                                change.Text = HttpUtility.HtmlDecode(node.InnerText);
+                                TreeNode change = new()
+                                {
+                                    Text = HttpUtility.HtmlDecode(node.InnerText)
+                                };
                                 root.Nodes.Add(change);
                                 root.Expand();
                                 if (changelogTreeView.Nodes.Count > 0) changelogTreeView.Nodes[0].EnsureVisible();
