@@ -220,7 +220,7 @@ internal partial class SelectForm : CustomForm
                     }
 
                     ProgramSelection selection = ProgramSelection.FromId(appId) ?? new();
-                    selection.Enabled = allCheckBox.Checked || selection.SelectedDlc.Any() || selection.ExtraDlc.Any();
+                    selection.Enabled = allCheckBox.Checked || selection.SelectedDlc.Any() || selection.ExtraSelectedDlc.Any();
                     selection.Id = appId;
                     selection.Name = appData?.name ?? name;
                     selection.RootDirectory = gameDirectory;
@@ -321,7 +321,7 @@ internal partial class SelectForm : CustomForm
                     }
 
                     ProgramSelection selection = ProgramSelection.FromId(@namespace) ?? new();
-                    selection.Enabled = allCheckBox.Checked || selection.SelectedDlc.Any() || selection.ExtraDlc.Any();
+                    selection.Enabled = allCheckBox.Checked || selection.SelectedDlc.Any() || selection.ExtraSelectedDlc.Any();
                     selection.Id = @namespace;
                     selection.Name = name;
                     selection.RootDirectory = directory;

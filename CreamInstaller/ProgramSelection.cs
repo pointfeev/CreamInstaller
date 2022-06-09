@@ -34,7 +34,9 @@ internal class ProgramSelection
 
     internal readonly SortedList<string, (DlcType type, string name, string icon)> AllDlc = new(AppIdComparer.Comparer);
     internal readonly SortedList<string, (DlcType type, string name, string icon)> SelectedDlc = new(AppIdComparer.Comparer);
-    internal readonly List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> ExtraDlc = new(); // for Paradox Launcher
+
+    internal readonly List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> ExtraDlc = new();         // for Paradox Launcher
+    internal readonly List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> ExtraSelectedDlc = new(); // for Paradox Launcher
 
     internal bool AreDllsLocked
     {
@@ -79,7 +81,7 @@ internal class ProgramSelection
                 break;
             }
         }
-        Enabled = SelectedDlc.Any() || ExtraDlc.Any();
+        Enabled = SelectedDlc.Any() || ExtraSelectedDlc.Any();
     }
 
     internal ProgramSelection() => All.Add(this);
