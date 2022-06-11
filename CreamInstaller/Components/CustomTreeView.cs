@@ -23,8 +23,8 @@ internal class CustomTreeView : TreeView
 
         public int Compare(object a, object b)
         {
-            TreeNode NodeA = a as TreeNode;
-            TreeNode NodeB = b as TreeNode;
+            if (a is not TreeNode NodeA) return 0;
+            if (b is not TreeNode NodeB) return 0;
             string StringA = compareText ? NodeA.Text : NodeA.Name;
             string StringB = compareText ? NodeB.Text : NodeB.Name;
             return AppIdComparer.Comparer.Compare(StringA, StringB);
