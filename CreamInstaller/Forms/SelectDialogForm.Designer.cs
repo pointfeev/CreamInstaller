@@ -31,9 +31,9 @@ namespace CreamInstaller
         {
             this.acceptButton = new System.Windows.Forms.Button();
             this.groupBox = new System.Windows.Forms.GroupBox();
-            this.sortCheckBox = new System.Windows.Forms.CheckBox();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.allCheckBox = new System.Windows.Forms.CheckBox();
+            this.sortCheckBox = new System.Windows.Forms.CheckBox();
             this.cancelButton = new System.Windows.Forms.Button();
             this.loadButton = new System.Windows.Forms.Button();
             this.saveButton = new System.Windows.Forms.Button();
@@ -71,18 +71,6 @@ namespace CreamInstaller
             this.groupBox.TabIndex = 3;
             this.groupBox.TabStop = false;
             this.groupBox.Text = "Choices";
-            // 
-            // sortCheckBox
-            // 
-            this.sortCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.sortCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.sortCheckBox.Location = new System.Drawing.Point(105, 245);
-            this.sortCheckBox.Margin = new System.Windows.Forms.Padding(3, 0, 0, 0);
-            this.sortCheckBox.Name = "sortCheckBox";
-            this.sortCheckBox.Size = new System.Drawing.Size(92, 19);
-            this.sortCheckBox.TabIndex = 2;
-            this.sortCheckBox.Text = "Sort By Name";
-            this.sortCheckBox.CheckedChanged += new System.EventHandler(this.OnSortCheckBoxChanged);
             // 
             // selectionTreeView
             // 
@@ -123,6 +111,19 @@ namespace CreamInstaller
             this.allCheckBox.TabIndex = 2;
             this.allCheckBox.Text = "All";
             this.allCheckBox.CheckedChanged += new System.EventHandler(this.OnAllCheckBoxChanged);
+            // 
+            // sortCheckBox
+            // 
+            this.sortCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.sortCheckBox.AutoSize = true;
+            this.sortCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.sortCheckBox.Location = new System.Drawing.Point(105, 245);
+            this.sortCheckBox.Margin = new System.Windows.Forms.Padding(3, 0, 0, 0);
+            this.sortCheckBox.Name = "sortCheckBox";
+            this.sortCheckBox.Size = new System.Drawing.Size(104, 20);
+            this.sortCheckBox.TabIndex = 2;
+            this.sortCheckBox.Text = "Sort By Name";
+            this.sortCheckBox.CheckedChanged += new System.EventHandler(this.OnSortCheckBoxChanged);
             // 
             // cancelButton
             // 
