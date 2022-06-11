@@ -163,6 +163,8 @@ namespace CreamInstaller
             this.AcceptButton = this.acceptButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSize = true;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(433, 279);
             this.Controls.Add(this.saveButton);
             this.Controls.Add(this.loadButton);

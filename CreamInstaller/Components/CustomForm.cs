@@ -14,6 +14,7 @@ internal class CustomForm : Form
         Owner = (owner as Form) ?? ActiveForm;
         KeyPreview = true;
         KeyPress += OnKeyPress;
+        ResizeRedraw = true;
     }
 
     protected override CreateParams CreateParams // Double buffering for all controls

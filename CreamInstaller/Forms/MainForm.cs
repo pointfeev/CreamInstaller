@@ -49,15 +49,14 @@ internal partial class MainForm : CustomForm
 
     private async void OnLoad()
     {
-        Size = new(420, 85);
-        progressBar1.Visible = false;
+        progressBar.Visible = false;
         ignoreButton.Visible = true;
         updateButton.Text = "Update";
         updateButton.Click -= OnUpdateCancel;
-        label1.Text = "Checking for updates . . .";
+        progressLabel.Text = "Checking for updates . . .";
         changelogTreeView.Visible = false;
-        changelogTreeView.Location = new(12, 41);
-        changelogTreeView.Size = new(380, 208);
+        changelogTreeView.Location = new(progressLabel.Location.X, progressLabel.Location.Y + progressLabel.Size.Height + 13);
+        Refresh();
 
         GithubPackageResolver resolver = new("pointfeev", "CreamInstaller", "CreamInstaller.zip");
         ZipPackageExtractor extractor = new();
@@ -87,8 +86,7 @@ internal partial class MainForm : CustomForm
         }
         else
         {
-            Size = new(420, 300);
-            label1.Text = $"An update is available: v{latestVersion}";
+            progressLabel.Text = $"An update is available: v{latestVersion}";
             ignoreButton.Enabled = true;
             updateButton.Enabled = true;
             updateButton.Click += new(OnUpdate);
@@ -96,8 +94,10 @@ internal partial class MainForm : CustomForm
             Version currentVersion = new(Application.ProductVersion);
             foreach (Version version in versions.Where(v => v > currentVersion && !changelogTreeView.Nodes.ContainsKey(v.ToString())))
             {
-                TreeNode root = new($"v{version}");
-                root.Name = root.Text;
+                TreeNode root = new($"v{version}")
+                {
+                    Name = version.ToString()
+                };
                 changelogTreeView.Nodes.Add(root);
                 if (changelogTreeView.Nodes.Count > 0) changelogTreeView.Nodes[0].EnsureVisible();
                 _ = Task.Run(async () =>
@@ -155,22 +155,22 @@ internal partial class MainForm : CustomForm
 
     private async void OnUpdate(object sender, EventArgs e)
     {
-        progressBar1.Visible = true;
+        progressBar.Visible = true;
         ignoreButton.Visible = false;
         updateButton.Text = "Cancel";
         updateButton.Click -= OnUpdate;
         updateButton.Click += new(OnUpdateCancel);
-        changelogTreeView.Location = new(12, 70);
-        changelogTreeView.Size = new(380, 179);
+        changelogTreeView.Location = new(progressBar.Location.X, progressBar.Location.Y + progressBar.Size.Height + 6);
+        Refresh();
 
         Progress<double> progress = new();
         progress.ProgressChanged += new(delegate (object sender, double _progress)
         {
-            label1.Text = $"Updating . . . {(int)_progress}%";
-            progressBar1.Value = (int)_progress;
+            progressLabel.Text = $"Updating . . . {(int)_progress}%";
+            progressBar.Value = (int)_progress;
         });
 
-        label1.Text = "Updating . . . ";
+        progressLabel.Text = "Updating . . . ";
         cancellationTokenSource = new();
         try
         {
@@ -179,6 +179,8 @@ internal partial class MainForm : CustomForm
             cancellationTokenSource = null;
         }
         catch { }
+
+        await Task.Run(() => Thread.Sleep(3000));
 
         if (updateManager is not null && updateManager.IsUpdatePrepared(latestVersion))
         {
@@ -191,15 +193,15 @@ internal partial class MainForm : CustomForm
 
     private void OnUpdateCancel(object sender, EventArgs e)
     {
-        cancellationTokenSource.Cancel();
-        updateManager.Dispose();
+        cancellationTokenSource?.Cancel();
+        updateManager?.Dispose();
         updateManager = null;
     }
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing && components is not null)
-            components.Dispose();
+        if (disposing)
+            components?.Dispose();
         base.Dispose(disposing);
         cancellationTokenSource?.Dispose();
         updateManager?.Dispose();

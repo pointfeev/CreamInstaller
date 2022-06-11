@@ -270,6 +270,8 @@ namespace CreamInstaller
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSize = true;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(584, 361);
             this.Controls.Add(this.progressLabelDLCs);
             this.Controls.Add(this.progressLabelGames);
@@ -282,11 +284,10 @@ namespace CreamInstaller
             this.Controls.Add(this.installButton);
             this.Controls.Add(this.progressLabel);
             this.DoubleBuffered = true;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(600, 400);
             this.Name = "SelectForm";
-            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "SelectForm";
             this.Load += new System.EventHandler(this.OnLoad);

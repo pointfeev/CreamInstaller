@@ -128,6 +128,8 @@ namespace CreamInstaller
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSize = true;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(784, 561);
             this.Controls.Add(this.reselectButton);
             this.Controls.Add(this.logTextBox);
@@ -137,11 +139,10 @@ namespace CreamInstaller
             this.Controls.Add(this.userProgressBar);
             this.Controls.Add(this.userInfoLabel);
             this.DoubleBuffered = true;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(600, 400);
             this.Name = "InstallForm";
-            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "InstallForm";
             this.Load += new System.EventHandler(this.OnLoad);

@@ -21,21 +21,21 @@ namespace CreamInstaller
         /// </summary>
         private void InitializeComponent()
         {
-            this.label1 = new System.Windows.Forms.Label();
+            this.progressLabel = new System.Windows.Forms.Label();
             this.updateButton = new System.Windows.Forms.Button();
             this.ignoreButton = new System.Windows.Forms.Button();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.progressBar = new System.Windows.Forms.ProgressBar();
             this.changelogTreeView = new CustomTreeView();
             this.SuspendLayout();
             // 
-            // label1
+            // progressLabel
             // 
-            this.label1.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.label1.Location = new System.Drawing.Point(12, 16);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(218, 15);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Checking for updates . . .";
+            this.progressLabel.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.progressLabel.Location = new System.Drawing.Point(12, 16);
+            this.progressLabel.Name = "progressLabel";
+            this.progressLabel.Size = new System.Drawing.Size(218, 15);
+            this.progressLabel.TabIndex = 0;
+            this.progressLabel.Text = "Checking for updates . . .";
             // 
             // updateButton
             // 
@@ -62,38 +62,41 @@ namespace CreamInstaller
             this.ignoreButton.UseVisualStyleBackColor = true;
             this.ignoreButton.Click += new System.EventHandler(this.OnIgnore);
             // 
-            // progressBar1
+            // progressBar
             // 
-            this.progressBar1.Location = new System.Drawing.Point(12, 41);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(380, 23);
-            this.progressBar1.TabIndex = 4;
-            this.progressBar1.Visible = false;
+            this.progressBar.Location = new System.Drawing.Point(12, 41);
+            this.progressBar.Name = "progressBar";
+            this.progressBar.Size = new System.Drawing.Size(380, 23);
+            this.progressBar.TabIndex = 4;
+            this.progressBar.Visible = false;
             // 
             // changelogTreeView
             // 
+            this.changelogTreeView.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawAll;
             this.changelogTreeView.Location = new System.Drawing.Point(12, 70);
+            this.changelogTreeView.Margin = new System.Windows.Forms.Padding(0, 0, 0, 12);
             this.changelogTreeView.Name = "changelogTreeView";
             this.changelogTreeView.Size = new System.Drawing.Size(380, 179);
+            this.changelogTreeView.Sorted = true;
             this.changelogTreeView.TabIndex = 5;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSize = true;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(404, 261);
             this.Controls.Add(this.changelogTreeView);
-            this.Controls.Add(this.progressBar1);
+            this.Controls.Add(this.progressBar);
             this.Controls.Add(this.ignoreButton);
             this.Controls.Add(this.updateButton);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.progressLabel);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(420, 300);
             this.MinimizeBox = false;
             this.Name = "MainForm";
-            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "MainForm";
             this.Load += new System.EventHandler(this.OnLoad);
@@ -103,10 +106,10 @@ namespace CreamInstaller
 
         #endregion
 
-        private Label label1;
+        private Label progressLabel;
         private Button updateButton;
         private Button ignoreButton;
-        private ProgressBar progressBar1;
+        private ProgressBar progressBar;
         private CustomTreeView changelogTreeView;
     }
 }
