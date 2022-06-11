@@ -180,8 +180,6 @@ internal partial class MainForm : CustomForm
         }
         catch { }
 
-        await Task.Run(() => Thread.Sleep(3000));
-
         if (updateManager is not null && updateManager.IsUpdatePrepared(latestVersion))
         {
             updateManager.LaunchUpdater(latestVersion);
