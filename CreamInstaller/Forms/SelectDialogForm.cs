@@ -8,6 +8,8 @@ using System.Windows.Forms;
 using CreamInstaller.Components;
 using CreamInstaller.Utility;
 
+using static CreamInstaller.Components.CustomTreeView;
+
 namespace CreamInstaller;
 
 internal partial class SelectDialogForm : CustomForm
@@ -70,6 +72,8 @@ internal partial class SelectDialogForm : CustomForm
         Text = TextRenderer.MeasureText(Program.ApplicationName, Font).Width > Size.Width - 100
             ? Program.ApplicationNameShort
             : Program.ApplicationName;
+
+    private void OnSortCheckBoxChanged(object sender, EventArgs e) => selectionTreeView.TreeViewNodeSorter = new TreeNodeSorter(sortCheckBox.Checked);
 
     private void OnAllCheckBoxChanged(object sender, EventArgs e)
     {

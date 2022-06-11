@@ -31,12 +31,13 @@ namespace CreamInstaller
         {
             this.acceptButton = new System.Windows.Forms.Button();
             this.groupBox = new System.Windows.Forms.GroupBox();
-            this.selectionTreeView = new Components.CustomTreeView();
+            this.sortCheckBox = new System.Windows.Forms.CheckBox();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.allCheckBox = new System.Windows.Forms.CheckBox();
             this.cancelButton = new System.Windows.Forms.Button();
             this.loadButton = new System.Windows.Forms.Button();
             this.saveButton = new System.Windows.Forms.Button();
+            this.selectionTreeView = new Components.CustomTreeView();
             this.groupBox.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
@@ -70,6 +71,18 @@ namespace CreamInstaller
             this.groupBox.TabIndex = 3;
             this.groupBox.TabStop = false;
             this.groupBox.Text = "Choices";
+            // 
+            // sortCheckBox
+            // 
+            this.sortCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.sortCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.sortCheckBox.Location = new System.Drawing.Point(105, 245);
+            this.sortCheckBox.Margin = new System.Windows.Forms.Padding(3, 0, 0, 0);
+            this.sortCheckBox.Name = "sortCheckBox";
+            this.sortCheckBox.Size = new System.Drawing.Size(92, 19);
+            this.sortCheckBox.TabIndex = 2;
+            this.sortCheckBox.Text = "Sort By Name";
+            this.sortCheckBox.CheckedChanged += new System.EventHandler(this.OnSortCheckBoxChanged);
             // 
             // selectionTreeView
             // 
@@ -166,6 +179,7 @@ namespace CreamInstaller
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(433, 279);
+            this.Controls.Add(this.sortCheckBox);
             this.Controls.Add(this.saveButton);
             this.Controls.Add(this.loadButton);
             this.Controls.Add(this.cancelButton);
@@ -186,6 +200,7 @@ namespace CreamInstaller
         }
 
         #endregion
+
         private System.Windows.Forms.Button acceptButton;
         private System.Windows.Forms.GroupBox groupBox;
         private Components.CustomTreeView selectionTreeView;
@@ -194,5 +209,6 @@ namespace CreamInstaller
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.Button loadButton;
         private System.Windows.Forms.Button saveButton;
+        private System.Windows.Forms.CheckBox sortCheckBox;
     }
 }

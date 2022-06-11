@@ -15,9 +15,20 @@ internal class CustomTreeView : TreeView
             base.WndProc(ref m);
     }
 
-    private class TreeNodeSorter : IComparer
+    internal class TreeNodeSorter : IComparer
     {
-        public int Compare(object a, object b) => AppIdComparer.Comparer.Compare((a as TreeNode).Name, (b as TreeNode).Name);
+        private readonly bool compareText;
+
+        internal TreeNodeSorter(bool compareText = false) : base() => this.compareText = compareText;
+
+        public int Compare(object a, object b)
+        {
+            TreeNode NodeA = a as TreeNode;
+            TreeNode NodeB = b as TreeNode;
+            string StringA = compareText ? NodeA.Text : NodeA.Name;
+            string StringB = compareText ? NodeB.Text : NodeB.Name;
+            return AppIdComparer.Comparer.Compare(StringA, StringB);
+        }
     }
 
     internal CustomTreeView() : base()
