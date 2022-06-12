@@ -195,8 +195,6 @@ internal partial class MainForm : CustomForm
         try
         {
             await updateManager.PrepareUpdateAsync(latestVersion, progress, cancellationTokenSource.Token);
-            cancellationTokenSource.Dispose();
-            cancellationTokenSource = null;
         }
 #if DEBUG
         catch (Exception ex)
