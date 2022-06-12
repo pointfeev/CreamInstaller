@@ -14,8 +14,13 @@ namespace CreamInstaller;
 
 internal static class Program
 {
+#if DEBUG
+    internal static readonly string ApplicationName = Application.CompanyName + " v" + Application.ProductVersion + "-debug: " + Application.ProductName;
+    internal static readonly string ApplicationNameShort = Application.CompanyName + " v" + Application.ProductVersion + "-debug";
+#else
     internal static readonly string ApplicationName = Application.CompanyName + " v" + Application.ProductVersion + ": " + Application.ProductName;
     internal static readonly string ApplicationNameShort = Application.CompanyName + " v" + Application.ProductVersion;
+#endif
 
     internal static readonly Assembly EntryAssembly = Assembly.GetEntryAssembly();
     internal static readonly Process CurrentProcess = Process.GetCurrentProcess();

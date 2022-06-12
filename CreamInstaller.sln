@@ -1,12 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31025.194
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32516.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CreamInstaller", "CreamInstaller\CreamInstaller.csproj", "{6C94C882-7168-435E-B9E3-B4B9222BBF68}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|ARM = Debug|ARM
+		Debug|ARM64 = Debug|ARM64
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
 		Release|ARM = Release|ARM
 		Release|ARM64 = Release|ARM64
@@ -14,6 +19,16 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6C94C882-7168-435E-B9E3-B4B9222BBF68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C94C882-7168-435E-B9E3-B4B9222BBF68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C94C882-7168-435E-B9E3-B4B9222BBF68}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{6C94C882-7168-435E-B9E3-B4B9222BBF68}.Debug|ARM.Build.0 = Debug|Any CPU
+		{6C94C882-7168-435E-B9E3-B4B9222BBF68}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{6C94C882-7168-435E-B9E3-B4B9222BBF68}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{6C94C882-7168-435E-B9E3-B4B9222BBF68}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6C94C882-7168-435E-B9E3-B4B9222BBF68}.Debug|x64.Build.0 = Debug|Any CPU
+		{6C94C882-7168-435E-B9E3-B4B9222BBF68}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6C94C882-7168-435E-B9E3-B4B9222BBF68}.Debug|x86.Build.0 = Debug|Any CPU
 		{6C94C882-7168-435E-B9E3-B4B9222BBF68}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C94C882-7168-435E-B9E3-B4B9222BBF68}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6C94C882-7168-435E-B9E3-B4B9222BBF68}.Release|ARM.ActiveCfg = Release|Any CPU

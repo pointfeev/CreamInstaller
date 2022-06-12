@@ -70,13 +70,24 @@ internal partial class MainForm : CustomForm
                 checkForUpdatesResult = await updateManager.CheckForUpdatesAsync(cancellationTokenSource.Token);
                 cancellationTokenSource.Dispose();
                 cancellationTokenSource = null;
+#if !DEBUG
                 if (checkForUpdatesResult.CanUpdate)
                 {
+#endif
                     latestVersion = checkForUpdatesResult.LastVersion;
                     versions = checkForUpdatesResult.Versions;
+#if !DEBUG
                 }
+#endif
             }
+#if DEBUG
+            catch (Exception e)
+            {
+                e.HandleException(form: this, caption: "Debug exception", acceptButtonText: "OK", cancelButtonText: null);
+            }
+#else
             catch { }
+#endif
         }
         if (latestVersion is null)
         {
@@ -92,14 +103,19 @@ internal partial class MainForm : CustomForm
             updateButton.Click += new(OnUpdate);
             changelogTreeView.Visible = true;
             Version currentVersion = new(Application.ProductVersion);
+#if DEBUG
+            foreach (Version version in versions.Where(v => (v > currentVersion || v == latestVersion) && !changelogTreeView.Nodes.ContainsKey(v.ToString())))
+#else
             foreach (Version version in versions.Where(v => v > currentVersion && !changelogTreeView.Nodes.ContainsKey(v.ToString())))
+#endif
             {
                 TreeNode root = new($"v{version}")
                 {
                     Name = version.ToString()
                 };
                 changelogTreeView.Nodes.Add(root);
-                if (changelogTreeView.Nodes.Count > 0) changelogTreeView.Nodes[0].EnsureVisible();
+                if (changelogTreeView.Nodes.Count > 0)
+                    changelogTreeView.Nodes[0].EnsureVisible();
                 _ = Task.Run(async () =>
                 {
                     HtmlNodeCollection nodes = await HttpClientManager.GetDocumentNodes(
@@ -116,7 +132,8 @@ internal partial class MainForm : CustomForm
                                 };
                                 root.Nodes.Add(change);
                                 root.Expand();
-                                if (changelogTreeView.Nodes.Count > 0) changelogTreeView.Nodes[0].EnsureVisible();
+                                if (changelogTreeView.Nodes.Count > 0)
+                                    changelogTreeView.Nodes[0].EnsureVisible();
                             });
                         }
                 });
@@ -178,7 +195,14 @@ internal partial class MainForm : CustomForm
             cancellationTokenSource.Dispose();
             cancellationTokenSource = null;
         }
+#if DEBUG
+        catch (Exception ex)
+        {
+            ex.HandleException(form: this, caption: "Debug exception", acceptButtonText: "OK", cancelButtonText: null);
+        }
+#else
         catch { }
+#endif
 
         if (updateManager is not null && updateManager.IsUpdatePrepared(latestVersion))
         {
