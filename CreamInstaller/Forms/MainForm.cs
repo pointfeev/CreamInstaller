@@ -68,8 +68,6 @@ internal partial class MainForm : CustomForm
             try
             {
                 checkForUpdatesResult = await updateManager.CheckForUpdatesAsync(cancellationTokenSource.Token);
-                cancellationTokenSource.Dispose();
-                cancellationTokenSource = null;
 #if !DEBUG
                 if (checkForUpdatesResult.CanUpdate)
                 {
@@ -88,6 +86,11 @@ internal partial class MainForm : CustomForm
 #else
             catch { }
 #endif
+            finally
+            {
+                cancellationTokenSource.Dispose();
+                cancellationTokenSource = null;
+            }
         }
         if (latestVersion is null)
         {
@@ -203,6 +206,11 @@ internal partial class MainForm : CustomForm
 #else
         catch { }
 #endif
+        finally
+        {
+            cancellationTokenSource.Dispose();
+            cancellationTokenSource = null;
+        }
 
         if (updateManager is not null && updateManager.IsUpdatePrepared(latestVersion))
         {
