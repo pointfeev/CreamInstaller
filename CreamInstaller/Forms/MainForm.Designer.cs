@@ -32,6 +32,7 @@ namespace CreamInstaller
             // 
             this.progressLabel.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.progressLabel.Location = new System.Drawing.Point(12, 16);
+            this.progressLabel.Margin = new System.Windows.Forms.Padding(3, 0, 3, 12);
             this.progressLabel.Name = "progressLabel";
             this.progressLabel.Size = new System.Drawing.Size(218, 15);
             this.progressLabel.TabIndex = 0;
@@ -43,6 +44,7 @@ namespace CreamInstaller
             this.updateButton.Enabled = false;
             this.updateButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.updateButton.Location = new System.Drawing.Point(317, 12);
+            this.updateButton.Margin = new System.Windows.Forms.Padding(3, 3, 3, 12);
             this.updateButton.Name = "updateButton";
             this.updateButton.Size = new System.Drawing.Size(75, 23);
             this.updateButton.TabIndex = 2;
@@ -55,6 +57,7 @@ namespace CreamInstaller
             this.ignoreButton.Enabled = false;
             this.ignoreButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.ignoreButton.Location = new System.Drawing.Point(236, 12);
+            this.ignoreButton.Margin = new System.Windows.Forms.Padding(3, 3, 3, 12);
             this.ignoreButton.Name = "ignoreButton";
             this.ignoreButton.Size = new System.Drawing.Size(75, 23);
             this.ignoreButton.TabIndex = 1;
