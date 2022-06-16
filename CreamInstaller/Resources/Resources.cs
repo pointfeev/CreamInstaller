@@ -118,14 +118,7 @@ internal static class Resources
         return BitConverter.ToString(hash).Replace("-", "").ToUpperInvariant();
     }
 
-    internal static bool IsResourceFile(this string filePath, ResourceIdentifier identifier) => ResourceMD5s[identifier].Contains(filePath.ComputeMD5());
+    internal static bool IsResourceFile(this string filePath, ResourceIdentifier identifier) => filePath.ComputeMD5() is string hash && ResourceMD5s[identifier].Contains(hash);
 
-    internal static bool IsResourceFile(this string filePath)
-    {
-        string hash = filePath.ComputeMD5();
-        foreach (IReadOnlyList<string> md5s in ResourceMD5s.Values)
-            if (md5s.Contains(hash))
-                return true;
-        return false;
-    }
+    internal static bool IsResourceFile(this string filePath) => filePath.ComputeMD5() is string hash && ResourceMD5s.Values.Any(hashes => hashes.Contains(hash));
 }
