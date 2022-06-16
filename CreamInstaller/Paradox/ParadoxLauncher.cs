@@ -8,6 +8,8 @@ using CreamInstaller.Resources;
 
 using Microsoft.Win32;
 
+using static CreamInstaller.Resources.Resources;
+
 namespace CreamInstaller.Paradox;
 
 internal static class ParadoxLauncher
@@ -67,7 +69,7 @@ internal static class ParadoxLauncher
     internal static async Task<int> Repair(Form form, ProgramSelection selection)
     {
         if (!Program.IsProgramRunningDialog(form, selection)) return -2;
-        byte[] creamConfig = null;
+        byte[] smokeConfig = null;
         byte[] steamOriginalSdk32 = null;
         byte[] steamOriginalSdk64 = null;
         byte[] screamConfig = null;
@@ -76,20 +78,20 @@ internal static class ParadoxLauncher
         foreach (string directory in selection.DllDirectories)
         {
             directory.GetSmokeApiComponents(out string sdk32, out string _, out string sdk64, out string _, out string config);
-            if (creamConfig is null && File.Exists(config))
-                creamConfig = File.ReadAllBytes(config);
+            if (smokeConfig is null && File.Exists(config))
+                smokeConfig = File.ReadAllBytes(config);
             await InstallForm.UninstallSmokeAPI(directory);
-            if (steamOriginalSdk32 is null && File.Exists(sdk32) && !Properties.Resources.Steamworks32.EqualsFile(sdk32))
+            if (steamOriginalSdk32 is null && File.Exists(sdk32) && !sdk32.IsResourceFile(ResourceIdentifier.Steamworks32))
                 steamOriginalSdk32 = File.ReadAllBytes(sdk32);
-            if (steamOriginalSdk64 is null && File.Exists(sdk64) && !Properties.Resources.Steamworks64.EqualsFile(sdk64))
+            if (steamOriginalSdk64 is null && File.Exists(sdk64) && !sdk64.IsResourceFile(ResourceIdentifier.Steamworks64))
                 steamOriginalSdk64 = File.ReadAllBytes(sdk64);
             directory.GetScreamApiComponents(out sdk32, out string _, out sdk64, out string _, out config);
             if (screamConfig is null && File.Exists(config))
                 screamConfig = File.ReadAllBytes(config);
             await InstallForm.UninstallScreamAPI(directory);
-            if (epicOriginalSdk32 is null && File.Exists(sdk32) && !Properties.Resources.EpicOnlineServices32.EqualsFile(sdk32))
+            if (epicOriginalSdk32 is null && File.Exists(sdk32) && !sdk32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32))
                 epicOriginalSdk32 = File.ReadAllBytes(sdk32);
-            if (epicOriginalSdk64 is null && File.Exists(sdk64) && !Properties.Resources.EpicOnlineServices64.EqualsFile(sdk64))
+            if (epicOriginalSdk64 is null && File.Exists(sdk64) && !sdk64.IsResourceFile(ResourceIdentifier.EpicOnlineServices64))
                 epicOriginalSdk64 = File.ReadAllBytes(sdk64);
         }
         using DialogForm dialogForm = new(form);
@@ -99,29 +101,29 @@ internal static class ParadoxLauncher
             foreach (string directory in selection.DllDirectories)
             {
                 directory.GetSmokeApiComponents(out string sdk32, out string _, out string sdk64, out string _, out string config);
-                if (steamOriginalSdk32 is not null && Properties.Resources.Steamworks32.EqualsFile(sdk32))
+                if (steamOriginalSdk32 is not null && sdk32.IsResourceFile(ResourceIdentifier.Steamworks32))
                 {
                     steamOriginalSdk32.Write(sdk32);
                     neededRepair = true;
                 }
-                if (steamOriginalSdk64 is not null && Properties.Resources.Steamworks64.EqualsFile(sdk64))
+                if (steamOriginalSdk64 is not null && sdk64.IsResourceFile(ResourceIdentifier.Steamworks64))
                 {
                     steamOriginalSdk64.Write(sdk64);
                     neededRepair = true;
                 }
-                if (creamConfig is not null)
+                if (smokeConfig is not null)
                 {
                     await InstallForm.InstallSmokeAPI(directory, selection);
-                    creamConfig.Write(config);
+                    smokeConfig.Write(config);
                 }
 
                 directory.GetScreamApiComponents(out sdk32, out string _, out sdk64, out string _, out config);
-                if (epicOriginalSdk32 is not null && Properties.Resources.EpicOnlineServices32.EqualsFile(sdk32))
+                if (epicOriginalSdk32 is not null && sdk32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32))
                 {
                     epicOriginalSdk32.Write(sdk32);
                     neededRepair = true;
                 }
-                if (epicOriginalSdk64 is not null && Properties.Resources.EpicOnlineServices64.EqualsFile(sdk64))
+                if (epicOriginalSdk64 is not null && sdk64.IsResourceFile(ResourceIdentifier.EpicOnlineServices64))
                 {
                     epicOriginalSdk64.Write(sdk64);
                     neededRepair = true;

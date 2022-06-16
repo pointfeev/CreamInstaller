@@ -41,14 +41,6 @@ internal static class Program
         return false;
     }
 
-    internal static bool IsFilePathLocked(this string filePath)
-    {
-        try { File.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None).Close(); }
-        catch (FileNotFoundException) { return false; }
-        catch (IOException) { return true; }
-        return false;
-    }
-
     internal static bool IsProgramRunningDialog(Form form, ProgramSelection selection)
     {
         if (selection.AreDllsLocked)
@@ -62,24 +54,6 @@ internal static class Program
         }
         else return true;
         return false;
-    }
-
-    internal static void GetSmokeApiComponents(this string directory, out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config)
-    {
-        sdk32 = directory + @"\steam_api.dll";
-        sdk32_o = directory + @"\steam_api_o.dll";
-        sdk64 = directory + @"\steam_api64.dll";
-        sdk64_o = directory + @"\steam_api64_o.dll";
-        config = directory + @"\SmokeAPI.json";
-    }
-
-    internal static void GetScreamApiComponents(this string directory, out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config)
-    {
-        sdk32 = directory + @"\EOSSDK-Win32-Shipping.dll";
-        sdk32_o = directory + @"\EOSSDK-Win32-Shipping_o.dll";
-        sdk64 = directory + @"\EOSSDK-Win64-Shipping.dll";
-        sdk64_o = directory + @"\EOSSDK-Win64-Shipping_o.dll";
-        config = directory + @"\ScreamAPI.json";
     }
 
     [STAThread]

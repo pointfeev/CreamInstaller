@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 
 using CreamInstaller.Components;
+using CreamInstaller.Resources;
 
 namespace CreamInstaller;
 

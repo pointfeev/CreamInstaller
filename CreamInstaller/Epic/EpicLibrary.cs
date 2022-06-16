@@ -5,6 +5,8 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
+using CreamInstaller.Resources;
+
 using Microsoft.Win32;
 
 namespace CreamInstaller.Epic;

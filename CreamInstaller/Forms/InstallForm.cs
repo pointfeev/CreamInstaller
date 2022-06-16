@@ -81,18 +81,23 @@ internal partial class InstallForm : CustomForm
         }
         else
             writer.WriteLine("  \"override\": [],");
-        writer.WriteLine("  \"dlc_ids\": [");
-        KeyValuePair<string, (DlcType type, string name, string icon)> lastAllDlc = allDlc.Last();
-        foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in allDlc)
+        if (allDlc.Count > 0)
         {
-            Thread.Sleep(0);
-            string dlcId = pair.Key;
-            (_, string dlcName, _) = pair.Value;
-            writer.WriteLine($"    {dlcId}{(pair.Equals(lastAllDlc) ? "" : ",")}");
-            if (installForm is not null)
-                installForm.UpdateUser($"Added DLC to SmokeAPI.json with appid {dlcId} ({dlcName})", InstallationLog.Action, info: false);
+            writer.WriteLine("  \"dlc_ids\": [");
+            KeyValuePair<string, (DlcType type, string name, string icon)> lastAllDlc = allDlc.Last();
+            foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in allDlc)
+            {
+                Thread.Sleep(0);
+                string dlcId = pair.Key;
+                (_, string dlcName, _) = pair.Value;
+                writer.WriteLine($"    {dlcId}{(pair.Equals(lastAllDlc) ? "" : ",")}");
+                if (installForm is not null)
+                    installForm.UpdateUser($"Added DLC to SmokeAPI.json with appid {dlcId} ({dlcName})", InstallationLog.Action, info: false);
+            }
+            writer.WriteLine("  ],");
         }
-        writer.WriteLine("  ],");
+        else
+            writer.WriteLine("  \"dlc_ids\": [],");
         writer.WriteLine("  \"auto_inject_inventory\": true,");
         writer.WriteLine("  \"inventory_items\": []");
         writer.WriteLine("}");
@@ -135,6 +140,13 @@ internal partial class InstallForm : CustomForm
 
     internal static async Task InstallSmokeAPI(string directory, ProgramSelection selection, InstallForm installForm = null) => await Task.Run(() =>
     {
+        directory.GetCreamApiComponents(out _, out _, out _, out _, out string oldConfig);
+        if (File.Exists(oldConfig))
+        {
+            File.Delete(oldConfig);
+            if (installForm is not null)
+                installForm.UpdateUser($"Deleted old config: {Path.GetFileName(oldConfig)}", InstallationLog.Action, info: false);
+        }
         directory.GetSmokeApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
         if (File.Exists(sdk32) && !File.Exists(sdk32_o))
         {

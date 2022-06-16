@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using CreamInstaller.Components;
 using CreamInstaller.Epic;
 using CreamInstaller.Paradox;
+using CreamInstaller.Resources;
 using CreamInstaller.Steam;
 using CreamInstaller.Utility;
 
