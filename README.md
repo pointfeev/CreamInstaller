@@ -33,7 +33,7 @@ games and DLCs the user selects; however, through the use of **right-click conte
 2. Extract the executable to anywhere on your computer you want. *it's completely self-contained*
 
 ---
-### **NOTE:** This program does not automatically download nor install actual DLC files for you. As the title of the program says, it's only a SmokeAPI/ScreamAPI installer. Should the game you wish to unlock DLC for not already come with the DLCs installed (very many do not), you have to find, download, and install those yourself. Preferably, you should be referring to the proper cs.rin.ru post for the game(s) you're tinkering with; you'll usually find any answer to your problems there.
+#### **NOTE:** This program does not automatically download nor install actual DLC files for you. As the title of the program says, it's only a SmokeAPI/ScreamAPI installer. Should the game you wish to unlock DLC for not already come with the DLCs installed (very many do not), you have to find, download, and install those yourself. Preferably, you should be referring to the proper cs.rin.ru post for the game(s) you're tinkering with; you'll usually find any answer to your problems there.
 
 ---
 #### Usage:
