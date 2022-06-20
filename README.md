@@ -12,7 +12,7 @@ Automatically finds all installed Steam and Epic games with their respective Ste
 parses SteamCMD, Steam Store, and Epic Games Store for user-selected games' DLCs, then provides a very simple graphical interface utilizing the gathered information.
 
 The primary function of the program is to **automatically generate and install SmokeAPI and/or ScreamAPI** for whichever
-games and DLCs the user selects, however through the use of **right-click context menus** the user can also:
+games and DLCs the user selects; however, through the use of **right-click context menus** the user can also:
 * automatically repair the Paradox Launcher
 * open parsed Steam and/or Epic Games appinfo in Notepad(++)
 * refresh parsed Steam and/or Epic Games appinfo
@@ -44,11 +44,11 @@ games and DLCs the user selects, however through the use of **right-click contex
 5. **CAREFULLY** select which games' DLCs you wish to unlock. *SmokeAPI and ScreamAPI are not tested for every game!*
 6. Click the **Generate and Install** button.
 7. Click the **OK** button to close the program.
-8. If SmokeAPI or ScreamAPI don't work for any of the games you installed them on, simply go back to step 5 and select what games you wish you **revert** changes to, and instead click the **Uninstall** button this time.
+8. If SmokeAPI or ScreamAPI cause problems with any of the games you installed them on, simply go back to step 5 and select what games you wish you **revert** changes to, and instead click the **Uninstall** button this time.
 
 ---
 ##### Bugs/Crashes/Issues:
-All bugs, crashes, and other issues should be referred to the [GitHub Issues](https://github.com/pointfeev/CreamInstaller/issues) page!
+For reliable and quick assistance, all bugs, crashes and other issues should be referred to the [GitHub Issues](https://github.com/pointfeev/CreamInstaller/issues) page!
 
 ---
 ##### More Information:
