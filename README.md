@@ -23,8 +23,8 @@ games and DLCs the user selects, however through the use of the **right-click co
 #### Features:
 * Automatic downloading and installing of SteamCMD (if a Steam game is chosen). *for gathering appinfo such as name, buildid, listofdlc, depots*
 * Automatic gathering and caching of appinfo for **ALL** installed Steam and Epic games and **ALL** of their DLCs.
-* Automatic generation of SmokeAPI.json/ScreamAPI.json configuration and installation of SmokeAPI/ScreamAPI DLLs.
-* Automatic uninstallation of CreamAPI/SmokeAPI/ScreamAPI DLLs and cream_api.ini/SmokeAPI.json/ScreamAPI.json configuration.
+* Automatic generation of SmokeAPI.json and/or ScreamAPI.json configuration and installation of SmokeAPI and/or ScreamAPI DLLs.
+* Automatic uninstallation of CreamAPI, SmokeAPI, and/or ScreamAPI DLLs and cream_api.ini, SmokeAPI.json, and/or ScreamAPI.json configuration.
 * Automatic repairing of the Paradox Launcher via the right-click context menu "Repair" option. *for when the launcher updates whilst you have CreamAPI, SmokeAPI or ScreamAPI installed to it*
 
 ---
