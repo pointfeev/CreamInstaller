@@ -12,7 +12,7 @@ Automatically finds all installed Steam and Epic games with their respective Ste
 parses SteamCMD, Steam Store, and Epic Games Store for user-selected games' DLCs, then provides a very simple graphical interface utilizing the gathered information.
 
 The primary function of the program is to **automatically generate and install SmokeAPI and/or ScreamAPI** for whichever
-games and DLCs the user selects, however through the use of the **right-click context menu** the user can also:
+games and DLCs the user selects, however through the use of **right-click context menus** the user can also:
 * automatically repair the Paradox Launcher
 * open parsed Steam and/or Epic Games appinfo in Notepad(++)
 * refresh parsed Steam and/or Epic Games appinfo
