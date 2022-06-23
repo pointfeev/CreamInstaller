@@ -17,7 +17,7 @@ games and DLCs the user selects; however, through the use of **right-click conte
 * open parsed Steam and/or Epic Games appinfo in Notepad(++)
 * refresh parsed Steam and/or Epic Games appinfo
 * open root game directories and Steamworks/Epic Online Services DLL directories in Explorer
-* open SteamDB, ScreamDB, Steam Store, Epic Games Store and Steam Community links in the default browser
+* open SteamDB, ScreamDB, Steam Store, Epic Games Store, Steam Community, and official game website links in the default browser
 
 ---
 #### Features:
