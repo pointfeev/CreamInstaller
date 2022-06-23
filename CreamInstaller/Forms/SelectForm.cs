@@ -231,6 +231,7 @@ internal partial class SelectForm : CustomForm
                     selection.IconUrl = IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("icon")}.jpg";
                     selection.SubIconUrl = appData?.header_image ?? IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("clienticon")}.ico";
                     selection.Publisher = appData?.publishers[0] ?? appInfo?.Value?.GetChild("extended")?.GetChild("publisher")?.ToString();
+                    selection.WebsiteUrl = appData?.website;
 
                     if (Program.Canceled) return;
                     Program.Invoke(selectionTreeView, delegate
@@ -607,9 +608,9 @@ internal partial class SelectForm : CustomForm
                 if (id == "ParadoxLauncher")
                     header = new(node.Text, "Paradox Launcher");
                 else if (selection is not null)
-                    header = new(node.Text, (id, selection.IconUrl, false));
+                    header = new(node.Text, (id, selection.IconUrl));
                 else if (dlc is not null && dlcParentSelection is not null)
-                    header = new(node.Text, (id, dlc.Value.app.icon, false), (id, dlcParentSelection.IconUrl, false));
+                    header = new(node.Text, (id, dlc.Value.app.icon), (id, dlcParentSelection.IconUrl));
                 contextMenuStrip.Items.Add(header ?? new ContextMenuItem(node.Text));
                 string appInfoVDF = $@"{SteamCMD.AppInfoPath}\{id}.vdf";
                 string appInfoJSON = $@"{SteamCMD.AppInfoPath}\{id}.json";
@@ -702,7 +703,7 @@ internal partial class SelectForm : CustomForm
                         {
                             contextMenuStrip.Items.Add(new ContextMenuItem("Open Steam Store", "Steam Store",
                                 new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
-                            contextMenuStrip.Items.Add(new ContextMenuItem("Open Steam Community", (id, selection.SubIconUrl, true), "Steam Community",
+                            contextMenuStrip.Items.Add(new ContextMenuItem("Open Steam Community", ("Sub_" + id, selection.SubIconUrl), "Steam Community",
                                 new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + id))));
                         }
                         else if (selection.IsEpic)
@@ -714,6 +715,11 @@ internal partial class SelectForm : CustomForm
                                 new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
                         }
                     }
+                }
+                if (selection is not null && selection.WebsiteUrl is not null)
+                {
+                    contextMenuStrip.Items.Add(new ContextMenuItem("Open Official Website", ("Web_" + id, IconGrabber.GetDomainFaviconUrl(selection.WebsiteUrl)),
+                        new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.WebsiteUrl))));
                 }
                 contextMenuStrip.Show(selectionTreeView, e.Location);
             };

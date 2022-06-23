@@ -39,19 +39,19 @@ internal class ContextMenuItem : ToolStripMenuItem
                     image = IconGrabber.GetFileExplorerImage();
                     break;
                 case "SteamDB":
-                    image = await HttpClientManager.GetImageFromUrl("https://steamdb.info/favicon.ico");
+                    image = await HttpClientManager.GetImageFromUrl(IconGrabber.GetDomainFaviconUrl("steamdb.info"));
                     break;
                 case "Steam Store":
-                    image = await HttpClientManager.GetImageFromUrl("https://store.steampowered.com/favicon.ico");
+                    image = await HttpClientManager.GetImageFromUrl(IconGrabber.GetDomainFaviconUrl("store.steampowered.com"));
                     break;
                 case "Steam Community":
-                    image = await HttpClientManager.GetImageFromUrl("https://steamcommunity.com/favicon.ico");
+                    image = await HttpClientManager.GetImageFromUrl(IconGrabber.GetDomainFaviconUrl("steamcommunity.com"));
                     break;
                 case "ScreamDB":
-                    image = await HttpClientManager.GetImageFromUrl("https://scream-db.web.app/favicon.ico");
+                    image = await HttpClientManager.GetImageFromUrl(IconGrabber.GetDomainFaviconUrl("scream-db.web.app"));
                     break;
                 case "Epic Games":
-                    image = await HttpClientManager.GetImageFromUrl("https://www.epicgames.com/favicon.ico");
+                    image = await HttpClientManager.GetImageFromUrl(IconGrabber.GetDomainFaviconUrl("epicgames.com"));
                     break;
                 default:
                     return;
@@ -64,10 +64,10 @@ internal class ContextMenuItem : ToolStripMenuItem
         }
     }).ConfigureAwait(false);
 
-    private static async Task TryImageIdentifierInfo(ContextMenuItem item, (string id, string iconUrl, bool sub) imageIdentifierInfo, Action onFail = null) => await Task.Run(async () =>
+    private static async Task TryImageIdentifierInfo(ContextMenuItem item, (string id, string iconUrl) imageIdentifierInfo, Action onFail = null) => await Task.Run(async () =>
     {
-        (string id, string iconUrl, bool sub) = imageIdentifierInfo;
-        string imageIdentifier = sub ? "SubIcon_" + id : "Icon_" + id;
+        (string id, string iconUrl) = imageIdentifierInfo;
+        string imageIdentifier = "Icon_" + id;
         if (images.TryGetValue(imageIdentifier, out Image image) && image is not null) item.Image = image;
         else
         {
@@ -99,12 +99,12 @@ internal class ContextMenuItem : ToolStripMenuItem
     internal ContextMenuItem(string text, string imageIdentifier, EventHandler onClick = null)
         : this(text, onClick) => _ = TryImageIdentifier(this, imageIdentifier);
 
-    internal ContextMenuItem(string text, (string id, string iconUrl, bool sub) imageIdentifierInfo, EventHandler onClick = null)
+    internal ContextMenuItem(string text, (string id, string iconUrl) imageIdentifierInfo, EventHandler onClick = null)
         : this(text, onClick) => _ = TryImageIdentifierInfo(this, imageIdentifierInfo);
 
-    internal ContextMenuItem(string text, (string id, string iconUrl, bool sub) imageIdentifierInfo, string imageIdentifierFallback, EventHandler onClick = null)
+    internal ContextMenuItem(string text, (string id, string iconUrl) imageIdentifierInfo, string imageIdentifierFallback, EventHandler onClick = null)
         : this(text, onClick) => _ = TryImageIdentifierInfo(this, imageIdentifierInfo, async () => await TryImageIdentifier(this, imageIdentifierFallback));
 
-    internal ContextMenuItem(string text, (string id, string iconUrl, bool sub) imageIdentifierInfo, (string id, string iconUrl, bool sub) imageIdentifierInfoFallback, EventHandler onClick = null)
+    internal ContextMenuItem(string text, (string id, string iconUrl) imageIdentifierInfo, (string id, string iconUrl) imageIdentifierInfoFallback, EventHandler onClick = null)
         : this(text, onClick) => _ = TryImageIdentifierInfo(this, imageIdentifierInfo, async () => await TryImageIdentifierInfo(this, imageIdentifierInfoFallback));
 }

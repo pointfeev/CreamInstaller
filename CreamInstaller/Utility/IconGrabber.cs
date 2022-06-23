@@ -14,6 +14,10 @@ internal static class IconGrabber
 
     internal const string SteamAppImagesPath = "https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/apps/";
 
+    internal const string GoogleFaviconsApiUrl = "https://www.google.com/s2/favicons";
+
+    internal static string GetDomainFaviconUrl(string domain, int size = 16) => GoogleFaviconsApiUrl + $"?domain={domain}&sz={size}";
+
     internal static Image GetFileIconImage(string path) => File.Exists(path) ? Icon.ExtractAssociatedIcon(path).ToBitmap() : null;
 
     internal static Image GetNotepadImage() => GetFileIconImage(Diagnostics.GetNotepadPath());

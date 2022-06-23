@@ -27,6 +27,8 @@ internal class ProgramSelection
 
     internal string Publisher;
 
+    internal string WebsiteUrl;
+
     internal string RootDirectory;
     internal List<string> DllDirectories;
 

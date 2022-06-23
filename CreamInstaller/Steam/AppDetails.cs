@@ -7,20 +7,6 @@ using System.Collections.Generic;
 
 namespace CreamInstaller.Steam;
 
-public class Category
-{
-    public int id { get; set; }
-
-    public string description { get; set; }
-}
-
-public class Genre
-{
-    public string id { get; set; }
-
-    public string description { get; set; }
-}
-
 public class AppData
 {
     public string type { get; set; }
@@ -40,10 +26,6 @@ public class AppData
     public List<string> publishers { get; set; }
 
     public List<int> packages { get; set; }
-
-    public List<Category> categories { get; set; }
-
-    public List<Genre> genres { get; set; }
 }
 
 public class AppDetails
