@@ -56,7 +56,7 @@ internal partial class InstallForm : CustomForm
         }
     }
 
-    internal static void WriteSmokeConfiguration(StreamWriter writer, SortedList<string, (DlcType type, string name, string icon)> overrideDlc, SortedList<string, (DlcType type, string name, string icon)> allDlc, InstallForm installForm = null)
+    internal static void WriteSmokeConfiguration(StreamWriter writer, SortedList<string, (DlcType type, string name, string icon)> overrideDlc, SortedList<string, (DlcType type, string name, string icon)> injectDlc, InstallForm installForm = null)
     {
         Thread.Sleep(0);
         writer.WriteLine("{");
@@ -81,18 +81,18 @@ internal partial class InstallForm : CustomForm
         }
         else
             writer.WriteLine("  \"override\": [],");
-        if (allDlc.Count > 0)
+        if (injectDlc.Count > 0)
         {
             writer.WriteLine("  \"dlc_ids\": [");
-            KeyValuePair<string, (DlcType type, string name, string icon)> lastAllDlc = allDlc.Last();
-            foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in allDlc)
+            KeyValuePair<string, (DlcType type, string name, string icon)> lastInjectDlc = injectDlc.Last();
+            foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in injectDlc)
             {
                 Thread.Sleep(0);
                 string dlcId = pair.Key;
                 (_, string dlcName, _) = pair.Value;
-                writer.WriteLine($"    {dlcId}{(pair.Equals(lastAllDlc) ? "" : ",")}");
+                writer.WriteLine($"    {dlcId}{(pair.Equals(lastInjectDlc) ? "" : ",")}");
                 if (installForm is not null)
-                    installForm.UpdateUser($"Added DLC to SmokeAPI.json with appid {dlcId} ({dlcName})", InstallationLog.Action, info: false);
+                    installForm.UpdateUser($"Added injected DLC to SmokeAPI.json with appid {dlcId} ({dlcName})", InstallationLog.Action, info: false);
             }
             writer.WriteLine("  ],");
         }
@@ -176,21 +176,26 @@ internal partial class InstallForm : CustomForm
             installForm.UpdateUser("Generating SmokeAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
         File.Create(config).Close();
         StreamWriter writer = new(config, true, Encoding.UTF8);
-        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> allDlc = selection.AllDlc.AsEnumerable();
-        foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraDlc)
-            allDlc = allDlc.Concat(extraDlc);
-        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> overrideDlc = allDlc.Except(selection.SelectedDlc);
+        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> overrideDlc = selection.AllDlc.Except(selection.SelectedDlc);
         foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
             overrideDlc = overrideDlc.Except(extraDlc);
+        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> injectDlc = new List<KeyValuePair<string, (DlcType type, string name, string icon)>>();
+        if (selection.AllDlc.Count > 64 || selection.ExtraDlc.Any(e => e.dlc.Count > 64))
+        {
+            injectDlc = injectDlc.Concat(selection.SelectedDlc.Where(pair => pair.Value.type is DlcType.SteamHidden));
+            foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
+                if (selection.ExtraDlc.Where(e => e.id == id).Single().dlc.Count > 64)
+                    injectDlc = injectDlc.Concat(extraDlc.Where(pair => pair.Value.type is DlcType.SteamHidden));
+        }
         WriteSmokeConfiguration(writer,
             new(overrideDlc.ToDictionary(pair => pair.Key, pair => pair.Value), AppIdComparer.Comparer),
-            new(allDlc.ToDictionary(pair => pair.Key, pair => pair.Value), AppIdComparer.Comparer),
+            new(injectDlc.ToDictionary(pair => pair.Key, pair => pair.Value), AppIdComparer.Comparer),
             installForm);
         writer.Flush();
         writer.Close();
     });
 
-    internal static void WriteScreamConfiguration(StreamWriter writer, SortedList<string, (DlcType type, string name, string icon)> dlc, List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> extraDlc, InstallForm installForm = null)
+    internal static void WriteScreamConfiguration(StreamWriter writer, SortedList<string, (DlcType type, string name, string icon)> overrideCatalogItems, SortedList<string, (DlcType type, string name, string icon)> entitlements, InstallForm installForm = null)
     {
         Thread.Sleep(0);
         writer.WriteLine("{");
@@ -199,39 +204,30 @@ internal partial class InstallForm : CustomForm
         writer.WriteLine("  \"eos_logging\": false,");
         writer.WriteLine("  \"block_metrics\": false,");
         writer.WriteLine("  \"catalog_items\": {");
-        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> catalogItems = dlc.Where(pair => pair.Value.type == DlcType.EpicCatalogItem);
-        foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> _dlc) in extraDlc)
-            catalogItems = catalogItems.Concat(_dlc.Where(pair => pair.Value.type == DlcType.EpicCatalogItem));
-        if (catalogItems.Any())
+        writer.WriteLine("    \"unlock_all\": true,");
+        if (overrideCatalogItems.Any())
         {
-            writer.WriteLine("    \"unlock_all\": false,");
             writer.WriteLine("    \"override\": [");
-            KeyValuePair<string, (DlcType type, string name, string icon)> lastCatalogItem = catalogItems.Last();
-            foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in catalogItems)
+            KeyValuePair<string, (DlcType type, string name, string icon)> lastOverrideCatalogItem = overrideCatalogItems.Last();
+            foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in overrideCatalogItems)
             {
                 Thread.Sleep(0);
                 string id = pair.Key;
                 (_, string name, _) = pair.Value;
-                writer.WriteLine($"      \"{id}\"{(pair.Equals(lastCatalogItem) ? "" : ",")}");
+                writer.WriteLine($"      \"{id}\"{(pair.Equals(lastOverrideCatalogItem) ? "" : ",")}");
                 if (installForm is not null)
-                    installForm.UpdateUser($"Added catalog item to ScreamAPI.json with id {id} ({name})", InstallationLog.Action, info: false);
+                    installForm.UpdateUser($"Added override catalog item to ScreamAPI.json with id {id} ({name})", InstallationLog.Action, info: false);
             }
             writer.WriteLine("    ]");
         }
         else
-        {
-            writer.WriteLine("    \"unlock_all\": true,");
             writer.WriteLine("    \"override\": []");
-        }
         writer.WriteLine("  },");
         writer.WriteLine("  \"entitlements\": {");
-        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> entitlements = dlc.Where(pair => pair.Value.type == DlcType.EpicEntitlement);
-        foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> _dlc) in extraDlc)
-            entitlements = entitlements.Concat(_dlc.Where(pair => pair.Value.type == DlcType.EpicEntitlement));
+        writer.WriteLine("    \"unlock_all\": true,");
+        writer.WriteLine("    \"auto_inject\": true,");
         if (entitlements.Any())
         {
-            writer.WriteLine("    \"unlock_all\": false,");
-            writer.WriteLine("    \"auto_inject\": false,");
             writer.WriteLine("    \"inject\": [");
             KeyValuePair<string, (DlcType type, string name, string icon)> lastEntitlement = entitlements.Last();
             foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in entitlements)
@@ -246,11 +242,7 @@ internal partial class InstallForm : CustomForm
             writer.WriteLine("    ]");
         }
         else
-        {
-            writer.WriteLine("    \"unlock_all\": true,");
-            writer.WriteLine("    \"auto_inject\": true,");
             writer.WriteLine("    \"inject\": []");
-        }
         writer.WriteLine("  }");
         writer.WriteLine("}");
     }
@@ -321,7 +313,16 @@ internal partial class InstallForm : CustomForm
             installForm.UpdateUser("Generating ScreamAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
         File.Create(config).Close();
         StreamWriter writer = new(config, true, Encoding.UTF8);
-        WriteScreamConfiguration(writer, selection.SelectedDlc, selection.ExtraSelectedDlc, installForm);
+        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> overrideCatalogItems = selection.AllDlc.Where(pair => pair.Value.type is DlcType.EpicCatalogItem).Except(selection.SelectedDlc);
+        foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
+            overrideCatalogItems = overrideCatalogItems.Except(extraDlc);
+        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> entitlements = selection.SelectedDlc.Where(pair => pair.Value.type == DlcType.EpicEntitlement);
+        foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> _dlc) in selection.ExtraSelectedDlc)
+            entitlements = entitlements.Concat(_dlc.Where(pair => pair.Value.type == DlcType.EpicEntitlement));
+        WriteScreamConfiguration(writer,
+            new(overrideCatalogItems.ToDictionary(pair => pair.Key, pair => pair.Value), AppIdComparer.Comparer),
+            new(entitlements.ToDictionary(pair => pair.Key, pair => pair.Value), AppIdComparer.Comparer),
+            installForm);
         writer.Flush();
         writer.Close();
     });
@@ -356,8 +357,8 @@ internal partial class InstallForm : CustomForm
         foreach (string directory in selection.DllDirectories)
         {
             Thread.Sleep(0);
-            if (selection.IsSteam && selection.SelectedDlc.Any(d => d.Value.type is DlcType.Steam)
-                || selection.ExtraSelectedDlc.Any(item => item.dlc.Any(dlc => dlc.Value.type is DlcType.Steam)))
+            if (selection.IsSteam && selection.SelectedDlc.Any(d => d.Value.type is DlcType.Steam or DlcType.SteamHidden)
+                || selection.ExtraSelectedDlc.Any(item => item.dlc.Any(dlc => dlc.Value.type is DlcType.Steam or DlcType.SteamHidden)))
             {
                 directory.GetSmokeApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
                 if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))

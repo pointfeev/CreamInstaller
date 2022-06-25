@@ -10,8 +10,9 @@ namespace CreamInstaller;
 public enum DlcType
 {
     Steam = 0,
-    EpicCatalogItem = 1,
-    EpicEntitlement = 2
+    SteamHidden = 1,
+    EpicCatalogItem = 2,
+    EpicEntitlement = 3
 }
 
 internal class ProgramSelection

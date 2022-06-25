@@ -180,11 +180,13 @@ internal partial class SelectForm : CustomForm
                                 if (Program.Canceled) return;
                                 string dlcName = null;
                                 string dlcIcon = null;
+                                bool onSteamStore = false;
                                 AppData dlcAppData = await SteamStore.QueryStoreAPI(dlcAppId, true);
                                 if (dlcAppData is not null)
                                 {
                                     dlcName = dlcAppData.name;
                                     dlcIcon = dlcAppData.header_image;
+                                    onSteamStore = true;
                                 }
                                 else
                                 {
@@ -201,7 +203,7 @@ internal partial class SelectForm : CustomForm
                                 }
                                 if (Program.Canceled) return;
                                 if (!string.IsNullOrWhiteSpace(dlcName))
-                                    dlc[dlcAppId] = (DlcType.Steam, dlcName, dlcIcon);
+                                    dlc[dlcAppId] = (onSteamStore ? DlcType.Steam : DlcType.SteamHidden, dlcName, dlcIcon);
                                 RemoveFromRemainingDLCs(dlcAppId);
                             });
                             dlcTasks.Add(task);
