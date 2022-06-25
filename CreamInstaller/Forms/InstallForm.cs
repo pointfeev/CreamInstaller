@@ -92,7 +92,7 @@ internal partial class InstallForm : CustomForm
                 (_, string dlcName, _) = pair.Value;
                 writer.WriteLine($"    {dlcId}{(pair.Equals(lastInjectDlc) ? "" : ",")}");
                 if (installForm is not null)
-                    installForm.UpdateUser($"Added injected DLC to SmokeAPI.json with appid {dlcId} ({dlcName})", InstallationLog.Action, info: false);
+                    installForm.UpdateUser($"Added inject DLC to SmokeAPI.json with appid {dlcId} ({dlcName})", InstallationLog.Action, info: false);
             }
             writer.WriteLine("  ],");
         }
@@ -112,11 +112,11 @@ internal partial class InstallForm : CustomForm
             {
                 File.Delete(sdk32);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Deleted file: {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
+                    installForm.UpdateUser($"Deleted SmokeAPI: {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
             }
             File.Move(sdk32_o, sdk32);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk32_o)} -> {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Restored Steamworks: {Path.GetFileName(sdk32_o)} -> {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
         }
         if (File.Exists(sdk64_o))
         {
@@ -124,17 +124,17 @@ internal partial class InstallForm : CustomForm
             {
                 File.Delete(sdk64);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Deleted file: {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
+                    installForm.UpdateUser($"Deleted SmokeAPI: {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
             }
             File.Move(sdk64_o, sdk64);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk64_o)} -> {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Restored Steamworks: {Path.GetFileName(sdk64_o)} -> {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
         }
         if (File.Exists(config))
         {
             File.Delete(config);
             if (installForm is not null)
-                installForm.UpdateUser($"Deleted file: {Path.GetFileName(config)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Deleted configuration: {Path.GetFileName(config)}", InstallationLog.Action, info: false);
         }
     });
 
@@ -145,37 +145,33 @@ internal partial class InstallForm : CustomForm
         {
             File.Delete(oldConfig);
             if (installForm is not null)
-                installForm.UpdateUser($"Deleted old config: {Path.GetFileName(oldConfig)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Deleted old CreamAPI configuration: {Path.GetFileName(oldConfig)}", InstallationLog.Action, info: false);
         }
         directory.GetSmokeApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
         if (File.Exists(sdk32) && !File.Exists(sdk32_o))
         {
             File.Move(sdk32, sdk32_o);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk32)} -> {Path.GetFileName(sdk32_o)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Renamed Steamworks: {Path.GetFileName(sdk32)} -> {Path.GetFileName(sdk32_o)}", InstallationLog.Action, info: false);
         }
         if (File.Exists(sdk32_o))
         {
             Properties.Resources.Steamworks32.Write(sdk32);
             if (installForm is not null)
-                installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Wrote SmokeAPI: {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
         }
         if (File.Exists(sdk64) && !File.Exists(sdk64_o))
         {
             File.Move(sdk64, sdk64_o);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk64)} -> {Path.GetFileName(sdk64_o)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Renamed Steamworks: {Path.GetFileName(sdk64)} -> {Path.GetFileName(sdk64_o)}", InstallationLog.Action, info: false);
         }
         if (File.Exists(sdk64_o))
         {
             Properties.Resources.Steamworks64.Write(sdk64);
             if (installForm is not null)
-                installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Wrote SmokeAPI: {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
         }
-        if (installForm is not null)
-            installForm.UpdateUser("Generating SmokeAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
-        File.Create(config).Close();
-        StreamWriter writer = new(config, true, Encoding.UTF8);
         IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> overrideDlc = selection.AllDlc.Except(selection.SelectedDlc);
         foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
             overrideDlc = overrideDlc.Except(extraDlc);
@@ -187,12 +183,25 @@ internal partial class InstallForm : CustomForm
                 if (selection.ExtraDlc.Where(e => e.id == id).Single().dlc.Count > 64)
                     injectDlc = injectDlc.Concat(extraDlc.Where(pair => pair.Value.type is DlcType.SteamHidden));
         }
-        WriteSmokeConfiguration(writer,
-            new(overrideDlc.ToDictionary(pair => pair.Key, pair => pair.Value), AppIdComparer.Comparer),
-            new(injectDlc.ToDictionary(pair => pair.Key, pair => pair.Value), AppIdComparer.Comparer),
-            installForm);
-        writer.Flush();
-        writer.Close();
+        if (overrideDlc.Any() || injectDlc.Any())
+        {
+            if (installForm is not null)
+                installForm.UpdateUser("Generating SmokeAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+            File.Create(config).Close();
+            StreamWriter writer = new(config, true, Encoding.UTF8);
+            WriteSmokeConfiguration(writer,
+                new(overrideDlc.ToDictionary(pair => pair.Key, pair => pair.Value), AppIdComparer.Comparer),
+                new(injectDlc.ToDictionary(pair => pair.Key, pair => pair.Value), AppIdComparer.Comparer),
+                installForm);
+            writer.Flush();
+            writer.Close();
+        }
+        else if (File.Exists(config))
+        {
+            File.Delete(config);
+            if (installForm is not null)
+                installForm.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", InstallationLog.Action, info: false);
+        }
     });
 
     internal static void WriteScreamConfiguration(StreamWriter writer, SortedList<string, (DlcType type, string name, string icon)> overrideCatalogItems, SortedList<string, (DlcType type, string name, string icon)> entitlements, InstallForm installForm = null)
@@ -256,11 +265,11 @@ internal partial class InstallForm : CustomForm
             {
                 File.Delete(sdk32);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Deleted file: {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
+                    installForm.UpdateUser($"Deleted ScreamAPI: {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
             }
             File.Move(sdk32_o, sdk32);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk32_o)} -> {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Restored Epic Online Services: {Path.GetFileName(sdk32_o)} -> {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
         }
         if (File.Exists(sdk64_o))
         {
@@ -268,17 +277,17 @@ internal partial class InstallForm : CustomForm
             {
                 File.Delete(sdk64);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Deleted file: {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
+                    installForm.UpdateUser($"Deleted ScreamAPI: {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
             }
             File.Move(sdk64_o, sdk64);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk64_o)} -> {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Restored Epic Online Services: {Path.GetFileName(sdk64_o)} -> {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
         }
         if (File.Exists(config))
         {
             File.Delete(config);
             if (installForm is not null)
-                installForm.UpdateUser($"Deleted file: {Path.GetFileName(config)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Deleted configuration: {Path.GetFileName(config)}", InstallationLog.Action, info: false);
         }
     });
 
@@ -289,42 +298,51 @@ internal partial class InstallForm : CustomForm
         {
             File.Move(sdk32, sdk32_o);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk32)} -> {Path.GetFileName(sdk32_o)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Renamed Epic Online Services: {Path.GetFileName(sdk32)} -> {Path.GetFileName(sdk32_o)}", InstallationLog.Action, info: false);
         }
         if (File.Exists(sdk32_o))
         {
             Properties.Resources.EpicOnlineServices32.Write(sdk32);
             if (installForm is not null)
-                installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Wrote ScreamAPI: {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
         }
         if (File.Exists(sdk64) && !File.Exists(sdk64_o))
         {
             File.Move(sdk64, sdk64_o);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed file: {Path.GetFileName(sdk64)} -> {Path.GetFileName(sdk64_o)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Renamed Epic Online Services: {Path.GetFileName(sdk64)} -> {Path.GetFileName(sdk64_o)}", InstallationLog.Action, info: false);
         }
         if (File.Exists(sdk64_o))
         {
             Properties.Resources.EpicOnlineServices64.Write(sdk64);
             if (installForm is not null)
-                installForm.UpdateUser($"Wrote resource to file: {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Wrote ScreamAPI: {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
         }
-        if (installForm is not null)
-            installForm.UpdateUser("Generating ScreamAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
-        File.Create(config).Close();
-        StreamWriter writer = new(config, true, Encoding.UTF8);
         IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> overrideCatalogItems = selection.AllDlc.Where(pair => pair.Value.type is DlcType.EpicCatalogItem).Except(selection.SelectedDlc);
         foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
             overrideCatalogItems = overrideCatalogItems.Except(extraDlc);
         IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> entitlements = selection.SelectedDlc.Where(pair => pair.Value.type == DlcType.EpicEntitlement);
         foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> _dlc) in selection.ExtraSelectedDlc)
             entitlements = entitlements.Concat(_dlc.Where(pair => pair.Value.type == DlcType.EpicEntitlement));
-        WriteScreamConfiguration(writer,
-            new(overrideCatalogItems.ToDictionary(pair => pair.Key, pair => pair.Value), AppIdComparer.Comparer),
-            new(entitlements.ToDictionary(pair => pair.Key, pair => pair.Value), AppIdComparer.Comparer),
-            installForm);
-        writer.Flush();
-        writer.Close();
+        if (overrideCatalogItems.Any() || entitlements.Any())
+        {
+            if (installForm is not null)
+                installForm.UpdateUser("Generating ScreamAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+            File.Create(config).Close();
+            StreamWriter writer = new(config, true, Encoding.UTF8);
+            WriteScreamConfiguration(writer,
+                new(overrideCatalogItems.ToDictionary(pair => pair.Key, pair => pair.Value), AppIdComparer.Comparer),
+                new(entitlements.ToDictionary(pair => pair.Key, pair => pair.Value), AppIdComparer.Comparer),
+                installForm);
+            writer.Flush();
+            writer.Close();
+        }
+        else if (File.Exists(config))
+        {
+            File.Delete(config);
+            if (installForm is not null)
+                installForm.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", InstallationLog.Action, info: false);
+        }
     });
 
     private async Task OperateFor(ProgramSelection selection)
