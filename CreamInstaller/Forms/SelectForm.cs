@@ -672,8 +672,8 @@ internal partial class SelectForm : CustomForm
                         for (int i = 0; i < directories.Count; i++)
                         {
                             string directory = directories[i];
-                            directory.GetSmokeApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
-                            if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
+                            directory.GetSmokeApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config, out string cache);
+                            if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config) || File.Exists(cache))
                             {
                                 contextMenuStrip.Items.Add(new ContextMenuItem($"Open Steamworks SDK Directory #{i + 1}", "File Explorer",
                                     new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
@@ -683,8 +683,8 @@ internal partial class SelectForm : CustomForm
                         for (int i = 0; i < directories.Count; i++)
                         {
                             string directory = directories[i];
-                            directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
-                            if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
+                            directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config, out string cache);
+                            if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config) || File.Exists(cache))
                             {
                                 contextMenuStrip.Items.Add(new ContextMenuItem($"Open Epic Online Services SDK Directory #{i + 1}", "File Explorer",
                                     new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));

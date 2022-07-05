@@ -53,12 +53,13 @@ internal static class EpicLibrary
     {
         List<string> dllDirectories = new();
         if (Program.Canceled || !Directory.Exists(gameDirectory)) return null;
-        gameDirectory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+        gameDirectory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config, out string cache);
         if (File.Exists(sdk32)
             || File.Exists(sdk32_o)
             || File.Exists(sdk64)
             || File.Exists(sdk64_o)
-            || File.Exists(config))
+            || File.Exists(config)
+            || File.Exists(cache))
             dllDirectories.Add(gameDirectory);
         string[] directories = Directory.GetDirectories(gameDirectory);
         foreach (string _directory in directories)

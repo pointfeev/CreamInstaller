@@ -9,10 +9,10 @@ namespace CreamInstaller;
 
 public enum DlcType
 {
-    Steam = 0,
-    SteamHidden = 1,
-    EpicCatalogItem = 2,
-    EpicEntitlement = 3
+    Steam,
+    SteamHidden,
+    EpicCatalogItem,
+    EpicEntitlement
 }
 
 internal class ProgramSelection
@@ -48,19 +48,21 @@ internal class ProgramSelection
         {
             foreach (string directory in DllDirectories)
             {
-                directory.GetSmokeApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+                directory.GetSmokeApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config, out string cache);
                 if (sdk32.IsFilePathLocked()
                     || sdk32_o.IsFilePathLocked()
                     || sdk64.IsFilePathLocked()
                     || sdk64_o.IsFilePathLocked()
-                    || config.IsFilePathLocked())
+                    || config.IsFilePathLocked()
+                    || cache.IsFilePathLocked())
                     return true;
-                directory.GetScreamApiComponents(out sdk32, out sdk32_o, out sdk64, out sdk64_o, out config);
+                directory.GetScreamApiComponents(out sdk32, out sdk32_o, out sdk64, out sdk64_o, out config, out cache);
                 if (sdk32.IsFilePathLocked()
                     || sdk32_o.IsFilePathLocked()
                     || sdk64.IsFilePathLocked()
                     || sdk64_o.IsFilePathLocked()
-                    || config.IsFilePathLocked())
+                    || config.IsFilePathLocked()
+                    || cache.IsFilePathLocked())
                     return true;
             }
             return false;

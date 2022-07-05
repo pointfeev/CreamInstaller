@@ -47,12 +47,13 @@ internal static class SteamLibrary
     {
         List<string> dllDirectories = new();
         if (Program.Canceled || !Directory.Exists(gameDirectory)) return null;
-        gameDirectory.GetSmokeApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string cApi);
+        gameDirectory.GetSmokeApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string config, out string cache);
         if (File.Exists(api)
             || File.Exists(api_o)
             || File.Exists(api64)
             || File.Exists(api64_o)
-            || File.Exists(cApi))
+            || File.Exists(config)
+            || File.Exists(cache))
             dllDirectories.Add(gameDirectory);
         string[] directories = Directory.GetDirectories(gameDirectory);
         foreach (string _directory in directories)
