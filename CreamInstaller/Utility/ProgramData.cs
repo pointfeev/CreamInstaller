@@ -29,15 +29,15 @@ internal static class ProgramData
             if (Directory.Exists(DirectoryPath)) Directory.Delete(DirectoryPath, true);
             Directory.Move(DirectoryPathOld, DirectoryPath);
         }
-        if (!Directory.Exists(DirectoryPath)) Directory.CreateDirectory(DirectoryPath);
+        if (!Directory.Exists(DirectoryPath)) _ = Directory.CreateDirectory(DirectoryPath);
         if (!File.Exists(AppInfoVersionPath) || !Version.TryParse(File.ReadAllText(AppInfoVersionPath, Encoding.UTF8), out Version version) || version < MinimumAppInfoVersion)
         {
             if (Directory.Exists(AppInfoPath)) Directory.Delete(AppInfoPath, true);
-            Directory.CreateDirectory(AppInfoPath);
+            _ = Directory.CreateDirectory(AppInfoPath);
             File.WriteAllText(AppInfoVersionPath, Application.ProductVersion, Encoding.UTF8);
         }
         if (!Directory.Exists(CooldownPath))
-            Directory.CreateDirectory(CooldownPath);
+            _ = Directory.CreateDirectory(CooldownPath);
     });
 
     internal static bool CheckCooldown(string identifier, int cooldown)
@@ -69,7 +69,7 @@ internal static class ProgramData
     private static void SetCooldown(string identifier, DateTime time)
     {
         if (!Directory.Exists(CooldownPath))
-            Directory.CreateDirectory(CooldownPath);
+            _ = Directory.CreateDirectory(CooldownPath);
         string cooldownFile = CooldownPath + @$"\{identifier}.txt";
         try
         {

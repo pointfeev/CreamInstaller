@@ -1,10 +1,10 @@
-﻿using System;
+﻿using HtmlAgilityPack;
+
+using System;
 using System.Drawing;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
-using HtmlAgilityPack;
 
 namespace CreamInstaller.Utility;
 
@@ -23,7 +23,7 @@ internal static class HttpClientManager
         {
             using HttpRequestMessage request = new(HttpMethod.Get, url);
             using HttpResponseMessage response = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-            response.EnsureSuccessStatusCode();
+            _ = response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
         }
         catch

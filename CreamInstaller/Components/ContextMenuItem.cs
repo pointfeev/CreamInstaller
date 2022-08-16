@@ -1,12 +1,12 @@
-﻿using System;
+﻿using CreamInstaller.Paradox;
+using CreamInstaller.Utility;
+
+using System;
 using System.Collections.Concurrent;
 using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
-using CreamInstaller.Paradox;
-using CreamInstaller.Utility;
 
 namespace CreamInstaller.Components;
 

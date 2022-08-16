@@ -1,8 +1,8 @@
-﻿using System;
+﻿using CreamInstaller.Components;
+
+using System;
 using System.Drawing;
 using System.Windows.Forms;
-
-using CreamInstaller.Components;
 
 namespace CreamInstaller;
 
@@ -10,10 +10,9 @@ internal partial class DialogForm : CustomForm
 {
     internal DialogForm(IWin32Window owner) : base(owner) => InitializeComponent();
 
-    internal DialogResult Show(Icon descriptionIcon, string descriptionText, string acceptButtonText, string cancelButtonText = null, string customFormText = null, Icon customFormIcon = null)
+    internal DialogResult Show(Icon descriptionIcon, string descriptionText, string acceptButtonText = "OK", string cancelButtonText = null, string customFormText = null, Icon customFormIcon = null)
     {
-        if (descriptionIcon is null)
-            descriptionIcon = Icon;
+        descriptionIcon ??= Icon;
         icon.Image = descriptionIcon.ToBitmap();
         descriptionLabel.Text = descriptionText;
         acceptButton.Text = acceptButtonText;

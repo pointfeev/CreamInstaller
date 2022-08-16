@@ -1,13 +1,13 @@
-﻿using System.Drawing;
+﻿using CreamInstaller.Resources;
+using CreamInstaller.Utility;
+
+using Microsoft.Win32;
+
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
-using CreamInstaller.Resources;
-using CreamInstaller.Utility;
-
-using Microsoft.Win32;
 
 using static CreamInstaller.Resources.Resources;
 
@@ -97,7 +97,7 @@ internal static class ParadoxLauncher
             if (steamOriginalSdk64 is null && File.Exists(sdk64) && !sdk64.IsResourceFile(ResourceIdentifier.Steamworks64))
                 steamOriginalSdk64 = File.ReadAllBytes(sdk64);
 
-            directory.GetScreamApiComponents(out sdk32, out _, out sdk64, out _, out config, out _);
+            directory.GetScreamApiComponents(out sdk32, out _, out sdk64, out _, out config);
             screamConfig = screamConfig || File.Exists(config);
             await InstallForm.UninstallScreamAPI(directory, deleteConfig: false);
             if (epicOriginalSdk32 is null && File.Exists(sdk32) && !sdk32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32))
@@ -129,7 +129,7 @@ internal static class ParadoxLauncher
                 if (smokeConfig)
                     await InstallForm.InstallSmokeAPI(directory, selection, generateConfig: false);
 
-                directory.GetScreamApiComponents(out sdk32, out _, out sdk64, out _, out _, out _);
+                directory.GetScreamApiComponents(out sdk32, out _, out sdk64, out _, out _);
                 if (epicOriginalSdk32 is not null && sdk32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32))
                 {
                     epicOriginalSdk32.Write(sdk32);
@@ -152,7 +152,7 @@ internal static class ParadoxLauncher
                 if (installForm is not null)
                     installForm.UpdateUser("Paradox Launcher successfully repaired!", InstallationLog.Success);
                 else
-                    dialogForm.Show(form.Icon, "Paradox Launcher successfully repaired!", "OK", customFormText: "Paradox Launcher");
+                    _ = dialogForm.Show(form.Icon, "Paradox Launcher successfully repaired!", "OK", customFormText: "Paradox Launcher");
                 return RepairResult.Success;
             }
             else
@@ -160,18 +160,17 @@ internal static class ParadoxLauncher
                 if (installForm is not null)
                     installForm.UpdateUser("Paradox Launcher did not need to be repaired.", InstallationLog.Success);
                 else
-                    dialogForm.Show(SystemIcons.Information, "Paradox Launcher does not need to be repaired.", "OK", customFormText: "Paradox Launcher");
+                    _ = dialogForm.Show(SystemIcons.Information, "Paradox Launcher does not need to be repaired.", "OK", customFormText: "Paradox Launcher");
                 return RepairResult.Unnecessary;
             }
         }
         else
         {
-            if (form is InstallForm)
-                throw new CustomMessageException("Repair failed! " +
+            _ = form is InstallForm
+                ? throw new CustomMessageException("Repair failed! " +
                     "An original Steamworks/Epic Online Services SDK file could not be found. " +
-                    "You will likely have to reinstall Paradox Launcher to fix this issue.");
-            else
-                dialogForm.Show(SystemIcons.Error, "Paradox Launcher repair failed!"
+                    "You will likely have to reinstall Paradox Launcher to fix this issue.")
+                : dialogForm.Show(SystemIcons.Error, "Paradox Launcher repair failed!"
                     + "\n\nAn original Steamworks/Epic Online Services SDK file could not be found."
                     + "\nYou will likely have to reinstall Paradox Launcher to fix this issue.", "OK", customFormText: "Paradox Launcher");
             return RepairResult.Failure;

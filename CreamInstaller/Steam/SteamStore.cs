@@ -1,12 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using CreamInstaller.Utility;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-using CreamInstaller.Utility;
-
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+#if DEBUG
+using System;
+using System.Drawing;
+#endif
 
 namespace CreamInstaller.Steam;
 
@@ -34,7 +39,7 @@ internal static class SteamStore
             string response = await HttpClientManager.EnsureGet($"https://store.steampowered.com/api/appdetails?appids={appId}");
             if (response is not null)
             {
-                IDictionary<string, JToken> apps = JsonConvert.DeserializeObject(response) as dynamic;
+                IDictionary<string, JToken> apps = (IDictionary<string, JToken>)JsonConvert.DeserializeObject(response);
                 if (apps is not null)
                     foreach (KeyValuePair<string, JToken> app in apps)
                     {
@@ -47,19 +52,29 @@ internal static class SteamStore
                                 {
                                     File.WriteAllText(cacheFile, JsonConvert.SerializeObject(data, Formatting.Indented));
                                 }
-                                catch //(Exception e)
+                                catch
+#if DEBUG
+                                (Exception e)
                                 {
-                                    //using DialogForm dialogForm = new(null);
-                                    //dialogForm.Show(SystemIcons.Error, "Unsuccessful serialization of query for appid " + appId + ":\n\n" + e.ToString(), "FUCK");
+                                    using DialogForm dialogForm = new(null);
+                                    dialogForm.Show(SystemIcons.Error, "Unsuccessful serialization of query for appid " + appId + ":\n\n" + e.ToString());
                                 }
+#else
+                                { }
+#endif
                                 return data;
                             }
                         }
-                        catch //(Exception e)
+                        catch
+#if DEBUG
+                        (Exception e)
                         {
-                            //using DialogForm dialogForm = new(null);
-                            //dialogForm.Show(SystemIcons.Error, "Unsuccessful deserialization of query for appid " + appId + ":\n\n" + e.ToString(), "FUCK");
+                            using DialogForm dialogForm = new(null);
+                            dialogForm.Show(SystemIcons.Error, "Unsuccessful deserialization of query for appid " + appId + ":\n\n" + e.ToString());
                         }
+#else
+                        { }
+#endif
                     }
             }
         }

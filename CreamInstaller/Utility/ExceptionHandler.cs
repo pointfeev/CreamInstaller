@@ -15,7 +15,7 @@ internal static class ExceptionHandler
         string[] stackTrace = e.StackTrace?.Split('\n');
         if (stackTrace is not null && stackTrace.Length > 0)
         {
-            output.Append("STACK TRACE\n");
+            _ = output.Append("STACK TRACE\n");
             for (int i = 0; i < Math.Min(stackTrace.Length, 3); i++)
             {
                 string line = stackTrace[i];
@@ -24,7 +24,7 @@ internal static class ExceptionHandler
                 int ciNum = line.LastIndexOf(@"CreamInstaller\");
                 int lineNum = line.LastIndexOf(":line ");
                 if (line is not null && atNum != -1)
-                    output.Append("\n    " + (inNum != -1 ? line[atNum..(inNum - 1)] : line[atNum..])
+                    _ = output.Append("\n    " + (inNum != -1 ? line[atNum..(inNum - 1)] : line[atNum..])
                         + (inNum != -1 ? ("\n        "
                             + (ciNum != -1 ? ("in "
                                 + (lineNum != -1 ? line[ciNum..lineNum]
@@ -38,13 +38,13 @@ internal static class ExceptionHandler
         if (messageLines is not null && messageLines.Length > 0)
         {
             if (output.Length > 0)
-                output.Append("\n\n");
-            output.Append("MESSAGE\n");
+                _ = output.Append("\n\n");
+            _ = output.Append("MESSAGE\n");
             for (int i = 0; i < messageLines.Length; i++)
             {
                 string line = messageLines[i];
                 if (line is not null)
-                    output.Append("\n    " + line);
+                    _ = output.Append("\n    " + line);
             }
         }
         using DialogForm dialogForm = new(form ?? Form.ActiveForm);

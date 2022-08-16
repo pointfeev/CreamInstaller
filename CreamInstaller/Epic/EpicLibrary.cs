@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using CreamInstaller.Resources;
+
+using Microsoft.Win32;
+
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-
-using CreamInstaller.Resources;
-
-using Microsoft.Win32;
 
 namespace CreamInstaller.Epic;
 
@@ -53,13 +53,12 @@ internal static class EpicLibrary
     {
         List<string> dllDirectories = new();
         if (Program.Canceled || !Directory.Exists(gameDirectory)) return null;
-        gameDirectory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config, out string cache);
+        gameDirectory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
         if (File.Exists(sdk32)
             || File.Exists(sdk32_o)
             || File.Exists(sdk64)
             || File.Exists(sdk64_o)
-            || File.Exists(config)
-            || File.Exists(cache))
+            || File.Exists(config))
             dllDirectories.Add(gameDirectory);
         string[] directories = Directory.GetDirectories(gameDirectory);
         foreach (string _directory in directories)

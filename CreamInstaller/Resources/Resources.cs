@@ -31,7 +31,11 @@ internal static class Resources
         return false;
     }
 
-    internal static void GetCreamApiComponents(this string directory, out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config)
+    internal static void GetCreamApiComponents(
+            this string directory,
+            out string sdk32, out string sdk32_o,
+            out string sdk64, out string sdk64_o,
+            out string config)
     {
         sdk32 = directory + @"\steam_api.dll";
         sdk32_o = directory + @"\steam_api_o.dll";
@@ -40,7 +44,12 @@ internal static class Resources
         config = directory + @"\cream_api.ini";
     }
 
-    internal static void GetSmokeApiComponents(this string directory, out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config, out string cache)
+    internal static void GetSmokeApiComponents(
+            this string directory,
+            out string sdk32, out string sdk32_o,
+            out string sdk64, out string sdk64_o,
+            out string config,
+            out string cache)
     {
         sdk32 = directory + @"\steam_api.dll";
         sdk32_o = directory + @"\steam_api_o.dll";
@@ -50,14 +59,48 @@ internal static class Resources
         cache = directory + @"\SmokeAPI.cache.json";
     }
 
-    internal static void GetScreamApiComponents(this string directory, out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config, out string cache)
+    internal static void GetScreamApiComponents(
+            this string directory,
+            out string sdk32, out string sdk32_o,
+            out string sdk64, out string sdk64_o,
+            out string config
+        )
     {
         sdk32 = directory + @"\EOSSDK-Win32-Shipping.dll";
         sdk32_o = directory + @"\EOSSDK-Win32-Shipping_o.dll";
         sdk64 = directory + @"\EOSSDK-Win64-Shipping.dll";
         sdk64_o = directory + @"\EOSSDK-Win64-Shipping_o.dll";
         config = directory + @"\ScreamAPI.json";
-        cache = directory + @"\ScreamAPI.cache.json";
+    }
+
+    internal static void GetUplayR1Components(
+            this string directory,
+            out string sdk32, out string sdk32_o,
+            out string sdk64, out string sdk64_o,
+            out string config
+        )
+    {
+        sdk32 = directory + @"\uplay_r1_loader.dll";
+        sdk32_o = directory + @"\uplay_r1_loader_o.dll";
+        sdk64 = directory + @"\uplay_r1_loader64.dll";
+        sdk64_o = directory + @"\uplay_r1_loader64_o.dll";
+        config = directory + @"\UplayR1Unlocker.jsonc";
+    }
+
+    internal static void GetUplayR2Components(
+            this string directory,
+            out string old_sdk32, out string old_sdk64,
+            out string sdk32, out string sdk32_o,
+            out string sdk64, out string sdk64_o,
+            out string config)
+    {
+        old_sdk32 = directory + @"\uplay_r2_loader.dll";
+        old_sdk64 = directory + @"\uplay_r2_loader64.dll";
+        sdk32 = directory + @"\upc_r2_loader.dll";
+        sdk32_o = directory + @"\upc_r2_loader_o.dll";
+        sdk64 = directory + @"\upc_r2_loader64.dll";
+        sdk64_o = directory + @"\upc_r2_loader64_o.dll";
+        config = directory + @"\UplayR2Unlocker.jsonc";
     }
 
     public enum ResourceIdentifier

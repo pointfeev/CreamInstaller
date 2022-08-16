@@ -1,3 +1,6 @@
+using CreamInstaller.Steam;
+using CreamInstaller.Utility;
+
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -6,9 +9,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
-
-using CreamInstaller.Steam;
-using CreamInstaller.Utility;
 
 namespace CreamInstaller;
 
@@ -62,14 +62,14 @@ internal static class Program
         using Mutex mutex = new(true, "CreamInstaller", out bool createdNew);
         if (createdNew)
         {
-            Application.SetHighDpiMode(HighDpiMode.SystemAware);
+            _ = Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.ApplicationExit += new(OnApplicationExit);
             Application.ThreadException += new((s, e) => e.Exception?.HandleFatalException());
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
             AppDomain.CurrentDomain.UnhandledException += new((s, e) => (e.ExceptionObject as Exception)?.HandleFatalException());
-        retry:
+            retry:
             try
             {
                 HttpClientManager.Setup();

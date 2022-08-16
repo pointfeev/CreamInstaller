@@ -1,4 +1,9 @@
-﻿using System;
+﻿using CreamInstaller.Resources;
+using CreamInstaller.Utility;
+
+using Gameloop.Vdf.Linq;
+
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,11 +14,6 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
-using CreamInstaller.Resources;
-using CreamInstaller.Utility;
-
-using Gameloop.Vdf.Linq;
 
 namespace CreamInstaller.Steam;
 
@@ -34,7 +34,7 @@ internal static class SteamCMD
     private static readonly int[] locks = new int[ProcessLimit];
     internal static async Task<string> Run(string appId) => await Task.Run(() =>
     {
-    wait_for_lock:
+        wait_for_lock:
         if (Program.Canceled) return "";
         Thread.Sleep(0);
         for (int i = 0; i < locks.Length; i++)
@@ -84,8 +84,7 @@ internal static class SteamCMD
                         lastOutput = DateTime.UtcNow;
                         char ch = (char)c;
                         if (ch == '{') appInfoStarted = true;
-                        if (appInfoStarted) appInfo.Append(ch);
-                        else output.Append(ch);
+                        _ = appInfoStarted ? appInfo.Append(ch) : output.Append(ch);
                     }
                     DateTime now = DateTime.UtcNow;
                     TimeSpan timeDiff = now - lastOutput;
@@ -99,13 +98,13 @@ internal static class SteamCMD
                             processStartInfo.Arguments = GetArguments(appId);
                             process = Process.Start(processStartInfo);
                             appInfoStarted = false;
-                            output.Clear();
-                            appInfo.Clear();
+                            _ = output.Clear();
+                            _ = appInfo.Clear();
                         }
                         else break;
                     }
                 }
-                Interlocked.Decrement(ref locks[i]);
+                _ = Interlocked.Decrement(ref locks[i]);
                 return appInfo.ToString();
             }
             Thread.Sleep(200);
@@ -142,7 +141,7 @@ internal static class SteamCMD
             int cur = 0;
             progress.Report(cur);
             watcher.Changed += (sender, e) => progress.Report(++cur);
-            await Run(null);
+            _ = await Run(null);
             watcher.Dispose();
         }
     }
@@ -187,7 +186,7 @@ internal static class SteamCMD
         if (Program.Canceled) return null;
         string output;
         string appUpdateFile = $@"{AppInfoPath}\{appId}.vdf";
-    restart:
+        restart:
         if (Program.Canceled) return null;
         if (File.Exists(appUpdateFile)) output = File.ReadAllText(appUpdateFile, Encoding.UTF8);
         else

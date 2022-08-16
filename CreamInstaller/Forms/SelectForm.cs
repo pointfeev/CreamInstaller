@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿#pragma warning disable IDE0058
 
 using CreamInstaller.Components;
 using CreamInstaller.Epic;
@@ -17,6 +8,17 @@ using CreamInstaller.Steam;
 using CreamInstaller.Utility;
 
 using Gameloop.Vdf.Linq;
+
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace CreamInstaller;
 
@@ -51,7 +53,7 @@ internal partial class SelectForm : CustomForm
         {
             if (Program.Canceled) return;
             if (RemainingGames.Contains(gameName))
-                RemainingGames.Remove(gameName);
+                _ = RemainingGames.Remove(gameName);
             UpdateRemainingGames();
         });
     }
@@ -76,7 +78,7 @@ internal partial class SelectForm : CustomForm
         {
             if (Program.Canceled) return;
             if (RemainingDLCs.Contains(dlcId))
-                RemainingDLCs.Remove(dlcId);
+                _ = RemainingDLCs.Remove(dlcId);
             UpdateRemainingDLCs();
         });
     }
@@ -123,7 +125,7 @@ internal partial class SelectForm : CustomForm
                 programNode.Text = selection.Name;
                 programNode.Checked = selection.Enabled;
                 programNode.Remove();
-                selectionTreeView.Nodes.Add(programNode);
+                _ = selectionTreeView.Nodes.Add(programNode);
             }
         }
         if (Directory.Exists(SteamLibrary.InstallPath) && ProgramsToScan.Any(c => c.platform == "Steam"))
@@ -245,7 +247,7 @@ internal partial class SelectForm : CustomForm
                         programNode.Text = appData?.name ?? name;
                         programNode.Checked = selection.Enabled;
                         programNode.Remove();
-                        selectionTreeView.Nodes.Add(programNode);
+                        _ = selectionTreeView.Nodes.Add(programNode);
                         foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in dlc)
                         {
                             if (Program.Canceled || programNode is null) return;
@@ -259,7 +261,7 @@ internal partial class SelectForm : CustomForm
                             dlcNode.Text = dlcApp.name;
                             dlcNode.Checked = selection.SelectedDlc.ContainsKey(appId);
                             dlcNode.Remove();
-                            programNode.Nodes.Add(dlcNode);
+                            _ = programNode.Nodes.Add(dlcNode);
                         }
                     });
                     if (Program.Canceled) return;
@@ -352,7 +354,7 @@ internal partial class SelectForm : CustomForm
                         programNode.Text = name;
                         programNode.Checked = selection.Enabled;
                         programNode.Remove();
-                        selectionTreeView.Nodes.Add(programNode);
+                        _ = selectionTreeView.Nodes.Add(programNode);
                         /*TreeNode catalogItemsNode = treeNodes.Find(s => s.Name == @namespace + "_catalogItems") ?? new();
                         catalogItemsNode.Name = @namespace + "_catalogItems";
                         catalogItemsNode.Text = "Catalog Items";
@@ -380,7 +382,7 @@ internal partial class SelectForm : CustomForm
                                 dlcNode.Text = dlcApp.name;
                                 dlcNode.Checked = selection.SelectedDlc.ContainsKey(dlcId);
                                 dlcNode.Remove();
-                                programNode.Nodes.Add(dlcNode); //entitlementsNode.Nodes.Add(dlcNode);
+                                _ = programNode.Nodes.Add(dlcNode); //entitlementsNode.Nodes.Add(dlcNode);
                             }
                         }
                     });
@@ -585,7 +587,7 @@ internal partial class SelectForm : CustomForm
 
     private void OnLoad(object sender, EventArgs _)
     {
-    retry:
+        retry:
         try
         {
             HideProgressBar();
@@ -683,8 +685,8 @@ internal partial class SelectForm : CustomForm
                         for (int i = 0; i < directories.Count; i++)
                         {
                             string directory = directories[i];
-                            directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config, out string cache);
-                            if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config) || File.Exists(cache))
+                            directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+                            if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
                             {
                                 contextMenuStrip.Items.Add(new ContextMenuItem($"Open Epic Online Services SDK Directory #{i + 1}", "File Explorer",
                                     new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
@@ -743,7 +745,7 @@ internal partial class SelectForm : CustomForm
             if (ParadoxLauncher.DlcDialog(this)) return;
             Hide();
             using InstallForm installForm = new(this, uninstall);
-            installForm.ShowDialog();
+            _ = installForm.ShowDialog();
             if (installForm.Reselecting)
             {
                 InheritLocation(installForm);
@@ -795,15 +797,15 @@ internal partial class SelectForm : CustomForm
     {
         StringBuilder blockedGames = new();
         foreach (string name in Program.ProtectedGames)
-            blockedGames.Append(helpButtonListPrefix + name);
+            _ = blockedGames.Append(helpButtonListPrefix + name);
         StringBuilder blockedDirectories = new();
         foreach (string path in Program.ProtectedGameDirectories)
-            blockedDirectories.Append(helpButtonListPrefix + path);
+            _ = blockedDirectories.Append(helpButtonListPrefix + path);
         StringBuilder blockedDirectoryExceptions = new();
         foreach (string name in Program.ProtectedGameDirectoryExceptions)
-            blockedDirectoryExceptions.Append(helpButtonListPrefix + name);
+            _ = blockedDirectoryExceptions.Append(helpButtonListPrefix + name);
         using DialogForm form = new(this);
-        form.Show(SystemIcons.Information,
+        _ = form.Show(SystemIcons.Information,
             "Blocks the program from caching and displaying games protected by DLL checks," +
             "\nanti-cheats, or that are confirmed not to be working with SmokeAPI or ScreamAPI." +
             "\n\nBlocked games:" + blockedGames +
@@ -812,3 +814,5 @@ internal partial class SelectForm : CustomForm
             "OK", customFormText: "Block Protected Games");
     }
 }
+
+#pragma warning restore IDE0058

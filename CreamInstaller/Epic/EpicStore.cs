@@ -1,4 +1,9 @@
-﻿using System;
+﻿using CreamInstaller.Epic.GraphQL;
+using CreamInstaller.Utility;
+
+using Newtonsoft.Json;
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,11 +11,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web;
-
-using CreamInstaller.Epic.GraphQL;
-using CreamInstaller.Utility;
-
-using Newtonsoft.Json;
 
 namespace CreamInstaller.Epic;
 
@@ -124,7 +124,7 @@ internal static class EpicStore
             HttpClient client = HttpClientManager.HttpClient;
             if (client is null) return null;
             HttpResponseMessage httpResponse = await client.PostAsync(new Uri("https://graphql.epicgames.com/graphql"), content);
-            httpResponse.EnsureSuccessStatusCode();
+            _ = httpResponse.EnsureSuccessStatusCode();
             string response = await httpResponse.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<Response>(response);
         }

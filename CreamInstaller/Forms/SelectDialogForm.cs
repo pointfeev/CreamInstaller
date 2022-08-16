@@ -1,12 +1,12 @@
-﻿using System;
+﻿using CreamInstaller.Components;
+using CreamInstaller.Utility;
+
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-
-using CreamInstaller.Components;
-using CreamInstaller.Utility;
 
 using static CreamInstaller.Components.CustomTreeView;
 
@@ -34,7 +34,7 @@ internal partial class SelectDialogForm : CustomForm
                 Checked = alreadySelected
             };
             OnTreeNodeChecked(node);
-            selectionTreeView.Nodes.Add(node);
+            _ = selectionTreeView.Nodes.Add(node);
         }
         if (!selected.Any()) OnLoad(null, null);
         allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
@@ -62,7 +62,7 @@ internal partial class SelectDialogForm : CustomForm
         if (node.Checked)
             selected.Add((node.Tag as string, id, node.Text));
         else
-            selected.RemoveAll(s => s.id == id);
+            _ = selected.RemoveAll(s => s.id == id);
         allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
         allCheckBox.Checked = selectionTreeView.Nodes.Cast<TreeNode>().All(n => n.Checked);
         allCheckBox.CheckedChanged += OnAllCheckBoxChanged;

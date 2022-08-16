@@ -1,4 +1,8 @@
-﻿using System;
+﻿using CreamInstaller.Components;
+using CreamInstaller.Resources;
+using CreamInstaller.Utility;
+
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -7,10 +11,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
-using CreamInstaller.Components;
-using CreamInstaller.Resources;
-using CreamInstaller.Utility;
 
 using static CreamInstaller.Paradox.ParadoxLauncher;
 
@@ -45,13 +45,14 @@ internal partial class InstallForm : CustomForm
 
     internal void UpdateUser(string text, Color color, bool info = true, bool log = true)
     {
-        if (info) userInfoLabel.Invoke(() => userInfoLabel.Text = text);
+        if (info) _ = userInfoLabel.Invoke(() => userInfoLabel.Text = text);
         if (log && !logTextBox.Disposing && !logTextBox.IsDisposed)
         {
             logTextBox.Invoke(() =>
             {
                 if (logTextBox.Text.Length > 0) logTextBox.AppendText(Environment.NewLine, color);
                 logTextBox.AppendText(text, color);
+                logTextBox.Refresh();
             });
             Thread.Sleep(0);
         }
@@ -268,7 +269,7 @@ internal partial class InstallForm : CustomForm
 
     internal static async Task UninstallScreamAPI(string directory, InstallForm installForm = null, bool deleteConfig = true) => await Task.Run(() =>
     {
-        directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config, out string cache);
+        directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
         if (File.Exists(sdk32_o))
         {
             if (File.Exists(sdk32))
@@ -299,17 +300,11 @@ internal partial class InstallForm : CustomForm
             if (installForm is not null)
                 installForm.UpdateUser($"Deleted configuration: {Path.GetFileName(config)}", InstallationLog.Action, info: false);
         }
-        if (deleteConfig && File.Exists(cache))
-        {
-            File.Delete(cache);
-            if (installForm is not null)
-                installForm.UpdateUser($"Deleted cache: {Path.GetFileName(cache)}", InstallationLog.Action, info: false);
-        }
     });
 
     internal static async Task InstallScreamAPI(string directory, ProgramSelection selection, InstallForm installForm = null, bool generateConfig = true) => await Task.Run(() =>
     {
-        directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config, out _);
+        directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
         if (File.Exists(sdk32) && !File.Exists(sdk32_o))
         {
             File.Move(sdk32, sdk32_o);
@@ -372,7 +367,7 @@ internal partial class InstallForm : CustomForm
         if (selection.Id == "ParadoxLauncher")
         {
             UpdateUser($"Repairing Paradox Launcher . . . ", InstallationLog.Operation);
-            await Repair(this, selection);
+            _ = await Repair(this, selection);
         }
         foreach (string directory in selection.DllDirectories)
         {
@@ -394,8 +389,8 @@ internal partial class InstallForm : CustomForm
             if (selection.IsEpic && selection.SelectedDlc.Any(d => d.Value.type is DlcType.EpicCatalogItem or DlcType.EpicEntitlement)
                 || selection.ExtraSelectedDlc.Any(item => item.dlc.Any(dlc => dlc.Value.type is DlcType.EpicCatalogItem or DlcType.EpicEntitlement)))
             {
-                directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config, out string cache);
-                if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config) || File.Exists(cache))
+                directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+                if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
                 {
                     UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} ScreamAPI" +
                         $" {(Uninstalling ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
@@ -469,7 +464,7 @@ internal partial class InstallForm : CustomForm
 
     private void OnLoad(object sender, EventArgs _)
     {
-    retry:
+        retry:
         try
         {
             userInfoLabel.Text = "Loading . . . ";

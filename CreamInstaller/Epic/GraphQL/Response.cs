@@ -1,8 +1,8 @@
 ﻿#pragma warning disable CA1819 // Properties should not return arrays
 
-using System;
-
 using Newtonsoft.Json;
+
+using System;
 
 namespace CreamInstaller.Epic.GraphQL;
 

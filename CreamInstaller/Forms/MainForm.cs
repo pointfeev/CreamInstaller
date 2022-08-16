@@ -1,4 +1,13 @@
-﻿using System;
+﻿using CreamInstaller.Components;
+using CreamInstaller.Utility;
+
+using HtmlAgilityPack;
+
+using Onova;
+using Onova.Models;
+using Onova.Services;
+
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -7,15 +16,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
-
-using CreamInstaller.Components;
-using CreamInstaller.Utility;
-
-using HtmlAgilityPack;
-
-using Onova;
-using Onova.Models;
-using Onova.Services;
 
 namespace CreamInstaller;
 
@@ -39,7 +39,7 @@ internal partial class MainForm : CustomForm
         }
         Hide();
         using SelectForm form = new(this);
-        form.ShowDialog();
+        _ = form.ShowDialog();
         Close();
     }
 
@@ -146,7 +146,7 @@ internal partial class MainForm : CustomForm
 
     private void OnLoad(object sender, EventArgs _)
     {
-    retry:
+        retry:
         try
         {
             string FileName = Path.GetFileName(Program.CurrentProcessFilePath);

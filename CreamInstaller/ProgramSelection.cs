@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using CreamInstaller.Components;
+using CreamInstaller.Resources;
+
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
-using CreamInstaller.Components;
-using CreamInstaller.Resources;
 
 namespace CreamInstaller;
 
@@ -56,13 +56,12 @@ internal class ProgramSelection
                     || config.IsFilePathLocked()
                     || cache.IsFilePathLocked())
                     return true;
-                directory.GetScreamApiComponents(out sdk32, out sdk32_o, out sdk64, out sdk64_o, out config, out cache);
+                directory.GetScreamApiComponents(out sdk32, out sdk32_o, out sdk64, out sdk64_o, out config);
                 if (sdk32.IsFilePathLocked()
                     || sdk32_o.IsFilePathLocked()
                     || sdk64.IsFilePathLocked()
                     || sdk64_o.IsFilePathLocked()
-                    || config.IsFilePathLocked()
-                    || cache.IsFilePathLocked())
+                    || config.IsFilePathLocked())
                     return true;
             }
             return false;
@@ -72,7 +71,7 @@ internal class ProgramSelection
     private void Toggle(string dlcAppId, (DlcType type, string name, string icon) dlcApp, bool enabled)
     {
         if (enabled) SelectedDlc[dlcAppId] = dlcApp;
-        else SelectedDlc.Remove(dlcAppId);
+        else _ = SelectedDlc.Remove(dlcAppId);
     }
 
     internal void ToggleDlc(string dlcId, bool enabled)
@@ -96,23 +95,23 @@ internal class ProgramSelection
     {
         if (Program.IsGameBlocked(Name, RootDirectory))
         {
-            All.Remove(this);
+            _ = All.Remove(this);
             return;
         }
         if (!Directory.Exists(RootDirectory))
         {
-            All.Remove(this);
+            _ = All.Remove(this);
             return;
         }
-        DllDirectories.RemoveAll(directory => !Directory.Exists(directory));
-        if (!DllDirectories.Any()) All.Remove(this);
+        _ = DllDirectories.RemoveAll(directory => !Directory.Exists(directory));
+        if (!DllDirectories.Any()) _ = All.Remove(this);
     }
 
     internal void Validate(List<(string platform, string id, string name)> programsToScan)
     {
         if (programsToScan is null || !programsToScan.Any(p => p.id == Id))
         {
-            All.Remove(this);
+            _ = All.Remove(this);
             return;
         }
         Validate();
