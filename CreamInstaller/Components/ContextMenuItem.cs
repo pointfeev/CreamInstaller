@@ -53,6 +53,9 @@ internal class ContextMenuItem : ToolStripMenuItem
                 case "Epic Games":
                     image = await HttpClientManager.GetImageFromUrl(IconGrabber.GetDomainFaviconUrl("epicgames.com"));
                     break;
+                case "Ubisoft Store":
+                    image = await HttpClientManager.GetImageFromUrl(IconGrabber.GetDomainFaviconUrl("store.ubi.com"));
+                    break;
                 default:
                     return;
             }

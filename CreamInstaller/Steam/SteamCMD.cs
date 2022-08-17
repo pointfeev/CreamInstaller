@@ -36,11 +36,9 @@ internal static class SteamCMD
     {
         wait_for_lock:
         if (Program.Canceled) return "";
-        Thread.Sleep(0);
         for (int i = 0; i < locks.Length; i++)
         {
             if (Program.Canceled) return "";
-            Thread.Sleep(0);
             if (Interlocked.CompareExchange(ref locks[i], 1, 0) == 0)
             {
                 if (appId is not null)
@@ -77,7 +75,6 @@ internal static class SteamCMD
                         process.Close();
                         break;
                     }
-                    Thread.Sleep(0);
                     int c = process.StandardOutput.Read();
                     if (c != -1)
                     {

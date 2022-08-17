@@ -91,7 +91,7 @@ internal static class ParadoxLauncher
         {
             directory.GetSmokeApiComponents(out string sdk32, out _, out string sdk64, out _, out string config, out _);
             smokeConfig = smokeConfig || File.Exists(config);
-            await InstallForm.UninstallSmokeAPI(directory, deleteConfig: false);
+            await SmokeAPI.Uninstall(directory, deleteConfig: false);
             if (steamOriginalSdk32 is null && File.Exists(sdk32) && !sdk32.IsResourceFile(ResourceIdentifier.Steamworks32))
                 steamOriginalSdk32 = File.ReadAllBytes(sdk32);
             if (steamOriginalSdk64 is null && File.Exists(sdk64) && !sdk64.IsResourceFile(ResourceIdentifier.Steamworks64))
@@ -99,7 +99,7 @@ internal static class ParadoxLauncher
 
             directory.GetScreamApiComponents(out sdk32, out _, out sdk64, out _, out config);
             screamConfig = screamConfig || File.Exists(config);
-            await InstallForm.UninstallScreamAPI(directory, deleteConfig: false);
+            await ScreamAPI.Uninstall(directory, deleteConfig: false);
             if (epicOriginalSdk32 is null && File.Exists(sdk32) && !sdk32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32))
                 epicOriginalSdk32 = File.ReadAllBytes(sdk32);
             if (epicOriginalSdk64 is null && File.Exists(sdk64) && !sdk64.IsResourceFile(ResourceIdentifier.EpicOnlineServices64))
@@ -127,7 +127,7 @@ internal static class ParadoxLauncher
                     neededRepair = true;
                 }
                 if (smokeConfig)
-                    await InstallForm.InstallSmokeAPI(directory, selection, generateConfig: false);
+                    await SmokeAPI.Install(directory, selection, generateConfig: false);
 
                 directory.GetScreamApiComponents(out sdk32, out _, out sdk64, out _, out _);
                 if (epicOriginalSdk32 is not null && sdk32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32))
@@ -145,7 +145,7 @@ internal static class ParadoxLauncher
                     neededRepair = true;
                 }
                 if (screamConfig)
-                    await InstallForm.InstallScreamAPI(directory, selection, generateConfig: false);
+                    await ScreamAPI.Install(directory, selection, generateConfig: false);
             }
             if (neededRepair)
             {

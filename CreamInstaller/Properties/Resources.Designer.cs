@@ -109,5 +109,45 @@ namespace CreamInstaller.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Upc32 {
+            get {
+                object obj = ResourceManager.GetObject("Upc32", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Upc64 {
+            get {
+                object obj = ResourceManager.GetObject("Upc64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Uplay32 {
+            get {
+                object obj = ResourceManager.GetObject("Uplay32", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Uplay64 {
+            get {
+                object obj = ResourceManager.GetObject("Uplay64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

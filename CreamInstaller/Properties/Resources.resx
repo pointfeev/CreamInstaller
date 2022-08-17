@@ -133,4 +133,16 @@
   <data name="Steamworks64" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\smokeapi\steam_api64.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="Upc32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\uplayr2\upc_r2_loader.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Upc64" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\uplayr2\upc_r2_loader64.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Uplay32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\uplayr1\uplay_r1_loader.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Uplay64" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\uplayr1\uplay_r1_loader64.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>

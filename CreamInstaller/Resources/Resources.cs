@@ -8,29 +8,6 @@ namespace CreamInstaller.Resources;
 
 internal static class Resources
 {
-    internal static void Write(this byte[] resource, string filePath)
-    {
-        using FileStream file = new(filePath, FileMode.Create, FileAccess.Write);
-        file.Write(resource);
-    }
-
-    internal static bool IsFilePathLocked(this string filePath)
-    {
-        try
-        {
-            File.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None).Close();
-        }
-        catch (FileNotFoundException)
-        {
-            return false;
-        }
-        catch (IOException)
-        {
-            return true;
-        }
-        return false;
-    }
-
     internal static void GetCreamApiComponents(
             this string directory,
             out string sdk32, out string sdk32_o,
@@ -44,71 +21,16 @@ internal static class Resources
         config = directory + @"\cream_api.ini";
     }
 
-    internal static void GetSmokeApiComponents(
-            this string directory,
-            out string sdk32, out string sdk32_o,
-            out string sdk64, out string sdk64_o,
-            out string config,
-            out string cache)
-    {
-        sdk32 = directory + @"\steam_api.dll";
-        sdk32_o = directory + @"\steam_api_o.dll";
-        sdk64 = directory + @"\steam_api64.dll";
-        sdk64_o = directory + @"\steam_api64_o.dll";
-        config = directory + @"\SmokeAPI.json";
-        cache = directory + @"\SmokeAPI.cache.json";
-    }
-
-    internal static void GetScreamApiComponents(
-            this string directory,
-            out string sdk32, out string sdk32_o,
-            out string sdk64, out string sdk64_o,
-            out string config
-        )
-    {
-        sdk32 = directory + @"\EOSSDK-Win32-Shipping.dll";
-        sdk32_o = directory + @"\EOSSDK-Win32-Shipping_o.dll";
-        sdk64 = directory + @"\EOSSDK-Win64-Shipping.dll";
-        sdk64_o = directory + @"\EOSSDK-Win64-Shipping_o.dll";
-        config = directory + @"\ScreamAPI.json";
-    }
-
-    internal static void GetUplayR1Components(
-            this string directory,
-            out string sdk32, out string sdk32_o,
-            out string sdk64, out string sdk64_o,
-            out string config
-        )
-    {
-        sdk32 = directory + @"\uplay_r1_loader.dll";
-        sdk32_o = directory + @"\uplay_r1_loader_o.dll";
-        sdk64 = directory + @"\uplay_r1_loader64.dll";
-        sdk64_o = directory + @"\uplay_r1_loader64_o.dll";
-        config = directory + @"\UplayR1Unlocker.jsonc";
-    }
-
-    internal static void GetUplayR2Components(
-            this string directory,
-            out string old_sdk32, out string old_sdk64,
-            out string sdk32, out string sdk32_o,
-            out string sdk64, out string sdk64_o,
-            out string config)
-    {
-        old_sdk32 = directory + @"\uplay_r2_loader.dll";
-        old_sdk64 = directory + @"\uplay_r2_loader64.dll";
-        sdk32 = directory + @"\upc_r2_loader.dll";
-        sdk32_o = directory + @"\upc_r2_loader_o.dll";
-        sdk64 = directory + @"\upc_r2_loader64.dll";
-        sdk64_o = directory + @"\upc_r2_loader64_o.dll";
-        config = directory + @"\UplayR2Unlocker.jsonc";
-    }
-
     public enum ResourceIdentifier
     {
         Steamworks32 = 0,
         Steamworks64 = 1,
         EpicOnlineServices32 = 2,
-        EpicOnlineServices64 = 3
+        EpicOnlineServices64 = 3,
+        Uplay32 = 4,
+        Uplay64 = 5,
+        Upc32 = 6,
+        Upc64 = 7,
     }
 
     internal static readonly Dictionary<ResourceIdentifier, IReadOnlyList<string>> ResourceMD5s = new()
@@ -150,6 +72,36 @@ internal static class Resources
                 "49122A2E2E51CBB0AE5E1D59B280E4CD", // SmokeAPI v1.0.2
                 "13F3E9476116F7670E21365A400357AC"  // SmokeAPI v1.0.3
             }
+        },
+        {
+            ResourceIdentifier.Uplay32,
+            new List<string>()
+            {
+                "1977967B2549A38EC2DB39D4C8ED499B" // Uplay R1 Unlocker v2.0.0
+            }
+        },
+        {
+            ResourceIdentifier.Uplay64,
+            new List<string>()
+            {
+                "333FEDD9DC2B299419B37ED1624FF8DB" // Uplay R1 Unlocker v2.0.0
+            }
+        },
+        {
+            ResourceIdentifier.Upc32,
+            new List<string>()
+            {
+                "C14368BC4EE19FDE8DBAC07E31C67AE4", // Uplay R2 Unlocker v3.0.0
+                "DED3A3EA1876E3110D7D87B9A22946B0"  // Uplay R2 Unlocker v3.0.1
+            }
+        },
+        {
+            ResourceIdentifier.Upc64,
+            new List<string>()
+            {
+                "7D9A4C12972BAABCB6C181920CC0F19B", // Uplay R2 Unlocker v3.0.0
+                "D7FDBFE0FC8D7600FEB8EC0A97713184"  // Uplay R2 Unlocker v3.0.1
+            }
         }
     };
 
@@ -167,4 +119,27 @@ internal static class Resources
     internal static bool IsResourceFile(this string filePath, ResourceIdentifier identifier) => filePath.ComputeMD5() is string hash && ResourceMD5s[identifier].Contains(hash);
 
     internal static bool IsResourceFile(this string filePath) => filePath.ComputeMD5() is string hash && ResourceMD5s.Values.Any(hashes => hashes.Contains(hash));
+
+    internal static bool IsFilePathLocked(this string filePath)
+    {
+        try
+        {
+            File.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None).Close();
+        }
+        catch (FileNotFoundException)
+        {
+            return false;
+        }
+        catch (IOException)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    internal static void Write(this byte[] resource, string filePath)
+    {
+        using FileStream file = new(filePath, FileMode.Create, FileAccess.Write);
+        file.Write(resource);
+    }
 }

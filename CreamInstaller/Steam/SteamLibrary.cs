@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace CreamInstaller.Steam;
@@ -33,7 +32,6 @@ internal static class SteamLibrary
         foreach (string libraryDirectory in gameLibraryDirectories)
         {
             if (Program.Canceled) return games;
-            Thread.Sleep(0);
             List<(string appId, string name, string branch, int buildId, string gameDirectory)> directoryGames = await GetGamesFromLibraryDirectory(libraryDirectory);
             if (directoryGames is not null)
                 foreach ((string appId, string name, string branch, int buildId, string gameDirectory) game in directoryGames
@@ -59,7 +57,6 @@ internal static class SteamLibrary
         foreach (string _directory in directories)
         {
             if (Program.Canceled) return null;
-            Thread.Sleep(0);
             try
             {
                 List<string> moreDllDirectories = await GetDllDirectoriesFromGameDirectory(_directory);
@@ -78,7 +75,6 @@ internal static class SteamLibrary
         foreach (string file in files)
         {
             if (Program.Canceled) return null;
-            Thread.Sleep(0);
             if (ValveDataFile.TryDeserialize(File.ReadAllText(file, Encoding.UTF8), out VProperty result))
             {
                 string appId = result.Value.GetChild("appid")?.ToString();

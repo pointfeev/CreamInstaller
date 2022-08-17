@@ -35,6 +35,7 @@ internal class ProgramSelection
 
     internal bool IsSteam;
     internal bool IsEpic;
+    internal bool IsUbisoft;
 
     internal readonly SortedList<string, (DlcType type, string name, string icon)> AllDlc = new(AppIdComparer.Comparer);
     internal readonly SortedList<string, (DlcType type, string name, string icon)> SelectedDlc = new(AppIdComparer.Comparer);
@@ -48,21 +49,53 @@ internal class ProgramSelection
         {
             foreach (string directory in DllDirectories)
             {
-                directory.GetSmokeApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config, out string cache);
-                if (sdk32.IsFilePathLocked()
-                    || sdk32_o.IsFilePathLocked()
-                    || sdk64.IsFilePathLocked()
-                    || sdk64_o.IsFilePathLocked()
-                    || config.IsFilePathLocked()
-                    || cache.IsFilePathLocked())
-                    return true;
-                directory.GetScreamApiComponents(out sdk32, out sdk32_o, out sdk64, out sdk64_o, out config);
-                if (sdk32.IsFilePathLocked()
-                    || sdk32_o.IsFilePathLocked()
-                    || sdk64.IsFilePathLocked()
-                    || sdk64_o.IsFilePathLocked()
-                    || config.IsFilePathLocked())
-                    return true;
+                if (IsSteam)
+                {
+                    directory.GetCreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+                    if (sdk32.IsFilePathLocked()
+                        || sdk32_o.IsFilePathLocked()
+                        || sdk64.IsFilePathLocked()
+                        || sdk64_o.IsFilePathLocked()
+                        || config.IsFilePathLocked())
+                        return true;
+                    directory.GetSmokeApiComponents(out sdk32, out sdk32_o, out sdk64, out sdk64_o, out config, out string cache);
+                    if (sdk32.IsFilePathLocked()
+                        || sdk32_o.IsFilePathLocked()
+                        || sdk64.IsFilePathLocked()
+                        || sdk64_o.IsFilePathLocked()
+                        || config.IsFilePathLocked()
+                        || cache.IsFilePathLocked())
+                        return true;
+                }
+                else if (IsEpic)
+                {
+                    directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+                    if (sdk32.IsFilePathLocked()
+                        || sdk32_o.IsFilePathLocked()
+                        || sdk64.IsFilePathLocked()
+                        || sdk64_o.IsFilePathLocked()
+                        || config.IsFilePathLocked())
+                        return true;
+                }
+                else if (IsUbisoft)
+                {
+                    directory.GetUplayR1Components(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+                    if (sdk32.IsFilePathLocked()
+                        || sdk32_o.IsFilePathLocked()
+                        || sdk64.IsFilePathLocked()
+                        || sdk64_o.IsFilePathLocked()
+                        || config.IsFilePathLocked())
+                        return true;
+                    directory.GetUplayR2Components(out string old_sdk32, out string old_sdk64, out sdk32, out sdk32_o, out sdk64, out sdk64_o, out config);
+                    if (old_sdk32.IsFilePathLocked()
+                        || old_sdk64.IsFilePathLocked()
+                        || sdk32.IsFilePathLocked()
+                        || sdk32_o.IsFilePathLocked()
+                        || sdk64.IsFilePathLocked()
+                        || sdk64_o.IsFilePathLocked()
+                        || config.IsFilePathLocked())
+                        return true;
+                }
             }
             return false;
         }

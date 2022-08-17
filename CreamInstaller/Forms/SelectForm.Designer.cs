@@ -109,8 +109,7 @@ namespace CreamInstaller
             this.noneFoundLabel.Name = "noneFoundLabel";
             this.noneFoundLabel.Size = new System.Drawing.Size(554, 218);
             this.noneFoundLabel.TabIndex = 1002;
-            this.noneFoundLabel.Text = "No SmokeAPI-applicable or ScreamAPI-applicable programs were found on your comput" +
-    "er!";
+            this.noneFoundLabel.Text = "No applicable programs nor games were found on your computer!";
             this.noneFoundLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.noneFoundLabel.Visible = false;
             // 

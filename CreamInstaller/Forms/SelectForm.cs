@@ -5,6 +5,7 @@ using CreamInstaller.Epic;
 using CreamInstaller.Paradox;
 using CreamInstaller.Resources;
 using CreamInstaller.Steam;
+using CreamInstaller.Ubisoft;
 using CreamInstaller.Utility;
 
 using Gameloop.Vdf.Linq;
@@ -104,7 +105,7 @@ internal partial class SelectForm : CustomForm
         RemainingGames.Clear(); // for display purposes only, otherwise ignorable
         RemainingDLCs.Clear(); // for display purposes only, otherwise ignorable
         List<Task> appTasks = new();
-        if (Directory.Exists(ParadoxLauncher.InstallPath) && ProgramsToScan.Any(c => c.platform == "Paradox" && c.id == "ParadoxLauncher"))
+        if (ProgramsToScan.Any(c => c.platform == "Paradox"))
         {
             List<string> steamDllDirectories = await SteamLibrary.GetDllDirectoriesFromGameDirectory(ParadoxLauncher.InstallPath);
             List<string> epicDllDirectories = await EpicLibrary.GetDllDirectoriesFromGameDirectory(ParadoxLauncher.InstallPath);
@@ -128,7 +129,7 @@ internal partial class SelectForm : CustomForm
                 _ = selectionTreeView.Nodes.Add(programNode);
             }
         }
-        if (Directory.Exists(SteamLibrary.InstallPath) && ProgramsToScan.Any(c => c.platform == "Steam"))
+        if (ProgramsToScan.Any(c => c.platform == "Steam"))
         {
             List<(string appId, string name, string branch, int buildId, string gameDirectory)> steamGames = await SteamLibrary.GetGames();
             int totalGames = steamGames.Count;
@@ -136,7 +137,6 @@ internal partial class SelectForm : CustomForm
             foreach ((string appId, string name, string branch, int buildId, string gameDirectory) in steamGames)
             {
                 if (Program.Canceled) return;
-                Thread.Sleep(0);
                 if (Program.IsGameBlocked(name, gameDirectory) || !ProgramsToScan.Any(c => c.id == appId))
                 {
                     gamesChecked++;
@@ -146,7 +146,6 @@ internal partial class SelectForm : CustomForm
                 Task task = Task.Run(async () =>
                 {
                     if (Program.Canceled) return;
-                    Thread.Sleep(0);
                     List<string> dllDirectories = await SteamLibrary.GetDllDirectoriesFromGameDirectory(gameDirectory);
                     if (dllDirectories is null)
                     {
@@ -173,12 +172,13 @@ internal partial class SelectForm : CustomForm
                         foreach (string dlcAppId in dlcIds)
                         {
                             if (Program.Canceled) return;
-                            Thread.Sleep(0);
                             AddToRemainingDLCs(dlcAppId);
                             Task task = Task.Run(async () =>
                             {
                                 if (Program.Canceled) return;
-                                do Thread.Sleep(10); while (!Program.Canceled && gamesChecked < totalGames); // give games steam store api limit priority
+                                do // give games steam store api limit priority
+                                    Thread.Sleep(100);
+                                while (!Program.Canceled && gamesChecked < totalGames);
                                 if (Program.Canceled) return;
                                 string dlcName = null;
                                 string dlcIcon = null;
@@ -209,7 +209,6 @@ internal partial class SelectForm : CustomForm
                                 RemoveFromRemainingDLCs(dlcAppId);
                             });
                             dlcTasks.Add(task);
-                            Thread.Sleep(10); // to reduce control & window freezing
                         }
                     }
                     else
@@ -241,7 +240,6 @@ internal partial class SelectForm : CustomForm
                     Program.Invoke(selectionTreeView, delegate
                     {
                         if (Program.Canceled) return;
-                        Thread.Sleep(0);
                         TreeNode programNode = treeNodes.Find(s => s.Name == appId) ?? new();
                         programNode.Name = appId;
                         programNode.Text = appData?.name ?? name;
@@ -251,7 +249,6 @@ internal partial class SelectForm : CustomForm
                         foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in dlc)
                         {
                             if (Program.Canceled || programNode is null) return;
-                            Thread.Sleep(0);
                             string appId = pair.Key;
                             (DlcType type, string name, string icon) dlcApp = pair.Value;
                             selection.AllDlc[appId] = dlcApp;
@@ -270,7 +267,7 @@ internal partial class SelectForm : CustomForm
                 appTasks.Add(task);
             }
         }
-        if (Directory.Exists(EpicLibrary.EpicManifestsPath) && ProgramsToScan.Any(c => c.platform == "Epic"))
+        if (ProgramsToScan.Any(c => c.platform == "Epic"))
         {
             List<Manifest> epicGames = await EpicLibrary.GetGames();
             foreach (Manifest manifest in epicGames)
@@ -279,13 +276,11 @@ internal partial class SelectForm : CustomForm
                 string name = manifest.DisplayName;
                 string directory = manifest.InstallLocation;
                 if (Program.Canceled) return;
-                Thread.Sleep(0);
                 if (Program.IsGameBlocked(name, directory) || !ProgramsToScan.Any(c => c.id == @namespace)) continue;
                 AddToRemainingGames(name);
                 Task task = Task.Run(async () =>
                 {
                     if (Program.Canceled) return;
-                    Thread.Sleep(0);
                     List<string> dllDirectories = await EpicLibrary.GetDllDirectoriesFromGameDirectory(directory);
                     if (dllDirectories is null)
                     {
@@ -301,17 +296,14 @@ internal partial class SelectForm : CustomForm
                         foreach ((string id, string name, string product, string icon, string developer) in entitlementIds)
                         {
                             if (Program.Canceled) return;
-                            Thread.Sleep(0);
                             AddToRemainingDLCs(id);
                             Task task = Task.Run(() =>
                             {
                                 if (Program.Canceled) return;
-                                Thread.Sleep(0);
                                 entitlements[id] = (name, product, icon, developer);
                                 RemoveFromRemainingDLCs(id);
                             });
                             dlcTasks.Add(task);
-                            Thread.Sleep(10); // to reduce control & window freezing
                         }
                     }
                     if (/*!catalogItems.Any() && */!entitlements.Any())
@@ -335,7 +327,6 @@ internal partial class SelectForm : CustomForm
                     selection.IsEpic = true;
                     foreach (KeyValuePair<string, (string name, string product, string icon, string developer)> pair in entitlements)
                     {
-                        Thread.Sleep(0);
                         if (pair.Value.name == selection.Name)
                         {
                             selection.ProductUrl = "https://www.epicgames.com/store/product/" + pair.Value.product;
@@ -348,7 +339,6 @@ internal partial class SelectForm : CustomForm
                     Program.Invoke(selectionTreeView, delegate
                     {
                         if (Program.Canceled) return;
-                        Thread.Sleep(0);
                         TreeNode programNode = treeNodes.Find(s => s.Name == @namespace) ?? new();
                         programNode.Name = @namespace;
                         programNode.Text = name;
@@ -372,7 +362,6 @@ internal partial class SelectForm : CustomForm
                             foreach (KeyValuePair<string, (string name, string product, string icon, string developer)> pair in entitlements)
                             {
                                 if (programNode is null/* || entitlementsNode is null*/) return;
-                                Thread.Sleep(0);
                                 string dlcId = pair.Key;
                                 (DlcType type, string name, string icon) dlcApp = (DlcType.EpicEntitlement, pair.Value.name, pair.Value.icon);
                                 selection.AllDlc[dlcId] = dlcApp;
@@ -385,6 +374,50 @@ internal partial class SelectForm : CustomForm
                                 _ = programNode.Nodes.Add(dlcNode); //entitlementsNode.Nodes.Add(dlcNode);
                             }
                         }
+                    });
+                    if (Program.Canceled) return;
+                    RemoveFromRemainingGames(name);
+                });
+                appTasks.Add(task);
+            }
+        }
+        if (ProgramsToScan.Any(c => c.platform == "Ubisoft"))
+        {
+            List<(string gameId, string name, string gameDirectory)> ubisoftGames = await UbisoftLibrary.GetGames();
+            foreach ((string gameId, string name, string gameDirectory) in ubisoftGames)
+            {
+                if (Program.Canceled) return;
+                if (Program.IsGameBlocked(name, gameDirectory) || !ProgramsToScan.Any(c => c.id == gameId)) continue;
+                AddToRemainingGames(name);
+                Task task = Task.Run(async () =>
+                {
+                    if (Program.Canceled) return;
+                    List<string> dllDirectories = await UbisoftLibrary.GetDllDirectoriesFromGameDirectory(gameDirectory);
+                    if (dllDirectories is null)
+                    {
+                        RemoveFromRemainingGames(name);
+                        return;
+                    }
+                    if (Program.Canceled) return;
+
+                    ProgramSelection selection = ProgramSelection.FromId(gameId) ?? new();
+                    selection.Enabled = allCheckBox.Checked || selection.SelectedDlc.Any() || selection.ExtraSelectedDlc.Any();
+                    selection.Id = gameId;
+                    selection.Name = name;
+                    selection.RootDirectory = gameDirectory;
+                    selection.DllDirectories = dllDirectories;
+                    selection.IsUbisoft = true;
+                    selection.IconUrl = IconGrabber.GetDomainFaviconUrl("store.ubi.com");
+
+                    Program.Invoke(selectionTreeView, delegate
+                    {
+                        if (Program.Canceled) return;
+                        TreeNode programNode = treeNodes.Find(s => s.Name == gameId) ?? new();
+                        programNode.Name = gameId;
+                        programNode.Text = name;
+                        programNode.Checked = selection.Enabled;
+                        programNode.Remove();
+                        _ = selectionTreeView.Nodes.Add(programNode);
                     });
                     if (Program.Canceled) return;
                     RemoveFromRemainingGames(name);
@@ -430,22 +463,24 @@ internal partial class SelectForm : CustomForm
             if (Directory.Exists(EpicLibrary.EpicManifestsPath))
                 foreach (Manifest manifest in (await EpicLibrary.GetGames()).Where(m => !Program.IsGameBlocked(m.DisplayName, m.InstallLocation)))
                     gameChoices.Add(("Epic", manifest.CatalogNamespace, manifest.DisplayName, ProgramsToScan is not null && ProgramsToScan.Any(p => p.id == manifest.CatalogNamespace)));
+            foreach ((string gameId, string name, string gameDirectory) in await UbisoftLibrary.GetGames())
+                gameChoices.Add(("Ubisoft", gameId, name, ProgramsToScan is not null && ProgramsToScan.Any(p => p.id == gameId)));
             if (gameChoices.Any())
             {
                 using SelectDialogForm form = new(this);
-                List<(string platform, string id, string name)> choices = form.QueryUser("Choose which programs/games to scan for DLC:", gameChoices);
+                List<(string platform, string id, string name)> choices = form.QueryUser("Choose which programs and/or games to scan for DLC:", gameChoices);
                 scan = choices is not null && choices.Any();
                 string retry = "\n\nPress the \"Rescan Programs / Games\" button to re-choose.";
                 if (scan)
                 {
                     ProgramsToScan = choices;
-                    noneFoundLabel.Text = "None of the chosen programs/games were SmokeAPI-applicable or ScreamAPI-applicable!" + retry;
+                    noneFoundLabel.Text = "None of the chosen programs nor games were applicable!" + retry;
                 }
                 else
-                    noneFoundLabel.Text = "You didn't choose any programs/games!" + retry;
+                    noneFoundLabel.Text = "You didn't choose any programs nor games!" + retry;
             }
             else
-                noneFoundLabel.Text = "No SmokeAPI-applicable or ScreamAPI-applicable programs/games were found on your computer!";
+                noneFoundLabel.Text = "No applicable programs nor games were found on your computer!";
         }
 
         if (scan)
@@ -458,7 +493,6 @@ internal partial class SelectForm : CustomForm
             progress.ProgressChanged += (sender, _progress) =>
             {
                 if (Program.Canceled) return;
-                Thread.Sleep(0);
                 if (_progress < 0 || _progress > maxProgress) maxProgress = -_progress;
                 else curProgress = _progress;
                 int p = Math.Max(Math.Min((int)((float)curProgress / maxProgress * 100), 100), 0);
@@ -475,7 +509,6 @@ internal partial class SelectForm : CustomForm
             progressLabel.Text = "Gathering and caching your applicable games and their DLCs . . . ";
             ProgramSelection.ValidateAll(ProgramsToScan);
             TreeNodes.ForEach(node => node.Remove());
-            Thread.Sleep(0);
             await GetApplicablePrograms(iProgress);
             await SteamCMD.Cleanup();
         }
@@ -692,6 +725,23 @@ internal partial class SelectForm : CustomForm
                                     new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
                             }
                         }
+                    if (selection.IsUbisoft)
+                        for (int i = 0, r1 = 0, r2 = 0; i < directories.Count; i++)
+                        {
+                            string directory = directories[i];
+                            directory.GetUplayR1Components(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
+                            if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
+                            {
+                                contextMenuStrip.Items.Add(new ContextMenuItem($"Open Uplay R1 SDK Directory #{++r1}", "File Explorer",
+                                    new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
+                            }
+                            directory.GetUplayR2Components(out string old_sdk32, out string old_sdk64, out sdk32, out sdk32_o, out sdk64, out sdk64_o, out config);
+                            if (File.Exists(old_sdk32) || File.Exists(old_sdk64) || File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
+                            {
+                                contextMenuStrip.Items.Add(new ContextMenuItem($"Open Uplay R2 SDK Directory #{++r2}", "File Explorer",
+                                    new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
+                            }
+                        }
                 }
                 if (id != "ParadoxLauncher")
                 {
@@ -717,6 +767,15 @@ internal partial class SelectForm : CustomForm
                                 new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://scream-db.web.app/offers/" + id))));
                             contextMenuStrip.Items.Add(new ContextMenuItem("Open Epic Games Store", "Epic Games",
                                 new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
+                        }
+                        else if (selection.IsUbisoft)
+                        {
+                            contextMenuStrip.Items.Add(new ToolStripSeparator());
+#pragma warning disable CA1308 // Normalize strings to uppercase
+                            contextMenuStrip.Items.Add(new ContextMenuItem("Open Ubisoft Store", "Ubisoft Store",
+                                new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://store.ubi.com/us/" + selection.Name.Replace(" ", "-").ToLowerInvariant()))));
+#pragma warning restore CA1308 // Normalize strings to uppercase
+
                         }
                     }
                 }
