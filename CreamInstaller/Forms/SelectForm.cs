@@ -325,14 +325,11 @@ internal partial class SelectForm : CustomForm
                     selection.RootDirectory = directory;
                     selection.DllDirectories = dllDirectories;
                     selection.IsEpic = true;
-                    foreach (KeyValuePair<string, (string name, string product, string icon, string developer)> pair in entitlements)
+                    foreach (KeyValuePair<string, (string name, string product, string icon, string developer)> pair in entitlements.Where(p => p.Value.name == selection.Name))
                     {
-                        if (pair.Value.name == selection.Name)
-                        {
-                            selection.ProductUrl = "https://www.epicgames.com/store/product/" + pair.Value.product;
-                            selection.IconUrl = pair.Value.icon;
-                            selection.Publisher = pair.Value.developer;
-                        }
+                        selection.ProductUrl = "https://www.epicgames.com/store/product/" + pair.Value.product;
+                        selection.IconUrl = pair.Value.icon;
+                        selection.Publisher = pair.Value.developer;
                     }
 
                     if (Program.Canceled) return;
