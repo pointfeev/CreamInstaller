@@ -165,8 +165,8 @@ internal static class SmokeAPI
                 File.Create(config).Close();
                 StreamWriter writer = new(config, true, Encoding.UTF8);
                 WriteConfig(writer,
-                    new(overrideDlc.ToDictionary(pair => pair.Key, pair => pair.Value), AppIdComparer.Comparer),
-                    new(injectDlc.ToDictionary(pair => pair.Key, pair => pair.Value), AppIdComparer.Comparer),
+                    new(overrideDlc.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.Strings),
+                    new(injectDlc.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.Strings),
                     installForm);
                 writer.Flush();
                 writer.Close();

@@ -2,11 +2,14 @@
 using CreamInstaller.Utility;
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+
+using Windows.Foundation.Metadata;
 
 using static CreamInstaller.Components.CustomTreeView;
 
@@ -16,15 +19,15 @@ internal partial class SelectDialogForm : CustomForm
 {
     internal SelectDialogForm(IWin32Window owner) : base(owner) => InitializeComponent();
 
-    private readonly List<(string platform, string id, string name)> selected = new();
-    internal List<(string platform, string id, string name)> QueryUser(string groupBoxText, List<(string platform, string id, string name, bool alreadySelected)> choices)
+    private readonly List<(Platform platform, string id, string name)> selected = new();
+    internal List<(Platform platform, string id, string name)> QueryUser(string groupBoxText, List<(Platform platform, string id, string name, bool alreadySelected)> choices)
     {
         if (!choices.Any()) return null;
         groupBox.Text = groupBoxText;
         allCheckBox.Enabled = false;
         acceptButton.Enabled = false;
         selectionTreeView.AfterCheck += OnTreeNodeChecked;
-        foreach ((string platform, string id, string name, bool alreadySelected) in choices)
+        foreach ((Platform platform, string id, string name, bool alreadySelected) in choices)
         {
             TreeNode node = new()
             {
@@ -43,7 +46,7 @@ internal partial class SelectDialogForm : CustomForm
         allCheckBox.Enabled = true;
         acceptButton.Enabled = selected.Any();
         saveButton.Enabled = acceptButton.Enabled;
-        loadButton.Enabled = File.Exists(ProgramData.ChoicesPath);
+        loadButton.Enabled = ProgramData.ReadChoices() is not null;
         OnResize(null, null);
         Resize += OnResize;
         return ShowDialog() == DialogResult.OK ? selected : null;
@@ -59,10 +62,11 @@ internal partial class SelectDialogForm : CustomForm
     private void OnTreeNodeChecked(TreeNode node)
     {
         string id = node.Name;
+        Platform platform = (Platform)node.Tag;
         if (node.Checked)
-            selected.Add((node.Tag as string, id, node.Text));
+            selected.Add((platform, id, node.Text));
         else
-            _ = selected.RemoveAll(s => s.id == id);
+            _ = selected.RemoveAll(s => s.platform == platform && s.id == id);
         allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
         allCheckBox.Checked = selectionTreeView.Nodes.Cast<TreeNode>().All(n => n.Checked);
         allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
@@ -73,7 +77,7 @@ internal partial class SelectDialogForm : CustomForm
             ? Program.ApplicationNameShort
             : Program.ApplicationName;
 
-    private void OnSortCheckBoxChanged(object sender, EventArgs e) => selectionTreeView.TreeViewNodeSorter = new TreeNodeSorter(sortCheckBox.Checked);
+    private void OnSortCheckBoxChanged(object sender, EventArgs e) => selectionTreeView.TreeViewNodeSorter = PlatformIdComparer.TreeNodes;
 
     private void OnAllCheckBoxChanged(object sender, EventArgs e)
     {
@@ -92,19 +96,20 @@ internal partial class SelectDialogForm : CustomForm
 
     private void OnLoad(object sender, EventArgs e)
     {
-        List<string> choices = ProgramData.ReadChoices();
+        List<(Platform platform, string id)> choices = ProgramData.ReadChoices();
+        if (choices is null) return;
         foreach (TreeNode node in selectionTreeView.Nodes)
         {
-            node.Checked = choices.Contains(node.Name);
+            node.Checked = choices.Any(n => n.platform == (Platform)node.Tag && n.id == node.Name);
             OnTreeNodeChecked(node);
         }
     }
 
     private void OnSave(object sender, EventArgs e)
     {
-        List<string> choices = new();
+        List<(Platform platform, string id)> choices = new();
         foreach (TreeNode node in selectionTreeView.Nodes.Cast<TreeNode>().Where(n => n.Checked))
-            choices.Add(node.Name);
+            choices.Add(((Platform)node.Tag, node.Name));
         ProgramData.WriteChoices(choices);
         loadButton.Enabled = File.Exists(ProgramData.ChoicesPath);
     }

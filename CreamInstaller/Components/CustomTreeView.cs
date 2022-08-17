@@ -15,27 +15,11 @@ internal class CustomTreeView : TreeView
             base.WndProc(ref m);
     }
 
-    internal class TreeNodeSorter : IComparer
-    {
-        private readonly bool compareText;
-
-        internal TreeNodeSorter(bool compareText = false) : base() => this.compareText = compareText;
-
-        public int Compare(object a, object b)
-        {
-            if (a is not TreeNode NodeA) return 0;
-            if (b is not TreeNode NodeB) return 0;
-            string StringA = compareText ? NodeA.Text : NodeA.Name;
-            string StringB = compareText ? NodeB.Text : NodeB.Name;
-            return AppIdComparer.Comparer.Compare(StringA, StringB);
-        }
-    }
-
     internal CustomTreeView() : base()
     {
         DrawMode = TreeViewDrawMode.OwnerDrawAll;
         DrawNode += new DrawTreeNodeEventHandler(DrawTreeNode);
-        TreeViewNodeSorter = new TreeNodeSorter();
+        TreeViewNodeSorter = PlatformIdComparer.TreeNodes;
     }
 
     private void DrawTreeNode(object sender, DrawTreeNodeEventArgs e)
@@ -45,23 +29,28 @@ internal class CustomTreeView : TreeView
         if (!node.IsVisible)
             return;
 
+        string subText = node.Name;
+        Platform? platform = node.Tag as Platform?;
+        string tagText = platform?.ToString();
+        if (string.IsNullOrWhiteSpace(subText) || string.IsNullOrWhiteSpace(tagText) || subText == "PL")
+            return;
+
         Graphics graphics = e.Graphics;
         Color backColor = BackColor;
         using SolidBrush brush = new(backColor);
         Font font = Font;
-        using Font subFont = new(font.FontFamily, font.SizeInPoints, FontStyle.Regular, font.Unit, font.GdiCharSet, font.GdiVerticalFont);
-
-        string subText = node.Name;
-        if (string.IsNullOrWhiteSpace(subText) || subText == "ParadoxLauncher"
-            || node.Tag is null && ProgramSelection.FromId(subText) is null && ProgramSelection.GetDlcFromId(subText) is null)
-            return;
-
-        Size subSize = TextRenderer.MeasureText(graphics, subText, subFont);
         Rectangle bounds = node.Bounds;
-        Rectangle subBounds = new(bounds.X + bounds.Width, bounds.Y, subSize.Width, bounds.Height);
+
+        Size tagSize = TextRenderer.MeasureText(graphics, tagText, font);
+        Rectangle tagBounds = new(bounds.X + bounds.Width, bounds.Y, tagSize.Width, bounds.Height);
+        graphics.FillRectangle(brush, tagBounds);
+        Point tagLocation = new(tagBounds.Location.X - 1, tagBounds.Location.Y + 1);
+        TextRenderer.DrawText(graphics, tagText, font, tagLocation, Color.Gray);
+
+        Size subSize = TextRenderer.MeasureText(graphics, subText, font);
+        Rectangle subBounds = new(tagBounds.X + tagBounds.Width - 4, bounds.Y, subSize.Width, bounds.Height);
         graphics.FillRectangle(brush, subBounds);
-        Point location = subBounds.Location;
-        Point subLocation = new(location.X - 1, location.Y + 1);
-        TextRenderer.DrawText(graphics, subText, subFont, subLocation, Color.Gray);
+        Point subLocation = new(subBounds.Location.X - 1, subBounds.Location.Y + 1);
+        TextRenderer.DrawText(graphics, subText, font, subLocation, Color.LightSlateGray);
     }
 }

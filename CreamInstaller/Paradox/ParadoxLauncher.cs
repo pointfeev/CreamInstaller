@@ -28,7 +28,7 @@ internal static class ParadoxLauncher
 
     private static void PopulateDlc(ProgramSelection paradoxLauncher = null)
     {
-        paradoxLauncher ??= ProgramSelection.FromId("ParadoxLauncher");
+        paradoxLauncher ??= ProgramSelection.FromPlatformId(Platform.Paradox, "PL");
         if (paradoxLauncher is not null)
         {
             paradoxLauncher.ExtraDlc.Clear();
@@ -51,7 +51,7 @@ internal static class ParadoxLauncher
 
     internal static bool DlcDialog(Form form)
     {
-        ProgramSelection paradoxLauncher = ProgramSelection.FromId("ParadoxLauncher");
+        ProgramSelection paradoxLauncher = ProgramSelection.FromPlatformId(Platform.Paradox, "PL");
         if (paradoxLauncher is not null && paradoxLauncher.Enabled)
         {
             PopulateDlc(paradoxLauncher);

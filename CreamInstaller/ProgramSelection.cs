@@ -1,11 +1,21 @@
 ﻿using CreamInstaller.Components;
 using CreamInstaller.Resources;
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace CreamInstaller;
+
+public enum Platform
+{
+    None = 0,
+    Paradox,
+    Steam,
+    Epic,
+    Ubisoft
+}
 
 public enum DlcType
 {
@@ -19,6 +29,7 @@ internal class ProgramSelection
 {
     internal bool Enabled;
 
+    internal Platform Platform;
     internal string Id = "0";
     internal string Name = "Program";
 
@@ -33,12 +44,8 @@ internal class ProgramSelection
     internal string RootDirectory;
     internal List<string> DllDirectories;
 
-    internal bool IsSteam;
-    internal bool IsEpic;
-    internal bool IsUbisoft;
-
-    internal readonly SortedList<string, (DlcType type, string name, string icon)> AllDlc = new(AppIdComparer.Comparer);
-    internal readonly SortedList<string, (DlcType type, string name, string icon)> SelectedDlc = new(AppIdComparer.Comparer);
+    internal readonly SortedList<string, (DlcType type, string name, string icon)> AllDlc = new(PlatformIdComparer.Strings);
+    internal readonly SortedList<string, (DlcType type, string name, string icon)> SelectedDlc = new(PlatformIdComparer.Strings);
 
     internal readonly List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> ExtraDlc = new();         // for Paradox Launcher
     internal readonly List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> ExtraSelectedDlc = new(); // for Paradox Launcher
@@ -49,7 +56,7 @@ internal class ProgramSelection
         {
             foreach (string directory in DllDirectories)
             {
-                if (IsSteam)
+                if (Platform is Platform.Steam or Platform.Paradox)
                 {
                     directory.GetCreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
                     if (sdk32.IsFilePathLocked()
@@ -67,7 +74,7 @@ internal class ProgramSelection
                         || cache.IsFilePathLocked())
                         return true;
                 }
-                else if (IsEpic)
+                if (Platform is Platform.Epic or Platform.Paradox)
                 {
                     directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
                     if (sdk32.IsFilePathLocked()
@@ -77,7 +84,7 @@ internal class ProgramSelection
                         || config.IsFilePathLocked())
                         return true;
                 }
-                else if (IsUbisoft)
+                if (Platform is Platform.Ubisoft)
                 {
                     directory.GetUplayR1Components(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
                     if (sdk32.IsFilePathLocked()
@@ -140,9 +147,9 @@ internal class ProgramSelection
         if (!DllDirectories.Any()) _ = All.Remove(this);
     }
 
-    internal void Validate(List<(string platform, string id, string name)> programsToScan)
+    internal void Validate(List<(Platform platform, string id, string name)> programsToScan)
     {
-        if (programsToScan is null || !programsToScan.Any(p => p.id == Id))
+        if (programsToScan is null || !programsToScan.Any(p => p.platform == Platform && p.id == Id))
         {
             _ = All.Remove(this);
             return;
@@ -152,7 +159,7 @@ internal class ProgramSelection
 
     internal static void ValidateAll() => AllSafe.ForEach(selection => selection.Validate());
 
-    internal static void ValidateAll(List<(string platform, string id, string name)> programsToScan) => AllSafe.ForEach(selection => selection.Validate(programsToScan));
+    internal static void ValidateAll(List<(Platform platform, string id, string name)> programsToScan) => AllSafe.ForEach(selection => selection.Validate(programsToScan));
 
     internal static readonly List<ProgramSelection> All = new();
 
@@ -160,11 +167,11 @@ internal class ProgramSelection
 
     internal static List<ProgramSelection> AllEnabled => AllSafe.FindAll(s => s.Enabled);
 
-    internal static ProgramSelection FromId(string gameId) => AllSafe.Find(s => s.Id == gameId);
+    internal static ProgramSelection FromPlatformId(Platform platform, string gameId) => AllSafe.Find(s => s.Platform == platform && s.Id == gameId);
 
-    internal static (string gameId, (DlcType type, string name, string icon) app)? GetDlcFromId(string dlcId)
+    internal static (string gameId, (DlcType type, string name, string icon) app)? GetDlcFromPlatformId(Platform platform, string dlcId)
     {
-        foreach (ProgramSelection selection in AllSafe)
+        foreach (ProgramSelection selection in AllSafe.Where(s => s.Platform == platform))
             foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in selection.AllDlc.Where(p => p.Key == dlcId))
                 return (selection.Id, pair.Value);
         return null;

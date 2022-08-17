@@ -1,8 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -20,7 +24,8 @@ internal static class ProgramData
 
     internal static readonly string CooldownPath = DirectoryPath + @"\cooldown";
 
-    internal static readonly string ChoicesPath = DirectoryPath + @"\choices.txt";
+    internal static readonly string OldChoicesPath = DirectoryPath + @"\choices.txt";
+    internal static readonly string ChoicesPath = DirectoryPath + @"\choices.json";
 
     internal static async Task Setup() => await Task.Run(() =>
     {
@@ -38,6 +43,8 @@ internal static class ProgramData
         }
         if (!Directory.Exists(CooldownPath))
             _ = Directory.CreateDirectory(CooldownPath);
+        if (File.Exists(OldChoicesPath))
+            File.Delete(OldChoicesPath);
     });
 
     internal static bool CheckCooldown(string identifier, int cooldown)
@@ -78,23 +85,24 @@ internal static class ProgramData
         catch { }
     }
 
-    internal static List<string> ReadChoices()
+    internal static List<(Platform platform, string id)> ReadChoices()
     {
-        if (!File.Exists(ChoicesPath)) return new();
+        if (!File.Exists(ChoicesPath)) return null;
         try
         {
-            return File.ReadAllLines(ChoicesPath).ToList();
+            return JsonConvert.DeserializeObject(File.ReadAllText(ChoicesPath),
+                typeof(List<(Platform platform, string id)>)) as List<(Platform platform, string id)>;
         }
         catch
         {
             return new();
         }
     }
-    internal static void WriteChoices(List<string> choices)
+    internal static void WriteChoices(List<(Platform platform, string id)> choices)
     {
         try
         {
-            File.WriteAllLines(ChoicesPath, choices.ToArray());
+            File.WriteAllText(ChoicesPath, JsonConvert.SerializeObject(choices));
         }
         catch { }
     }

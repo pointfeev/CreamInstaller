@@ -21,6 +21,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using Windows.Foundation.Metadata;
+
 namespace CreamInstaller;
 
 internal partial class SelectForm : CustomForm
@@ -105,23 +107,28 @@ internal partial class SelectForm : CustomForm
         RemainingGames.Clear(); // for display purposes only, otherwise ignorable
         RemainingDLCs.Clear(); // for display purposes only, otherwise ignorable
         List<Task> appTasks = new();
-        if (ProgramsToScan.Any(c => c.platform == "Paradox"))
+        if (ProgramsToScan.Any(c => c.platform is Platform.Paradox))
         {
             List<string> steamDllDirectories = await SteamLibrary.GetDllDirectoriesFromGameDirectory(ParadoxLauncher.InstallPath);
             List<string> epicDllDirectories = await EpicLibrary.GetDllDirectoriesFromGameDirectory(ParadoxLauncher.InstallPath);
+            List<string> dllDirectories = new();
+            if (steamDllDirectories is not null)
+                dllDirectories = dllDirectories.Union(steamDllDirectories).ToList();
+            if (epicDllDirectories is not null)
+                dllDirectories = dllDirectories.Union(epicDllDirectories).ToList();
             if (steamDllDirectories is not null || epicDllDirectories is not null)
             {
-                ProgramSelection selection = ProgramSelection.FromId("ParadoxLauncher");
+                ProgramSelection selection = ProgramSelection.FromPlatformId(Platform.Paradox, "PL");
                 selection ??= new();
                 if (allCheckBox.Checked) selection.Enabled = true;
-                selection.Id = "ParadoxLauncher";
+                selection.Id = "PL";
                 selection.Name = "Paradox Launcher";
                 selection.RootDirectory = ParadoxLauncher.InstallPath;
-                selection.DllDirectories = steamDllDirectories ?? epicDllDirectories;
-                selection.IsSteam = steamDllDirectories is not null;
-                selection.IsEpic = epicDllDirectories is not null;
+                selection.DllDirectories = dllDirectories;
+                selection.Platform = Platform.Paradox;
 
                 TreeNode programNode = treeNodes.Find(s => s.Name == selection.Id) ?? new();
+                programNode.Tag = selection.Platform;
                 programNode.Name = selection.Id;
                 programNode.Text = selection.Name;
                 programNode.Checked = selection.Enabled;
@@ -129,7 +136,7 @@ internal partial class SelectForm : CustomForm
                 _ = selectionTreeView.Nodes.Add(programNode);
             }
         }
-        if (ProgramsToScan.Any(c => c.platform == "Steam"))
+        if (ProgramsToScan.Any(c => c.platform is Platform.Steam))
         {
             List<(string appId, string name, string branch, int buildId, string gameDirectory)> steamGames = await SteamLibrary.GetGames();
             int totalGames = steamGames.Count;
@@ -137,7 +144,7 @@ internal partial class SelectForm : CustomForm
             foreach ((string appId, string name, string branch, int buildId, string gameDirectory) in steamGames)
             {
                 if (Program.Canceled) return;
-                if (Program.IsGameBlocked(name, gameDirectory) || !ProgramsToScan.Any(c => c.id == appId))
+                if (Program.IsGameBlocked(name, gameDirectory) || !ProgramsToScan.Any(c => c.platform is Platform.Steam && c.id == appId))
                 {
                     gamesChecked++;
                     continue;
@@ -223,13 +230,13 @@ internal partial class SelectForm : CustomForm
                         await task;
                     }
 
-                    ProgramSelection selection = ProgramSelection.FromId(appId) ?? new();
+                    ProgramSelection selection = ProgramSelection.FromPlatformId(Platform.Steam, appId) ?? new();
                     selection.Enabled = allCheckBox.Checked || selection.SelectedDlc.Any() || selection.ExtraSelectedDlc.Any();
                     selection.Id = appId;
                     selection.Name = appData?.name ?? name;
                     selection.RootDirectory = gameDirectory;
                     selection.DllDirectories = dllDirectories;
-                    selection.IsSteam = true;
+                    selection.Platform = Platform.Steam;
                     selection.ProductUrl = "https://store.steampowered.com/app/" + appId;
                     selection.IconUrl = IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("icon")}.jpg";
                     selection.SubIconUrl = appData?.header_image ?? IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("clienticon")}.ico";
@@ -241,6 +248,7 @@ internal partial class SelectForm : CustomForm
                     {
                         if (Program.Canceled) return;
                         TreeNode programNode = treeNodes.Find(s => s.Name == appId) ?? new();
+                        programNode.Tag = selection.Platform;
                         programNode.Name = appId;
                         programNode.Text = appData?.name ?? name;
                         programNode.Checked = selection.Enabled;
@@ -254,6 +262,7 @@ internal partial class SelectForm : CustomForm
                             selection.AllDlc[appId] = dlcApp;
                             if (allCheckBox.Checked) selection.SelectedDlc[appId] = dlcApp;
                             TreeNode dlcNode = treeNodes.Find(s => s.Name == appId) ?? new();
+                            dlcNode.Tag = selection.Platform;
                             dlcNode.Name = appId;
                             dlcNode.Text = dlcApp.name;
                             dlcNode.Checked = selection.SelectedDlc.ContainsKey(appId);
@@ -267,7 +276,7 @@ internal partial class SelectForm : CustomForm
                 appTasks.Add(task);
             }
         }
-        if (ProgramsToScan.Any(c => c.platform == "Epic"))
+        if (ProgramsToScan.Any(c => c.platform is Platform.Epic))
         {
             List<Manifest> epicGames = await EpicLibrary.GetGames();
             foreach (Manifest manifest in epicGames)
@@ -276,7 +285,7 @@ internal partial class SelectForm : CustomForm
                 string name = manifest.DisplayName;
                 string directory = manifest.InstallLocation;
                 if (Program.Canceled) return;
-                if (Program.IsGameBlocked(name, directory) || !ProgramsToScan.Any(c => c.id == @namespace)) continue;
+                if (Program.IsGameBlocked(name, directory) || !ProgramsToScan.Any(c => c.platform is Platform.Epic && c.id == @namespace)) continue;
                 AddToRemainingGames(name);
                 Task task = Task.Run(async () =>
                 {
@@ -318,13 +327,13 @@ internal partial class SelectForm : CustomForm
                         await task;
                     }
 
-                    ProgramSelection selection = ProgramSelection.FromId(@namespace) ?? new();
+                    ProgramSelection selection = ProgramSelection.FromPlatformId(Platform.Epic, @namespace) ?? new();
                     selection.Enabled = allCheckBox.Checked || selection.SelectedDlc.Any() || selection.ExtraSelectedDlc.Any();
                     selection.Id = @namespace;
                     selection.Name = name;
                     selection.RootDirectory = directory;
                     selection.DllDirectories = dllDirectories;
-                    selection.IsEpic = true;
+                    selection.Platform = Platform.Epic;
                     foreach (KeyValuePair<string, (string name, string product, string icon, string developer)> pair in entitlements.Where(p => p.Value.name == selection.Name))
                     {
                         selection.ProductUrl = "https://www.epicgames.com/store/product/" + pair.Value.product;
@@ -337,6 +346,7 @@ internal partial class SelectForm : CustomForm
                     {
                         if (Program.Canceled) return;
                         TreeNode programNode = treeNodes.Find(s => s.Name == @namespace) ?? new();
+                        programNode.Tag = selection.Platform;
                         programNode.Name = @namespace;
                         programNode.Text = name;
                         programNode.Checked = selection.Enabled;
@@ -364,6 +374,7 @@ internal partial class SelectForm : CustomForm
                                 selection.AllDlc[dlcId] = dlcApp;
                                 if (allCheckBox.Checked) selection.SelectedDlc[dlcId] = dlcApp;
                                 TreeNode dlcNode = treeNodes.Find(s => s.Name == dlcId) ?? new();
+                                dlcNode.Tag = selection.Platform;
                                 dlcNode.Name = dlcId;
                                 dlcNode.Text = dlcApp.name;
                                 dlcNode.Checked = selection.SelectedDlc.ContainsKey(dlcId);
@@ -378,13 +389,13 @@ internal partial class SelectForm : CustomForm
                 appTasks.Add(task);
             }
         }
-        if (ProgramsToScan.Any(c => c.platform == "Ubisoft"))
+        if (ProgramsToScan.Any(c => c.platform is Platform.Ubisoft))
         {
             List<(string gameId, string name, string gameDirectory)> ubisoftGames = await UbisoftLibrary.GetGames();
             foreach ((string gameId, string name, string gameDirectory) in ubisoftGames)
             {
                 if (Program.Canceled) return;
-                if (Program.IsGameBlocked(name, gameDirectory) || !ProgramsToScan.Any(c => c.id == gameId)) continue;
+                if (Program.IsGameBlocked(name, gameDirectory) || !ProgramsToScan.Any(c => c.platform is Platform.Ubisoft && c.id == gameId)) continue;
                 AddToRemainingGames(name);
                 Task task = Task.Run(async () =>
                 {
@@ -397,19 +408,20 @@ internal partial class SelectForm : CustomForm
                     }
                     if (Program.Canceled) return;
 
-                    ProgramSelection selection = ProgramSelection.FromId(gameId) ?? new();
+                    ProgramSelection selection = ProgramSelection.FromPlatformId(Platform.Ubisoft, gameId) ?? new();
                     selection.Enabled = allCheckBox.Checked || selection.SelectedDlc.Any() || selection.ExtraSelectedDlc.Any();
                     selection.Id = gameId;
                     selection.Name = name;
                     selection.RootDirectory = gameDirectory;
                     selection.DllDirectories = dllDirectories;
-                    selection.IsUbisoft = true;
+                    selection.Platform = Platform.Ubisoft;
                     selection.IconUrl = IconGrabber.GetDomainFaviconUrl("store.ubi.com");
 
                     Program.Invoke(selectionTreeView, delegate
                     {
                         if (Program.Canceled) return;
                         TreeNode programNode = treeNodes.Find(s => s.Name == gameId) ?? new();
+                        programNode.Tag = selection.Platform;
                         programNode.Name = gameId;
                         programNode.Text = name;
                         programNode.Checked = selection.Enabled;
@@ -429,7 +441,7 @@ internal partial class SelectForm : CustomForm
         }
     }
 
-    private List<(string platform, string id, string name)> ProgramsToScan;
+    private List<(Platform platform, string id, string name)> ProgramsToScan;
     private async void OnLoad(bool forceScan = false, bool forceProvideChoices = false)
     {
         Program.Canceled = false;
@@ -450,22 +462,21 @@ internal partial class SelectForm : CustomForm
         bool scan = forceScan;
         if (!scan && (ProgramsToScan is null || !ProgramsToScan.Any() || forceProvideChoices))
         {
-            List<(string platform, string id, string name, bool alreadySelected)> gameChoices = new();
+            List<(Platform platform, string id, string name, bool alreadySelected)> gameChoices = new();
             if (Directory.Exists(ParadoxLauncher.InstallPath))
-                gameChoices.Add(("Paradox", "ParadoxLauncher", "Paradox Launcher", ProgramsToScan is not null && ProgramsToScan.Any(p => p.id == "ParadoxLauncher")));
+                gameChoices.Add((Platform.Paradox, "PL", "Paradox Launcher", ProgramsToScan is not null && ProgramsToScan.Any(p => p.platform is Platform.Paradox && p.id == "PL")));
             if (Directory.Exists(SteamLibrary.InstallPath))
-                foreach ((string appId, string name, string branch, int buildId, string gameDirectory) in await SteamLibrary.GetGames())
-                    if (!Program.IsGameBlocked(name, gameDirectory))
-                        gameChoices.Add(("Steam", appId, name, ProgramsToScan is not null && ProgramsToScan.Any(p => p.id == appId)));
+                foreach ((string appId, string name, string branch, int buildId, string gameDirectory) in (await SteamLibrary.GetGames()).Where(g => !Program.IsGameBlocked(g.name, g.gameDirectory)))
+                    gameChoices.Add((Platform.Steam, appId, name, ProgramsToScan is not null && ProgramsToScan.Any(p => p.platform is Platform.Steam && p.id == appId)));
             if (Directory.Exists(EpicLibrary.EpicManifestsPath))
                 foreach (Manifest manifest in (await EpicLibrary.GetGames()).Where(m => !Program.IsGameBlocked(m.DisplayName, m.InstallLocation)))
-                    gameChoices.Add(("Epic", manifest.CatalogNamespace, manifest.DisplayName, ProgramsToScan is not null && ProgramsToScan.Any(p => p.id == manifest.CatalogNamespace)));
-            foreach ((string gameId, string name, string gameDirectory) in await UbisoftLibrary.GetGames())
-                gameChoices.Add(("Ubisoft", gameId, name, ProgramsToScan is not null && ProgramsToScan.Any(p => p.id == gameId)));
+                    gameChoices.Add((Platform.Epic, manifest.CatalogNamespace, manifest.DisplayName, ProgramsToScan is not null && ProgramsToScan.Any(p => p.platform is Platform.Epic && p.id == manifest.CatalogNamespace)));
+            foreach ((string gameId, string name, string gameDirectory) in (await UbisoftLibrary.GetGames()).Where(g => !Program.IsGameBlocked(g.name, g.gameDirectory)))
+                gameChoices.Add((Platform.Ubisoft, gameId, name, ProgramsToScan is not null && ProgramsToScan.Any(p => p.platform is Platform.Ubisoft && p.id == gameId)));
             if (gameChoices.Any())
             {
                 using SelectDialogForm form = new(this);
-                List<(string platform, string id, string name)> choices = form.QueryUser("Choose which programs and/or games to scan for DLC:", gameChoices);
+                List<(Platform platform, string id, string name)> choices = form.QueryUser("Choose which programs and/or games to scan for DLC:", gameChoices);
                 scan = choices is not null && choices.Any();
                 string retry = "\n\nPress the \"Rescan Programs / Games\" button to re-choose.";
                 if (scan)
@@ -497,7 +508,7 @@ internal partial class SelectForm : CustomForm
                     : $"Gathering and caching your applicable games and their DLCs . . . {p}%";
                 progressBar.Value = p;
             };
-            if (Directory.Exists(SteamLibrary.InstallPath) && ProgramsToScan is not null && ProgramsToScan.Any(c => c.platform == "Steam"))
+            if (Directory.Exists(SteamLibrary.InstallPath) && ProgramsToScan is not null && ProgramsToScan.Any(c => c.platform is Platform.Steam))
             {
                 progressLabel.Text = $"Setting up SteamCMD . . . ";
                 await SteamCMD.Setup(iProgress);
@@ -557,17 +568,19 @@ internal partial class SelectForm : CustomForm
 
     private static void SyncNode(TreeNode node)
     {
-        (string gameId, (DlcType type, string name, string icon) app)? dlc = ProgramSelection.GetDlcFromId(node.Name);
+        string id = node.Name;
+        Platform platform = (Platform)node.Tag;
+        (string gameId, (DlcType type, string name, string icon) app)? dlc = ProgramSelection.GetDlcFromPlatformId(platform, id);
         if (dlc.HasValue)
         {
             (string gameId, _) = dlc.Value;
-            ProgramSelection selection = ProgramSelection.FromId(gameId);
+            ProgramSelection selection = ProgramSelection.FromPlatformId(platform, gameId);
             if (selection is not null)
                 selection.ToggleDlc(node.Name, node.Checked);
         }
         else
         {
-            ProgramSelection selection = ProgramSelection.FromId(node.Name);
+            ProgramSelection selection = ProgramSelection.FromPlatformId(platform, id);
             if (selection is not null)
                 selection.Enabled = node.Checked;
         }
@@ -630,16 +643,18 @@ internal partial class SelectForm : CustomForm
                 ContextMenuStrip contextMenuStrip = new();
                 selectionTreeView.SelectedNode = node;
                 string id = node.Name;
-                ProgramSelection selection = ProgramSelection.FromId(id);
+                Platform platform = (Platform)node.Tag;
+                ProgramSelection selection = ProgramSelection.FromPlatformId(platform, id);
                 (string gameAppId, (DlcType type, string name, string icon) app)? dlc = null;
-                if (selection is null) dlc = ProgramSelection.GetDlcFromId(id);
+                if (selection is null)
+                    dlc = ProgramSelection.GetDlcFromPlatformId(platform, id);
                 ProgramSelection dlcParentSelection = null;
                 if (dlc is not null)
-                    dlcParentSelection = ProgramSelection.FromId(dlc.Value.gameAppId);
+                    dlcParentSelection = ProgramSelection.FromPlatformId(platform, dlc.Value.gameAppId);
                 if (selection is null && dlcParentSelection is null)
                     return;
                 ContextMenuItem header = null;
-                if (id == "ParadoxLauncher")
+                if (id == "PL")
                     header = new(node.Text, "Paradox Launcher");
                 else if (selection is not null)
                     header = new(node.Text, (id, selection.IconUrl));
@@ -654,8 +669,9 @@ internal partial class SelectForm : CustomForm
                     List<ContextMenuItem> queries = new();
                     if (File.Exists(appInfoJSON))
                     {
-                        string platform = (selection is null || selection.IsSteam) ? "Steam Store " : selection.IsEpic ? "Epic GraphQL " : "";
-                        queries.Add(new ContextMenuItem($"Open {platform}Query", "Notepad",
+                        string platformString = (selection is null || selection.Platform is Platform.Steam) ? "Steam Store "
+                            : selection.Platform is Platform.Epic ? "Epic GraphQL " : "";
+                        queries.Add(new ContextMenuItem($"Open {platformString}Query", "Notepad",
                             new EventHandler((sender, e) => Diagnostics.OpenFileInNotepad(appInfoJSON))));
                     }
                     if (File.Exists(appInfoVDF))
@@ -690,7 +706,7 @@ internal partial class SelectForm : CustomForm
                 }
                 if (selection is not null)
                 {
-                    if (id == "ParadoxLauncher")
+                    if (id == "PL")
                     {
                         contextMenuStrip.Items.Add(new ToolStripSeparator());
                         contextMenuStrip.Items.Add(new ContextMenuItem("Repair", "Command Prompt",
@@ -700,49 +716,40 @@ internal partial class SelectForm : CustomForm
                     contextMenuStrip.Items.Add(new ContextMenuItem("Open Root Directory", "File Explorer",
                         new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(selection.RootDirectory))));
                     List<string> directories = selection.DllDirectories.ToList();
-                    if (selection.IsSteam)
-                        for (int i = 0; i < directories.Count; i++)
+                    int steam = 0, epic = 0, r1 = 0, r2 = 0;
+                    if (selection.Platform is Platform.Steam or Platform.Paradox)
+                        foreach (string directory in directories)
                         {
-                            string directory = directories[i];
                             directory.GetSmokeApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config, out string cache);
                             if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config) || File.Exists(cache))
-                            {
-                                contextMenuStrip.Items.Add(new ContextMenuItem($"Open Steamworks SDK Directory #{i + 1}", "File Explorer",
+                                contextMenuStrip.Items.Add(new ContextMenuItem($"Open Steamworks Directory #{++steam}", "File Explorer",
                                     new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
-                            }
                         }
-                    if (selection.IsEpic)
-                        for (int i = 0; i < directories.Count; i++)
+                    if (selection.Platform is Platform.Epic or Platform.Paradox)
+                        foreach (string directory in directories)
                         {
-                            string directory = directories[i];
                             directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
                             if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
-                            {
-                                contextMenuStrip.Items.Add(new ContextMenuItem($"Open Epic Online Services SDK Directory #{i + 1}", "File Explorer",
+                                contextMenuStrip.Items.Add(new ContextMenuItem($"Open Epic Online Services Directory #{++epic}", "File Explorer",
                                     new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
-                            }
                         }
-                    if (selection.IsUbisoft)
-                        for (int i = 0, r1 = 0, r2 = 0; i < directories.Count; i++)
+                    if (selection.Platform is Platform.Ubisoft)
+                        foreach (string directory in directories)
                         {
-                            string directory = directories[i];
                             directory.GetUplayR1Components(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
                             if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
-                            {
                                 contextMenuStrip.Items.Add(new ContextMenuItem($"Open Uplay R1 SDK Directory #{++r1}", "File Explorer",
                                     new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
-                            }
                             directory.GetUplayR2Components(out string old_sdk32, out string old_sdk64, out sdk32, out sdk32_o, out sdk64, out sdk64_o, out config);
                             if (File.Exists(old_sdk32) || File.Exists(old_sdk64) || File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
-                            {
                                 contextMenuStrip.Items.Add(new ContextMenuItem($"Open Uplay R2 SDK Directory #{++r2}", "File Explorer",
                                     new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
-                            }
                         }
                 }
-                if (id != "ParadoxLauncher")
+                if (id != "PL")
                 {
-                    if (selection is not null && selection.IsSteam || dlcParentSelection is not null && dlcParentSelection.IsSteam)
+                    if (selection is not null && selection.Platform is Platform.Steam
+                    || dlcParentSelection is not null && dlcParentSelection.Platform is Platform.Steam)
                     {
                         contextMenuStrip.Items.Add(new ToolStripSeparator());
                         contextMenuStrip.Items.Add(new ContextMenuItem("Open SteamDB", "SteamDB",
@@ -750,14 +757,14 @@ internal partial class SelectForm : CustomForm
                     }
                     if (selection is not null)
                     {
-                        if (selection.IsSteam)
+                        if (selection.Platform is Platform.Steam)
                         {
                             contextMenuStrip.Items.Add(new ContextMenuItem("Open Steam Store", "Steam Store",
                                 new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
                             contextMenuStrip.Items.Add(new ContextMenuItem("Open Steam Community", ("Sub_" + id, selection.SubIconUrl), "Steam Community",
                                 new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + id))));
                         }
-                        else if (selection.IsEpic)
+                        if (selection.Platform is Platform.Epic)
                         {
                             contextMenuStrip.Items.Add(new ToolStripSeparator());
                             contextMenuStrip.Items.Add(new ContextMenuItem("Open ScreamDB", "ScreamDB",
@@ -765,7 +772,7 @@ internal partial class SelectForm : CustomForm
                             contextMenuStrip.Items.Add(new ContextMenuItem("Open Epic Games Store", "Epic Games",
                                 new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
                         }
-                        else if (selection.IsUbisoft)
+                        if (selection.Platform is Platform.Ubisoft)
                         {
                             contextMenuStrip.Items.Add(new ToolStripSeparator());
 #pragma warning disable CA1308 // Normalize strings to uppercase

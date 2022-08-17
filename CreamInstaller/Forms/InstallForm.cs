@@ -60,14 +60,14 @@ internal partial class InstallForm : CustomForm
         UpdateProgress(0);
         int count = selection.DllDirectories.Count;
         int cur = 0;
-        if (selection.Id == "ParadoxLauncher")
+        if (selection.Id == "PL")
         {
             UpdateUser($"Repairing Paradox Launcher . . . ", InstallationLog.Operation);
             _ = await Repair(this, selection);
         }
         foreach (string directory in selection.DllDirectories)
         {
-            if (selection.IsSteam && selection.SelectedDlc.Any(d => d.Value.type is DlcType.Steam or DlcType.SteamHidden)
+            if (selection.Platform is Platform.Steam && selection.SelectedDlc.Any(d => d.Value.type is DlcType.Steam or DlcType.SteamHidden)
                 || selection.ExtraSelectedDlc.Any(item => item.dlc.Any(dlc => dlc.Value.type is DlcType.Steam or DlcType.SteamHidden)))
             {
                 directory.GetSmokeApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config, out string cache);
@@ -81,7 +81,7 @@ internal partial class InstallForm : CustomForm
                         await SmokeAPI.Install(directory, selection, this);
                 }
             }
-            if (selection.IsEpic && selection.SelectedDlc.Any(d => d.Value.type is DlcType.EpicCatalogItem or DlcType.EpicEntitlement)
+            if (selection.Platform is Platform.Epic && selection.SelectedDlc.Any(d => d.Value.type is DlcType.EpicCatalogItem or DlcType.EpicEntitlement)
                 || selection.ExtraSelectedDlc.Any(item => item.dlc.Any(dlc => dlc.Value.type is DlcType.EpicCatalogItem or DlcType.EpicEntitlement)))
             {
                 directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
@@ -95,7 +95,7 @@ internal partial class InstallForm : CustomForm
                         await ScreamAPI.Install(directory, selection, this);
                 }
             }
-            if (selection.IsUbisoft)
+            if (selection.Platform is Platform.Ubisoft)
             {
                 directory.GetUplayR1Components(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
                 if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
