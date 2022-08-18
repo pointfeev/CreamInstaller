@@ -59,8 +59,8 @@ internal static class ParadoxLauncher
             {
                 using DialogForm dialogForm = new(form);
                 return dialogForm.Show(SystemIcons.Warning,
-                    $"WARNING: There are no installed games with DLC that can be added to the Paradox Launcher!" +
-                    "\n\nInstalling SmokeAPI/ScreamAPI for the Paradox Launcher is pointless, since no DLC will be added to the configuration!",
+                    $"WARNING: There are no scanned games with DLC that can be added to the Paradox Launcher!" +
+                    "\n\nInstalling DLC unlockers for the Paradox Launcher alone can cause existing configurations to be deleted!",
                     "Ignore", "Cancel", customFormText: "Paradox Launcher") != DialogResult.OK;
             }
         }
