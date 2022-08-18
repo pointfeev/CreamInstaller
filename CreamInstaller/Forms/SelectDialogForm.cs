@@ -2,16 +2,11 @@
 using CreamInstaller.Utility;
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-
-using Windows.Foundation.Metadata;
-
-using static CreamInstaller.Components.CustomTreeView;
 
 namespace CreamInstaller;
 
@@ -77,7 +72,8 @@ internal partial class SelectDialogForm : CustomForm
             ? Program.ApplicationNameShort
             : Program.ApplicationName;
 
-    private void OnSortCheckBoxChanged(object sender, EventArgs e) => selectionTreeView.TreeViewNodeSorter = PlatformIdComparer.TreeNodes;
+    private void OnSortCheckBoxChanged(object sender, EventArgs e) => selectionTreeView.TreeViewNodeSorter
+        = sortCheckBox.Checked ? PlatformIdComparer.NodeText : PlatformIdComparer.NodeName;
 
     private void OnAllCheckBoxChanged(object sender, EventArgs e)
     {

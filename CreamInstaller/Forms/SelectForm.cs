@@ -21,8 +21,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using Windows.Foundation.Metadata;
-
 namespace CreamInstaller;
 
 internal partial class SelectForm : CustomForm
@@ -640,7 +638,7 @@ internal partial class SelectForm : CustomForm
                 TreeNode node = e.Node;
                 if (node is null || !node.Bounds.Contains(e.Location) || e.Button != MouseButtons.Right || e.Clicks != 1)
                     return;
-                ContextMenuStrip contextMenuStrip = new();
+                using ContextMenuStrip contextMenuStrip = new();
                 selectionTreeView.SelectedNode = node;
                 string id = node.Name;
                 Platform platform = (Platform)node.Tag;
@@ -876,6 +874,9 @@ internal partial class SelectForm : CustomForm
             "\n\nBlocked game sub-directory exceptions (not blocked):" + blockedDirectoryExceptions,
             "OK", customFormText: "Block Protected Games");
     }
+
+    private void OnSortCheckBoxChanged(object sender, EventArgs e) => selectionTreeView.TreeViewNodeSorter
+        = sortCheckBox.Checked ? PlatformIdComparer.NodeText : PlatformIdComparer.NodeName;
 }
 
 #pragma warning restore IDE0058

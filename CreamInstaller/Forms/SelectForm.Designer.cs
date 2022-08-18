@@ -48,6 +48,7 @@ namespace CreamInstaller
             this.uninstallButton = new System.Windows.Forms.Button();
             this.progressLabelGames = new System.Windows.Forms.Label();
             this.progressLabelDLCs = new System.Windows.Forms.Label();
+            this.sortCheckBox = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
@@ -56,11 +57,14 @@ namespace CreamInstaller
             // installButton
             // 
             this.installButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.installButton.AutoSize = true;
+            this.installButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.installButton.Enabled = false;
             this.installButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.installButton.Location = new System.Drawing.Point(422, 326);
+            this.installButton.Location = new System.Drawing.Point(420, 325);
             this.installButton.Name = "installButton";
-            this.installButton.Size = new System.Drawing.Size(150, 23);
+            this.installButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
+            this.installButton.Size = new System.Drawing.Size(149, 24);
             this.installButton.TabIndex = 10003;
             this.installButton.Text = "Generate and Install";
             this.installButton.UseVisualStyleBackColor = true;
@@ -69,10 +73,13 @@ namespace CreamInstaller
             // cancelButton
             // 
             this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.cancelButton.AutoSize = true;
+            this.cancelButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.cancelButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.cancelButton.Location = new System.Drawing.Point(12, 326);
+            this.cancelButton.Location = new System.Drawing.Point(12, 325);
             this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Size = new System.Drawing.Size(75, 23);
+            this.cancelButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
+            this.cancelButton.Size = new System.Drawing.Size(81, 24);
             this.cancelButton.TabIndex = 10000;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
@@ -97,7 +104,7 @@ namespace CreamInstaller
             this.groupBox1.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(560, 240);
+            this.groupBox1.Size = new System.Drawing.Size(560, 239);
             this.groupBox1.TabIndex = 8;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Programs / Games";
@@ -107,7 +114,7 @@ namespace CreamInstaller
             this.noneFoundLabel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.noneFoundLabel.Location = new System.Drawing.Point(3, 19);
             this.noneFoundLabel.Name = "noneFoundLabel";
-            this.noneFoundLabel.Size = new System.Drawing.Size(554, 218);
+            this.noneFoundLabel.Size = new System.Drawing.Size(554, 217);
             this.noneFoundLabel.TabIndex = 1002;
             this.noneFoundLabel.Text = "No applicable programs nor games were found on your computer!";
             this.noneFoundLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -167,7 +174,7 @@ namespace CreamInstaller
             this.selectionTreeView.FullRowSelect = true;
             this.selectionTreeView.Location = new System.Drawing.Point(3, 19);
             this.selectionTreeView.Name = "selectionTreeView";
-            this.selectionTreeView.Size = new System.Drawing.Size(554, 218);
+            this.selectionTreeView.Size = new System.Drawing.Size(554, 217);
             this.selectionTreeView.Sorted = true;
             this.selectionTreeView.TabIndex = 1001;
             // 
@@ -202,7 +209,7 @@ namespace CreamInstaller
             // 
             this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar.Location = new System.Drawing.Point(12, 297);
+            this.progressBar.Location = new System.Drawing.Point(12, 296);
             this.progressBar.Name = "progressBar";
             this.progressBar.Size = new System.Drawing.Size(560, 23);
             this.progressBar.TabIndex = 9;
@@ -211,7 +218,7 @@ namespace CreamInstaller
             // 
             this.progressLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressLabel.Location = new System.Drawing.Point(12, 255);
+            this.progressLabel.Location = new System.Drawing.Point(12, 254);
             this.progressLabel.Name = "progressLabel";
             this.progressLabel.Size = new System.Drawing.Size(560, 15);
             this.progressLabel.TabIndex = 10;
@@ -220,24 +227,30 @@ namespace CreamInstaller
             // scanButton
             // 
             this.scanButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.scanButton.AutoSize = true;
+            this.scanButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.scanButton.Enabled = false;
             this.scanButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.scanButton.Location = new System.Drawing.Point(140, 326);
+            this.scanButton.Location = new System.Drawing.Point(235, 325);
             this.scanButton.Name = "scanButton";
-            this.scanButton.Size = new System.Drawing.Size(180, 23);
+            this.scanButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
+            this.scanButton.Size = new System.Drawing.Size(82, 24);
             this.scanButton.TabIndex = 10001;
-            this.scanButton.Text = "Rescan Programs / Games";
+            this.scanButton.Text = "Rescan";
             this.scanButton.UseVisualStyleBackColor = true;
             this.scanButton.Click += new System.EventHandler(this.OnScan);
             // 
             // uninstallButton
             // 
             this.uninstallButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.uninstallButton.AutoSize = true;
+            this.uninstallButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.uninstallButton.Enabled = false;
             this.uninstallButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.uninstallButton.Location = new System.Drawing.Point(326, 326);
+            this.uninstallButton.Location = new System.Drawing.Point(323, 325);
             this.uninstallButton.Name = "uninstallButton";
-            this.uninstallButton.Size = new System.Drawing.Size(90, 23);
+            this.uninstallButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
+            this.uninstallButton.Size = new System.Drawing.Size(91, 24);
             this.uninstallButton.TabIndex = 10002;
             this.uninstallButton.Text = "Uninstall";
             this.uninstallButton.UseVisualStyleBackColor = true;
@@ -248,7 +261,7 @@ namespace CreamInstaller
             this.progressLabelGames.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.progressLabelGames.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.progressLabelGames.Location = new System.Drawing.Point(12, 270);
+            this.progressLabelGames.Location = new System.Drawing.Point(12, 269);
             this.progressLabelGames.Name = "progressLabelGames";
             this.progressLabelGames.Size = new System.Drawing.Size(560, 12);
             this.progressLabelGames.TabIndex = 11;
@@ -259,11 +272,24 @@ namespace CreamInstaller
             this.progressLabelDLCs.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.progressLabelDLCs.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.progressLabelDLCs.Location = new System.Drawing.Point(12, 282);
+            this.progressLabelDLCs.Location = new System.Drawing.Point(12, 281);
             this.progressLabelDLCs.Name = "progressLabelDLCs";
             this.progressLabelDLCs.Size = new System.Drawing.Size(560, 12);
             this.progressLabelDLCs.TabIndex = 10004;
             this.progressLabelDLCs.Text = "Remaining DLC (2): 123456, 654321";
+            // 
+            // sortCheckBox
+            // 
+            this.sortCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.sortCheckBox.AutoSize = true;
+            this.sortCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.sortCheckBox.Location = new System.Drawing.Point(120, 328);
+            this.sortCheckBox.Margin = new System.Windows.Forms.Padding(3, 0, 0, 0);
+            this.sortCheckBox.Name = "sortCheckBox";
+            this.sortCheckBox.Size = new System.Drawing.Size(104, 20);
+            this.sortCheckBox.TabIndex = 1;
+            this.sortCheckBox.Text = "Sort By Name";
+            this.sortCheckBox.CheckedChanged += new System.EventHandler(this.OnSortCheckBoxChanged);
             // 
             // SelectForm
             // 
@@ -272,6 +298,7 @@ namespace CreamInstaller
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(584, 361);
+            this.Controls.Add(this.sortCheckBox);
             this.Controls.Add(this.progressLabelDLCs);
             this.Controls.Add(this.progressLabelGames);
             this.Controls.Add(this.uninstallButton);
@@ -296,6 +323,7 @@ namespace CreamInstaller
             this.flowLayoutPanel1.PerformLayout();
             this.flowLayoutPanel2.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -318,6 +346,7 @@ namespace CreamInstaller
         private Button uninstallButton;
         private Label progressLabelGames;
         private Label progressLabelDLCs;
+        private CheckBox sortCheckBox;
     }
 }
 

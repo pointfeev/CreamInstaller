@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -19,7 +18,7 @@ internal class CustomTreeView : TreeView
     {
         DrawMode = TreeViewDrawMode.OwnerDrawAll;
         DrawNode += new DrawTreeNodeEventHandler(DrawTreeNode);
-        TreeViewNodeSorter = PlatformIdComparer.TreeNodes;
+        TreeViewNodeSorter = PlatformIdComparer.NodeName;
     }
 
     private void DrawTreeNode(object sender, DrawTreeNodeEventArgs e)

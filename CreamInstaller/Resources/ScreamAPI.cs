@@ -151,8 +151,8 @@ internal static class ScreamAPI
                 File.Create(config).Close();
                 StreamWriter writer = new(config, true, Encoding.UTF8);
                 WriteConfig(writer,
-                    new(overrideCatalogItems.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.Strings),
-                    new(entitlements.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.Strings),
+                    new(overrideCatalogItems.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String),
+                    new(entitlements.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String),
                     installForm);
                 writer.Flush();
                 writer.Close();
