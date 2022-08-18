@@ -718,29 +718,29 @@ internal partial class SelectForm : CustomForm
                     if (selection.Platform is Platform.Steam or Platform.Paradox)
                         foreach (string directory in directories)
                         {
-                            directory.GetSmokeApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config, out string cache);
-                            if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config) || File.Exists(cache))
+                            directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out string cache);
+                            if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config) || File.Exists(cache))
                                 contextMenuStrip.Items.Add(new ContextMenuItem($"Open Steamworks Directory #{++steam}", "File Explorer",
                                     new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
                         }
                     if (selection.Platform is Platform.Epic or Platform.Paradox)
                         foreach (string directory in directories)
                         {
-                            directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
-                            if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
+                            directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+                            if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config))
                                 contextMenuStrip.Items.Add(new ContextMenuItem($"Open Epic Online Services Directory #{++epic}", "File Explorer",
                                     new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
                         }
                     if (selection.Platform is Platform.Ubisoft)
                         foreach (string directory in directories)
                         {
-                            directory.GetUplayR1Components(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
-                            if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
-                                contextMenuStrip.Items.Add(new ContextMenuItem($"Open Uplay R1 SDK Directory #{++r1}", "File Explorer",
+                            directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+                            if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config))
+                                contextMenuStrip.Items.Add(new ContextMenuItem($"Open Uplay R1 Directory #{++r1}", "File Explorer",
                                     new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
-                            directory.GetUplayR2Components(out string old_sdk32, out string old_sdk64, out sdk32, out sdk32_o, out sdk64, out sdk64_o, out config);
-                            if (File.Exists(old_sdk32) || File.Exists(old_sdk64) || File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
-                                contextMenuStrip.Items.Add(new ContextMenuItem($"Open Uplay R2 SDK Directory #{++r2}", "File Explorer",
+                            directory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config);
+                            if (File.Exists(old_api32) || File.Exists(old_api64) || File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config))
+                                contextMenuStrip.Items.Add(new ContextMenuItem($"Open Uplay R2 Directory #{++r2}", "File Explorer",
                                     new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
                         }
                 }

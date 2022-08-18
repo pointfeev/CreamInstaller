@@ -13,15 +13,15 @@ internal static class ScreamAPI
 {
     internal static void GetScreamApiComponents(
             this string directory,
-            out string sdk32, out string sdk32_o,
-            out string sdk64, out string sdk64_o,
+            out string api32, out string api32_o,
+            out string api64, out string api64_o,
             out string config
         )
     {
-        sdk32 = directory + @"\EOSSDK-Win32-Shipping.dll";
-        sdk32_o = directory + @"\EOSSDK-Win32-Shipping_o.dll";
-        sdk64 = directory + @"\EOSSDK-Win64-Shipping.dll";
-        sdk64_o = directory + @"\EOSSDK-Win64-Shipping_o.dll";
+        api32 = directory + @"\EOSSDK-Win32-Shipping.dll";
+        api32_o = directory + @"\EOSSDK-Win32-Shipping_o.dll";
+        api64 = directory + @"\EOSSDK-Win64-Shipping.dll";
+        api64_o = directory + @"\EOSSDK-Win64-Shipping_o.dll";
         config = directory + @"\ScreamAPI.json";
     }
 
@@ -76,30 +76,30 @@ internal static class ScreamAPI
 
     internal static async Task Uninstall(string directory, InstallForm installForm = null, bool deleteConfig = true) => await Task.Run(() =>
     {
-        directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
-        if (File.Exists(sdk32_o))
+        directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+        if (File.Exists(api32_o))
         {
-            if (File.Exists(sdk32))
+            if (File.Exists(api32))
             {
-                File.Delete(sdk32);
+                File.Delete(api32);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Deleted ScreamAPI: {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
+                    installForm.UpdateUser($"Deleted ScreamAPI: {Path.GetFileName(api32)}", InstallationLog.Action, info: false);
             }
-            File.Move(sdk32_o, sdk32);
+            File.Move(api32_o, api32);
             if (installForm is not null)
-                installForm.UpdateUser($"Restored Epic Online Services: {Path.GetFileName(sdk32_o)} -> {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Restored Epic Online Services: {Path.GetFileName(api32_o)} -> {Path.GetFileName(api32)}", InstallationLog.Action, info: false);
         }
-        if (File.Exists(sdk64_o))
+        if (File.Exists(api64_o))
         {
-            if (File.Exists(sdk64))
+            if (File.Exists(api64))
             {
-                File.Delete(sdk64);
+                File.Delete(api64);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Deleted ScreamAPI: {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
+                    installForm.UpdateUser($"Deleted ScreamAPI: {Path.GetFileName(api64)}", InstallationLog.Action, info: false);
             }
-            File.Move(sdk64_o, sdk64);
+            File.Move(api64_o, api64);
             if (installForm is not null)
-                installForm.UpdateUser($"Restored Epic Online Services: {Path.GetFileName(sdk64_o)} -> {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Restored Epic Online Services: {Path.GetFileName(api64_o)} -> {Path.GetFileName(api64)}", InstallationLog.Action, info: false);
         }
         if (deleteConfig && File.Exists(config))
         {
@@ -111,30 +111,30 @@ internal static class ScreamAPI
 
     internal static async Task Install(string directory, ProgramSelection selection, InstallForm installForm = null, bool generateConfig = true) => await Task.Run(() =>
     {
-        directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
-        if (File.Exists(sdk32) && !File.Exists(sdk32_o))
+        directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+        if (File.Exists(api32) && !File.Exists(api32_o))
         {
-            File.Move(sdk32, sdk32_o);
+            File.Move(api32, api32_o);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed Epic Online Services: {Path.GetFileName(sdk32)} -> {Path.GetFileName(sdk32_o)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Renamed Epic Online Services: {Path.GetFileName(api32)} -> {Path.GetFileName(api32_o)}", InstallationLog.Action, info: false);
         }
-        if (File.Exists(sdk32_o))
+        if (File.Exists(api32_o))
         {
-            Properties.Resources.EpicOnlineServices32.Write(sdk32);
+            Properties.Resources.EpicOnlineServices32.Write(api32);
             if (installForm is not null)
-                installForm.UpdateUser($"Wrote ScreamAPI: {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Wrote ScreamAPI: {Path.GetFileName(api32)}", InstallationLog.Action, info: false);
         }
-        if (File.Exists(sdk64) && !File.Exists(sdk64_o))
+        if (File.Exists(api64) && !File.Exists(api64_o))
         {
-            File.Move(sdk64, sdk64_o);
+            File.Move(api64, api64_o);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed Epic Online Services: {Path.GetFileName(sdk64)} -> {Path.GetFileName(sdk64_o)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Renamed Epic Online Services: {Path.GetFileName(api64)} -> {Path.GetFileName(api64_o)}", InstallationLog.Action, info: false);
         }
-        if (File.Exists(sdk64_o))
+        if (File.Exists(api64_o))
         {
-            Properties.Resources.EpicOnlineServices64.Write(sdk64);
+            Properties.Resources.EpicOnlineServices64.Write(api64);
             if (installForm is not null)
-                installForm.UpdateUser($"Wrote ScreamAPI: {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Wrote ScreamAPI: {Path.GetFileName(api64)}", InstallationLog.Action, info: false);
         }
         if (generateConfig)
         {

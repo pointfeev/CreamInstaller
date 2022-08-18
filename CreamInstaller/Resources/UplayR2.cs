@@ -13,17 +13,17 @@ internal static class UplayR2
 {
     internal static void GetUplayR2Components(
             this string directory,
-            out string old_sdk32, out string old_sdk64,
-            out string sdk32, out string sdk32_o,
-            out string sdk64, out string sdk64_o,
+            out string old_api32, out string old_api64,
+            out string api32, out string api32_o,
+            out string api64, out string api64_o,
             out string config)
     {
-        old_sdk32 = directory + @"\uplay_r2_loader.dll";
-        old_sdk64 = directory + @"\uplay_r2_loader64.dll";
-        sdk32 = directory + @"\upc_r2_loader.dll";
-        sdk32_o = directory + @"\upc_r2_loader_o.dll";
-        sdk64 = directory + @"\upc_r2_loader64.dll";
-        sdk64_o = directory + @"\upc_r2_loader64_o.dll";
+        old_api32 = directory + @"\uplay_r2_loader.dll";
+        old_api64 = directory + @"\uplay_r2_loader64.dll";
+        api32 = directory + @"\upc_r2_loader.dll";
+        api32_o = directory + @"\upc_r2_loader_o.dll";
+        api64 = directory + @"\upc_r2_loader64.dll";
+        api64_o = directory + @"\upc_r2_loader64_o.dll";
         config = directory + @"\UplayR2Unlocker.jsonc";
     }
 
@@ -56,32 +56,32 @@ internal static class UplayR2
 
     internal static async Task Uninstall(string directory, InstallForm installForm = null, bool deleteConfig = true) => await Task.Run(() =>
     {
-        directory.GetUplayR2Components(out string old_sdk32, out string old_sdk64, out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
-        if (File.Exists(sdk32_o))
+        directory.GetUplayR2Components(out string old_api32, out string old_api64, out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+        if (File.Exists(api32_o))
         {
-            string sdk = File.Exists(old_sdk32) ? old_sdk32 : sdk32;
-            if (File.Exists(sdk))
+            string api = File.Exists(old_api32) ? old_api32 : api32;
+            if (File.Exists(api))
             {
-                File.Delete(sdk);
+                File.Delete(api);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Deleted Uplay R2 Unlocker: {Path.GetFileName(sdk)}", InstallationLog.Action, info: false);
+                    installForm.UpdateUser($"Deleted Uplay R2 Unlocker: {Path.GetFileName(api)}", InstallationLog.Action, info: false);
             }
-            File.Move(sdk32_o, sdk);
+            File.Move(api32_o, api);
             if (installForm is not null)
-                installForm.UpdateUser($"Restored Uplay R2: {Path.GetFileName(sdk32_o)} -> {Path.GetFileName(sdk)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Restored Uplay R2: {Path.GetFileName(api32_o)} -> {Path.GetFileName(api)}", InstallationLog.Action, info: false);
         }
-        if (File.Exists(sdk64_o))
+        if (File.Exists(api64_o))
         {
-            string sdk = File.Exists(old_sdk64) ? old_sdk64 : sdk64;
-            if (File.Exists(sdk))
+            string api = File.Exists(old_api64) ? old_api64 : api64;
+            if (File.Exists(api))
             {
-                File.Delete(sdk);
+                File.Delete(api);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Deleted Uplay R2 Unlocker: {Path.GetFileName(sdk)}", InstallationLog.Action, info: false);
+                    installForm.UpdateUser($"Deleted Uplay R2 Unlocker: {Path.GetFileName(api)}", InstallationLog.Action, info: false);
             }
-            File.Move(sdk64_o, sdk);
+            File.Move(api64_o, api);
             if (installForm is not null)
-                installForm.UpdateUser($"Restored Uplay R2: {Path.GetFileName(sdk64_o)} -> {Path.GetFileName(sdk)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Restored Uplay R2: {Path.GetFileName(api64_o)} -> {Path.GetFileName(api)}", InstallationLog.Action, info: false);
         }
         if (deleteConfig && File.Exists(config))
         {
@@ -93,32 +93,32 @@ internal static class UplayR2
 
     internal static async Task Install(string directory, ProgramSelection selection, InstallForm installForm = null, bool generateConfig = true) => await Task.Run(() =>
     {
-        directory.GetUplayR2Components(out string old_sdk32, out string old_sdk64, out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
-        string sdk = File.Exists(old_sdk32) ? old_sdk32 : sdk32;
-        if (File.Exists(sdk) && !File.Exists(sdk32_o))
+        directory.GetUplayR2Components(out string old_api32, out string old_api64, out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+        string api = File.Exists(old_api32) ? old_api32 : api32;
+        if (File.Exists(api) && !File.Exists(api32_o))
         {
-            File.Move(sdk, sdk32_o);
+            File.Move(api, api32_o);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed Uplay R2: {Path.GetFileName(sdk)} -> {Path.GetFileName(sdk32_o)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Renamed Uplay R2: {Path.GetFileName(api)} -> {Path.GetFileName(api32_o)}", InstallationLog.Action, info: false);
         }
-        if (File.Exists(sdk32_o))
+        if (File.Exists(api32_o))
         {
-            Properties.Resources.Upc32.Write(sdk);
+            Properties.Resources.Upc32.Write(api);
             if (installForm is not null)
-                installForm.UpdateUser($"Wrote Uplay R2 Unlocker: {Path.GetFileName(sdk)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Wrote Uplay R2 Unlocker: {Path.GetFileName(api)}", InstallationLog.Action, info: false);
         }
-        sdk = File.Exists(old_sdk64) ? old_sdk64 : sdk64;
-        if (File.Exists(sdk) && !File.Exists(sdk64_o))
+        api = File.Exists(old_api64) ? old_api64 : api64;
+        if (File.Exists(api) && !File.Exists(api64_o))
         {
-            File.Move(sdk, sdk64_o);
+            File.Move(api, api64_o);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed Uplay R2: {Path.GetFileName(sdk)} -> {Path.GetFileName(sdk64_o)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Renamed Uplay R2: {Path.GetFileName(api)} -> {Path.GetFileName(api64_o)}", InstallationLog.Action, info: false);
         }
-        if (File.Exists(sdk64_o))
+        if (File.Exists(api64_o))
         {
-            Properties.Resources.Upc64.Write(sdk);
+            Properties.Resources.Upc64.Write(api);
             if (installForm is not null)
-                installForm.UpdateUser($"Wrote Uplay R2 Unlocker: {Path.GetFileName(sdk)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Wrote Uplay R2 Unlocker: {Path.GetFileName(api)}", InstallationLog.Action, info: false);
         }
         if (generateConfig)
         {

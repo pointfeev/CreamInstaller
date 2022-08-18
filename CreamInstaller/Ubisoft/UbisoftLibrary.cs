@@ -41,22 +41,22 @@ internal static class UbisoftLibrary
     {
         List<string> dllDirectories = new();
         if (Program.Canceled || !Directory.Exists(gameDirectory)) return null;
-        gameDirectory.GetUplayR1Components(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
-        if (File.Exists(sdk32)
-            || File.Exists(sdk32_o)
-            || File.Exists(sdk64)
-            || File.Exists(sdk64_o)
+        gameDirectory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+        if (File.Exists(api32)
+            || File.Exists(api32_o)
+            || File.Exists(api64)
+            || File.Exists(api64_o)
             || File.Exists(config))
             dllDirectories.Add(gameDirectory);
         else
         {
-            gameDirectory.GetUplayR2Components(out string old_sdk32, out string old_sdk64, out sdk32, out sdk32_o, out sdk64, out sdk64_o, out config);
-            if (File.Exists(old_sdk32)
-                || File.Exists(old_sdk64)
-                || File.Exists(sdk32)
-                || File.Exists(sdk32_o)
-                || File.Exists(sdk64)
-                || File.Exists(sdk64_o)
+            gameDirectory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config);
+            if (File.Exists(old_api32)
+                || File.Exists(old_api64)
+                || File.Exists(api32)
+                || File.Exists(api32_o)
+                || File.Exists(api64)
+                || File.Exists(api64_o)
                 || File.Exists(config))
                 dllDirectories.Add(gameDirectory);
         }

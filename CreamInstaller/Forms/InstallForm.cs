@@ -70,8 +70,8 @@ internal partial class InstallForm : CustomForm
             if (selection.Platform is Platform.Steam && selection.SelectedDlc.Any(d => d.Value.type is DlcType.Steam or DlcType.SteamHidden)
                 || selection.ExtraSelectedDlc.Any(item => item.dlc.Any(dlc => dlc.Value.type is DlcType.Steam or DlcType.SteamHidden)))
             {
-                directory.GetSmokeApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config, out string cache);
-                if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config) || File.Exists(cache))
+                directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out string cache);
+                if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config) || File.Exists(cache))
                 {
                     UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} SmokeAPI" +
                         $" {(Uninstalling ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
@@ -84,8 +84,8 @@ internal partial class InstallForm : CustomForm
             if (selection.Platform is Platform.Epic && selection.SelectedDlc.Any(d => d.Value.type is DlcType.EpicCatalogItem or DlcType.EpicEntitlement)
                 || selection.ExtraSelectedDlc.Any(item => item.dlc.Any(dlc => dlc.Value.type is DlcType.EpicCatalogItem or DlcType.EpicEntitlement)))
             {
-                directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
-                if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
+                directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+                if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config))
                 {
                     UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} ScreamAPI" +
                         $" {(Uninstalling ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
@@ -97,8 +97,8 @@ internal partial class InstallForm : CustomForm
             }
             if (selection.Platform is Platform.Ubisoft)
             {
-                directory.GetUplayR1Components(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
-                if (File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
+                directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+                if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config))
                 {
                     UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} Uplay R1 Unlocker" +
                         $" {(Uninstalling ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
@@ -107,8 +107,8 @@ internal partial class InstallForm : CustomForm
                     else
                         await UplayR1.Install(directory, selection, this);
                 }
-                directory.GetUplayR2Components(out string old_sdk32, out string old_sdk64, out sdk32, out sdk32_o, out sdk64, out sdk64_o, out config);
-                if (File.Exists(old_sdk32) || File.Exists(old_sdk64) || File.Exists(sdk32) || File.Exists(sdk32_o) || File.Exists(sdk64) || File.Exists(sdk64_o) || File.Exists(config))
+                directory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config);
+                if (File.Exists(old_api32) || File.Exists(old_api64) || File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config))
                 {
                     UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} Uplay R2 Unlocker" +
                         $" {(Uninstalling ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);

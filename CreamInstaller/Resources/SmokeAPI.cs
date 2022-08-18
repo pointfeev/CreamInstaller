@@ -13,15 +13,15 @@ internal static class SmokeAPI
 {
     internal static void GetSmokeApiComponents(
             this string directory,
-            out string sdk32, out string sdk32_o,
-            out string sdk64, out string sdk64_o,
+            out string api32, out string api32_o,
+            out string api64, out string api64_o,
             out string config,
             out string cache)
     {
-        sdk32 = directory + @"\steam_api.dll";
-        sdk32_o = directory + @"\steam_api_o.dll";
-        sdk64 = directory + @"\steam_api64.dll";
-        sdk64_o = directory + @"\steam_api64_o.dll";
+        api32 = directory + @"\steam_api.dll";
+        api32_o = directory + @"\steam_api_o.dll";
+        api64 = directory + @"\steam_api64.dll";
+        api64_o = directory + @"\steam_api64_o.dll";
         config = directory + @"\SmokeAPI.json";
         cache = directory + @"\SmokeAPI.cache.json";
     }
@@ -72,30 +72,30 @@ internal static class SmokeAPI
 
     internal static async Task Uninstall(string directory, InstallForm installForm = null, bool deleteConfig = true) => await Task.Run(() =>
     {
-        directory.GetSmokeApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config, out string cache);
-        if (File.Exists(sdk32_o))
+        directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out string cache);
+        if (File.Exists(api32_o))
         {
-            if (File.Exists(sdk32))
+            if (File.Exists(api32))
             {
-                File.Delete(sdk32);
+                File.Delete(api32);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Deleted SmokeAPI: {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
+                    installForm.UpdateUser($"Deleted SmokeAPI: {Path.GetFileName(api32)}", InstallationLog.Action, info: false);
             }
-            File.Move(sdk32_o, sdk32);
+            File.Move(api32_o, api32);
             if (installForm is not null)
-                installForm.UpdateUser($"Restored Steamworks: {Path.GetFileName(sdk32_o)} -> {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Restored Steamworks: {Path.GetFileName(api32_o)} -> {Path.GetFileName(api32)}", InstallationLog.Action, info: false);
         }
-        if (File.Exists(sdk64_o))
+        if (File.Exists(api64_o))
         {
-            if (File.Exists(sdk64))
+            if (File.Exists(api64))
             {
-                File.Delete(sdk64);
+                File.Delete(api64);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Deleted SmokeAPI: {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
+                    installForm.UpdateUser($"Deleted SmokeAPI: {Path.GetFileName(api64)}", InstallationLog.Action, info: false);
             }
-            File.Move(sdk64_o, sdk64);
+            File.Move(api64_o, api64);
             if (installForm is not null)
-                installForm.UpdateUser($"Restored Steamworks: {Path.GetFileName(sdk64_o)} -> {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Restored Steamworks: {Path.GetFileName(api64_o)} -> {Path.GetFileName(api64)}", InstallationLog.Action, info: false);
         }
         if (deleteConfig && File.Exists(config))
         {
@@ -120,30 +120,30 @@ internal static class SmokeAPI
             if (installForm is not null)
                 installForm.UpdateUser($"Deleted old CreamAPI configuration: {Path.GetFileName(oldConfig)}", InstallationLog.Action, info: false);
         }
-        directory.GetSmokeApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config, out _);
-        if (File.Exists(sdk32) && !File.Exists(sdk32_o))
+        directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out _);
+        if (File.Exists(api32) && !File.Exists(api32_o))
         {
-            File.Move(sdk32, sdk32_o);
+            File.Move(api32, api32_o);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed Steamworks: {Path.GetFileName(sdk32)} -> {Path.GetFileName(sdk32_o)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Renamed Steamworks: {Path.GetFileName(api32)} -> {Path.GetFileName(api32_o)}", InstallationLog.Action, info: false);
         }
-        if (File.Exists(sdk32_o))
+        if (File.Exists(api32_o))
         {
-            Properties.Resources.Steamworks32.Write(sdk32);
+            Properties.Resources.Steamworks32.Write(api32);
             if (installForm is not null)
-                installForm.UpdateUser($"Wrote SmokeAPI: {Path.GetFileName(sdk32)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Wrote SmokeAPI: {Path.GetFileName(api32)}", InstallationLog.Action, info: false);
         }
-        if (File.Exists(sdk64) && !File.Exists(sdk64_o))
+        if (File.Exists(api64) && !File.Exists(api64_o))
         {
-            File.Move(sdk64, sdk64_o);
+            File.Move(api64, api64_o);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed Steamworks: {Path.GetFileName(sdk64)} -> {Path.GetFileName(sdk64_o)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Renamed Steamworks: {Path.GetFileName(api64)} -> {Path.GetFileName(api64_o)}", InstallationLog.Action, info: false);
         }
-        if (File.Exists(sdk64_o))
+        if (File.Exists(api64_o))
         {
-            Properties.Resources.Steamworks64.Write(sdk64);
+            Properties.Resources.Steamworks64.Write(api64);
             if (installForm is not null)
-                installForm.UpdateUser($"Wrote SmokeAPI: {Path.GetFileName(sdk64)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Wrote SmokeAPI: {Path.GetFileName(api64)}", InstallationLog.Action, info: false);
         }
         if (generateConfig)
         {

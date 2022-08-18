@@ -10,14 +10,14 @@ internal static class Resources
 {
     internal static void GetCreamApiComponents(
             this string directory,
-            out string sdk32, out string sdk32_o,
-            out string sdk64, out string sdk64_o,
+            out string api32, out string api32_o,
+            out string api64, out string api64_o,
             out string config)
     {
-        sdk32 = directory + @"\steam_api.dll";
-        sdk32_o = directory + @"\steam_api_o.dll";
-        sdk64 = directory + @"\steam_api64.dll";
-        sdk64_o = directory + @"\steam_api64_o.dll";
+        api32 = directory + @"\steam_api.dll";
+        api32_o = directory + @"\steam_api_o.dll";
+        api64 = directory + @"\steam_api64.dll";
+        api64_o = directory + @"\steam_api64_o.dll";
         config = directory + @"\cream_api.ini";
     }
 

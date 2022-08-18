@@ -57,48 +57,48 @@ internal class ProgramSelection
             {
                 if (Platform is Platform.Steam or Platform.Paradox)
                 {
-                    directory.GetCreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
-                    if (sdk32.IsFilePathLocked()
-                        || sdk32_o.IsFilePathLocked()
-                        || sdk64.IsFilePathLocked()
-                        || sdk64_o.IsFilePathLocked()
+                    directory.GetCreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+                    if (api32.IsFilePathLocked()
+                        || api32_o.IsFilePathLocked()
+                        || api64.IsFilePathLocked()
+                        || api64_o.IsFilePathLocked()
                         || config.IsFilePathLocked())
                         return true;
-                    directory.GetSmokeApiComponents(out sdk32, out sdk32_o, out sdk64, out sdk64_o, out config, out string cache);
-                    if (sdk32.IsFilePathLocked()
-                        || sdk32_o.IsFilePathLocked()
-                        || sdk64.IsFilePathLocked()
-                        || sdk64_o.IsFilePathLocked()
+                    directory.GetSmokeApiComponents(out api32, out api32_o, out api64, out api64_o, out config, out string cache);
+                    if (api32.IsFilePathLocked()
+                        || api32_o.IsFilePathLocked()
+                        || api64.IsFilePathLocked()
+                        || api64_o.IsFilePathLocked()
                         || config.IsFilePathLocked()
                         || cache.IsFilePathLocked())
                         return true;
                 }
                 if (Platform is Platform.Epic or Platform.Paradox)
                 {
-                    directory.GetScreamApiComponents(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
-                    if (sdk32.IsFilePathLocked()
-                        || sdk32_o.IsFilePathLocked()
-                        || sdk64.IsFilePathLocked()
-                        || sdk64_o.IsFilePathLocked()
+                    directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+                    if (api32.IsFilePathLocked()
+                        || api32_o.IsFilePathLocked()
+                        || api64.IsFilePathLocked()
+                        || api64_o.IsFilePathLocked()
                         || config.IsFilePathLocked())
                         return true;
                 }
                 if (Platform is Platform.Ubisoft)
                 {
-                    directory.GetUplayR1Components(out string sdk32, out string sdk32_o, out string sdk64, out string sdk64_o, out string config);
-                    if (sdk32.IsFilePathLocked()
-                        || sdk32_o.IsFilePathLocked()
-                        || sdk64.IsFilePathLocked()
-                        || sdk64_o.IsFilePathLocked()
+                    directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+                    if (api32.IsFilePathLocked()
+                        || api32_o.IsFilePathLocked()
+                        || api64.IsFilePathLocked()
+                        || api64_o.IsFilePathLocked()
                         || config.IsFilePathLocked())
                         return true;
-                    directory.GetUplayR2Components(out string old_sdk32, out string old_sdk64, out sdk32, out sdk32_o, out sdk64, out sdk64_o, out config);
-                    if (old_sdk32.IsFilePathLocked()
-                        || old_sdk64.IsFilePathLocked()
-                        || sdk32.IsFilePathLocked()
-                        || sdk32_o.IsFilePathLocked()
-                        || sdk64.IsFilePathLocked()
-                        || sdk64_o.IsFilePathLocked()
+                    directory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config);
+                    if (old_api32.IsFilePathLocked()
+                        || old_api64.IsFilePathLocked()
+                        || api32.IsFilePathLocked()
+                        || api32_o.IsFilePathLocked()
+                        || api64.IsFilePathLocked()
+                        || api64_o.IsFilePathLocked()
                         || config.IsFilePathLocked())
                         return true;
                 }
