@@ -638,7 +638,7 @@ internal partial class SelectForm : CustomForm
                 TreeNode node = e.Node;
                 if (node is null || !node.Bounds.Contains(e.Location) || e.Button != MouseButtons.Right || e.Clicks != 1)
                     return;
-                using ContextMenuStrip contextMenuStrip = new();
+                ContextMenuStrip contextMenuStrip = new();
                 selectionTreeView.SelectedNode = node;
                 string id = node.Name;
                 Platform platform = (Platform)node.Tag;
