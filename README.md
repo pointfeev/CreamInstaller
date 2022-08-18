@@ -1,6 +1,6 @@
 ### CreamInstaller: Automatic DLC Unlocker Installer & Configuration Generator
 
-![Program Preview Image](https://i.imgur.com/4mqizfE.png)
+![Program Preview Image](https://camo.githubusercontent.com/2abc74baa4ef20957e35e38449be37eacfbab9601a9d8718db93641dd3cc112f/68747470733a2f2f692e696d6775722e636f6d2f7479467959665a2e706e67)
 
 ###### The program utilizes the latest versions of [SmokeAPI](https://github.com/acidicoala/SmokeAPI), [ScreamAPI](https://github.com/acidicoala/ScreamAPI), [Uplay R1 Unlocker](https://github.com/acidicoala/UplayR1Unlocker) and [Uplay R2 Unlocker](https://github.com/acidicoala/UplayR2Unlocker), all by the wonderful [acidicoala](https://github.com/acidicoala), and all downloaded from the posts above and embedded into the program itself; no further downloads necessary on your part!
 ---
