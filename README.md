@@ -35,9 +35,9 @@ games and DLCs the user selects; however, through the use of **right-click conte
 ---
 #### Usage:
 1. Start the program executable.
-2. Choose which programs/games the program should scan for DLC. *the program automatically gathers all installed games from Steam, Epic and Ubisoft directories*
+2. Choose which programs and/or games the program should scan for DLC. *the program automatically gathers all installed games from Steam, Epic and Ubisoft directories*
 3. Wait for the program to download and install SteamCMD (if you chose a Steam game). *very fast, depends on internet speed*
-4. Wait for the program to gather and cache the chosen Steam and/or Epic games' appinfo & DLCs. *may take a good amount of time on the first run, depends on how many games you chose and how many DLCs they have*
+4. Wait for the program to gather and cache the chosen games' information & DLCs. *may take a good amount of time on the first run, depends on how many games you chose and how many DLCs they have*
 5. **CAREFULLY** select which games' DLCs you wish to unlock. *Obviously none of the DLC unlockers are tested for every single game!*
 6. Click the **Generate and Install** button.
 7. Click the **OK** button to close the program.
