@@ -5,7 +5,7 @@
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Resources\ini.ico</ApplicationIcon>
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-		<Version>3.6.1.3</Version>
+		<Version>4.0.0.0</Version>
 		<PackageIcon>Resources\ini.ico</PackageIcon>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<Copyright>2021, pointfeev (https://github.com/pointfeev)</Copyright>
@@ -38,6 +38,114 @@
 	  <DebugType>embedded</DebugType>
 	  <DefineConstants>$(DefineConstants)</DefineConstants>
 	</PropertyGroup>
+	<ItemGroup>
+	  <None Remove="Resources\Koaloader\audioses-32\audioses.dll" />
+	  <None Remove="Resources\Koaloader\audioses-64\audioses.dll" />
+	  <None Remove="Resources\Koaloader\d3d10-32\d3d10.dll" />
+	  <None Remove="Resources\Koaloader\d3d10-64\d3d10.dll" />
+	  <None Remove="Resources\Koaloader\d3d11-32\d3d11.dll" />
+	  <None Remove="Resources\Koaloader\d3d11-64\d3d11.dll" />
+	  <None Remove="Resources\Koaloader\d3d9-32\d3d9.dll" />
+	  <None Remove="Resources\Koaloader\d3d9-64\d3d9.dll" />
+	  <None Remove="Resources\Koaloader\dinput8-32\dinput8.dll" />
+	  <None Remove="Resources\Koaloader\dinput8-64\dinput8.dll" />
+	  <None Remove="Resources\Koaloader\dwmapi-32\dwmapi.dll" />
+	  <None Remove="Resources\Koaloader\dwmapi-64\dwmapi.dll" />
+	  <None Remove="Resources\Koaloader\dxgi-32\dxgi.dll" />
+	  <None Remove="Resources\Koaloader\dxgi-64\dxgi.dll" />
+	  <None Remove="Resources\Koaloader\glu32-32\glu32.dll" />
+	  <None Remove="Resources\Koaloader\glu32-64\glu32.dll" />
+	  <None Remove="Resources\Koaloader\hid-32\hid.dll" />
+	  <None Remove="Resources\Koaloader\hid-64\hid.dll" />
+	  <None Remove="Resources\Koaloader\iphlpapi-32\iphlpapi.dll" />
+	  <None Remove="Resources\Koaloader\iphlpapi-64\iphlpapi.dll" />
+	  <None Remove="Resources\Koaloader\msasn1-32\msasn1.dll" />
+	  <None Remove="Resources\Koaloader\msasn1-64\msasn1.dll" />
+	  <None Remove="Resources\Koaloader\msimg32-32\msimg32.dll" />
+	  <None Remove="Resources\Koaloader\msimg32-64\msimg32.dll" />
+	  <None Remove="Resources\Koaloader\mswsock-32\mswsock.dll" />
+	  <None Remove="Resources\Koaloader\mswsock-64\mswsock.dll" />
+	  <None Remove="Resources\Koaloader\opengl32-32\opengl32.dll" />
+	  <None Remove="Resources\Koaloader\opengl32-64\opengl32.dll" />
+	  <None Remove="Resources\Koaloader\profapi-32\profapi.dll" />
+	  <None Remove="Resources\Koaloader\profapi-64\profapi.dll" />
+	  <None Remove="Resources\Koaloader\propsys-32\propsys.dll" />
+	  <None Remove="Resources\Koaloader\propsys-64\propsys.dll" />
+	  <None Remove="Resources\Koaloader\textshaping-32\textshaping.dll" />
+	  <None Remove="Resources\Koaloader\textshaping-64\textshaping.dll" />
+	  <None Remove="Resources\Koaloader\version-32\version.dll" />
+	  <None Remove="Resources\Koaloader\version-64\version.dll" />
+	  <None Remove="Resources\Koaloader\winhttp-32\winhttp.dll" />
+	  <None Remove="Resources\Koaloader\winhttp-64\winhttp.dll" />
+	  <None Remove="Resources\Koaloader\winmm-32\winmm.dll" />
+	  <None Remove="Resources\Koaloader\winmm-64\winmm.dll" />
+	  <None Remove="Resources\Koaloader\wldp-32\wldp.dll" />
+	  <None Remove="Resources\Koaloader\wldp-64\wldp.dll" />
+	  <None Remove="Resources\Koaloader\xinput9_1_0-32\xinput9_1_0.dll" />
+	  <None Remove="Resources\Koaloader\xinput9_1_0-64\xinput9_1_0.dll" />
+	  <None Remove="Resources\ScreamAPI\EOSSDK-Win32-Shipping.dll" />
+	  <None Remove="Resources\ScreamAPI\EOSSDK-Win64-Shipping.dll" />
+	  <None Remove="Resources\SmokeAPI\steam_api.dll" />
+	  <None Remove="Resources\SmokeAPI\steam_api64.dll" />
+	  <None Remove="Resources\UplayR1\uplay_r1_loader.dll" />
+	  <None Remove="Resources\UplayR1\uplay_r1_loader64.dll" />
+	  <None Remove="Resources\UplayR2\upc_r2_loader.dll" />
+	  <None Remove="Resources\UplayR2\upc_r2_loader64.dll" />
+	</ItemGroup>
+	<ItemGroup>
+	  <EmbeddedResource Include="Resources\Koaloader\audioses-32\audioses.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\audioses-64\audioses.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\d3d10-32\d3d10.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\d3d10-64\d3d10.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\d3d11-32\d3d11.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\d3d11-64\d3d11.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\d3d9-32\d3d9.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\d3d9-64\d3d9.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\dinput8-32\dinput8.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\dinput8-64\dinput8.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\dwmapi-32\dwmapi.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\dwmapi-64\dwmapi.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\dxgi-32\dxgi.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\dxgi-64\dxgi.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\glu32-32\glu32.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\glu32-64\glu32.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\hid-32\hid.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\hid-64\hid.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\iphlpapi-32\iphlpapi.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\iphlpapi-64\iphlpapi.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\msasn1-32\msasn1.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\msasn1-64\msasn1.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\msimg32-32\msimg32.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\msimg32-64\msimg32.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\mswsock-32\mswsock.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\mswsock-64\mswsock.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\opengl32-32\opengl32.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\opengl32-64\opengl32.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\profapi-32\profapi.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\profapi-64\profapi.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\propsys-32\propsys.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\propsys-64\propsys.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\textshaping-32\textshaping.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\textshaping-64\textshaping.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\version-32\version.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\version-64\version.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\winhttp-32\winhttp.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\winhttp-64\winhttp.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\winmm-32\winmm.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\winmm-64\winmm.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\wldp-32\wldp.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\wldp-64\wldp.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\xinput9_1_0-32\xinput9_1_0.dll" />
+	  <EmbeddedResource Include="Resources\Koaloader\xinput9_1_0-64\xinput9_1_0.dll" />
+	  <EmbeddedResource Include="Resources\ScreamAPI\EOSSDK-Win32-Shipping.dll" />
+	  <EmbeddedResource Include="Resources\ScreamAPI\EOSSDK-Win64-Shipping.dll" />
+	  <EmbeddedResource Include="Resources\SmokeAPI\steam_api.dll" />
+	  <EmbeddedResource Include="Resources\SmokeAPI\steam_api64.dll" />
+	  <EmbeddedResource Include="Resources\UplayR1\uplay_r1_loader.dll" />
+	  <EmbeddedResource Include="Resources\UplayR1\uplay_r1_loader64.dll" />
+	  <EmbeddedResource Include="Resources\UplayR2\upc_r2_loader.dll" />
+	  <EmbeddedResource Include="Resources\UplayR2\upc_r2_loader64.dll" />
+	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Gameloop.Vdf" Version="0.6.2" />
 		<PackageReference Include="HtmlAgilityPack" Version="1.11.43" />

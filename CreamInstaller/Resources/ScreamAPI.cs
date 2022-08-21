@@ -120,7 +120,7 @@ internal static class ScreamAPI
         }
         if (File.Exists(api32_o))
         {
-            Properties.Resources.EpicOnlineServices32.Write(api32);
+            "ScreamAPI.EOSSDK-Win32-Shipping.dll".Write(api32);
             if (installForm is not null)
                 installForm.UpdateUser($"Wrote ScreamAPI: {Path.GetFileName(api32)}", InstallationLog.Action, info: false);
         }
@@ -132,7 +132,7 @@ internal static class ScreamAPI
         }
         if (File.Exists(api64_o))
         {
-            Properties.Resources.EpicOnlineServices64.Write(api64);
+            "ScreamAPI.EOSSDK-Win64-Shipping.dll".Write(api64);
             if (installForm is not null)
                 installForm.UpdateUser($"Wrote ScreamAPI: {Path.GetFileName(api64)}", InstallationLog.Action, info: false);
         }

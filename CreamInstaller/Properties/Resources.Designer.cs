@@ -61,92 +61,12 @@ namespace CreamInstaller.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] EpicOnlineServices32 {
-            get {
-                object obj = ResourceManager.GetObject("EpicOnlineServices32", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] EpicOnlineServices64 {
-            get {
-                object obj = ResourceManager.GetObject("EpicOnlineServices64", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
         internal static System.Drawing.Icon Icon {
             get {
                 object obj = ResourceManager.GetObject("Icon", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] Steamworks32 {
-            get {
-                object obj = ResourceManager.GetObject("Steamworks32", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] Steamworks64 {
-            get {
-                object obj = ResourceManager.GetObject("Steamworks64", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] Upc32 {
-            get {
-                object obj = ResourceManager.GetObject("Upc32", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] Upc64 {
-            get {
-                object obj = ResourceManager.GetObject("Upc64", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] Uplay32 {
-            get {
-                object obj = ResourceManager.GetObject("Uplay32", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] Uplay64 {
-            get {
-                object obj = ResourceManager.GetObject("Uplay64", resourceCulture);
-                return ((byte[])(obj));
             }
         }
     }

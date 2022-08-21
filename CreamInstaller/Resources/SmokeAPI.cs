@@ -129,7 +129,7 @@ internal static class SmokeAPI
         }
         if (File.Exists(api32_o))
         {
-            Properties.Resources.Steamworks32.Write(api32);
+            "SmokeAPI.steam_api.dll".Write(api32);
             if (installForm is not null)
                 installForm.UpdateUser($"Wrote SmokeAPI: {Path.GetFileName(api32)}", InstallationLog.Action, info: false);
         }
@@ -141,7 +141,7 @@ internal static class SmokeAPI
         }
         if (File.Exists(api64_o))
         {
-            Properties.Resources.Steamworks64.Write(api64);
+            "SmokeAPI.steam_api64.dll".Write(api64);
             if (installForm is not null)
                 installForm.UpdateUser($"Wrote SmokeAPI: {Path.GetFileName(api64)}", InstallationLog.Action, info: false);
         }

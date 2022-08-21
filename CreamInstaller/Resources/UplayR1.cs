@@ -96,7 +96,7 @@ internal static class UplayR1
         }
         if (File.Exists(api32_o))
         {
-            Properties.Resources.Uplay32.Write(api32);
+            "UplayR1.uplay_r1_loader.dll".Write(api32);
             if (installForm is not null)
                 installForm.UpdateUser($"Wrote Uplay R1 Unlocker: {Path.GetFileName(api32)}", InstallationLog.Action, info: false);
         }
@@ -108,7 +108,7 @@ internal static class UplayR1
         }
         if (File.Exists(api64_o))
         {
-            Properties.Resources.Uplay64.Write(api64);
+            "UplayR1.uplay_r1_loader64.dll".Write(api64);
             if (installForm is not null)
                 installForm.UpdateUser($"Wrote Uplay R1 Unlocker: {Path.GetFileName(api64)}", InstallationLog.Action, info: false);
         }
