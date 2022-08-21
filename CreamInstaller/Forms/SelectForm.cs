@@ -867,8 +867,8 @@ internal partial class SelectForm : CustomForm
             _ = blockedDirectoryExceptions.Append(helpButtonListPrefix + name);
         using DialogForm form = new(this);
         _ = form.Show(SystemIcons.Information,
-            "Blocks the program from caching and displaying games protected by DLL checks," +
-            "\nanti-cheats, or that are confirmed not to be working with SmokeAPI or ScreamAPI." +
+            "Blocks the program from caching and displaying games protected by anti-cheats." +
+            "\nYou disable this option and install DLC unlockers to protected games at your own risk!" +
             "\n\nBlocked games: " + (string.IsNullOrWhiteSpace(blockedGames.ToString()) ? "(none)" : blockedGames) +
             "\n\nBlocked game sub-directories: " + (string.IsNullOrWhiteSpace(blockedDirectories.ToString()) ? "(none)" : blockedDirectories) +
             "\n\nBlocked game sub-directory exceptions: " + (string.IsNullOrWhiteSpace(blockedDirectoryExceptions.ToString()) ? "(none)" : blockedDirectoryExceptions),

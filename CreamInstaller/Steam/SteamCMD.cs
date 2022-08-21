@@ -231,6 +231,7 @@ internal static class SteamCMD
 #pragma warning restore IDE0150 // Prefer 'null' check over type check
         VToken extended = appInfo.Value.GetChild("extended");
         if (extended is not null)
+#pragma warning disable IDE0220 // Add explicit cast
             foreach (VProperty property in extended.Where(p => p is VProperty && (p as VProperty).Key == "listofdlc"))
                 foreach (string id in property.Value.ToString().Split(","))
                     if (int.TryParse(id, out int appId) && !dlcIds.Contains("" + appId))
@@ -240,6 +241,7 @@ internal static class SteamCMD
             foreach (VProperty property in depots.Where(p => p is VProperty && int.TryParse((p as VProperty).Key, out int _)))
                 if (int.TryParse(property.Value.GetChild("dlcappid")?.ToString(), out int appId) && !dlcIds.Contains("" + appId))
                     dlcIds.Add("" + appId);
+#pragma warning restore IDE0220 // Add explicit cast
         return dlcIds;
     });
 

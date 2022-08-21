@@ -27,8 +27,8 @@ internal static class Program
     internal static readonly string CurrentProcessFilePath = CurrentProcess.MainModule.FileName;
 
     internal static bool BlockProtectedGames = true;
-    internal static readonly string[] ProtectedGames = { "PAYDAY 2", "Call to Arms" }; // non-functioning DLC unlockers or DLL detections
-    internal static readonly string[] ProtectedGameDirectories = { @"\EasyAntiCheat", @"\BattlEye" }; // DLL detections
+    internal static readonly string[] ProtectedGames = { "PAYDAY 2" };
+    internal static readonly string[] ProtectedGameDirectories = { @"\EasyAntiCheat", @"\BattlEye" };
     internal static readonly string[] ProtectedGameDirectoryExceptions = Array.Empty<string>();
 
     internal static bool IsGameBlocked(string name, string directory = null)
