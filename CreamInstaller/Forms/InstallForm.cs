@@ -65,7 +65,7 @@ internal partial class InstallForm : CustomForm
         }
         if (selection.Koaloader && !Uninstalling)
         {
-            foreach (string directory in await selection.GetKoaloaderDirectories())
+            foreach (string directory in selection.ExecutableDirectories)
             {
                 UpdateUser("Installing Koaloader to " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
                 await Koaloader.Install(directory, selection, this);
@@ -75,7 +75,7 @@ internal partial class InstallForm : CustomForm
         {
             if (Uninstalling)
             {
-                foreach (string directory in await selection.GetKoaloaderDirectories())
+                foreach (string directory in selection.ExecutableDirectories)
                 {
                     directory.GetKoaloaderComponents(out List<string> proxies, out string config);
                     if (proxies.Any(proxy => File.Exists(proxy) && proxy.IsResourceFile(Resources.Resources.ResourceIdentifier.Koaloader))

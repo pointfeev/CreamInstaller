@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace CreamInstaller.Resources;
 
@@ -54,6 +55,27 @@ internal static class Resources
         }
         return false;
     }
+
+    internal static async Task<List<string>> GetExecutableDirectories(this string rootDirectory, Func<string, bool> validFunc = null) => await Task.Run(async () =>
+    {
+        List<string> executableDirectories = new();
+        if (Program.Canceled || !Directory.Exists(rootDirectory)) return null;
+        if (Directory.GetFiles(rootDirectory, "*.exe").Any(d => validFunc(d)))
+            executableDirectories.Add(rootDirectory);
+        string[] directories = Directory.GetDirectories(rootDirectory);
+        foreach (string _directory in directories)
+        {
+            if (Program.Canceled) return null;
+            try
+            {
+                List<string> moreExecutableDirectories = await _directory.GetExecutableDirectories(validFunc);
+                if (moreExecutableDirectories is not null)
+                    executableDirectories.AddRange(moreExecutableDirectories);
+            }
+            catch { }
+        }
+        return !executableDirectories.Any() ? null : executableDirectories;
+    });
 
     internal static void GetCreamApiComponents(
             this string directory,

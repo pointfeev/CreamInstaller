@@ -30,7 +30,7 @@ internal static class Koaloader
     {
         ("SmokeAPI", "SmokeAPI32.dll"), ("SmokeAPI", "SmokeAPI64.dll"),
         ("ScreamAPI", "ScreamAPI32.dll"), ("ScreamAPI", "ScreamAPI64.dll"),
-        ("Uplay R2 Unlocker", "UplayR2Unlocker32.dll"), ("Uplay R2 Unlocker", "UplayR2Unlocker64.dll"),
+        ("Uplay R1 Unlocker", "UplayR1Unlocker32.dll"), ("Uplay R1 Unlocker", "UplayR1Unlocker64.dll"),
         ("Uplay R2 Unlocker", "UplayR2Unlocker32.dll"), ("Uplay R2 Unlocker", "UplayR2Unlocker64.dll")
     };
 
@@ -43,8 +43,8 @@ internal static class Koaloader
         if (targets.Any())
         {
             writer.WriteLine("  \"targets\": [");
-            System.Collections.Generic.KeyValuePair<string, string> lastTarget = targets.Last();
-            foreach (System.Collections.Generic.KeyValuePair<string, string> pair in targets)
+            KeyValuePair<string, string> lastTarget = targets.Last();
+            foreach (KeyValuePair<string, string> pair in targets)
             {
                 string path = pair.Value;
                 writer.WriteLine($"      \"{path}\"{(pair.Equals(lastTarget) ? "" : ",")}");
@@ -58,8 +58,8 @@ internal static class Koaloader
         if (modules.Any())
         {
             writer.WriteLine("  \"modules\": [");
-            System.Collections.Generic.KeyValuePair<string, string> lastModule = modules.Last();
-            foreach (System.Collections.Generic.KeyValuePair<string, string> pair in modules)
+            KeyValuePair<string, string> lastModule = modules.Last();
+            foreach (KeyValuePair<string, string> pair in modules)
             {
                 string path = pair.Value;
                 writer.WriteLine("    {");
@@ -75,27 +75,6 @@ internal static class Koaloader
             writer.WriteLine("  \"modules\": []");
         writer.WriteLine("}");
     }
-
-    internal static async Task<List<string>> GetKoaloaderDirectories(this string rootDirectory) => await Task.Run(async () =>
-    {
-        List<string> executableDirectories = new();
-        if (Program.Canceled || !Directory.Exists(rootDirectory)) return null;
-        if (Directory.GetFiles(rootDirectory, "*.exe").Any())
-            executableDirectories.Add(rootDirectory);
-        string[] directories = Directory.GetDirectories(rootDirectory);
-        foreach (string _directory in directories)
-        {
-            if (Program.Canceled) return null;
-            try
-            {
-                List<string> moreExecutableDirectories = await _directory.GetKoaloaderDirectories();
-                if (moreExecutableDirectories is not null)
-                    executableDirectories.AddRange(moreExecutableDirectories);
-            }
-            catch { }
-        }
-        return !executableDirectories.Any() ? null : executableDirectories;
-    });
 
     internal static async Task Uninstall(string directory, InstallForm installForm = null, bool deleteConfig = true) => await Task.Run(() =>
     {

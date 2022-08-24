@@ -1,4 +1,5 @@
 ﻿using CreamInstaller.Resources;
+using CreamInstaller.Utility;
 
 using Microsoft.Win32;
 
@@ -22,7 +23,7 @@ internal static class EpicLibrary
             epicManifestsPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Epic Games\EpicGamesLauncher", "AppDataPath", null) as string;
             epicManifestsPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Epic Games\EpicGamesLauncher", "AppDataPath", null) as string;
             if (epicManifestsPath is not null && epicManifestsPath.EndsWith(@"\Data")) epicManifestsPath += @"\Manifests";
-            return epicManifestsPath;
+            return epicManifestsPath.BeautifyPath();
         }
     }
 
@@ -57,7 +58,7 @@ internal static class EpicLibrary
             || File.Exists(api64)
             || File.Exists(api64_o)
             || File.Exists(config))
-            dllDirectories.Add(gameDirectory);
+            dllDirectories.Add(gameDirectory.BeautifyPath());
         string[] directories = Directory.GetDirectories(gameDirectory);
         foreach (string _directory in directories)
         {

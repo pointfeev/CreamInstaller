@@ -6,6 +6,8 @@ public class Manifest
 
     public string InstallLocation { get; set; }
 
+    public string LaunchExecutable { get; set; }
+
     public string CatalogNamespace { get; set; }
 
     public string CatalogItemId { get; set; }

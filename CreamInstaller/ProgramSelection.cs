@@ -4,7 +4,6 @@ using CreamInstaller.Resources;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace CreamInstaller;
 
@@ -43,6 +42,7 @@ internal class ProgramSelection
     internal string WebsiteUrl;
 
     internal string RootDirectory;
+    internal List<string> ExecutableDirectories;
     internal List<string> DllDirectories;
 
     internal readonly SortedList<string, (DlcType type, string name, string icon)> AllDlc = new(PlatformIdComparer.String);
@@ -50,9 +50,6 @@ internal class ProgramSelection
 
     internal readonly List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> ExtraDlc = new();         // for Paradox Launcher
     internal readonly List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> ExtraSelectedDlc = new(); // for Paradox Launcher
-
-    private List<string> koaloaderDirectories;
-    internal async Task<List<string>> GetKoaloaderDirectories() => koaloaderDirectories ??= await RootDirectory.GetKoaloaderDirectories();
 
     internal bool AreDllsLocked
     {

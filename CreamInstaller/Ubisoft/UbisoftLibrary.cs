@@ -1,4 +1,5 @@
 ﻿using CreamInstaller.Resources;
+using CreamInstaller.Utility;
 
 using Microsoft.Win32;
 
@@ -32,7 +33,7 @@ internal static class UbisoftLibrary
             RegistryKey installKey = installsKey.OpenSubKey(gameId);
             string installDir = installKey?.GetValue("InstallDir")?.ToString();
             if (installDir is not null)
-                games.Add((gameId, new DirectoryInfo(installDir).Name, Path.GetFullPath(installDir)));
+                games.Add((gameId, new DirectoryInfo(installDir).Name, installDir.BeautifyPath()));
         }
         return games;
     });
@@ -47,7 +48,7 @@ internal static class UbisoftLibrary
             || File.Exists(api64)
             || File.Exists(api64_o)
             || File.Exists(config))
-            dllDirectories.Add(gameDirectory);
+            dllDirectories.Add(gameDirectory.BeautifyPath());
         else
         {
             gameDirectory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config);
@@ -58,7 +59,7 @@ internal static class UbisoftLibrary
                 || File.Exists(api64)
                 || File.Exists(api64_o)
                 || File.Exists(config))
-                dllDirectories.Add(gameDirectory);
+                dllDirectories.Add(gameDirectory.BeautifyPath());
         }
         string[] directories = Directory.GetDirectories(gameDirectory);
         foreach (string _directory in directories)

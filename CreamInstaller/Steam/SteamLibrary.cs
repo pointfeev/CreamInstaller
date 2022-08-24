@@ -1,4 +1,5 @@
 ﻿using CreamInstaller.Resources;
+using CreamInstaller.Utility;
 
 using Gameloop.Vdf.Linq;
 
@@ -21,7 +22,7 @@ internal static class SteamLibrary
         {
             installPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam", "InstallPath", null) as string;
             installPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Valve\Steam", "InstallPath", null) as string;
-            return installPath;
+            return installPath.BeautifyPath();
         }
     }
 
@@ -52,7 +53,7 @@ internal static class SteamLibrary
             || File.Exists(api64_o)
             || File.Exists(config)
             || File.Exists(cache))
-            dllDirectories.Add(gameDirectory);
+            dllDirectories.Add(gameDirectory.BeautifyPath());
         string[] directories = Directory.GetDirectories(gameDirectory);
         foreach (string _directory in directories)
         {
@@ -91,7 +92,7 @@ internal static class SteamLibrary
                 string gameDirectory = libraryDirectory + @"\common\" + installdir;
                 if (!int.TryParse(appId, out int appIdInt)) continue;
                 if (!int.TryParse(buildId, out int buildIdInt)) continue;
-                games.Add((appId, name, branch, buildIdInt, gameDirectory));
+                games.Add((appId, name, branch, buildIdInt, gameDirectory.BeautifyPath()));
             }
         }
         return !games.Any() ? null : games;

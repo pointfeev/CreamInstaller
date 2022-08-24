@@ -148,7 +148,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Gameloop.Vdf" Version="0.6.2" />
-		<PackageReference Include="HtmlAgilityPack" Version="1.11.43" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.11.45" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="Onova" Version="2.6.2" />
 	</ItemGroup>

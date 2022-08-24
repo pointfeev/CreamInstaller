@@ -57,4 +57,6 @@ internal static class Diagnostics
         FileName = url,
         UseShellExecute = true
     });
+
+    internal static string BeautifyPath(this string path) => path is null ? null : Path.TrimEndingDirectorySeparator(Path.GetFullPath(path));
 }
