@@ -1,6 +1,4 @@
-﻿using ABI.System.Collections.Generic;
-
-using CreamInstaller.Components;
+﻿using CreamInstaller.Components;
 using CreamInstaller.Utility;
 
 using System.Collections.Generic;
@@ -8,9 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using Windows.Media.Playback;
-using Windows.Networking.Connectivity;
 
 namespace CreamInstaller.Resources;
 
@@ -82,7 +77,28 @@ internal static class Koaloader
         writer.WriteLine("}");
     }
 
-    internal static async Task Uninstall(string directory, ProgramSelection selection, InstallForm installForm = null, bool deleteConfig = true) => await Task.Run(() =>
+    internal static async Task<List<string>> GetKoaloaderDirectories(this string rootDirectory) => await Task.Run(async () =>
+    {
+        List<string> executableDirectories = new();
+        if (Program.Canceled || !Directory.Exists(rootDirectory)) return null;
+        if (Directory.GetFiles(rootDirectory, "*.exe").Any())
+            executableDirectories.Add(rootDirectory);
+        string[] directories = Directory.GetDirectories(rootDirectory);
+        foreach (string _directory in directories)
+        {
+            if (Program.Canceled) return null;
+            try
+            {
+                List<string> moreExecutableDirectories = await _directory.GetKoaloaderDirectories();
+                if (moreExecutableDirectories is not null)
+                    executableDirectories.AddRange(moreExecutableDirectories);
+            }
+            catch { }
+        }
+        return !executableDirectories.Any() ? null : executableDirectories;
+    });
+
+    internal static async Task Uninstall(string directory, InstallForm installForm = null, bool deleteConfig = true) => await Task.Run(() =>
     {
         directory.GetKoaloaderComponents(out List<string> proxies, out string config);
         foreach (string proxy in proxies)

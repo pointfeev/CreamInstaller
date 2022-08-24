@@ -4,6 +4,7 @@ using CreamInstaller.Resources;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CreamInstaller;
 
@@ -27,6 +28,7 @@ public enum DlcType
 internal class ProgramSelection
 {
     internal bool Enabled;
+    internal bool Koaloader = true;
 
     internal Platform Platform;
     internal string Id = "0";
@@ -43,13 +45,14 @@ internal class ProgramSelection
     internal string RootDirectory;
     internal List<string> DllDirectories;
 
-    internal bool Koaloader = true;
-
     internal readonly SortedList<string, (DlcType type, string name, string icon)> AllDlc = new(PlatformIdComparer.String);
     internal readonly SortedList<string, (DlcType type, string name, string icon)> SelectedDlc = new(PlatformIdComparer.String);
 
     internal readonly List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> ExtraDlc = new();         // for Paradox Launcher
     internal readonly List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> ExtraSelectedDlc = new(); // for Paradox Launcher
+
+    private List<string> koaloaderDirectories;
+    internal async Task<List<string>> GetKoaloaderDirectories() => koaloaderDirectories ??= await RootDirectory.GetKoaloaderDirectories();
 
     internal bool AreDllsLocked
     {

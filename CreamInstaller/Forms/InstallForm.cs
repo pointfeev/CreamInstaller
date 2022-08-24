@@ -65,7 +65,7 @@ internal partial class InstallForm : CustomForm
         }
         if (selection.Koaloader && !Uninstalling)
         {
-            foreach (string directory in await selection.RootDirectory.GetExecutableDirectories())
+            foreach (string directory in await selection.GetKoaloaderDirectories())
             {
                 UpdateUser("Installing Koaloader to " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
                 await Koaloader.Install(directory, selection, this);
@@ -75,7 +75,7 @@ internal partial class InstallForm : CustomForm
         {
             if (Uninstalling)
             {
-                foreach (string directory in await selection.RootDirectory.GetExecutableDirectories())
+                foreach (string directory in await selection.GetKoaloaderDirectories())
                 {
                     directory.GetKoaloaderComponents(out List<string> proxies, out string config);
                     bool proxyExists = false;
@@ -85,20 +85,21 @@ internal partial class InstallForm : CustomForm
                             proxyExists = true;
                             break;
                         }
-                    bool dllExists = false;
-                    foreach ((string unlocker, string dll) in Koaloader.AutoLoadDlls)
-                    {
-                        string path = directory + @"\" + dll;
-                        if (File.Exists(path))
+                    bool dllExists = proxyExists || false;
+                    if (!dllExists)
+                        foreach ((string unlocker, string dll) in Koaloader.AutoLoadDlls)
                         {
-                            dllExists = true;
-                            break;
+                            string path = directory + @"\" + dll;
+                            if (File.Exists(path))
+                            {
+                                dllExists = true;
+                                break;
+                            }
                         }
-                    }
                     if (proxyExists || dllExists || File.Exists(config))
                     {
                         UpdateUser("Uninstalling Koaloader from " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
-                        await Koaloader.Uninstall(directory, selection, this);
+                        await Koaloader.Uninstall(directory, this);
                     }
                 }
             }
