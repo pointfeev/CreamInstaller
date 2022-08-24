@@ -78,25 +78,9 @@ internal partial class InstallForm : CustomForm
                 foreach (string directory in await selection.GetKoaloaderDirectories())
                 {
                     directory.GetKoaloaderComponents(out List<string> proxies, out string config);
-                    bool proxyExists = false;
-                    foreach (string proxy in proxies)
-                        if (File.Exists(proxy) && proxy.IsResourceFile(Resources.Resources.ResourceIdentifier.Koaloader))
-                        {
-                            proxyExists = true;
-                            break;
-                        }
-                    bool dllExists = proxyExists || false;
-                    if (!dllExists)
-                        foreach ((string unlocker, string dll) in Koaloader.AutoLoadDlls)
-                        {
-                            string path = directory + @"\" + dll;
-                            if (File.Exists(path))
-                            {
-                                dllExists = true;
-                                break;
-                            }
-                        }
-                    if (proxyExists || dllExists || File.Exists(config))
+                    if (proxies.Any(proxy => File.Exists(proxy) && proxy.IsResourceFile(Resources.Resources.ResourceIdentifier.Koaloader))
+                        || Koaloader.AutoLoadDlls.Any(pair => File.Exists(directory + @"\" + pair.dll))
+                        || File.Exists(config))
                     {
                         UpdateUser("Uninstalling Koaloader from " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
                         await Koaloader.Uninstall(directory, this);

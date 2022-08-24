@@ -18,12 +18,11 @@ internal static class Koaloader
         )
     {
         proxies = new();
-        foreach (string proxy in Resources.EmbeddedResources)
+        foreach (string proxy in Resources.EmbeddedResources.Select(proxy =>
         {
-            string proxyPath = proxy[(proxy.IndexOf('.') + 1)..];
-            proxyPath = proxyPath[(proxyPath.IndexOf('.') + 1)..];
-            proxies.Add(directory + @"\" + proxyPath);
-        }
+            proxy = proxy[(proxy.IndexOf('.') + 1)..];
+            return proxy[(proxy.IndexOf('.') + 1)..];
+        })) proxies.Add(directory + @"\" + proxy);
         config = directory + @"\Koaloader.json";
     }
 
@@ -101,24 +100,19 @@ internal static class Koaloader
     internal static async Task Uninstall(string directory, InstallForm installForm = null, bool deleteConfig = true) => await Task.Run(() =>
     {
         directory.GetKoaloaderComponents(out List<string> proxies, out string config);
-        foreach (string proxy in proxies)
+        foreach (string proxy in proxies.Where(proxy => File.Exists(proxy) && proxy.IsResourceFile(Resources.ResourceIdentifier.Koaloader)))
         {
-            if (File.Exists(proxy) && proxy.IsResourceFile(Resources.ResourceIdentifier.Koaloader))
-            {
-                File.Delete(proxy);
-                if (installForm is not null)
-                    installForm.UpdateUser($"Deleted Koaloader: {Path.GetFileName(proxy)}", InstallationLog.Action, info: false);
-            }
+            File.Delete(proxy);
+            if (installForm is not null)
+                installForm.UpdateUser($"Deleted Koaloader: {Path.GetFileName(proxy)}", InstallationLog.Action, info: false);
         }
-        foreach ((string unlocker, string dll) in AutoLoadDlls)
+        foreach ((string unlocker, string path) in AutoLoadDlls
+            .Select(pair => (pair.unlocker, path: directory + @"\" + pair.dll))
+            .Where(pair => File.Exists(pair.path)))
         {
-            string path = directory + @"\" + dll;
-            if (File.Exists(path))
-            {
-                File.Delete(path);
-                if (installForm is not null)
-                    installForm.UpdateUser($"Deleted {unlocker}: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
-            }
+            File.Delete(path);
+            if (installForm is not null)
+                installForm.UpdateUser($"Deleted {unlocker}: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
         }
         if (deleteConfig && File.Exists(config))
         {
