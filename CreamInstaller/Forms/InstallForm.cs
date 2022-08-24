@@ -58,67 +58,106 @@ internal partial class InstallForm : CustomForm
     private async Task OperateFor(ProgramSelection selection)
     {
         UpdateProgress(0);
-        int count = selection.DllDirectories.Count;
-        int cur = 0;
         if (selection.Id == "PL")
         {
             UpdateUser($"Repairing Paradox Launcher . . . ", InstallationLog.Operation);
             _ = await Repair(this, selection);
         }
-        foreach (string directory in selection.DllDirectories)
+        if (selection.Koaloader && !Uninstalling)
         {
-            if (selection.Platform is Platform.Steam || selection.SelectedDlc.Any(d => d.Value.type is DlcType.Steam or DlcType.SteamHidden)
-                || selection.Platform is Platform.Paradox || selection.ExtraSelectedDlc.Any(item => item.dlc.Any(dlc => dlc.Value.type is DlcType.Steam or DlcType.SteamHidden)))
+            foreach (string directory in await selection.RootDirectory.GetExecutableDirectories())
             {
-                directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out string cache);
-                if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config) || File.Exists(cache))
+                UpdateUser("Installing Koaloader to " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+                await Koaloader.Install(directory, selection, this);
+            }
+        }
+        else
+        {
+            if (Uninstalling)
+            {
+                foreach (string directory in await selection.RootDirectory.GetExecutableDirectories())
                 {
-                    UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} SmokeAPI" +
-                        $" {(Uninstalling ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
-                    if (Uninstalling)
-                        await SmokeAPI.Uninstall(directory, this);
-                    else
-                        await SmokeAPI.Install(directory, selection, this);
+                    directory.GetKoaloaderComponents(out List<string> proxies, out string config);
+                    bool proxyExists = false;
+                    foreach (string proxy in proxies)
+                        if (File.Exists(proxy) && proxy.IsResourceFile(Resources.Resources.ResourceIdentifier.Koaloader))
+                        {
+                            proxyExists = true;
+                            break;
+                        }
+                    bool dllExists = false;
+                    foreach ((string unlocker, string dll) in Koaloader.AutoLoadDlls)
+                    {
+                        string path = directory + @"\" + dll;
+                        if (File.Exists(path))
+                        {
+                            dllExists = true;
+                            break;
+                        }
+                    }
+                    if (proxyExists || dllExists || File.Exists(config))
+                    {
+                        UpdateUser("Uninstalling Koaloader from " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+                        await Koaloader.Uninstall(directory, selection, this);
+                    }
                 }
             }
-            if (selection.Platform is Platform.Epic || selection.SelectedDlc.Any(d => d.Value.type is DlcType.EpicCatalogItem or DlcType.EpicEntitlement)
-                || selection.Platform is Platform.Paradox || selection.ExtraSelectedDlc.Any(item => item.dlc.Any(dlc => dlc.Value.type is DlcType.EpicCatalogItem or DlcType.EpicEntitlement)))
+            int count = selection.DllDirectories.Count, cur = 0;
+            foreach (string directory in selection.DllDirectories)
             {
-                directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
-                if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config))
+                if (selection.Platform is Platform.Steam || selection.SelectedDlc.Any(d => d.Value.type is DlcType.Steam or DlcType.SteamHidden)
+                    || selection.Platform is Platform.Paradox || selection.ExtraSelectedDlc.Any(item => item.dlc.Any(dlc => dlc.Value.type is DlcType.Steam or DlcType.SteamHidden)))
                 {
-                    UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} ScreamAPI" +
-                        $" {(Uninstalling ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
-                    if (Uninstalling)
-                        await ScreamAPI.Uninstall(directory, this);
-                    else
-                        await ScreamAPI.Install(directory, selection, this);
+                    directory.GetSmokeApiComponents(out _, out string api32_o, out _, out string api64_o, out string config, out string cache);
+                    if (File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config) || File.Exists(cache))
+                    {
+                        UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} SmokeAPI" +
+                            $" {(Uninstalling ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+                        if (Uninstalling)
+                            await SmokeAPI.Uninstall(directory, this);
+                        else
+                            await SmokeAPI.Install(directory, selection, this);
+                    }
                 }
+                if (selection.Platform is Platform.Epic || selection.SelectedDlc.Any(d => d.Value.type is DlcType.EpicCatalogItem or DlcType.EpicEntitlement)
+                    || selection.Platform is Platform.Paradox || selection.ExtraSelectedDlc.Any(item => item.dlc.Any(dlc => dlc.Value.type is DlcType.EpicCatalogItem or DlcType.EpicEntitlement)))
+                {
+                    directory.GetScreamApiComponents(out _, out string api32_o, out _, out string api64_o, out string config);
+                    if (File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config))
+                    {
+                        UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} ScreamAPI" +
+                            $" {(Uninstalling ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+                        if (Uninstalling)
+                            await ScreamAPI.Uninstall(directory, this);
+                        else
+                            await ScreamAPI.Install(directory, selection, this);
+                    }
+                }
+                if (selection.Platform is Platform.Ubisoft)
+                {
+                    directory.GetUplayR1Components(out _, out string api32_o, out _, out string api64_o, out string config);
+                    if (File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config))
+                    {
+                        UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} Uplay R1 Unlocker" +
+                            $" {(Uninstalling ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+                        if (Uninstalling)
+                            await UplayR1.Uninstall(directory, this);
+                        else
+                            await UplayR1.Install(directory, selection, this);
+                    }
+                    directory.GetUplayR2Components(out _, out _, out _, out api32_o, out _, out api64_o, out config);
+                    if (File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config))
+                    {
+                        UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} Uplay R2 Unlocker" +
+                            $" {(Uninstalling ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+                        if (Uninstalling)
+                            await UplayR2.Uninstall(directory, this);
+                        else
+                            await UplayR2.Install(directory, selection, this);
+                    }
+                }
+                UpdateProgress(++cur / count * 100);
             }
-            if (selection.Platform is Platform.Ubisoft)
-            {
-                directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
-                if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config))
-                {
-                    UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} Uplay R1 Unlocker" +
-                        $" {(Uninstalling ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
-                    if (Uninstalling)
-                        await UplayR1.Uninstall(directory, this);
-                    else
-                        await UplayR1.Install(directory, selection, this);
-                }
-                directory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config);
-                if (File.Exists(old_api32) || File.Exists(old_api64) || File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config))
-                {
-                    UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")} Uplay R2 Unlocker" +
-                        $" {(Uninstalling ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
-                    if (Uninstalling)
-                        await UplayR2.Uninstall(directory, this);
-                    else
-                        await UplayR2.Install(directory, selection, this);
-                }
-            }
-            UpdateProgress(++cur / count * 100);
         }
         UpdateProgress(100);
     }

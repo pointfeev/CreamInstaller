@@ -43,6 +43,8 @@ internal class ProgramSelection
     internal string RootDirectory;
     internal List<string> DllDirectories;
 
+    internal bool Koaloader = true;
+
     internal readonly SortedList<string, (DlcType type, string name, string icon)> AllDlc = new(PlatformIdComparer.String);
     internal readonly SortedList<string, (DlcType type, string name, string icon)> SelectedDlc = new(PlatformIdComparer.String);
 

@@ -110,6 +110,7 @@ internal static class SteamLibrary
                 gameDirectories.Add(libraryFolder);
                 string libraryFolders = libraryFolder + @"\libraryfolders.vdf";
                 if (File.Exists(libraryFolders) && ValveDataFile.TryDeserialize(File.ReadAllText(libraryFolders, Encoding.UTF8), out VProperty result))
+#pragma warning disable IDE0220 // Add explicit cast
                     foreach (VProperty property in result.Value.Where(p => p is VProperty && int.TryParse((p as VProperty).Key, out int _)))
                     {
                         string path = property.Value.GetChild("path")?.ToString();
@@ -117,6 +118,7 @@ internal static class SteamLibrary
                         path += @"\steamapps";
                         if (Directory.Exists(path) && !gameDirectories.Contains(path)) gameDirectories.Add(path);
                     }
+#pragma warning restore IDE0220 // Add explicit cast
             }
         }
         return gameDirectories;

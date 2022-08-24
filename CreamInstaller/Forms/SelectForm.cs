@@ -134,11 +134,11 @@ internal partial class SelectForm : CustomForm
                 _ = selectionTreeView.Nodes.Add(programNode);
             }
         }
+        int totalGames = 0, gamesChecked = 0;
         if (ProgramsToScan.Any(c => c.platform is Platform.Steam))
         {
             List<(string appId, string name, string branch, int buildId, string gameDirectory)> steamGames = await SteamLibrary.GetGames();
-            int totalGames = steamGames.Count;
-            int gamesChecked = 0;
+            totalGames = steamGames.Count;
             foreach ((string appId, string name, string branch, int buildId, string gameDirectory) in steamGames)
             {
                 if (Program.Canceled) return;
@@ -437,6 +437,7 @@ internal partial class SelectForm : CustomForm
             if (Program.Canceled) return;
             await task;
         }
+        gamesChecked = totalGames;
     }
 
     private List<(Platform platform, string id, string name)> ProgramsToScan;

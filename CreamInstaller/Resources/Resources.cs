@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace CreamInstaller.Resources;
 
@@ -417,4 +419,25 @@ internal static class Resources
     internal static bool IsResourceFile(this string filePath, ResourceIdentifier identifier) => filePath.ComputeMD5() is string hash && ResourceMD5s[identifier].Contains(hash);
 
     internal static bool IsResourceFile(this string filePath) => filePath.ComputeMD5() is string hash && ResourceMD5s.Values.Any(hashes => hashes.Contains(hash));
+
+    internal static async Task<List<string>> GetExecutableDirectories(this string rootDirectory) => await Task.Run(async () =>
+    {
+        List<string> executableDirectories = new();
+        if (Program.Canceled || !Directory.Exists(rootDirectory)) return null;
+        if (Directory.GetFiles(rootDirectory, "*.exe").Any())
+            executableDirectories.Add(rootDirectory);
+        string[] directories = Directory.GetDirectories(rootDirectory);
+        foreach (string _directory in directories)
+        {
+            if (Program.Canceled) return null;
+            try
+            {
+                List<string> moreExecutableDirectories = await _directory.GetExecutableDirectories();
+                if (moreExecutableDirectories is not null)
+                    executableDirectories.AddRange(moreExecutableDirectories);
+            }
+            catch { }
+        }
+        return !executableDirectories.Any() ? null : executableDirectories;
+    });
 }
