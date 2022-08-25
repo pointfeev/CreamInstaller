@@ -4,6 +4,8 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 
+using TreeView = System.Windows.Forms.TreeView;
+
 namespace CreamInstaller.Components;
 
 internal class CustomTreeView : TreeView
@@ -18,7 +20,7 @@ internal class CustomTreeView : TreeView
 
     internal CustomTreeView() : base()
     {
-        DrawMode = TreeViewDrawMode.OwnerDrawAll;
+        DrawMode = TreeViewDrawMode.OwnerDrawText;
         DrawNode += new DrawTreeNodeEventHandler(DrawTreeNode);
         TreeViewNodeSorter = PlatformIdComparer.NodeName;
     }
@@ -27,13 +29,33 @@ internal class CustomTreeView : TreeView
     private readonly Dictionary<ProgramSelection, Rectangle> checkBoxBounds = new();
     private const string koaloaderToggleString = "Koaloader";
 
+    private SolidBrush backBrush;
     private void DrawTreeNode(object sender, DrawTreeNodeEventArgs e)
     {
         e.DrawDefault = true;
         TreeNode node = e.Node;
         if (!node.IsVisible)
             return;
-        bool highlighted = node.IsSelected && SelectedNode == node && ContainsFocus;
+
+        bool highlighted = (e.State & TreeNodeStates.Selected) == TreeNodeStates.Selected && Focused;
+
+        Graphics graphics = e.Graphics;
+        backBrush ??= new(BackColor);
+        Font font = node.NodeFont ?? Font;
+
+        Brush brush = highlighted ? SystemBrushes.Highlight : backBrush;
+        string text;// = e.Node.Text;
+        Size size;
+        Rectangle bounds = node.Bounds;
+        Rectangle selectionBounds = bounds;
+        Color color;// = highlighted ? SystemColors.HighlightText : (node.ForeColor != Color.Empty) ? node.ForeColor : node.TreeView.ForeColor;
+        Point point;
+
+        /*Size textSize = TextRenderer.MeasureText(text, font);
+        Point textLoc = new(bounds.X - 1, bounds.Y);
+        bounds = new Rectangle(textLoc, new Size(textSize.Width, bounds.Height));
+        graphics.FillRectangle(brush, bounds);
+        TextRenderer.DrawText(graphics, text, font, bounds, color, TextFormatFlags.Default);*/
 
         Form form = FindForm();
         if (form is not SelectForm and not SelectDialogForm)
@@ -44,63 +66,65 @@ internal class CustomTreeView : TreeView
         if (string.IsNullOrWhiteSpace(platformId) || platform is Platform.None)
             return;
 
-        Graphics graphics = e.Graphics;
-        using SolidBrush backBrush = new(BackColor);
-        using SolidBrush highlightBrush = new(SystemColors.Highlight);
-        Font font = Font;
-        Size lastSize;
-        Rectangle lastBounds = node.Bounds;
-        Rectangle selectionBounds = lastBounds;
-        Point lastPoint;
-
-        string tagText = platform.ToString();
-        lastSize = TextRenderer.MeasureText(graphics, tagText, font);
-        lastBounds = new(lastBounds.X + lastBounds.Width, lastBounds.Y, lastSize.Width, lastBounds.Height);
-        selectionBounds = new(selectionBounds.Location, selectionBounds.Size + new Size(lastBounds.Size.Width, 0));
-        graphics.FillRectangle(highlighted ? highlightBrush : backBrush, lastBounds);
-        lastPoint = new(lastBounds.Location.X - 1, lastBounds.Location.Y + 1);
-        TextRenderer.DrawText(graphics, tagText, font, lastPoint, highlighted ? ColorTranslator.FromHtml("#FFFF99") : Enabled ? ColorTranslator.FromHtml("#696900") : ColorTranslator.FromHtml("#AAAA69"));
+        color = highlighted ? ColorTranslator.FromHtml("#FFFF99") : Enabled ? ColorTranslator.FromHtml("#696900") : ColorTranslator.FromHtml("#AAAA69");
+        text = platform.ToString();
+        size = TextRenderer.MeasureText(graphics, text, font);
+        bounds = new(bounds.X + bounds.Width, bounds.Y, size.Width, bounds.Height);
+        selectionBounds = new(selectionBounds.Location, selectionBounds.Size + new Size(bounds.Size.Width, 0));
+        graphics.FillRectangle(brush, bounds);
+        point = new(bounds.Location.X - 1, bounds.Location.Y + 1);
+        TextRenderer.DrawText(graphics, text, font, point, color, TextFormatFlags.Default);
 
         if (platform is not Platform.Paradox)
         {
-            string subText = platformId.ToString();
-            lastSize = TextRenderer.MeasureText(graphics, subText, font);
-            lastBounds = new(lastBounds.X + lastBounds.Width - 4, lastBounds.Y, lastSize.Width, lastBounds.Height);
-            selectionBounds = new(selectionBounds.Location, selectionBounds.Size + new Size(lastBounds.Size.Width - 4, 0));
-            graphics.FillRectangle(highlighted ? highlightBrush : backBrush, lastBounds);
-            lastPoint = new(lastBounds.Location.X - 1, lastBounds.Location.Y + 1);
-            TextRenderer.DrawText(graphics, subText, font, lastPoint, highlighted ? ColorTranslator.FromHtml("#99FFFF") : Enabled ? ColorTranslator.FromHtml("#006969") : ColorTranslator.FromHtml("#69AAAA"));
+            color = highlighted ? ColorTranslator.FromHtml("#99FFFF") : Enabled ? ColorTranslator.FromHtml("#006969") : ColorTranslator.FromHtml("#69AAAA");
+            text = platformId.ToString();
+            size = TextRenderer.MeasureText(graphics, text, font);
+            int left = -4;
+            bounds = new(bounds.X + bounds.Width + left, bounds.Y, size.Width, bounds.Height);
+            selectionBounds = new(selectionBounds.Location, selectionBounds.Size + new Size(bounds.Size.Width + left, 0));
+            graphics.FillRectangle(brush, bounds);
+            point = new(bounds.Location.X - 1, bounds.Location.Y + 1);
+            TextRenderer.DrawText(graphics, text, font, point, color, TextFormatFlags.Default);
         }
+
+        /*if (highlighted)
+            ControlPaint.DrawFocusRectangle(graphics, selectionBounds, color, SystemColors.Highlight);*/
 
         if (form is SelectForm)
         {
             ProgramSelection selection = ProgramSelection.FromPlatformId(platform, platformId);
             if (selection is not null)
             {
-                if (lastBounds == node.Bounds)
+                if (bounds == node.Bounds)
                 {
-                    lastSize = new(4, 0);
-                    lastBounds = new(lastBounds.X + lastBounds.Width, lastBounds.Y, lastSize.Width, lastBounds.Height);
-                    graphics.FillRectangle(highlighted ? highlightBrush : backBrush, lastBounds);
+                    size = new(4, 0);
+                    bounds = new(bounds.X + bounds.Width, bounds.Y, size.Width, bounds.Height);
+                    graphics.FillRectangle(brush, bounds);
                 }
 
-                CheckBoxState checkBoxState = selection.Koaloader ? CheckBoxState.CheckedNormal : CheckBoxState.UncheckedNormal;
-                lastSize = CheckBoxRenderer.GetGlyphSize(graphics, checkBoxState);
-                lastBounds = new(lastBounds.X + lastBounds.Width, lastBounds.Y, lastSize.Width, lastBounds.Height);
-                selectionBounds = new(selectionBounds.Location, selectionBounds.Size + new Size(lastBounds.Size.Width, 0));
-                Rectangle checkBoxBounds = lastBounds;
-                graphics.FillRectangle(backBrush, lastBounds);
-                lastPoint = new(lastBounds.Left, lastBounds.Top + lastBounds.Height / 2 - lastSize.Height / 2 - 1);
-                CheckBoxRenderer.DrawCheckBox(graphics, lastPoint, checkBoxState);
+                CheckBoxState checkBoxState = selection.Koaloader
+                    ? Enabled ? CheckBoxState.CheckedPressed : CheckBoxState.CheckedDisabled
+                    : Enabled ? CheckBoxState.UncheckedPressed : CheckBoxState.UncheckedDisabled;
+                size = CheckBoxRenderer.GetGlyphSize(graphics, checkBoxState);
+                bounds = new(bounds.X + bounds.Width, bounds.Y, size.Width, bounds.Height);
+                selectionBounds = new(selectionBounds.Location, selectionBounds.Size + new Size(bounds.Size.Width, 0));
+                Rectangle checkBoxBounds = bounds;
+                graphics.FillRectangle(backBrush, bounds);
+                point = new(bounds.Left, bounds.Top + bounds.Height / 2 - size.Height / 2 - 1);
+                CheckBoxRenderer.DrawCheckBox(graphics, point, checkBoxState);
 
-                lastSize = TextRenderer.MeasureText(graphics, koaloaderToggleString, font);
+                text = koaloaderToggleString;
+                size = TextRenderer.MeasureText(graphics, text, font);
                 int left = 1;
-                lastBounds = new(lastBounds.X + lastBounds.Width, lastBounds.Y, lastSize.Width + left, lastBounds.Height);
-                selectionBounds = new(selectionBounds.Location, selectionBounds.Size + new Size(lastBounds.Size.Width + left, 0));
-                checkBoxBounds = new(checkBoxBounds.Location, checkBoxBounds.Size + new Size(lastBounds.Size.Width + left, 0));
-                graphics.FillRectangle(backBrush, lastBounds);
-                lastPoint = new(lastBounds.Location.X - 1 + left, lastBounds.Location.Y + 1);
-                TextRenderer.DrawText(graphics, koaloaderToggleString, font, lastPoint, Enabled ? ColorTranslator.FromHtml("#006900") : ColorTranslator.FromHtml("#69AA69"));
+                bounds = new(bounds.X + bounds.Width, bounds.Y, size.Width + left, bounds.Height);
+                selectionBounds = new(selectionBounds.Location, selectionBounds.Size + new Size(bounds.Size.Width + left, 0));
+                checkBoxBounds = new(checkBoxBounds.Location, checkBoxBounds.Size + new Size(bounds.Size.Width + left, 0));
+                graphics.FillRectangle(backBrush, bounds);
+                point = new(bounds.Location.X - 1 + left, bounds.Location.Y + 1);
+                TextRenderer.DrawText(graphics, text, font, point,
+                    Enabled ? ColorTranslator.FromHtml("#006900") : ColorTranslator.FromHtml("#69AA69"),
+                    TextFormatFlags.Default);
 
                 this.checkBoxBounds[selection] = RectangleToClient(checkBoxBounds);
             }

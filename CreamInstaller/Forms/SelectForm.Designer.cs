@@ -43,7 +43,7 @@ namespace CreamInstaller
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.blockedGamesCheckBox = new System.Windows.Forms.CheckBox();
             this.blockProtectedHelpButton = new System.Windows.Forms.Button();
-            this.selectionTreeView = new CreamInstaller.Components.CustomTreeView();
+            this.selectionTreeView = new Components.CustomTreeView();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.allCheckBox = new System.Windows.Forms.CheckBox();
             this.progressBar = new System.Windows.Forms.ProgressBar();
@@ -123,10 +123,10 @@ namespace CreamInstaller
             this.flowLayoutPanel4.AutoSize = true;
             this.flowLayoutPanel4.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.flowLayoutPanel4.Controls.Add(this.koaloaderAllCheckBox);
-            this.flowLayoutPanel4.Location = new System.Drawing.Point(420, -1);
+            this.flowLayoutPanel4.Location = new System.Drawing.Point(430, -1);
             this.flowLayoutPanel4.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel4.Name = "flowLayoutPanel4";
-            this.flowLayoutPanel4.Size = new System.Drawing.Size(75, 19);
+            this.flowLayoutPanel4.Size = new System.Drawing.Size(73, 19);
             this.flowLayoutPanel4.TabIndex = 10005;
             this.flowLayoutPanel4.WrapContents = false;
             // 
@@ -137,10 +137,10 @@ namespace CreamInstaller
             this.koaloaderAllCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.koaloaderAllCheckBox.Enabled = false;
             this.koaloaderAllCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.koaloaderAllCheckBox.Location = new System.Drawing.Point(3, 0);
-            this.koaloaderAllCheckBox.Margin = new System.Windows.Forms.Padding(3, 0, 0, 0);
+            this.koaloaderAllCheckBox.Location = new System.Drawing.Point(2, 0);
+            this.koaloaderAllCheckBox.Margin = new System.Windows.Forms.Padding(2, 0, 0, 0);
             this.koaloaderAllCheckBox.Name = "koaloaderAllCheckBox";
-            this.koaloaderAllCheckBox.Size = new System.Drawing.Size(72, 19);
+            this.koaloaderAllCheckBox.Size = new System.Drawing.Size(71, 19);
             this.koaloaderAllCheckBox.TabIndex = 4;
             this.koaloaderAllCheckBox.Text = "Koaloader";
             this.koaloaderAllCheckBox.CheckedChanged += new System.EventHandler(this.OnKoaloaderAllCheckBoxChanged);
@@ -175,10 +175,10 @@ namespace CreamInstaller
             this.flowLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.flowLayoutPanel1.Controls.Add(this.blockedGamesCheckBox);
             this.flowLayoutPanel1.Controls.Add(this.blockProtectedHelpButton);
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(124, -1);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(125, -1);
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(165, 20);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(162, 20);
             this.flowLayoutPanel1.TabIndex = 1005;
             this.flowLayoutPanel1.WrapContents = false;
             // 
@@ -188,8 +188,8 @@ namespace CreamInstaller
             this.blockedGamesCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.blockedGamesCheckBox.Enabled = false;
             this.blockedGamesCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.blockedGamesCheckBox.Location = new System.Drawing.Point(3, 0);
-            this.blockedGamesCheckBox.Margin = new System.Windows.Forms.Padding(3, 0, 0, 0);
+            this.blockedGamesCheckBox.Location = new System.Drawing.Point(2, 0);
+            this.blockedGamesCheckBox.Margin = new System.Windows.Forms.Padding(2, 0, 0, 0);
             this.blockedGamesCheckBox.Name = "blockedGamesCheckBox";
             this.blockedGamesCheckBox.Size = new System.Drawing.Size(140, 20);
             this.blockedGamesCheckBox.TabIndex = 1;
@@ -202,8 +202,8 @@ namespace CreamInstaller
             this.blockProtectedHelpButton.Enabled = false;
             this.blockProtectedHelpButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.blockProtectedHelpButton.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.blockProtectedHelpButton.Location = new System.Drawing.Point(143, 0);
-            this.blockProtectedHelpButton.Margin = new System.Windows.Forms.Padding(0, 0, 3, 0);
+            this.blockProtectedHelpButton.Location = new System.Drawing.Point(142, 0);
+            this.blockProtectedHelpButton.Margin = new System.Windows.Forms.Padding(0, 0, 1, 0);
             this.blockProtectedHelpButton.Name = "blockProtectedHelpButton";
             this.blockProtectedHelpButton.Size = new System.Drawing.Size(19, 19);
             this.blockProtectedHelpButton.TabIndex = 2;
@@ -232,10 +232,10 @@ namespace CreamInstaller
             this.flowLayoutPanel2.AutoSize = true;
             this.flowLayoutPanel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.flowLayoutPanel2.Controls.Add(this.allCheckBox);
-            this.flowLayoutPanel2.Location = new System.Drawing.Point(515, -1);
+            this.flowLayoutPanel2.Location = new System.Drawing.Point(520, -1);
             this.flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-            this.flowLayoutPanel2.Size = new System.Drawing.Size(37, 19);
+            this.flowLayoutPanel2.Size = new System.Drawing.Size(34, 19);
             this.flowLayoutPanel2.TabIndex = 1006;
             this.flowLayoutPanel2.WrapContents = false;
             // 
@@ -246,10 +246,10 @@ namespace CreamInstaller
             this.allCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.allCheckBox.Enabled = false;
             this.allCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.allCheckBox.Location = new System.Drawing.Point(3, 0);
-            this.allCheckBox.Margin = new System.Windows.Forms.Padding(3, 0, 0, 0);
+            this.allCheckBox.Location = new System.Drawing.Point(2, 0);
+            this.allCheckBox.Margin = new System.Windows.Forms.Padding(2, 0, 0, 0);
             this.allCheckBox.Name = "allCheckBox";
-            this.allCheckBox.Size = new System.Drawing.Size(34, 19);
+            this.allCheckBox.Size = new System.Drawing.Size(32, 19);
             this.allCheckBox.TabIndex = 4;
             this.allCheckBox.Text = "All";
             this.allCheckBox.CheckedChanged += new System.EventHandler(this.OnAllCheckBoxChanged);
@@ -346,7 +346,7 @@ namespace CreamInstaller
             this.contextMenuStrip.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.VerticalStackWithOverflow;
             this.contextMenuStrip.Name = "contextMenuStrip";
             this.contextMenuStrip.ShowItemToolTips = false;
-            this.contextMenuStrip.Size = new System.Drawing.Size(181, 26);
+            this.contextMenuStrip.Size = new System.Drawing.Size(61, 4);
             this.contextMenuStrip.TabStop = true;
             // 
             // SelectForm

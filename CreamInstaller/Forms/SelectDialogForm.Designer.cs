@@ -94,20 +94,20 @@ namespace CreamInstaller
             this.flowLayoutPanel2.AutoSize = true;
             this.flowLayoutPanel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.flowLayoutPanel2.Controls.Add(this.allCheckBox);
-            this.flowLayoutPanel2.Location = new System.Drawing.Point(366, -1);
+            this.flowLayoutPanel2.Location = new System.Drawing.Point(370, -1);
             this.flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-            this.flowLayoutPanel2.Size = new System.Drawing.Size(37, 19);
+            this.flowLayoutPanel2.Size = new System.Drawing.Size(34, 19);
             this.flowLayoutPanel2.TabIndex = 1007;
             // 
             // allCheckBox
             // 
             this.allCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.allCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.allCheckBox.Location = new System.Drawing.Point(3, 0);
-            this.allCheckBox.Margin = new System.Windows.Forms.Padding(3, 0, 0, 0);
+            this.allCheckBox.Location = new System.Drawing.Point(2, 0);
+            this.allCheckBox.Margin = new System.Windows.Forms.Padding(2, 0, 0, 0);
             this.allCheckBox.Name = "allCheckBox";
-            this.allCheckBox.Size = new System.Drawing.Size(34, 19);
+            this.allCheckBox.Size = new System.Drawing.Size(32, 19);
             this.allCheckBox.TabIndex = 1;
             this.allCheckBox.Text = "All";
             this.allCheckBox.CheckedChanged += new System.EventHandler(this.OnAllCheckBoxChanged);
