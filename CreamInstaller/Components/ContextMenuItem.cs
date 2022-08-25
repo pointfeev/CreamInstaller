@@ -65,7 +65,7 @@ internal class ContextMenuItem : ToolStripMenuItem
                 item.Image = image;
             }
         }
-    }).ConfigureAwait(false);
+    });
 
     private static async Task TryImageIdentifierInfo(ContextMenuItem item, (string id, string iconUrl) imageIdentifierInfo, Action onFail = null) => await Task.Run(async () =>
     {
@@ -83,7 +83,7 @@ internal class ContextMenuItem : ToolStripMenuItem
             else if (onFail is not null)
                 onFail();
         }
-    }).ConfigureAwait(false);
+    });
 
     private readonly EventHandler OnClickEvent;
     protected override void OnClick(EventArgs e)

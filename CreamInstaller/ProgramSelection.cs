@@ -27,7 +27,8 @@ public enum DlcType
 internal class ProgramSelection
 {
     internal bool Enabled;
-    internal bool Koaloader = true;
+    internal bool Koaloader;
+    internal string KoaloaderProxy = "Koaloader.version_64.version.dll";
 
     internal Platform Platform;
     internal string Id = "0";

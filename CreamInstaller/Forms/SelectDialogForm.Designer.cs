@@ -53,7 +53,7 @@ namespace CreamInstaller
             this.acceptButton.Name = "acceptButton";
             this.acceptButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
             this.acceptButton.Size = new System.Drawing.Size(61, 24);
-            this.acceptButton.TabIndex = 1;
+            this.acceptButton.TabIndex = 6;
             this.acceptButton.Text = "OK";
             this.acceptButton.UseVisualStyleBackColor = true;
             // 
@@ -108,7 +108,7 @@ namespace CreamInstaller
             this.allCheckBox.Margin = new System.Windows.Forms.Padding(3, 0, 0, 0);
             this.allCheckBox.Name = "allCheckBox";
             this.allCheckBox.Size = new System.Drawing.Size(34, 19);
-            this.allCheckBox.TabIndex = 2;
+            this.allCheckBox.TabIndex = 1;
             this.allCheckBox.Text = "All";
             this.allCheckBox.CheckedChanged += new System.EventHandler(this.OnAllCheckBoxChanged);
             // 
@@ -121,7 +121,7 @@ namespace CreamInstaller
             this.sortCheckBox.Margin = new System.Windows.Forms.Padding(3, 0, 0, 0);
             this.sortCheckBox.Name = "sortCheckBox";
             this.sortCheckBox.Size = new System.Drawing.Size(104, 20);
-            this.sortCheckBox.TabIndex = 2;
+            this.sortCheckBox.TabIndex = 3;
             this.sortCheckBox.Text = "Sort By Name";
             this.sortCheckBox.CheckedChanged += new System.EventHandler(this.OnSortCheckBoxChanged);
             // 
@@ -136,7 +136,7 @@ namespace CreamInstaller
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
             this.cancelButton.Size = new System.Drawing.Size(81, 24);
-            this.cancelButton.TabIndex = 0;
+            this.cancelButton.TabIndex = 2;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             // 
@@ -151,7 +151,7 @@ namespace CreamInstaller
             this.loadButton.Name = "loadButton";
             this.loadButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
             this.loadButton.Size = new System.Drawing.Size(71, 24);
-            this.loadButton.TabIndex = 4;
+            this.loadButton.TabIndex = 5;
             this.loadButton.Text = "Load";
             this.loadButton.UseVisualStyleBackColor = true;
             this.loadButton.Click += new System.EventHandler(this.OnLoad);
@@ -167,7 +167,7 @@ namespace CreamInstaller
             this.saveButton.Name = "saveButton";
             this.saveButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
             this.saveButton.Size = new System.Drawing.Size(69, 24);
-            this.saveButton.TabIndex = 5;
+            this.saveButton.TabIndex = 4;
             this.saveButton.Text = "Save";
             this.saveButton.UseVisualStyleBackColor = true;
             this.saveButton.Click += new System.EventHandler(this.OnSave);

@@ -26,6 +26,41 @@ internal static class SmokeAPI
         cache = directory + @"\SmokeAPI.cache.json";
     }
 
+    internal static void CheckConfig(string directory, ProgramSelection selection, InstallForm installForm = null)
+    {
+        directory.GetSmokeApiComponents(out _, out _, out _, out _, out string config, out _);
+        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> overrideDlc = selection.AllDlc.Except(selection.SelectedDlc);
+        foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
+            overrideDlc = overrideDlc.Except(extraDlc);
+        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> injectDlc = new List<KeyValuePair<string, (DlcType type, string name, string icon)>>();
+        if (selection.AllDlc.Count > 64 || selection.ExtraDlc.Any(e => e.dlc.Count > 64))
+        {
+            injectDlc = injectDlc.Concat(selection.SelectedDlc.Where(pair => pair.Value.type is DlcType.SteamHidden));
+            foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
+                if (selection.ExtraDlc.Where(e => e.id == id).Single().dlc.Count > 64)
+                    injectDlc = injectDlc.Concat(extraDlc.Where(pair => pair.Value.type is DlcType.SteamHidden));
+        }
+        if (overrideDlc.Any() || injectDlc.Any())
+        {
+            if (installForm is not null)
+                installForm.UpdateUser("Generating SmokeAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+            File.Create(config).Close();
+            StreamWriter writer = new(config, true, Encoding.UTF8);
+            WriteConfig(writer,
+                new(overrideDlc.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String),
+                new(injectDlc.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String),
+                installForm);
+            writer.Flush();
+            writer.Close();
+        }
+        else if (File.Exists(config))
+        {
+            File.Delete(config);
+            if (installForm is not null)
+                installForm.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", InstallationLog.Action, info: false);
+        }
+    }
+
     internal static void WriteConfig(StreamWriter writer, SortedList<string, (DlcType type, string name, string icon)> overrideDlc, SortedList<string, (DlcType type, string name, string icon)> injectDlc, InstallForm installForm = null)
     {
         writer.WriteLine("{");
@@ -146,37 +181,6 @@ internal static class SmokeAPI
                 installForm.UpdateUser($"Wrote SmokeAPI: {Path.GetFileName(api64)}", InstallationLog.Action, info: false);
         }
         if (generateConfig)
-        {
-            IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> overrideDlc = selection.AllDlc.Except(selection.SelectedDlc);
-            foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
-                overrideDlc = overrideDlc.Except(extraDlc);
-            IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> injectDlc = new List<KeyValuePair<string, (DlcType type, string name, string icon)>>();
-            if (selection.AllDlc.Count > 64 || selection.ExtraDlc.Any(e => e.dlc.Count > 64))
-            {
-                injectDlc = injectDlc.Concat(selection.SelectedDlc.Where(pair => pair.Value.type is DlcType.SteamHidden));
-                foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
-                    if (selection.ExtraDlc.Where(e => e.id == id).Single().dlc.Count > 64)
-                        injectDlc = injectDlc.Concat(extraDlc.Where(pair => pair.Value.type is DlcType.SteamHidden));
-            }
-            if (overrideDlc.Any() || injectDlc.Any())
-            {
-                if (installForm is not null)
-                    installForm.UpdateUser("Generating SmokeAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
-                File.Create(config).Close();
-                StreamWriter writer = new(config, true, Encoding.UTF8);
-                WriteConfig(writer,
-                    new(overrideDlc.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String),
-                    new(injectDlc.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String),
-                    installForm);
-                writer.Flush();
-                writer.Close();
-            }
-            else if (File.Exists(config))
-            {
-                File.Delete(config);
-                if (installForm is not null)
-                    installForm.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", InstallationLog.Action, info: false);
-            }
-        }
+            CheckConfig(directory, selection, installForm);
     });
 }

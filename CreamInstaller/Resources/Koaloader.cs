@@ -34,6 +34,29 @@ internal static class Koaloader
         ("Uplay R2 Unlocker", "UplayR2Unlocker32.dll"), ("Uplay R2 Unlocker", "UplayR2Unlocker64.dll")
     };
 
+    internal static void CheckConfig(string directory, ProgramSelection selection, InstallForm installForm = null)
+    {
+        directory.GetKoaloaderComponents(out _, out string config);
+        SortedList<string, string> targets = new(PlatformIdComparer.String);
+        SortedList<string, string> modules = new(PlatformIdComparer.String);
+        if (targets.Any() || modules.Any())
+        {
+            if (installForm is not null)
+                installForm.UpdateUser("Generating Koaloader configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+            File.Create(config).Close();
+            StreamWriter writer = new(config, true, Encoding.UTF8);
+            WriteConfig(writer, targets, modules, installForm);
+            writer.Flush();
+            writer.Close();
+        }
+        else if (File.Exists(config))
+        {
+            File.Delete(config);
+            if (installForm is not null)
+                installForm.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", InstallationLog.Action, info: false);
+        }
+    }
+
     internal static void WriteConfig(StreamWriter writer, SortedList<string, string> targets, SortedList<string, string> modules, InstallForm installForm = null)
     {
         writer.WriteLine("{");
@@ -76,7 +99,7 @@ internal static class Koaloader
         writer.WriteLine("}");
     }
 
-    internal static async Task Uninstall(string directory, InstallForm installForm = null, bool deleteConfig = true) => await Task.Run(() =>
+    internal static async Task Uninstall(string directory, InstallForm installForm = null, bool deleteConfig = true) => await Task.Run(async () =>
     {
         directory.GetKoaloaderComponents(out List<string> proxies, out string config);
         foreach (string proxy in proxies.Where(proxy => File.Exists(proxy) && proxy.IsResourceFile(Resources.ResourceIdentifier.Koaloader)))
@@ -99,13 +122,20 @@ internal static class Koaloader
             if (installForm is not null)
                 installForm.UpdateUser($"Deleted configuration: {Path.GetFileName(config)}", InstallationLog.Action, info: false);
         }
+        await SmokeAPI.Uninstall(directory, installForm, deleteConfig);
+        await ScreamAPI.Uninstall(directory, installForm, deleteConfig);
+        await UplayR1.Uninstall(directory, installForm, deleteConfig);
+        await UplayR2.Uninstall(directory, installForm, deleteConfig);
     });
 
     internal static async Task Install(string directory, ProgramSelection selection, InstallForm installForm = null, bool generateConfig = true) => await Task.Run(() =>
     {
         directory.GetKoaloaderComponents(out List<string> proxies, out string config);
-        string path = directory + @"\version.dll";
-        "Koaloader.version_64.version.dll".Write(path);
+        string proxy = selection.KoaloaderProxy;
+        proxy = proxy[(proxy.IndexOf('.') + 1)..];
+        proxy = proxy[(proxy.IndexOf('.') + 1)..];
+        string path = directory + @"\" + proxy;
+        selection.KoaloaderProxy.Write(path);
         if (installForm is not null)
             installForm.UpdateUser($"Wrote Koaloader: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
         if (selection.Platform is Platform.Steam or Platform.Paradox)
@@ -133,6 +163,8 @@ internal static class Koaloader
                 if (did32 && did64)
                     break;
             }
+            if (did32 || did64)
+                SmokeAPI.CheckConfig(directory, selection, installForm);
         }
         if (selection.Platform is Platform.Epic or Platform.Paradox)
         {
@@ -159,6 +191,8 @@ internal static class Koaloader
                 if (did32 && did64)
                     break;
             }
+            if (did32 || did64)
+                ScreamAPI.CheckConfig(directory, selection, installForm);
         }
         if (selection.Platform is Platform.Ubisoft)
         {
@@ -202,27 +236,12 @@ internal static class Koaloader
                 if (did32r1 && did64r1 && did32r2 && did64r2)
                     break;
             }
+            if (did32r1 || did64r1)
+                UplayR1.CheckConfig(directory, selection, installForm);
+            if (did32r2 || did64r2)
+                UplayR2.CheckConfig(directory, selection, installForm);
         }
         if (generateConfig)
-        {
-            SortedList<string, string> targets = new(PlatformIdComparer.String);
-            SortedList<string, string> modules = new(PlatformIdComparer.String);
-            if (targets.Any() || modules.Any())
-            {
-                if (installForm is not null)
-                    installForm.UpdateUser("Generating Koaloader configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
-                File.Create(config).Close();
-                StreamWriter writer = new(config, true, Encoding.UTF8);
-                WriteConfig(writer, targets, modules, installForm);
-                writer.Flush();
-                writer.Close();
-            }
-            else if (File.Exists(config))
-            {
-                File.Delete(config);
-                if (installForm is not null)
-                    installForm.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", InstallationLog.Action, info: false);
-            }
-        }
+            CheckConfig(directory, selection, installForm);
     });
 }

@@ -56,7 +56,7 @@ internal partial class MainForm : CustomForm
         progressLabel.Text = "Checking for updates . . .";
         changelogTreeView.Visible = false;
         changelogTreeView.Location = new(progressLabel.Location.X, progressLabel.Location.Y + progressLabel.Size.Height + 13);
-        Refresh();
+        Invalidate();
 
         GithubPackageResolver resolver = new("pointfeev", "CreamInstaller", "CreamInstaller.zip");
         ZipPackageExtractor extractor = new();
@@ -181,7 +181,7 @@ internal partial class MainForm : CustomForm
         updateButton.Click -= OnUpdate;
         updateButton.Click += new(OnUpdateCancel);
         changelogTreeView.Location = new(progressBar.Location.X, progressBar.Location.Y + progressBar.Size.Height + 6);
-        Refresh();
+        Invalidate();
 
         Progress<double> progress = new();
         progress.ProgressChanged += new(delegate (object sender, double _progress)

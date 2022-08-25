@@ -27,6 +27,30 @@ internal static class UplayR2
         config = directory + @"\UplayR2Unlocker.jsonc";
     }
 
+    internal static void CheckConfig(string directory, ProgramSelection selection, InstallForm installForm = null)
+    {
+        directory.GetUplayR2Components(out _, out _, out _, out _, out _, out _, out string config);
+        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> blacklistDlc = selection.AllDlc.Except(selection.SelectedDlc);
+        foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
+            blacklistDlc = blacklistDlc.Except(extraDlc);
+        if (blacklistDlc.Any())
+        {
+            if (installForm is not null)
+                installForm.UpdateUser("Generating Uplay R2 Unlocker configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+            File.Create(config).Close();
+            StreamWriter writer = new(config, true, Encoding.UTF8);
+            WriteConfig(writer, new(blacklistDlc.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String), installForm);
+            writer.Flush();
+            writer.Close();
+        }
+        else if (File.Exists(config))
+        {
+            File.Delete(config);
+            if (installForm is not null)
+                installForm.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", InstallationLog.Action, info: false);
+        }
+    }
+
     internal static void WriteConfig(StreamWriter writer, SortedList<string, (DlcType type, string name, string icon)> blacklistDlc, InstallForm installForm = null)
     {
         writer.WriteLine("{");
@@ -121,26 +145,6 @@ internal static class UplayR2
                 installForm.UpdateUser($"Wrote Uplay R2 Unlocker: {Path.GetFileName(api)}", InstallationLog.Action, info: false);
         }
         if (generateConfig)
-        {
-            IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> blacklistDlc = selection.AllDlc.Except(selection.SelectedDlc);
-            foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
-                blacklistDlc = blacklistDlc.Except(extraDlc);
-            if (blacklistDlc.Any())
-            {
-                if (installForm is not null)
-                    installForm.UpdateUser("Generating Uplay R2 Unlocker configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
-                File.Create(config).Close();
-                StreamWriter writer = new(config, true, Encoding.UTF8);
-                WriteConfig(writer, new(blacklistDlc.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String), installForm);
-                writer.Flush();
-                writer.Close();
-            }
-            else if (File.Exists(config))
-            {
-                File.Delete(config);
-                if (installForm is not null)
-                    installForm.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", InstallationLog.Action, info: false);
-            }
-        }
+            CheckConfig(directory, selection, installForm);
     });
 }

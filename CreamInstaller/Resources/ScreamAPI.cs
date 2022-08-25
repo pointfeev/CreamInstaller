@@ -25,6 +25,36 @@ internal static class ScreamAPI
         config = directory + @"\ScreamAPI.json";
     }
 
+    internal static void CheckConfig(string directory, ProgramSelection selection, InstallForm installForm = null)
+    {
+        directory.GetScreamApiComponents(out _, out _, out _, out _, out string config);
+        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> overrideCatalogItems = selection.AllDlc.Where(pair => pair.Value.type is DlcType.EpicCatalogItem).Except(selection.SelectedDlc);
+        foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
+            overrideCatalogItems = overrideCatalogItems.Except(extraDlc);
+        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> entitlements = selection.SelectedDlc.Where(pair => pair.Value.type == DlcType.EpicEntitlement);
+        foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> _dlc) in selection.ExtraSelectedDlc)
+            entitlements = entitlements.Concat(_dlc.Where(pair => pair.Value.type == DlcType.EpicEntitlement));
+        if (overrideCatalogItems.Any() || entitlements.Any())
+        {
+            if (installForm is not null)
+                installForm.UpdateUser("Generating ScreamAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
+            File.Create(config).Close();
+            StreamWriter writer = new(config, true, Encoding.UTF8);
+            WriteConfig(writer,
+                new(overrideCatalogItems.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String),
+                new(entitlements.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String),
+                installForm);
+            writer.Flush();
+            writer.Close();
+        }
+        else if (File.Exists(config))
+        {
+            File.Delete(config);
+            if (installForm is not null)
+                installForm.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", InstallationLog.Action, info: false);
+        }
+    }
+
     internal static void WriteConfig(StreamWriter writer, SortedList<string, (DlcType type, string name, string icon)> overrideCatalogItems, SortedList<string, (DlcType type, string name, string icon)> entitlements, InstallForm installForm = null)
     {
         writer.WriteLine("{");
@@ -137,32 +167,6 @@ internal static class ScreamAPI
                 installForm.UpdateUser($"Wrote ScreamAPI: {Path.GetFileName(api64)}", InstallationLog.Action, info: false);
         }
         if (generateConfig)
-        {
-            IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> overrideCatalogItems = selection.AllDlc.Where(pair => pair.Value.type is DlcType.EpicCatalogItem).Except(selection.SelectedDlc);
-            foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
-                overrideCatalogItems = overrideCatalogItems.Except(extraDlc);
-            IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> entitlements = selection.SelectedDlc.Where(pair => pair.Value.type == DlcType.EpicEntitlement);
-            foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> _dlc) in selection.ExtraSelectedDlc)
-                entitlements = entitlements.Concat(_dlc.Where(pair => pair.Value.type == DlcType.EpicEntitlement));
-            if (overrideCatalogItems.Any() || entitlements.Any())
-            {
-                if (installForm is not null)
-                    installForm.UpdateUser("Generating ScreamAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
-                File.Create(config).Close();
-                StreamWriter writer = new(config, true, Encoding.UTF8);
-                WriteConfig(writer,
-                    new(overrideCatalogItems.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String),
-                    new(entitlements.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String),
-                    installForm);
-                writer.Flush();
-                writer.Close();
-            }
-            else if (File.Exists(config))
-            {
-                File.Delete(config);
-                if (installForm is not null)
-                    installForm.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", InstallationLog.Action, info: false);
-            }
-        }
+            CheckConfig(directory, selection, installForm);
     });
 }
