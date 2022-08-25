@@ -432,17 +432,13 @@ internal partial class SelectForm : CustomForm
                     selection.Id = gameId;
                     selection.Name = name;
                     selection.RootDirectory = gameDirectory;
-                    // need a better method for obtaining ubisoft game executables
-                    // for now, I just get the largest (file size) single executable
-                    string largestExecutableDirectory = null;
-                    long largestExecutableDirectorySize = 0;
-                    foreach (string path in await selection.RootDirectory.GetExecutables())
-                        if (new FileInfo(path).Length is long executableSize && executableSize > largestExecutableDirectorySize)
+                    // need a solid method for obtaining ubisoft game executables (below is likely temporary)
+                    selection.ExecutableDirectories = (await selection.RootDirectory
+                        .GetExecutables(d =>
                         {
-                            largestExecutableDirectory = Path.GetDirectoryName(path);
-                            largestExecutableDirectorySize = executableSize;
-                        }
-                    selection.ExecutableDirectories = new() { largestExecutableDirectory ?? selection.RootDirectory };
+                            string subPath = d[selection.RootDirectory.Length..].ToUpperInvariant();
+                            return !subPath.Contains("SETUP") && !subPath.Contains("REDIST");
+                        })).Select(e => e = Path.GetDirectoryName(e)).Distinct().ToList();
                     selection.DllDirectories = dllDirectories;
                     selection.Platform = Platform.Ubisoft;
                     selection.IconUrl = IconGrabber.GetDomainFaviconUrl("store.ubi.com");
