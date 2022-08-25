@@ -127,7 +127,7 @@ internal partial class SelectForm : CustomForm
                 selection.DllDirectories = dllDirectories;
                 selection.Platform = Platform.Paradox;
 
-                TreeNode programNode = treeNodes.Find(s => s.Name == selection.Id) ?? new();
+                TreeNode programNode = treeNodes.Find(s => s.Tag is Platform.Paradox && s.Name == selection.Id) ?? new();
                 programNode.Tag = selection.Platform;
                 programNode.Name = selection.Id;
                 programNode.Text = selection.Name;
@@ -259,7 +259,7 @@ internal partial class SelectForm : CustomForm
                     Program.Invoke(selectionTreeView, delegate
                     {
                         if (Program.Canceled) return;
-                        TreeNode programNode = treeNodes.Find(s => s.Name == appId) ?? new();
+                        TreeNode programNode = treeNodes.Find(s => s.Tag is Platform.Steam && s.Name == appId) ?? new();
                         programNode.Tag = selection.Platform;
                         programNode.Name = appId;
                         programNode.Text = appData?.name ?? name;
@@ -273,7 +273,7 @@ internal partial class SelectForm : CustomForm
                             (DlcType type, string name, string icon) dlcApp = pair.Value;
                             selection.AllDlc[appId] = dlcApp;
                             if (allCheckBox.Checked) selection.SelectedDlc[appId] = dlcApp;
-                            TreeNode dlcNode = treeNodes.Find(s => s.Name == appId) ?? new();
+                            TreeNode dlcNode = treeNodes.Find(s => s.Tag is Platform.Steam && s.Name == appId) ?? new();
                             dlcNode.Tag = selection.Platform;
                             dlcNode.Name = appId;
                             dlcNode.Text = dlcApp.name;
@@ -363,14 +363,15 @@ internal partial class SelectForm : CustomForm
                     Program.Invoke(selectionTreeView, delegate
                     {
                         if (Program.Canceled) return;
-                        TreeNode programNode = treeNodes.Find(s => s.Name == @namespace) ?? new();
+                        TreeNode programNode = treeNodes.Find(s => s.Tag is Platform.Epic && s.Name == @namespace) ?? new();
                         programNode.Tag = selection.Platform;
                         programNode.Name = @namespace;
                         programNode.Text = name;
                         programNode.Checked = selection.Enabled;
                         programNode.Remove();
                         _ = selectionTreeView.Nodes.Add(programNode);
-                        /*TreeNode catalogItemsNode = treeNodes.Find(s => s.Name == @namespace + "_catalogItems") ?? new();
+                        /*TreeNode catalogItemsNode = treeNodes.Find(s => s.Tag is Platform.Epic && s.Name == @namespace + "_catalogItems") ?? new();
+                        catalogItemsNode.Tag = selection.Platform;
                         catalogItemsNode.Name = @namespace + "_catalogItems";
                         catalogItemsNode.Text = "Catalog Items";
                         catalogItemsNode.Checked = selection.SelectedDlc.Any(pair => pair.Value.type == DlcType.CatalogItem);
@@ -378,7 +379,8 @@ internal partial class SelectForm : CustomForm
                         programNode.Nodes.Add(catalogItemsNode);*/
                         if (entitlements.Any())
                         {
-                            /*TreeNode entitlementsNode = treeNodes.Find(s => s.Name == @namespace + "_entitlements") ?? new();
+                            /*TreeNode entitlementsNode = treeNodes.Find(s => s.Tag is Platform.Epic && s.Name == @namespace + "_entitlements") ?? new();
+                            entitlementsNode.Tag = selection.Platform;
                             entitlementsNode.Name = @namespace + "_entitlements";
                             entitlementsNode.Text = "Entitlements";
                             entitlementsNode.Checked = selection.SelectedDlc.Any(pair => pair.Value.type == DlcType.Entitlement);
@@ -391,7 +393,7 @@ internal partial class SelectForm : CustomForm
                                 (DlcType type, string name, string icon) dlcApp = (DlcType.EpicEntitlement, pair.Value.name, pair.Value.icon);
                                 selection.AllDlc[dlcId] = dlcApp;
                                 if (allCheckBox.Checked) selection.SelectedDlc[dlcId] = dlcApp;
-                                TreeNode dlcNode = treeNodes.Find(s => s.Name == dlcId) ?? new();
+                                TreeNode dlcNode = treeNodes.Find(s => s.Tag is Platform.Epic && s.Name == dlcId) ?? new();
                                 dlcNode.Tag = selection.Platform;
                                 dlcNode.Name = dlcId;
                                 dlcNode.Text = dlcApp.name;
@@ -446,7 +448,7 @@ internal partial class SelectForm : CustomForm
                     Program.Invoke(selectionTreeView, delegate
                     {
                         if (Program.Canceled) return;
-                        TreeNode programNode = treeNodes.Find(s => s.Name == gameId) ?? new();
+                        TreeNode programNode = treeNodes.Find(s => s.Tag is Platform.Ubisoft && s.Name == gameId) ?? new();
                         programNode.Tag = selection.Platform;
                         programNode.Name = gameId;
                         programNode.Text = name;
@@ -544,7 +546,14 @@ internal partial class SelectForm : CustomForm
             setup = false;
             progressLabel.Text = "Gathering and caching your applicable games and their DLCs . . . ";
             ProgramSelection.ValidateAll(ProgramsToScan);
-            TreeNodes.ForEach(node => node.Remove());
+            TreeNodes.ForEach(node =>
+            {
+                if (node.Tag is not Platform platform
+                || node.Name is not string platformId
+                || ProgramSelection.FromPlatformId(platform, platformId) is null
+                && ProgramSelection.GetDlcFromPlatformId(platform, platformId) is null)
+                    node.Remove();
+            });
             await GetApplicablePrograms(iProgress);
             await SteamCMD.Cleanup();
         }
