@@ -56,25 +56,26 @@ internal static class Resources
         return false;
     }
 
-    internal static async Task<List<string>> GetExecutableDirectories(this string rootDirectory, Func<string, bool> validFunc = null) => await Task.Run(async () =>
+    internal static async Task<List<string>> GetExecutables(this string rootDirectory, Func<string, bool> validFunc = null) => await Task.Run(async () =>
     {
-        List<string> executableDirectories = new();
+        List<string> executables = new();
         if (Program.Canceled || !Directory.Exists(rootDirectory)) return null;
-        if (Directory.GetFiles(rootDirectory, "*.exe").Any(d => validFunc(d)))
-            executableDirectories.Add(rootDirectory);
+        foreach (string path in Directory.GetFiles(rootDirectory, "*.exe"))
+            if (validFunc is null || validFunc(path))
+                executables.Add(path);
         string[] directories = Directory.GetDirectories(rootDirectory);
-        foreach (string _directory in directories)
+        foreach (string directory in directories)
         {
             if (Program.Canceled) return null;
             try
             {
-                List<string> moreExecutableDirectories = await _directory.GetExecutableDirectories(validFunc);
-                if (moreExecutableDirectories is not null)
-                    executableDirectories.AddRange(moreExecutableDirectories);
+                List<string> moreExecutables = await directory.GetExecutables(validFunc);
+                if (moreExecutables is not null)
+                    executables.AddRange(moreExecutables);
             }
             catch { }
         }
-        return !executableDirectories.Any() ? null : executableDirectories;
+        return !executables.Any() ? null : executables;
     });
 
     internal static void GetCreamApiComponents(

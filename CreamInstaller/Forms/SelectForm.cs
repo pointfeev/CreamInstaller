@@ -121,7 +121,9 @@ internal partial class SelectForm : CustomForm
                 selection.Id = "PL";
                 selection.Name = "Paradox Launcher";
                 selection.RootDirectory = ParadoxLauncher.InstallPath;
-                selection.ExecutableDirectories = await selection.RootDirectory.GetExecutableDirectories(d => !d.Contains("bootstrapper"));
+                selection.ExecutableDirectories = (await selection.RootDirectory
+                    .GetExecutables(d => !Path.GetFileName(d).Contains("bootstrapper")))
+                    .Select(e => e = Path.GetDirectoryName(e)).Distinct().ToList();
                 selection.DllDirectories = dllDirectories;
                 selection.Platform = Platform.Paradox;
 
@@ -430,7 +432,17 @@ internal partial class SelectForm : CustomForm
                     selection.Id = gameId;
                     selection.Name = name;
                     selection.RootDirectory = gameDirectory;
-                    selection.ExecutableDirectories = new() { selection.RootDirectory };
+                    // need a better method for obtaining ubisoft game executables
+                    // for now, I just get the largest (file size) single executable
+                    string largestExecutableDirectory = null;
+                    long largestExecutableDirectorySize = 0;
+                    foreach (string path in await selection.RootDirectory.GetExecutables())
+                        if (new FileInfo(path).Length is long executableSize && executableSize > largestExecutableDirectorySize)
+                        {
+                            largestExecutableDirectory = Path.GetDirectoryName(path);
+                            largestExecutableDirectorySize = executableSize;
+                        }
+                    selection.ExecutableDirectories = new() { largestExecutableDirectory ?? selection.RootDirectory };
                     selection.DllDirectories = dllDirectories;
                     selection.Platform = Platform.Ubisoft;
                     selection.IconUrl = IconGrabber.GetDomainFaviconUrl("store.ubi.com");
