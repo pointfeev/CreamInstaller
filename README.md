@@ -2,7 +2,7 @@
 
 ![Program Preview Image](https://raw.githubusercontent.com/pointfeev/CreamInstaller/main/preview.png)
 
-###### The program utilizes the latest versions of [SmokeAPI](https://github.com/acidicoala/SmokeAPI), [ScreamAPI](https://github.com/acidicoala/ScreamAPI), [Uplay R1 Unlocker](https://github.com/acidicoala/UplayR1Unlocker) and [Uplay R2 Unlocker](https://github.com/acidicoala/UplayR2Unlocker), all by the wonderful [acidicoala](https://github.com/acidicoala), and all downloaded from the posts above and embedded into the program itself; no further downloads necessary on your part!
+###### The program utilizes the latest versions of [Koaloader](https://github.com/acidicoala/Koaloader), [SmokeAPI](https://github.com/acidicoala/SmokeAPI), [ScreamAPI](https://github.com/acidicoala/ScreamAPI), [Uplay R1 Unlocker](https://github.com/acidicoala/UplayR1Unlocker) and [Uplay R2 Unlocker](https://github.com/acidicoala/UplayR2Unlocker), all by the wonderful [acidicoala](https://github.com/acidicoala), and all downloaded from the posts above and embedded into the program itself; no further downloads necessary on your part!
 ---
 #### Description:
 Automatically finds all installed Steam, Epic and Ubisoft games with their respective DLC-related DLL locations on the user's computer,
@@ -20,8 +20,8 @@ games and DLCs the user selects; however, through the use of **right-click conte
 #### Features:
 * Automatic download and installation of SteamCMD as necessary whenever a Steam game is chosen. *for gathering appinfo such as name, buildid, listofdlc, depots*
 * Automatic gathering and caching of information for all selected Steam and Epic games and **ALL** of their DLCs.
-* Automatic DLL installation and configuration generation for SmokeAPI, ScreamAPI, Uplay R1 Unlocker and Uplay R2 Unlocker.
-* Automatic uninstallation of DLLs and configurations for CreamAPI, SmokeAPI, ScreamAPI, Uplay R1 Unlocker and Uplay R2 Unlocker.
+* Automatic DLL installation and configuration generation for Koaloader, SmokeAPI, ScreamAPI, Uplay R1 Unlocker and Uplay R2 Unlocker.
+* Automatic uninstallation of DLLs and configurations for Koaloader, CreamAPI, SmokeAPI, ScreamAPI, Uplay R1 Unlocker and Uplay R2 Unlocker.
 * Automatic reparation of the Paradox Launcher (and manually via the right-click context menu "Repair" option). *for when the launcher updates whilst you have CreamAPI, SmokeAPI or ScreamAPI installed to it*
 
 ---
@@ -39,9 +39,10 @@ games and DLCs the user selects; however, through the use of **right-click conte
 3. Wait for the program to download and install SteamCMD (if you chose a Steam game). *very fast, depends on internet speed*
 4. Wait for the program to gather and cache the chosen games' information & DLCs. *may take a good amount of time on the first run, depends on how many games you chose and how many DLCs they have*
 5. **CAREFULLY** select which games' DLCs you wish to unlock. *Obviously none of the DLC unlockers are tested for every single game!*
-6. Click the **Generate and Install** button.
-7. Click the **OK** button to close the program.
-8. If any of the DLC unlockers cause problems with any of the games you installed them on, simply go back to step 5 and select what games you wish you **revert** changes to, and instead click the **Uninstall** button this time.
+6. Choose whether or not to install with Koaloader, and if so then also pick the proxy DLL to use. *If the default version.dll x64 doesn't work, then see [here](https://cs.rin.ru/forum/viewtopic.php?p=2552172#p2552172) to find one that does.*
+7. Click the **Generate and Install** button.
+8. Click the **OK** button to close the program.
+9. If any of the DLC unlockers cause problems with any of the games you installed them on, simply go back to step 5 and select what games you wish you **revert** changes to, and instead click the **Uninstall** button this time.
 
 ---
 ##### Bugs/Crashes/Issues:
