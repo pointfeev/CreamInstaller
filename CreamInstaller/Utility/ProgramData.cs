@@ -8,8 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using Windows.Foundation.Metadata;
-
 namespace CreamInstaller.Utility;
 
 internal static class ProgramData

@@ -188,20 +188,27 @@ internal class CustomTreeView : TreeView
         Refresh();
         Point clickPoint = PointToClient(e.Location);
         SelectForm selectForm = (form ??= FindForm()) as SelectForm;
-        foreach (KeyValuePair<TreeNode, Rectangle> pair in selectionBounds)
-            if (pair.Key.IsVisible && pair.Value.Contains(clickPoint))
+        foreach (KeyValuePair<TreeNode, Rectangle> pair in selectionBounds.ToList())
+        {
+            if (pair.Key.TreeView is null)
+                _ = selectionBounds.Remove(pair.Key);
+            else if (pair.Key.IsVisible && pair.Value.Contains(clickPoint))
             {
                 SelectedNode = pair.Key;
                 if (e.Button is MouseButtons.Right && selectForm is not null)
                     selectForm.OnNodeRightClick(pair.Key, e.Location);
                 break;
             }
+        }
         if (e.Button is MouseButtons.Left)
         {
             bool invalidate = false;
             if (comboBoxBounds.Any() && selectForm is not null)
-                foreach (KeyValuePair<ProgramSelection, Rectangle> pair in comboBoxBounds)
-                    if (pair.Value.Contains(clickPoint))
+                foreach (KeyValuePair<ProgramSelection, Rectangle> pair in comboBoxBounds.ToList())
+                {
+                    if (!ProgramSelection.All.Contains(pair.Key))
+                        _ = comboBoxBounds.Remove(pair.Key);
+                    else if (pair.Value.Contains(clickPoint))
                     {
                         List<string> proxies = Resources.Resources.EmbeddedResources.FindAll(r => r.StartsWith("Koaloader"));
                         comboBoxDropDown ??= new();
@@ -215,15 +222,18 @@ internal class CustomTreeView : TreeView
                                 string text = proxy.GetKoaloaderProxyDisplay();
                                 if (text.Contains("32-bit"))
                                 {
-                                    _ = comboBoxDropDown.Items.Add(new ToolStripButton(text, null, new EventHandler((sender, e) => {
+                                    _ = comboBoxDropDown.Items.Add(new ToolStripButton(text, null, new EventHandler((sender, e) =>
+                                    {
                                         pair.Key.KoaloaderProxy = proxy;
                                         ProgramData.UpdateKoaloaderProxyChoices();
                                         Invalidate();
-                                    })) { Font = comboBoxFont });
+                                    }))
+                                    { Font = comboBoxFont });
                                 }
                             }
                             comboBoxDropDown.Show(new(comboBoxDropDown.Left, comboBoxDropDown.Top));
-                        }) { Font = comboBoxFont });
+                        })
+                        { Font = comboBoxFont });
                         _ = comboBoxDropDown.Items.Add(new ToolStripButton("64-bit", null, (s, e) =>
                         {
                             comboBoxDropDown.Items.Clear();
@@ -232,28 +242,36 @@ internal class CustomTreeView : TreeView
                                 string text = proxy.GetKoaloaderProxyDisplay();
                                 if (text.Contains("64-bit"))
                                 {
-                                    _ = comboBoxDropDown.Items.Add(new ToolStripButton(text, null, new EventHandler((sender, e) => {
+                                    _ = comboBoxDropDown.Items.Add(new ToolStripButton(text, null, new EventHandler((sender, e) =>
+                                    {
                                         pair.Key.KoaloaderProxy = proxy;
                                         ProgramData.UpdateKoaloaderProxyChoices();
                                         Invalidate();
-                                    })) { Font = comboBoxFont });
+                                    }))
+                                    { Font = comboBoxFont });
                                 }
                             }
                             comboBoxDropDown.Show(new(comboBoxDropDown.Left, comboBoxDropDown.Top));
-                        }) { Font = comboBoxFont });
+                        })
+                        { Font = comboBoxFont });
                         comboBoxDropDown.Show(this, PointToScreen(new(pair.Value.Left, pair.Value.Bottom - 1)));
                         invalidate = true;
                         break;
                     }
+                }
             if (!invalidate)
             {
-                foreach (KeyValuePair<ProgramSelection, Rectangle> pair in checkBoxBounds)
-                    if (pair.Value.Contains(clickPoint))
+                foreach (KeyValuePair<ProgramSelection, Rectangle> pair in checkBoxBounds.ToList())
+                {
+                    if (!ProgramSelection.All.Contains(pair.Key))
+                        _ = checkBoxBounds.Remove(pair.Key);
+                    else if (pair.Value.Contains(clickPoint))
                     {
                         pair.Key.Koaloader = !pair.Key.Koaloader;
                         invalidate = true;
                         break;
                     }
+                }
                 if (invalidate && selectForm is not null)
                 {
                     CheckBox koaloaderAllCheckBox = selectForm.KoaloaderAllCheckBox();
