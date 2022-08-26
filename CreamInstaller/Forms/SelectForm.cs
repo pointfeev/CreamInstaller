@@ -852,7 +852,7 @@ internal partial class SelectForm : CustomForm
         {
             foreach (ProgramSelection selection in ProgramSelection.AllEnabled)
                 if (!Program.IsProgramRunningDialog(this, selection)) return;
-            if (ParadoxLauncher.DlcDialog(this)) return;
+            if (!uninstall && ParadoxLauncher.DlcDialog(this)) return;
             Hide();
             using InstallForm installForm = new(this, uninstall);
             _ = installForm.ShowDialog();
