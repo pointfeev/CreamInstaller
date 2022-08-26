@@ -15,6 +15,10 @@ namespace CreamInstaller.Components;
 internal class CustomTreeView : TreeView
 {
     private Form form;
+    private SolidBrush backBrush;
+    private Font comboBoxFont;
+    private ToolStripDropDown comboBoxDropDown;
+
     protected override void WndProc(ref Message m)
     {
         if (m.Msg == 0x203)
@@ -29,6 +33,20 @@ internal class CustomTreeView : TreeView
         DrawMode = TreeViewDrawMode.OwnerDrawText;
         DrawNode += new DrawTreeNodeEventHandler(DrawTreeNode);
         TreeViewNodeSorter = PlatformIdComparer.NodeName;
+        Disposed += OnDisposed;
+    }
+
+    private void OnDisposed(object sender, EventArgs e)
+    {
+        if (backBrush is not null)
+            backBrush.Dispose();
+        backBrush = null;
+        if (comboBoxFont is not null)
+            comboBoxFont.Dispose();
+        comboBoxFont = null;
+        if (comboBoxDropDown is not null)
+            comboBoxDropDown.Dispose();
+        comboBoxDropDown = null;
     }
 
     private readonly Dictionary<TreeNode, Rectangle> selectionBounds = new();
@@ -36,7 +54,6 @@ internal class CustomTreeView : TreeView
     private readonly Dictionary<ProgramSelection, Rectangle> comboBoxBounds = new();
     private const string koaloaderToggleString = "Koaloader";
 
-    private SolidBrush backBrush;
     private void DrawTreeNode(object sender, DrawTreeNodeEventArgs e)
     {
         e.DrawDefault = true;
@@ -137,17 +154,19 @@ internal class CustomTreeView : TreeView
 
                 if (selection.Koaloader && selection.KoaloaderProxy is not null)
                 {
+                    comboBoxFont ??= new(font.FontFamily, 6, font.Style, font.Unit, font.GdiCharSet, font.GdiVerticalFont);
                     ComboBoxState comboBoxState = Enabled ? ComboBoxState.Normal : ComboBoxState.Disabled;
 
                     text = selection.KoaloaderProxy.GetKoaloaderProxyDisplay();
-                    size = TextRenderer.MeasureText(graphics, text, font) + new Size(6, 0);
-                    bounds = new(bounds.X + bounds.Width, bounds.Y, size.Width, bounds.Height);
+                    size = TextRenderer.MeasureText(graphics, text, comboBoxFont) + new Size(6, 0);
+                    int padding = 2;
+                    bounds = new(bounds.X + bounds.Width, bounds.Y + padding / 2, size.Width, bounds.Height - padding);
                     selectionBounds = new(selectionBounds.Location, selectionBounds.Size + new Size(bounds.Size.Width, 0));
                     Rectangle comboBoxBounds = bounds;
                     graphics.FillRectangle(backBrush, bounds);
-                    ComboBoxRenderer.DrawTextBox(graphics, bounds, text, font, comboBoxState);
+                    ComboBoxRenderer.DrawTextBox(graphics, bounds, text, comboBoxFont, comboBoxState);
 
-                    size = new(16, 0);
+                    size = new(14, 0);
                     left = -1;
                     bounds = new(bounds.X + bounds.Width + left, bounds.Y, size.Width, bounds.Height);
                     selectionBounds = new(selectionBounds.Location, selectionBounds.Size + new Size(bounds.Size.Width + left, 0));
@@ -184,19 +203,45 @@ internal class CustomTreeView : TreeView
                 foreach (KeyValuePair<ProgramSelection, Rectangle> pair in comboBoxBounds)
                     if (pair.Value.Contains(clickPoint))
                     {
-                        ContextMenuStrip contextMenuStrip = selectForm.ContextMenuStrip;
-                        contextMenuStrip.Items.Clear();
-                        foreach (string proxy in Resources.Resources.EmbeddedResources.FindAll(r => r.StartsWith("Koaloader")))
+                        List<string> proxies = Resources.Resources.EmbeddedResources.FindAll(r => r.StartsWith("Koaloader"));
+                        comboBoxDropDown ??= new();
+                        comboBoxDropDown.ShowItemToolTips = false;
+                        comboBoxDropDown.Items.Clear();
+                        _ = comboBoxDropDown.Items.Add(new ToolStripButton("32-bit", null, (s, e) =>
                         {
-                            _ = contextMenuStrip.Items.Add(new ContextMenuItem(proxy.GetKoaloaderProxyDisplay(),
-                                new EventHandler((sender, e) =>
+                            comboBoxDropDown.Items.Clear();
+                            foreach (string proxy in proxies)
+                            {
+                                string text = proxy.GetKoaloaderProxyDisplay();
+                                if (text.Contains("32-bit"))
                                 {
-                                    pair.Key.KoaloaderProxy = proxy;
-                                    ProgramData.UpdateKoaloaderProxyChoices();
-                                    Invalidate();
-                                })));
-                        }
-                        contextMenuStrip.Show(this, PointToScreen(new(pair.Value.Left, pair.Value.Bottom)));
+                                    _ = comboBoxDropDown.Items.Add(new ToolStripButton(text, null, new EventHandler((sender, e) => {
+                                        pair.Key.KoaloaderProxy = proxy;
+                                        ProgramData.UpdateKoaloaderProxyChoices();
+                                        Invalidate();
+                                    })) { Font = comboBoxFont });
+                                }
+                            }
+                            comboBoxDropDown.Show(new(comboBoxDropDown.Left, comboBoxDropDown.Top));
+                        }) { Font = comboBoxFont });
+                        _ = comboBoxDropDown.Items.Add(new ToolStripButton("64-bit", null, (s, e) =>
+                        {
+                            comboBoxDropDown.Items.Clear();
+                            foreach (string proxy in proxies)
+                            {
+                                string text = proxy.GetKoaloaderProxyDisplay();
+                                if (text.Contains("64-bit"))
+                                {
+                                    _ = comboBoxDropDown.Items.Add(new ToolStripButton(text, null, new EventHandler((sender, e) => {
+                                        pair.Key.KoaloaderProxy = proxy;
+                                        ProgramData.UpdateKoaloaderProxyChoices();
+                                        Invalidate();
+                                    })) { Font = comboBoxFont });
+                                }
+                            }
+                            comboBoxDropDown.Show(new(comboBoxDropDown.Left, comboBoxDropDown.Top));
+                        }) { Font = comboBoxFont });
+                        comboBoxDropDown.Show(this, PointToScreen(new(pair.Value.Left, pair.Value.Bottom - 1)));
                         invalidate = true;
                         break;
                     }

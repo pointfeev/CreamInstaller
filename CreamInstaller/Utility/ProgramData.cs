@@ -153,4 +153,11 @@ internal static class ProgramData
         if (choices.Any())
             WriteKoaloaderProxyChoices(choices);
     }
+
+    internal static void ResetKoaloaderProxyChoices()
+    {
+        if (File.Exists(KoaloaderProxyChoicesPath))
+            File.Delete(KoaloaderProxyChoicesPath);
+        UpdateKoaloaderProxyChoices();
+    }
 }
