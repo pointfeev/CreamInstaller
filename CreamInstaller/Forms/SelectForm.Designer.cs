@@ -1,374 +1,334 @@
-﻿
+﻿using System;
 using System.Windows.Forms;
+using System.Drawing;
+using System.ComponentModel;
+using CreamInstaller.Components;
 
 namespace CreamInstaller
 {
     partial class SelectForm
     {
-        /// <summary>
-        ///  Required designer variable.
-        /// </summary>
-        private System.ComponentModel.IContainer components = null;
-
-        /// <summary>
-        ///  Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        private IContainer components = null;
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
-            {
+            if (disposing && components is not null)
                 components.Dispose();
-            }
             base.Dispose(disposing);
         }
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        ///  Required method for Designer support - do not modify
-        ///  the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
-            this.installButton = new System.Windows.Forms.Button();
-            this.cancelButton = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.flowLayoutPanel4 = new System.Windows.Forms.FlowLayoutPanel();
-            this.koaloaderAllCheckBox = new System.Windows.Forms.CheckBox();
-            this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
-            this.noneFoundLabel = new System.Windows.Forms.Label();
-            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.blockedGamesCheckBox = new System.Windows.Forms.CheckBox();
-            this.blockProtectedHelpButton = new System.Windows.Forms.Button();
-            this.selectionTreeView = new Components.CustomTreeView();
-            this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
-            this.allCheckBox = new System.Windows.Forms.CheckBox();
-            this.progressBar = new System.Windows.Forms.ProgressBar();
-            this.progressLabel = new System.Windows.Forms.Label();
-            this.scanButton = new System.Windows.Forms.Button();
-            this.uninstallButton = new System.Windows.Forms.Button();
-            this.progressLabelGames = new System.Windows.Forms.Label();
-            this.progressLabelDLCs = new System.Windows.Forms.Label();
-            this.sortCheckBox = new System.Windows.Forms.CheckBox();
-            this.groupBox1.SuspendLayout();
-            this.flowLayoutPanel4.SuspendLayout();
-            this.flowLayoutPanel1.SuspendLayout();
-            this.flowLayoutPanel2.SuspendLayout();
+            this.installButton = new();
+            this.cancelButton = new();
+            this.programsGroupBox = new();
+            this.koaloaderFlowPanel = new();
+            this.koaloaderAllCheckBox = new();
+            this.noneFoundLabel = new();
+            this.blockedGamesFlowPanel = new();
+            this.blockedGamesCheckBox = new();
+            this.blockProtectedHelpButton = new();
+            this.selectionTreeView = new();
+            this.allCheckBoxLayoutPanel = new();
+            this.allCheckBox = new();
+            this.progressBar = new();
+            this.progressLabel = new();
+            this.scanButton = new();
+            this.uninstallButton = new();
+            this.progressLabelGames = new();
+            this.progressLabelDLCs = new();
+            this.sortCheckBox = new();
+            this.programsGroupBox.SuspendLayout();
+            this.koaloaderFlowPanel.SuspendLayout();
+            this.blockedGamesFlowPanel.SuspendLayout();
+            this.allCheckBoxLayoutPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // installButton
             // 
-            this.installButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.installButton.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Right)));
             this.installButton.AutoSize = true;
-            this.installButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.installButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             this.installButton.Enabled = false;
-            this.installButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.installButton.Location = new System.Drawing.Point(420, 325);
+            this.installButton.FlatStyle = FlatStyle.System;
+            this.installButton.Location = new Point(420, 325);
             this.installButton.Name = "installButton";
-            this.installButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.installButton.Size = new System.Drawing.Size(149, 24);
+            this.installButton.Padding = new(12, 0, 12, 0);
+            this.installButton.Size = new Size(149, 24);
             this.installButton.TabIndex = 10004;
             this.installButton.Text = "Generate and Install";
             this.installButton.UseVisualStyleBackColor = true;
-            this.installButton.Click += new System.EventHandler(this.OnInstall);
+            this.installButton.Click += this.OnInstall;
             // 
             // cancelButton
             // 
-            this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.cancelButton.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Left)));
             this.cancelButton.AutoSize = true;
-            this.cancelButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.cancelButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.cancelButton.Location = new System.Drawing.Point(12, 325);
+            this.cancelButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            this.cancelButton.FlatStyle = FlatStyle.System;
+            this.cancelButton.Location = new Point(12, 325);
             this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.cancelButton.Size = new System.Drawing.Size(81, 24);
+            this.cancelButton.Padding = new(12, 0, 12, 0);
+            this.cancelButton.Size = new Size(81, 24);
             this.cancelButton.TabIndex = 10000;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
-            this.cancelButton.Click += new System.EventHandler(this.OnCancel);
+            this.cancelButton.Click += this.OnCancel;
             // 
-            // label1
+            // programsGroupBox
             // 
-            this.label1.Location = new System.Drawing.Point(0, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(100, 23);
-            this.label1.TabIndex = 0;
+            this.programsGroupBox.Anchor = ((AnchorStyles)((((AnchorStyles.Top | AnchorStyles.Bottom) | AnchorStyles.Left) | AnchorStyles.Right)));
+            this.programsGroupBox.Controls.Add(this.koaloaderFlowPanel);
+            this.programsGroupBox.Controls.Add(this.noneFoundLabel);
+            this.programsGroupBox.Controls.Add(this.blockedGamesFlowPanel);
+            this.programsGroupBox.Controls.Add(this.selectionTreeView);
+            this.programsGroupBox.Controls.Add(this.allCheckBoxLayoutPanel);
+            this.programsGroupBox.FlatStyle = FlatStyle.System;
+            this.programsGroupBox.Location = new Point(12, 12);
+            this.programsGroupBox.Name = "programsGroupBox";
+            this.programsGroupBox.Size = new Size(560, 239);
+            this.programsGroupBox.TabIndex = 8;
+            this.programsGroupBox.TabStop = false;
+            this.programsGroupBox.Text = "Programs / Games";
             // 
-            // groupBox1
+            // koaloaderFlowPanel
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox1.Controls.Add(this.flowLayoutPanel4);
-            this.groupBox1.Controls.Add(this.flowLayoutPanel3);
-            this.groupBox1.Controls.Add(this.noneFoundLabel);
-            this.groupBox1.Controls.Add(this.flowLayoutPanel1);
-            this.groupBox1.Controls.Add(this.selectionTreeView);
-            this.groupBox1.Controls.Add(this.flowLayoutPanel2);
-            this.groupBox1.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.groupBox1.Location = new System.Drawing.Point(12, 12);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(560, 239);
-            this.groupBox1.TabIndex = 8;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Programs / Games";
-            // 
-            // flowLayoutPanel4
-            // 
-            this.flowLayoutPanel4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.flowLayoutPanel4.AutoSize = true;
-            this.flowLayoutPanel4.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.flowLayoutPanel4.Controls.Add(this.koaloaderAllCheckBox);
-            this.flowLayoutPanel4.Location = new System.Drawing.Point(430, -1);
-            this.flowLayoutPanel4.Margin = new System.Windows.Forms.Padding(0);
-            this.flowLayoutPanel4.Name = "flowLayoutPanel4";
-            this.flowLayoutPanel4.Size = new System.Drawing.Size(73, 19);
-            this.flowLayoutPanel4.TabIndex = 10005;
-            this.flowLayoutPanel4.WrapContents = false;
+            this.koaloaderFlowPanel.Anchor = ((AnchorStyles)((AnchorStyles.Top | AnchorStyles.Right)));
+            this.koaloaderFlowPanel.AutoSize = true;
+            this.koaloaderFlowPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            this.koaloaderFlowPanel.Controls.Add(this.koaloaderAllCheckBox);
+            this.koaloaderFlowPanel.Location = new Point(430, -1);
+            this.koaloaderFlowPanel.Margin = new(0);
+            this.koaloaderFlowPanel.Name = "koaloaderFlowPanel";
+            this.koaloaderFlowPanel.Size = new Size(73, 19);
+            this.koaloaderFlowPanel.TabIndex = 10005;
+            this.koaloaderFlowPanel.WrapContents = false;
             // 
             // koaloaderAllCheckBox
             // 
-            this.koaloaderAllCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.koaloaderAllCheckBox.Anchor = ((AnchorStyles)((AnchorStyles.Top | AnchorStyles.Right)));
             this.koaloaderAllCheckBox.Checked = true;
-            this.koaloaderAllCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.koaloaderAllCheckBox.CheckState = CheckState.Checked;
             this.koaloaderAllCheckBox.Enabled = false;
-            this.koaloaderAllCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.koaloaderAllCheckBox.Location = new System.Drawing.Point(2, 0);
-            this.koaloaderAllCheckBox.Margin = new System.Windows.Forms.Padding(2, 0, 0, 0);
+            this.koaloaderAllCheckBox.FlatStyle = FlatStyle.System;
+            this.koaloaderAllCheckBox.Location = new Point(2, 0);
+            this.koaloaderAllCheckBox.Margin = new(2, 0, 0, 0);
             this.koaloaderAllCheckBox.Name = "koaloaderAllCheckBox";
-            this.koaloaderAllCheckBox.Size = new System.Drawing.Size(71, 19);
+            this.koaloaderAllCheckBox.Size = new Size(71, 19);
             this.koaloaderAllCheckBox.TabIndex = 4;
             this.koaloaderAllCheckBox.Text = "Koaloader";
-            this.koaloaderAllCheckBox.CheckedChanged += new System.EventHandler(this.OnKoaloaderAllCheckBoxChanged);
-            // 
-            // flowLayoutPanel3
-            // 
-            this.flowLayoutPanel3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.flowLayoutPanel3.AutoSize = true;
-            this.flowLayoutPanel3.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.flowLayoutPanel3.Location = new System.Drawing.Point(500, -1);
-            this.flowLayoutPanel3.Margin = new System.Windows.Forms.Padding(0);
-            this.flowLayoutPanel3.Name = "flowLayoutPanel3";
-            this.flowLayoutPanel3.Size = new System.Drawing.Size(0, 0);
-            this.flowLayoutPanel3.TabIndex = 1007;
-            this.flowLayoutPanel3.WrapContents = false;
+            this.koaloaderAllCheckBox.CheckedChanged += this.OnKoaloaderAllCheckBoxChanged;
             // 
             // noneFoundLabel
             // 
-            this.noneFoundLabel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.noneFoundLabel.Location = new System.Drawing.Point(3, 19);
+            this.noneFoundLabel.Dock = DockStyle.Fill;
+            this.noneFoundLabel.Location = new Point(3, 19);
             this.noneFoundLabel.Name = "noneFoundLabel";
-            this.noneFoundLabel.Size = new System.Drawing.Size(554, 217);
+            this.noneFoundLabel.Size = new Size(554, 217);
             this.noneFoundLabel.TabIndex = 1002;
             this.noneFoundLabel.Text = "No applicable programs nor games were found on your computer!";
             this.noneFoundLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.noneFoundLabel.Visible = false;
             // 
-            // flowLayoutPanel1
+            // blockedGamesFlowPanel
             // 
-            this.flowLayoutPanel1.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.flowLayoutPanel1.AutoSize = true;
-            this.flowLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.flowLayoutPanel1.Controls.Add(this.blockedGamesCheckBox);
-            this.flowLayoutPanel1.Controls.Add(this.blockProtectedHelpButton);
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(125, -1);
-            this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
-            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(162, 20);
-            this.flowLayoutPanel1.TabIndex = 1005;
-            this.flowLayoutPanel1.WrapContents = false;
+            this.blockedGamesFlowPanel.Anchor = AnchorStyles.Top;
+            this.blockedGamesFlowPanel.AutoSize = true;
+            this.blockedGamesFlowPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            this.blockedGamesFlowPanel.Controls.Add(this.blockedGamesCheckBox);
+            this.blockedGamesFlowPanel.Controls.Add(this.blockProtectedHelpButton);
+            this.blockedGamesFlowPanel.Location = new Point(125, -1);
+            this.blockedGamesFlowPanel.Margin = new(0);
+            this.blockedGamesFlowPanel.Name = "blockedGamesFlowPanel";
+            this.blockedGamesFlowPanel.Size = new Size(162, 20);
+            this.blockedGamesFlowPanel.TabIndex = 1005;
+            this.blockedGamesFlowPanel.WrapContents = false;
             // 
             // blockedGamesCheckBox
             // 
             this.blockedGamesCheckBox.Checked = true;
-            this.blockedGamesCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.blockedGamesCheckBox.CheckState = CheckState.Checked;
             this.blockedGamesCheckBox.Enabled = false;
-            this.blockedGamesCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.blockedGamesCheckBox.Location = new System.Drawing.Point(2, 0);
-            this.blockedGamesCheckBox.Margin = new System.Windows.Forms.Padding(2, 0, 0, 0);
+            this.blockedGamesCheckBox.FlatStyle = FlatStyle.System;
+            this.blockedGamesCheckBox.Location = new Point(2, 0);
+            this.blockedGamesCheckBox.Margin = new(2, 0, 0, 0);
             this.blockedGamesCheckBox.Name = "blockedGamesCheckBox";
-            this.blockedGamesCheckBox.Size = new System.Drawing.Size(140, 20);
+            this.blockedGamesCheckBox.Size = new Size(140, 20);
             this.blockedGamesCheckBox.TabIndex = 1;
             this.blockedGamesCheckBox.Text = "Block Protected Games";
             this.blockedGamesCheckBox.UseVisualStyleBackColor = true;
-            this.blockedGamesCheckBox.CheckedChanged += new System.EventHandler(this.OnBlockProtectedGamesCheckBoxChanged);
+            this.blockedGamesCheckBox.CheckedChanged += this.OnBlockProtectedGamesCheckBoxChanged;
             // 
             // blockProtectedHelpButton
             // 
             this.blockProtectedHelpButton.Enabled = false;
-            this.blockProtectedHelpButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.blockProtectedHelpButton.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.blockProtectedHelpButton.Location = new System.Drawing.Point(142, 0);
-            this.blockProtectedHelpButton.Margin = new System.Windows.Forms.Padding(0, 0, 1, 0);
+            this.blockProtectedHelpButton.FlatStyle = FlatStyle.System;
+            this.blockProtectedHelpButton.Font = new Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.blockProtectedHelpButton.Location = new Point(142, 0);
+            this.blockProtectedHelpButton.Margin = new(0, 0, 1, 0);
             this.blockProtectedHelpButton.Name = "blockProtectedHelpButton";
-            this.blockProtectedHelpButton.Size = new System.Drawing.Size(19, 19);
+            this.blockProtectedHelpButton.Size = new Size(19, 19);
             this.blockProtectedHelpButton.TabIndex = 2;
             this.blockProtectedHelpButton.Text = "?";
             this.blockProtectedHelpButton.UseVisualStyleBackColor = true;
-            this.blockProtectedHelpButton.Click += new System.EventHandler(this.OnBlockProtectedGamesHelpButtonClicked);
+            this.blockProtectedHelpButton.Click += this.OnBlockProtectedGamesHelpButtonClicked;
             // 
             // selectionTreeView
             // 
             this.selectionTreeView.BackColor = System.Drawing.SystemColors.Control;
-            this.selectionTreeView.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.selectionTreeView.BorderStyle = BorderStyle.None;
             this.selectionTreeView.CheckBoxes = true;
-            this.selectionTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.selectionTreeView.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawAll;
+            this.selectionTreeView.Dock = DockStyle.Fill;
+            this.selectionTreeView.DrawMode = TreeViewDrawMode.OwnerDrawAll;
             this.selectionTreeView.Enabled = false;
             this.selectionTreeView.FullRowSelect = true;
-            this.selectionTreeView.Location = new System.Drawing.Point(3, 19);
+            this.selectionTreeView.Location = new Point(3, 19);
             this.selectionTreeView.Name = "selectionTreeView";
-            this.selectionTreeView.Size = new System.Drawing.Size(554, 217);
+            this.selectionTreeView.Size = new Size(554, 217);
             this.selectionTreeView.Sorted = true;
             this.selectionTreeView.TabIndex = 1001;
             // 
-            // flowLayoutPanel2
+            // allCheckBoxLayoutPanel
             // 
-            this.flowLayoutPanel2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.flowLayoutPanel2.AutoSize = true;
-            this.flowLayoutPanel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.flowLayoutPanel2.Controls.Add(this.allCheckBox);
-            this.flowLayoutPanel2.Location = new System.Drawing.Point(520, -1);
-            this.flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
-            this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-            this.flowLayoutPanel2.Size = new System.Drawing.Size(34, 19);
-            this.flowLayoutPanel2.TabIndex = 1006;
-            this.flowLayoutPanel2.WrapContents = false;
+            this.allCheckBoxLayoutPanel.Anchor = ((AnchorStyles)((AnchorStyles.Top | AnchorStyles.Right)));
+            this.allCheckBoxLayoutPanel.AutoSize = true;
+            this.allCheckBoxLayoutPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            this.allCheckBoxLayoutPanel.Controls.Add(this.allCheckBox);
+            this.allCheckBoxLayoutPanel.Location = new Point(520, -1);
+            this.allCheckBoxLayoutPanel.Margin = new(0);
+            this.allCheckBoxLayoutPanel.Name = "allCheckBoxLayoutPanel";
+            this.allCheckBoxLayoutPanel.Size = new Size(34, 19);
+            this.allCheckBoxLayoutPanel.TabIndex = 1006;
+            this.allCheckBoxLayoutPanel.WrapContents = false;
             // 
             // allCheckBox
             // 
-            this.allCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.allCheckBox.Anchor = ((AnchorStyles)((AnchorStyles.Top | AnchorStyles.Right)));
             this.allCheckBox.Checked = true;
-            this.allCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.allCheckBox.CheckState = CheckState.Checked;
             this.allCheckBox.Enabled = false;
-            this.allCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.allCheckBox.Location = new System.Drawing.Point(2, 0);
-            this.allCheckBox.Margin = new System.Windows.Forms.Padding(2, 0, 0, 0);
+            this.allCheckBox.FlatStyle = FlatStyle.System;
+            this.allCheckBox.Location = new Point(2, 0);
+            this.allCheckBox.Margin = new(2, 0, 0, 0);
             this.allCheckBox.Name = "allCheckBox";
-            this.allCheckBox.Size = new System.Drawing.Size(32, 19);
+            this.allCheckBox.Size = new Size(32, 19);
             this.allCheckBox.TabIndex = 4;
             this.allCheckBox.Text = "All";
-            this.allCheckBox.CheckedChanged += new System.EventHandler(this.OnAllCheckBoxChanged);
+            this.allCheckBox.CheckedChanged += this.OnAllCheckBoxChanged;
             // 
             // progressBar
             // 
-            this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar.Location = new System.Drawing.Point(12, 296);
+            this.progressBar.Anchor = ((AnchorStyles)(((AnchorStyles.Bottom | AnchorStyles.Left) | AnchorStyles.Right)));
+            this.progressBar.Location = new Point(12, 296);
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(560, 23);
+            this.progressBar.Size = new Size(560, 23);
             this.progressBar.TabIndex = 9;
             // 
             // progressLabel
             // 
-            this.progressLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressLabel.Location = new System.Drawing.Point(12, 254);
+            this.progressLabel.Anchor = ((AnchorStyles)(((AnchorStyles.Bottom | AnchorStyles.Left) | AnchorStyles.Right)));
+            this.progressLabel.Location = new Point(12, 254);
             this.progressLabel.Name = "progressLabel";
-            this.progressLabel.Size = new System.Drawing.Size(560, 15);
+            this.progressLabel.Size = new Size(560, 15);
             this.progressLabel.TabIndex = 10;
             this.progressLabel.Text = "Gathering and caching your applicable games and their DLCs . . . 0%";
             // 
             // scanButton
             // 
-            this.scanButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.scanButton.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Right)));
             this.scanButton.AutoSize = true;
-            this.scanButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.scanButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             this.scanButton.Enabled = false;
-            this.scanButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.scanButton.Location = new System.Drawing.Point(235, 325);
+            this.scanButton.FlatStyle = FlatStyle.System;
+            this.scanButton.Location = new Point(235, 325);
             this.scanButton.Name = "scanButton";
-            this.scanButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.scanButton.Size = new System.Drawing.Size(82, 24);
+            this.scanButton.Padding = new(12, 0, 12, 0);
+            this.scanButton.Size = new Size(82, 24);
             this.scanButton.TabIndex = 10002;
             this.scanButton.Text = "Rescan";
             this.scanButton.UseVisualStyleBackColor = true;
-            this.scanButton.Click += new System.EventHandler(this.OnScan);
+            this.scanButton.Click += this.OnScan;
             // 
             // uninstallButton
             // 
-            this.uninstallButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.uninstallButton.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Right)));
             this.uninstallButton.AutoSize = true;
-            this.uninstallButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.uninstallButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             this.uninstallButton.Enabled = false;
-            this.uninstallButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.uninstallButton.Location = new System.Drawing.Point(323, 325);
+            this.uninstallButton.FlatStyle = FlatStyle.System;
+            this.uninstallButton.Location = new Point(323, 325);
             this.uninstallButton.Name = "uninstallButton";
-            this.uninstallButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.uninstallButton.Size = new System.Drawing.Size(91, 24);
+            this.uninstallButton.Padding = new(12, 0, 12, 0);
+            this.uninstallButton.Size = new Size(91, 24);
             this.uninstallButton.TabIndex = 10003;
             this.uninstallButton.Text = "Uninstall";
             this.uninstallButton.UseVisualStyleBackColor = true;
-            this.uninstallButton.Click += new System.EventHandler(this.OnUninstall);
+            this.uninstallButton.Click += this.OnUninstall;
             // 
             // progressLabelGames
             // 
-            this.progressLabelGames.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressLabelGames.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.progressLabelGames.Location = new System.Drawing.Point(12, 269);
+            this.progressLabelGames.Anchor = ((AnchorStyles)(((AnchorStyles.Bottom | AnchorStyles.Left) | AnchorStyles.Right)));
+            this.progressLabelGames.Font = new Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.progressLabelGames.Location = new Point(12, 269);
             this.progressLabelGames.Name = "progressLabelGames";
-            this.progressLabelGames.Size = new System.Drawing.Size(560, 12);
+            this.progressLabelGames.Size = new Size(560, 12);
             this.progressLabelGames.TabIndex = 11;
             this.progressLabelGames.Text = "Remaining games (2): Game 1, Game 2";
             // 
             // progressLabelDLCs
             // 
-            this.progressLabelDLCs.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressLabelDLCs.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.progressLabelDLCs.Location = new System.Drawing.Point(12, 281);
+            this.progressLabelDLCs.Anchor = ((AnchorStyles)(((AnchorStyles.Bottom | AnchorStyles.Left) | AnchorStyles.Right)));
+            this.progressLabelDLCs.Font = new Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.progressLabelDLCs.Location = new Point(12, 281);
             this.progressLabelDLCs.Name = "progressLabelDLCs";
-            this.progressLabelDLCs.Size = new System.Drawing.Size(560, 12);
+            this.progressLabelDLCs.Size = new Size(560, 12);
             this.progressLabelDLCs.TabIndex = 12;
             this.progressLabelDLCs.Text = "Remaining DLC (2): 123456, 654321";
             // 
             // sortCheckBox
             // 
-            this.sortCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.sortCheckBox.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Left)));
             this.sortCheckBox.AutoSize = true;
-            this.sortCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.sortCheckBox.Location = new System.Drawing.Point(120, 328);
-            this.sortCheckBox.Margin = new System.Windows.Forms.Padding(3, 0, 0, 0);
+            this.sortCheckBox.FlatStyle = FlatStyle.System;
+            this.sortCheckBox.Location = new Point(120, 328);
+            this.sortCheckBox.Margin = new(3, 0, 0, 0);
             this.sortCheckBox.Name = "sortCheckBox";
-            this.sortCheckBox.Size = new System.Drawing.Size(104, 20);
+            this.sortCheckBox.Size = new Size(104, 20);
             this.sortCheckBox.TabIndex = 10001;
             this.sortCheckBox.Text = "Sort By Name";
-            this.sortCheckBox.CheckedChanged += new System.EventHandler(this.OnSortCheckBoxChanged);
+            this.sortCheckBox.CheckedChanged += this.OnSortCheckBoxChanged;
             // 
             // SelectForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleDimensions = new SizeF(7F, 15F);
+            this.AutoScaleMode = AutoScaleMode.Font;
             this.AutoSize = true;
-            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(584, 361);
+            this.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            this.ClientSize = new Size(584, 361);
             this.Controls.Add(this.sortCheckBox);
             this.Controls.Add(this.progressLabelDLCs);
             this.Controls.Add(this.progressLabelGames);
             this.Controls.Add(this.uninstallButton);
             this.Controls.Add(this.scanButton);
-            this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.programsGroupBox);
             this.Controls.Add(this.progressBar);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.installButton);
             this.Controls.Add(this.progressLabel);
             this.DoubleBuffered = true;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "SelectForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.StartPosition = FormStartPosition.CenterParent;
             this.Text = "SelectForm";
-            this.Load += new System.EventHandler(this.OnLoad);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
-            this.flowLayoutPanel4.ResumeLayout(false);
-            this.flowLayoutPanel1.ResumeLayout(false);
-            this.flowLayoutPanel2.ResumeLayout(false);
+            this.Load += this.OnLoad;
+            this.programsGroupBox.ResumeLayout(false);
+            this.programsGroupBox.PerformLayout();
+            this.koaloaderFlowPanel.ResumeLayout(false);
+            this.blockedGamesFlowPanel.ResumeLayout(false);
+            this.allCheckBoxLayoutPanel.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -376,26 +336,24 @@ namespace CreamInstaller
 
         #endregion
 
-        private System.Windows.Forms.Button installButton;
-        private System.Windows.Forms.Button cancelButton;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.ProgressBar progressBar;
-        private System.Windows.Forms.Label progressLabel;
-        private System.Windows.Forms.CheckBox allCheckBox;
+        private Button installButton;
+        private Button cancelButton;
+        private GroupBox programsGroupBox;
+        private ProgressBar progressBar;
+        private Label progressLabel;
+        private CheckBox allCheckBox;
         private Button scanButton;
         private Label noneFoundLabel;
-        private Components.CustomTreeView selectionTreeView;
+        private CustomTreeView selectionTreeView;
         private CheckBox blockedGamesCheckBox;
         private Button blockProtectedHelpButton;
-        private FlowLayoutPanel flowLayoutPanel1;
-        private FlowLayoutPanel flowLayoutPanel2;
+        private FlowLayoutPanel blockedGamesFlowPanel;
+        private FlowLayoutPanel allCheckBoxLayoutPanel;
         private Button uninstallButton;
         private Label progressLabelGames;
         private Label progressLabelDLCs;
         private CheckBox sortCheckBox;
-        private FlowLayoutPanel flowLayoutPanel3;
-        private FlowLayoutPanel flowLayoutPanel4;
+        private FlowLayoutPanel koaloaderFlowPanel;
         private CheckBox koaloaderAllCheckBox;
     }
 }

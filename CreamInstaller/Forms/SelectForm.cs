@@ -213,8 +213,9 @@ internal partial class SelectForm : CustomForm
                                     }
                                 }
                                 if (Program.Canceled) return;
-                                if (!string.IsNullOrWhiteSpace(dlcName))
-                                    dlc[dlcAppId] = (onSteamStore ? DlcType.Steam : DlcType.SteamHidden, dlcName, dlcIcon);
+                                if (string.IsNullOrWhiteSpace(dlcName))
+                                    dlcName = "Unknown";
+                                dlc[dlcAppId] = (onSteamStore ? DlcType.Steam : DlcType.SteamHidden, dlcName, dlcIcon);
                                 RemoveFromRemainingDLCs(dlcAppId);
                             });
                             dlcTasks.Add(task);
@@ -650,7 +651,7 @@ internal partial class SelectForm : CustomForm
         progressLabelDLCs.Text = "";
         progressLabelDLCs.Visible = true;
         progressBar.Visible = true;
-        groupBox1.Size = new(groupBox1.Size.Width, groupBox1.Size.Height - 3
+        programsGroupBox.Size = new(programsGroupBox.Size.Width, programsGroupBox.Size.Height - 3
             - progressLabel.Size.Height
             - progressLabelGames.Size.Height
             - progressLabelDLCs.Size.Height
@@ -663,7 +664,7 @@ internal partial class SelectForm : CustomForm
         progressLabelGames.Visible = false;
         progressLabelDLCs.Visible = false;
         progressBar.Visible = false;
-        groupBox1.Size = new(groupBox1.Size.Width, groupBox1.Size.Height + 3
+        programsGroupBox.Size = new(programsGroupBox.Size.Width, programsGroupBox.Size.Height + 3
             + progressLabel.Size.Height
             + progressLabelGames.Size.Height
             + progressLabelDLCs.Size.Height

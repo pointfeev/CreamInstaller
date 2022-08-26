@@ -1,23 +1,18 @@
 ﻿
+using CreamInstaller.Components;
+
+using System.ComponentModel;
+using System.Windows.Forms;
+
 namespace CreamInstaller
 {
     partial class SelectDialogForm
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
-        private System.ComponentModel.IContainer components = null;
-
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        private IContainer components = null;
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
-            {
+            if (disposing && components is not null)
                 components.Dispose();
-            }
             base.Dispose(disposing);
         }
 
@@ -31,7 +26,7 @@ namespace CreamInstaller
         {
             this.acceptButton = new System.Windows.Forms.Button();
             this.groupBox = new System.Windows.Forms.GroupBox();
-            this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
+            this.allCheckBoxFlowPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.allCheckBox = new System.Windows.Forms.CheckBox();
             this.sortCheckBox = new System.Windows.Forms.CheckBox();
             this.cancelButton = new System.Windows.Forms.Button();
@@ -39,7 +34,7 @@ namespace CreamInstaller
             this.saveButton = new System.Windows.Forms.Button();
             this.selectionTreeView = new Components.CustomTreeView();
             this.groupBox.SuspendLayout();
-            this.flowLayoutPanel2.SuspendLayout();
+            this.allCheckBoxFlowPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // acceptButton
@@ -63,7 +58,7 @@ namespace CreamInstaller
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox.Controls.Add(this.selectionTreeView);
-            this.groupBox.Controls.Add(this.flowLayoutPanel2);
+            this.groupBox.Controls.Add(this.allCheckBoxFlowPanel);
             this.groupBox.Location = new System.Drawing.Point(12, 12);
             this.groupBox.MinimumSize = new System.Drawing.Size(240, 40);
             this.groupBox.Name = "groupBox";
@@ -88,17 +83,17 @@ namespace CreamInstaller
             this.selectionTreeView.Sorted = true;
             this.selectionTreeView.TabIndex = 0;
             // 
-            // flowLayoutPanel2
+            // allCheckBoxFlowPanel
             // 
-            this.flowLayoutPanel2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.flowLayoutPanel2.AutoSize = true;
-            this.flowLayoutPanel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.flowLayoutPanel2.Controls.Add(this.allCheckBox);
-            this.flowLayoutPanel2.Location = new System.Drawing.Point(370, -1);
-            this.flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
-            this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-            this.flowLayoutPanel2.Size = new System.Drawing.Size(34, 19);
-            this.flowLayoutPanel2.TabIndex = 1007;
+            this.allCheckBoxFlowPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.allCheckBoxFlowPanel.AutoSize = true;
+            this.allCheckBoxFlowPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.allCheckBoxFlowPanel.Controls.Add(this.allCheckBox);
+            this.allCheckBoxFlowPanel.Location = new System.Drawing.Point(370, -1);
+            this.allCheckBoxFlowPanel.Margin = new System.Windows.Forms.Padding(0);
+            this.allCheckBoxFlowPanel.Name = "allCheckBoxFlowPanel";
+            this.allCheckBoxFlowPanel.Size = new System.Drawing.Size(34, 19);
+            this.allCheckBoxFlowPanel.TabIndex = 1007;
             // 
             // allCheckBox
             // 
@@ -194,7 +189,7 @@ namespace CreamInstaller
             this.Text = "SelectDialogForm";
             this.groupBox.ResumeLayout(false);
             this.groupBox.PerformLayout();
-            this.flowLayoutPanel2.ResumeLayout(false);
+            this.allCheckBoxFlowPanel.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -202,14 +197,14 @@ namespace CreamInstaller
 
         #endregion
 
-        private System.Windows.Forms.Button acceptButton;
-        private System.Windows.Forms.GroupBox groupBox;
-        private Components.CustomTreeView selectionTreeView;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
-        private System.Windows.Forms.CheckBox allCheckBox;
-        private System.Windows.Forms.Button cancelButton;
-        private System.Windows.Forms.Button loadButton;
-        private System.Windows.Forms.Button saveButton;
-        private System.Windows.Forms.CheckBox sortCheckBox;
+        private Button acceptButton;
+        private GroupBox groupBox;
+        private CustomTreeView selectionTreeView;
+        private FlowLayoutPanel allCheckBoxFlowPanel;
+        private CheckBox allCheckBox;
+        private Button cancelButton;
+        private Button loadButton;
+        private Button saveButton;
+        private CheckBox sortCheckBox;
     }
 }

@@ -1,23 +1,16 @@
 ﻿
+using System.ComponentModel;
+using System.Windows.Forms;
+
 namespace CreamInstaller
 {
     partial class InstallForm
     {
-        /// <summary>
-        ///  Required designer variable.
-        /// </summary>
-        private System.ComponentModel.IContainer components = null;
-
-        /// <summary>
-        ///  Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        private IContainer components = null;
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
-            {
+            if (disposing && components is not null)
                 components.Dispose();
-            }
             base.Dispose(disposing);
         }
 
@@ -151,13 +144,14 @@ namespace CreamInstaller
         }
 
         #endregion
-        private System.Windows.Forms.ProgressBar userProgressBar;
-        private System.Windows.Forms.Label userInfoLabel;
-        private System.Windows.Forms.Button acceptButton;
-        private System.Windows.Forms.Button retryButton;
-        private System.Windows.Forms.Button cancelButton;
-        private System.Windows.Forms.RichTextBox logTextBox;
-        private System.Windows.Forms.Button reselectButton;
+
+        private ProgressBar userProgressBar;
+        private Label userInfoLabel;
+        private Button acceptButton;
+        private Button retryButton;
+        private Button cancelButton;
+        private RichTextBox logTextBox;
+        private Button reselectButton;
     }
 }
 
