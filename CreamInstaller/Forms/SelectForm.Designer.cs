@@ -31,7 +31,6 @@ namespace CreamInstaller
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             this.installButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -53,7 +52,6 @@ namespace CreamInstaller
             this.progressLabelGames = new System.Windows.Forms.Label();
             this.progressLabelDLCs = new System.Windows.Forms.Label();
             this.sortCheckBox = new System.Windows.Forms.CheckBox();
-            this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.groupBox1.SuspendLayout();
             this.flowLayoutPanel4.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
@@ -340,15 +338,6 @@ namespace CreamInstaller
             this.sortCheckBox.Text = "Sort By Name";
             this.sortCheckBox.CheckedChanged += new System.EventHandler(this.OnSortCheckBoxChanged);
             // 
-            // contextMenuStrip
-            // 
-            this.contextMenuStrip.AllowMerge = false;
-            this.contextMenuStrip.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.VerticalStackWithOverflow;
-            this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.ShowItemToolTips = false;
-            this.contextMenuStrip.Size = new System.Drawing.Size(61, 4);
-            this.contextMenuStrip.TabStop = true;
-            // 
             // SelectForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -406,7 +395,6 @@ namespace CreamInstaller
         private Label progressLabelDLCs;
         private CheckBox sortCheckBox;
         private FlowLayoutPanel flowLayoutPanel3;
-        private ContextMenuStrip contextMenuStrip;
         private FlowLayoutPanel flowLayoutPanel4;
         private CheckBox koaloaderAllCheckBox;
     }

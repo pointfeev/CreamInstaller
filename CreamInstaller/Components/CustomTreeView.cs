@@ -1,6 +1,10 @@
-﻿using System;
+﻿using CreamInstaller.Resources;
+using CreamInstaller.Utility;
+
+using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 
@@ -10,12 +14,14 @@ namespace CreamInstaller.Components;
 
 internal class CustomTreeView : TreeView
 {
+    private Form form;
     protected override void WndProc(ref Message m)
     {
         if (m.Msg == 0x203)
             m.Result = IntPtr.Zero;
         else
             base.WndProc(ref m);
+        form = FindForm();
     }
 
     internal CustomTreeView() : base()
@@ -27,6 +33,7 @@ internal class CustomTreeView : TreeView
 
     private readonly Dictionary<TreeNode, Rectangle> selectionBounds = new();
     private readonly Dictionary<ProgramSelection, Rectangle> checkBoxBounds = new();
+    private readonly Dictionary<ProgramSelection, Rectangle> comboBoxBounds = new();
     private const string koaloaderToggleString = "Koaloader";
 
     private SolidBrush backBrush;
@@ -118,8 +125,8 @@ internal class CustomTreeView : TreeView
                 size = TextRenderer.MeasureText(graphics, text, font);
                 int left = 1;
                 bounds = new(bounds.X + bounds.Width, bounds.Y, size.Width + left, bounds.Height);
-                selectionBounds = new(selectionBounds.Location, selectionBounds.Size + new Size(bounds.Size.Width + left, 0));
-                checkBoxBounds = new(checkBoxBounds.Location, checkBoxBounds.Size + new Size(bounds.Size.Width + left, 0));
+                selectionBounds = new(selectionBounds.Location, selectionBounds.Size + new Size(bounds.Size.Width, 0));
+                checkBoxBounds = new(checkBoxBounds.Location, checkBoxBounds.Size + new Size(bounds.Size.Width, 0));
                 graphics.FillRectangle(backBrush, bounds);
                 point = new(bounds.Location.X - 1 + left, bounds.Location.Y + 1);
                 TextRenderer.DrawText(graphics, text, font, point,
@@ -127,6 +134,29 @@ internal class CustomTreeView : TreeView
                     TextFormatFlags.Default);
 
                 this.checkBoxBounds[selection] = RectangleToClient(checkBoxBounds);
+
+                if (selection.Koaloader && selection.KoaloaderProxy is not null)
+                {
+                    ComboBoxState comboBoxState = Enabled ? ComboBoxState.Normal : ComboBoxState.Disabled;
+
+                    text = selection.KoaloaderProxy.GetKoaloaderProxyDisplay();
+                    size = TextRenderer.MeasureText(graphics, text, font) + new Size(6, 0);
+                    bounds = new(bounds.X + bounds.Width, bounds.Y, size.Width, bounds.Height);
+                    selectionBounds = new(selectionBounds.Location, selectionBounds.Size + new Size(bounds.Size.Width, 0));
+                    Rectangle comboBoxBounds = bounds;
+                    graphics.FillRectangle(backBrush, bounds);
+                    ComboBoxRenderer.DrawTextBox(graphics, bounds, text, font, comboBoxState);
+
+                    size = new(16, 0);
+                    left = -1;
+                    bounds = new(bounds.X + bounds.Width + left, bounds.Y, size.Width, bounds.Height);
+                    selectionBounds = new(selectionBounds.Location, selectionBounds.Size + new Size(bounds.Size.Width + left, 0));
+                    comboBoxBounds = new(comboBoxBounds.Location, comboBoxBounds.Size + new Size(bounds.Size.Width + left, 0));
+                    ComboBoxRenderer.DrawDropDownButton(graphics, bounds, comboBoxState);
+
+                    this.comboBoxBounds[selection] = RectangleToClient(comboBoxBounds);
+                }
+                else _ = comboBoxBounds.Remove(selection);
             }
         }
 
@@ -138,28 +168,48 @@ internal class CustomTreeView : TreeView
         base.OnMouseDown(e);
         Refresh();
         Point clickPoint = PointToClient(e.Location);
+        SelectForm selectForm = (form ??= FindForm()) as SelectForm;
         foreach (KeyValuePair<TreeNode, Rectangle> pair in selectionBounds)
             if (pair.Key.IsVisible && pair.Value.Contains(clickPoint))
             {
                 SelectedNode = pair.Key;
-                if (e.Button is MouseButtons.Right && FindForm() is SelectForm selectForm)
+                if (e.Button is MouseButtons.Right && selectForm is not null)
                     selectForm.OnNodeRightClick(pair.Key, e.Location);
                 break;
             }
         if (e.Button is MouseButtons.Left)
         {
             bool invalidate = false;
-            foreach (KeyValuePair<ProgramSelection, Rectangle> pair in checkBoxBounds)
-                if (pair.Value.Contains(clickPoint))
-                {
-                    pair.Key.Koaloader = !pair.Key.Koaloader;
-                    invalidate = true;
-                    break;
-                }
-            if (invalidate)
+            if (comboBoxBounds.Any() && selectForm is not null)
+                foreach (KeyValuePair<ProgramSelection, Rectangle> pair in comboBoxBounds)
+                    if (pair.Value.Contains(clickPoint))
+                    {
+                        ContextMenuStrip contextMenuStrip = selectForm.ContextMenuStrip;
+                        contextMenuStrip.Items.Clear();
+                        foreach (string proxy in Resources.Resources.EmbeddedResources.FindAll(r => r.StartsWith("Koaloader")))
+                        {
+                            _ = contextMenuStrip.Items.Add(new ContextMenuItem(proxy.GetKoaloaderProxyDisplay(),
+                                new EventHandler((sender, e) =>
+                                {
+                                    pair.Key.KoaloaderProxy = proxy;
+                                    ProgramData.UpdateKoaloaderProxyChoices();
+                                    Invalidate();
+                                })));
+                        }
+                        contextMenuStrip.Show(this, PointToScreen(new(pair.Value.Left, pair.Value.Bottom)));
+                        invalidate = true;
+                        break;
+                    }
+            if (!invalidate)
             {
-                Invalidate();
-                if (FindForm() is SelectForm selectForm)
+                foreach (KeyValuePair<ProgramSelection, Rectangle> pair in checkBoxBounds)
+                    if (pair.Value.Contains(clickPoint))
+                    {
+                        pair.Key.Koaloader = !pair.Key.Koaloader;
+                        invalidate = true;
+                        break;
+                    }
+                if (invalidate && selectForm is not null)
                 {
                     CheckBox koaloaderAllCheckBox = selectForm.KoaloaderAllCheckBox();
                     koaloaderAllCheckBox.CheckedChanged -= selectForm.OnKoaloaderAllCheckBoxChanged;
@@ -167,6 +217,7 @@ internal class CustomTreeView : TreeView
                     koaloaderAllCheckBox.CheckedChanged += selectForm.OnKoaloaderAllCheckBoxChanged;
                 }
             }
+            if (invalidate) Invalidate();
         }
     }
 }

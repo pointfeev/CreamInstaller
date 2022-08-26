@@ -28,7 +28,7 @@ internal class ProgramSelection
 {
     internal bool Enabled;
     internal bool Koaloader;
-    internal string KoaloaderProxy = "Koaloader.version_64.version.dll";
+    internal string KoaloaderProxy;
 
     internal Platform Platform;
     internal string Id = "0";

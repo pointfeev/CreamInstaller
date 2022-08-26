@@ -26,6 +26,15 @@ internal static class Koaloader
         config = directory + @"\Koaloader.json";
     }
 
+    internal static string GetKoaloaderProxyDisplay(this string proxy)
+    {
+        string proxyDisplay = proxy[(proxy.IndexOf('.') + 1)..];
+        proxyDisplay = proxyDisplay[..proxyDisplay.IndexOf('.')];
+        string name = proxyDisplay[..proxyDisplay.LastIndexOf('_')];
+        string bitness = proxyDisplay[(proxyDisplay.LastIndexOf('_') + 1)..];
+        return $"{name}.dll ({bitness}-bit)";
+    }
+
     internal static readonly List<(string unlocker, string dll)> AutoLoadDlls = new()
     {
         ("SmokeAPI", "SmokeAPI32.dll"), ("SmokeAPI", "SmokeAPI64.dll"),
@@ -102,11 +111,11 @@ internal static class Koaloader
     internal static async Task Uninstall(string directory, InstallForm installForm = null, bool deleteConfig = true) => await Task.Run(async () =>
     {
         directory.GetKoaloaderComponents(out List<string> proxies, out string config);
-        foreach (string proxy in proxies.Where(proxy => File.Exists(proxy) && proxy.IsResourceFile(Resources.ResourceIdentifier.Koaloader)))
+        foreach (string proxyPath in proxies.Where(proxyPath => File.Exists(proxyPath) && proxyPath.IsResourceFile(Resources.ResourceIdentifier.Koaloader)))
         {
-            File.Delete(proxy);
+            File.Delete(proxyPath);
             if (installForm is not null)
-                installForm.UpdateUser($"Deleted Koaloader: {Path.GetFileName(proxy)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Deleted Koaloader: {Path.GetFileName(proxyPath)}", InstallationLog.Action, info: false);
         }
         foreach ((string unlocker, string path) in AutoLoadDlls
             .Select(pair => (pair.unlocker, path: directory + @"\" + pair.dll))
@@ -135,6 +144,12 @@ internal static class Koaloader
         proxy = proxy[(proxy.IndexOf('.') + 1)..];
         proxy = proxy[(proxy.IndexOf('.') + 1)..];
         string path = directory + @"\" + proxy;
+        foreach (string proxyPath in proxies.Where(proxyPath => proxyPath != path && File.Exists(proxyPath) && proxyPath.IsResourceFile(Resources.ResourceIdentifier.Koaloader)))
+        {
+            File.Delete(proxyPath);
+            if (installForm is not null)
+                installForm.UpdateUser($"Deleted Koaloader: {Path.GetFileName(proxyPath)}", InstallationLog.Action, info: false);
+        }
         selection.KoaloaderProxy.Write(path);
         if (installForm is not null)
             installForm.UpdateUser($"Wrote Koaloader: {Path.GetFileName(path)}", InstallationLog.Action, info: false);

@@ -3,9 +3,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using Windows.Foundation.Metadata;
 
 namespace CreamInstaller.Utility;
 
@@ -23,6 +26,8 @@ internal static class ProgramData
 
     internal static readonly string OldChoicesPath = DirectoryPath + @"\choices.txt";
     internal static readonly string ChoicesPath = DirectoryPath + @"\choices.json";
+
+    internal static readonly string KoaloaderProxyChoicesPath = DirectoryPath + @"\proxies.json";
 
     internal static async Task Setup() => await Task.Run(() =>
     {
@@ -102,5 +107,50 @@ internal static class ProgramData
             File.WriteAllText(ChoicesPath, JsonConvert.SerializeObject(choices));
         }
         catch { }
+    }
+
+    internal static List<(Platform platform, string id, string proxy)> ReadKoaloaderProxyChoices()
+    {
+        if (!File.Exists(KoaloaderProxyChoicesPath)) return null;
+        try
+        {
+            return JsonConvert.DeserializeObject(File.ReadAllText(KoaloaderProxyChoicesPath),
+                typeof(List<(Platform platform, string id, string proxy)>)) as List<(Platform platform, string id, string proxy)>;
+        }
+        catch
+        {
+            return new();
+        }
+    }
+
+    internal static void WriteKoaloaderProxyChoices(List<(Platform platform, string id, string proxy)> choices)
+    {
+        try
+        {
+            File.WriteAllText(KoaloaderProxyChoicesPath, JsonConvert.SerializeObject(choices));
+        }
+        catch { }
+    }
+
+    internal static void UpdateKoaloaderProxyChoices()
+    {
+        string defaultProxy = Resources.Resources.EmbeddedResources.Find(r => r.Contains("version_64"));
+        List<(Platform platform, string id, string proxy)> choices = ReadKoaloaderProxyChoices() ?? new();
+        foreach ((Platform platform, string id, string proxy) choice in choices.ToList())
+            if (ProgramSelection.FromPlatformId(choice.platform, choice.id) is ProgramSelection selection)
+            {
+                if (selection.KoaloaderProxy is null)
+                    selection.KoaloaderProxy = choice.proxy;
+                else if (selection.KoaloaderProxy != choice.proxy && choices.Remove(choice))
+                    choices.Add((selection.Platform, selection.Id, selection.KoaloaderProxy));
+            }
+        foreach (ProgramSelection selection in ProgramSelection.AllSafe)
+            if (selection.KoaloaderProxy is null)
+            {
+                selection.KoaloaderProxy = defaultProxy;
+                choices.Add((selection.Platform, selection.Id, selection.KoaloaderProxy));
+            }
+        if (choices.Any())
+            WriteKoaloaderProxyChoices(choices);
     }
 }

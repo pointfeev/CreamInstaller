@@ -31,6 +31,8 @@ internal partial class SelectForm : CustomForm
         Text = Program.ApplicationName;
     }
 
+    public override ContextMenuStrip ContextMenuStrip => base.ContextMenuStrip ??= new();
+
     private static void UpdateRemaining(Label label, SynchronizedCollection<string> list, string descriptor) =>
         label.Text = list.Any() ? $"Remaining {descriptor} ({list.Count}): " + string.Join(", ", list).Replace("&", "&&") : "";
 
@@ -558,6 +560,8 @@ internal partial class SelectForm : CustomForm
             await SteamCMD.Cleanup();
         }
 
+        ProgramData.UpdateKoaloaderProxyChoices();
+
         HideProgressBar();
         selectionTreeView.Enabled = ProgramSelection.All.Any();
         allCheckBox.Enabled = selectionTreeView.Enabled;
@@ -668,6 +672,7 @@ internal partial class SelectForm : CustomForm
 
     internal void OnNodeRightClick(TreeNode node, Point location)
     {
+        ContextMenuStrip contextMenuStrip = ContextMenuStrip;
         contextMenuStrip.Items.Clear();
         string id = node.Name;
         Platform platform = (Platform)node.Tag;
