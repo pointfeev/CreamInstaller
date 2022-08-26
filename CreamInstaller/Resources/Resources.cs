@@ -1,9 +1,12 @@
-﻿using System;
+﻿using CreamInstaller.Utility;
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CreamInstaller.Resources;
@@ -56,20 +59,32 @@ internal static class Resources
         return false;
     }
 
-    internal static async Task<List<string>> GetExecutables(this string rootDirectory, Func<string, bool> validFunc = null) => await Task.Run(async () =>
+    internal static bool IsCommonIncorrectExecutable(this string rootDirectory, string path)
+    {
+        string subPath = path[rootDirectory.Length..].ToUpperInvariant().BeautifyPath();
+        return subPath.Contains("SETUP") || subPath.Contains("REDIST")
+            || subPath.Contains("CRASH") && (subPath.Contains("PAD") || subPath.Contains("REPORT"));
+    }
+
+    internal static async Task<List<string>> GetExecutables(this string rootDirectory, string subDirectory = null, bool filterCommon = false, Func<string, bool> validFunc = null) => await Task.Run(async () =>
     {
         List<string> executables = new();
-        if (Program.Canceled || !Directory.Exists(rootDirectory)) return null;
-        foreach (string path in Directory.GetFiles(rootDirectory, "*.exe"))
-            if (validFunc is null || validFunc(path))
+        if (Program.Canceled || !Directory.Exists(subDirectory ?? rootDirectory)) return null;
+        Thread.Sleep(0);
+        foreach (string path in Directory.GetFiles(subDirectory ?? rootDirectory, "*.exe"))
+        {
+            Thread.Sleep(0);
+            if ((!filterCommon || !rootDirectory.IsCommonIncorrectExecutable(path)) && (validFunc is null || validFunc(path)))
                 executables.Add(path);
-        string[] directories = Directory.GetDirectories(rootDirectory);
+        }
+        string[] directories = Directory.GetDirectories(subDirectory ?? rootDirectory);
         foreach (string directory in directories)
         {
             if (Program.Canceled) return null;
+            Thread.Sleep(0);
             try
             {
-                List<string> moreExecutables = await directory.GetExecutables(validFunc);
+                List<string> moreExecutables = await rootDirectory.GetExecutables(directory, filterCommon, validFunc);
                 if (moreExecutables is not null)
                     executables.AddRange(moreExecutables);
             }
@@ -77,6 +92,9 @@ internal static class Resources
         }
         return !executables.Any() ? null : executables;
     });
+
+    internal static async Task<List<string>> GetExecutableDirectories(this string rootDirectory, bool filterCommon = false, Func<string, bool> validFunc = null) => await Task.Run(async () =>
+        (await rootDirectory.GetExecutables(filterCommon: filterCommon, validFunc: validFunc) ?? await rootDirectory.GetExecutables()).Select(e => e = Path.GetDirectoryName(e)).Distinct().ToList());
 
     internal static void GetCreamApiComponents(
             this string directory,

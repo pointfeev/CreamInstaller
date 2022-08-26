@@ -26,6 +26,9 @@ internal static class SteamLibrary
         }
     }
 
+    internal static async Task<List<string>> GetExecutableDirectories(string gameDirectory) =>
+        await Task.Run(async () => await gameDirectory.GetExecutableDirectories(filterCommon: true));
+
     internal static async Task<List<(string appId, string name, string branch, int buildId, string gameDirectory)>> GetGames() => await Task.Run(async () =>
     {
         List<(string appId, string name, string branch, int buildId, string gameDirectory)> games = new();

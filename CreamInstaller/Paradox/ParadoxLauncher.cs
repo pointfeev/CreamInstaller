@@ -3,6 +3,7 @@ using CreamInstaller.Utility;
 
 using Microsoft.Win32;
 
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -25,6 +26,9 @@ internal static class ParadoxLauncher
             return installPath.BeautifyPath();
         }
     }
+
+    internal static async Task<List<string>> GetExecutableDirectories(string gameDirectory) =>
+        await Task.Run(async () => await gameDirectory.GetExecutableDirectories(validFunc: d => !Path.GetFileName(d).Contains("bootstrapper")));
 
     private static void PopulateDlc(ProgramSelection paradoxLauncher = null)
     {
@@ -126,7 +130,7 @@ internal static class ParadoxLauncher
                         installForm.UpdateUser("Corrected Steamworks: " + api64, InstallationLog.Action);
                     neededRepair = true;
                 }
-                if (smokeConfig)
+                if (!selection.Koaloader && smokeConfig)
                     await SmokeAPI.Install(directory, selection, generateConfig: false);
 
                 directory.GetScreamApiComponents(out api32, out _, out api64, out _, out _);
@@ -144,7 +148,7 @@ internal static class ParadoxLauncher
                         installForm.UpdateUser("Corrected Epic Online Services: " + api64, InstallationLog.Action);
                     neededRepair = true;
                 }
-                if (screamConfig)
+                if (!selection.Koaloader && screamConfig)
                     await ScreamAPI.Install(directory, selection, generateConfig: false);
             }
             if (neededRepair)

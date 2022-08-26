@@ -27,6 +27,9 @@ internal static class EpicLibrary
         }
     }
 
+    internal static async Task<List<string>> GetExecutableDirectories(string gameDirectory) =>
+        await Task.Run(async () => await gameDirectory.GetExecutableDirectories(filterCommon: true));
+
     internal static async Task<List<Manifest>> GetGames() => await Task.Run(() =>
     {
         List<Manifest> games = new();

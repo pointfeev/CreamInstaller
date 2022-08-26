@@ -123,9 +123,7 @@ internal partial class SelectForm : CustomForm
                 selection.Id = "PL";
                 selection.Name = "Paradox Launcher";
                 selection.RootDirectory = ParadoxLauncher.InstallPath;
-                selection.ExecutableDirectories = (await selection.RootDirectory
-                    .GetExecutables(d => !Path.GetFileName(d).Contains("bootstrapper")))
-                    .Select(e => e = Path.GetDirectoryName(e)).Distinct().ToList();
+                selection.ExecutableDirectories = await ParadoxLauncher.GetExecutableDirectories(selection.RootDirectory);
                 selection.DllDirectories = dllDirectories;
                 selection.Platform = Platform.Paradox;
 
@@ -240,16 +238,7 @@ internal partial class SelectForm : CustomForm
                     selection.Id = appId;
                     selection.Name = appData?.name ?? name;
                     selection.RootDirectory = gameDirectory;
-                    selection.ExecutableDirectories = new();
-                    VToken launch = appInfo?.Value?.GetChild("config")?.GetChild("launch");
-                    if (launch is not null)
-                        foreach (VToken token in launch.Children())
-                            if (token?.GetChild("executable")?.ToString() is string executable
-                            && (selection.RootDirectory + @"\" + Path.GetDirectoryName(executable)).BeautifyPath() is string path
-                            && !selection.ExecutableDirectories.Contains(path))
-                                selection.ExecutableDirectories.Add(path);
-                    if (!selection.ExecutableDirectories.Any())
-                        selection.ExecutableDirectories.Add(selection.RootDirectory);
+                    selection.ExecutableDirectories = await SteamLibrary.GetExecutableDirectories(selection.RootDirectory);
                     selection.DllDirectories = dllDirectories;
                     selection.Platform = Platform.Steam;
                     selection.ProductUrl = "https://store.steampowered.com/app/" + appId;
@@ -348,11 +337,7 @@ internal partial class SelectForm : CustomForm
                     selection.Id = @namespace;
                     selection.Name = name;
                     selection.RootDirectory = directory;
-                    selection.ExecutableDirectories = new();
-                    if (manifest.LaunchExecutable is string executable && (selection.RootDirectory + @"\" + Path.GetDirectoryName(executable)).BeautifyPath() is string path)
-                        selection.ExecutableDirectories.Add(path);
-                    else
-                        selection.ExecutableDirectories.Add(selection.RootDirectory);
+                    selection.ExecutableDirectories = await EpicLibrary.GetExecutableDirectories(selection.RootDirectory);
                     selection.DllDirectories = dllDirectories;
                     selection.Platform = Platform.Epic;
                     foreach (KeyValuePair<string, (string name, string product, string icon, string developer)> pair in entitlements.Where(p => p.Value.name == selection.Name))
@@ -437,13 +422,7 @@ internal partial class SelectForm : CustomForm
                     selection.Id = gameId;
                     selection.Name = name;
                     selection.RootDirectory = gameDirectory;
-                    // need a solid method for obtaining ubisoft game executables (below is likely temporary)
-                    selection.ExecutableDirectories = (await selection.RootDirectory
-                        .GetExecutables(d =>
-                        {
-                            string subPath = d[selection.RootDirectory.Length..].ToUpperInvariant();
-                            return !subPath.Contains("SETUP") && !subPath.Contains("REDIST");
-                        })).Select(e => e = Path.GetDirectoryName(e)).Distinct().ToList();
+                    selection.ExecutableDirectories = await UbisoftLibrary.GetExecutableDirectories(selection.RootDirectory);
                     selection.DllDirectories = dllDirectories;
                     selection.Platform = Platform.Ubisoft;
                     selection.IconUrl = IconGrabber.GetDomainFaviconUrl("store.ubi.com");

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -63,6 +64,21 @@ internal partial class InstallForm : CustomForm
             UpdateUser($"Repairing Paradox Launcher . . . ", InstallationLog.Operation);
             _ = await Repair(this, selection);
         }
+        IEnumerable<string> invalidDirectories = (await selection.RootDirectory.GetExecutables()).Where(d => !selection.ExecutableDirectories.Contains(d));
+        if (!selection.ExecutableDirectories.Contains(selection.RootDirectory)) invalidDirectories = invalidDirectories.Append(selection.RootDirectory);
+        invalidDirectories = invalidDirectories.Distinct();
+        foreach (string directory in invalidDirectories)
+        {
+            directory.GetKoaloaderComponents(out List<string> proxies, out string config);
+            if (proxies.Any(proxy => File.Exists(proxy) && proxy.IsResourceFile(Resources.Resources.ResourceIdentifier.Koaloader))
+                || Koaloader.AutoLoadDlls.Any(pair => File.Exists(directory + @"\" + pair.dll))
+                || File.Exists(config))
+            {
+                UpdateUser("Uninstalling Koaloader from " + selection.Name + $" in incorrect directory \"{directory}\" . . . ", InstallationLog.Operation);
+                await Koaloader.Uninstall(directory, this);
+            }
+            Thread.Sleep(0);
+        }
         if (Uninstalling || !selection.Koaloader)
         {
             foreach (string directory in selection.ExecutableDirectories)
@@ -81,12 +97,14 @@ internal partial class InstallForm : CustomForm
         int count = selection.DllDirectories.Count, cur = 0;
         foreach (string directory in selection.DllDirectories)
         {
-            if (selection.Platform is Platform.Steam || selection.SelectedDlc.Any(d => d.Value.type is DlcType.Steam or DlcType.SteamHidden)
-                || selection.Platform is Platform.Paradox || selection.ExtraSelectedDlc.Any(item => item.dlc.Any(dlc => dlc.Value.type is DlcType.Steam or DlcType.SteamHidden)))
+            if (selection.Platform is Platform.Steam or Platform.Paradox
+                && (selection.SelectedDlc.Any(d => d.Value.type is DlcType.Steam or DlcType.SteamHidden)
+                    || selection.ExtraSelectedDlc.Any(item => item.dlc.Any(dlc => dlc.Value.type is DlcType.Steam or DlcType.SteamHidden))))
             {
                 directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out string cache);
                 if (!uninstallProxy && (File.Exists(api32) || File.Exists(api64))
-                    || uninstallProxy && (File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config) || File.Exists(cache)))
+                    || uninstallProxy && (File.Exists(api32_o) || File.Exists(api64_o)
+                        || !selection.Koaloader && (File.Exists(config) || File.Exists(cache))))
                 {
                     UpdateUser($"{(uninstallProxy ? "Uninstalling" : "Installing")} SmokeAPI" +
                         $" {(uninstallProxy ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
@@ -96,12 +114,14 @@ internal partial class InstallForm : CustomForm
                         await SmokeAPI.Install(directory, selection, this);
                 }
             }
-            if (selection.Platform is Platform.Epic || selection.SelectedDlc.Any(d => d.Value.type is DlcType.EpicCatalogItem or DlcType.EpicEntitlement)
-                || selection.Platform is Platform.Paradox || selection.ExtraSelectedDlc.Any(item => item.dlc.Any(dlc => dlc.Value.type is DlcType.EpicCatalogItem or DlcType.EpicEntitlement)))
+            if (selection.Platform is Platform.Epic or Platform.Paradox
+                && (selection.SelectedDlc.Any(d => d.Value.type is DlcType.EpicCatalogItem or DlcType.EpicEntitlement)
+                    || selection.ExtraSelectedDlc.Any(item => item.dlc.Any(dlc => dlc.Value.type is DlcType.EpicCatalogItem or DlcType.EpicEntitlement))))
             {
                 directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
                 if (!uninstallProxy && (File.Exists(api32) || File.Exists(api64))
-                    || uninstallProxy && (File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config)))
+                    || uninstallProxy && (File.Exists(api32_o) || File.Exists(api64_o)
+                        || !selection.Koaloader && File.Exists(config)))
                 {
                     UpdateUser($"{(uninstallProxy ? "Uninstalling" : "Installing")} ScreamAPI" +
                         $" {(uninstallProxy ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
@@ -115,7 +135,8 @@ internal partial class InstallForm : CustomForm
             {
                 directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
                 if (!uninstallProxy && (File.Exists(api32) || File.Exists(api64))
-                    || uninstallProxy && (File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config)))
+                    || uninstallProxy && (File.Exists(api32_o) || File.Exists(api64_o)
+                        || !selection.Koaloader && File.Exists(config)))
                 {
                     UpdateUser($"{(uninstallProxy ? "Uninstalling" : "Installing")} Uplay R1 Unlocker" +
                         $" {(uninstallProxy ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
@@ -126,7 +147,8 @@ internal partial class InstallForm : CustomForm
                 }
                 directory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config);
                 if (!uninstallProxy && (File.Exists(old_api32) || File.Exists(old_api64) || File.Exists(api32) || File.Exists(api64))
-                    || uninstallProxy && (File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config)))
+                    || uninstallProxy && (File.Exists(api32_o) || File.Exists(api64_o)
+                        || !selection.Koaloader && File.Exists(config)))
                 {
                     UpdateUser($"{(uninstallProxy ? "Uninstalling" : "Installing")} Uplay R2 Unlocker" +
                         $" {(uninstallProxy ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);

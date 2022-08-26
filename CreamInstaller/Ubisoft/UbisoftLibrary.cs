@@ -23,6 +23,9 @@ internal static class UbisoftLibrary
         }
     }
 
+    internal static async Task<List<string>> GetExecutableDirectories(string gameDirectory) =>
+        await Task.Run(async () => await gameDirectory.GetExecutableDirectories(filterCommon: true));
+
     internal static async Task<List<(string gameId, string name, string gameDirectory)>> GetGames() => await Task.Run(() =>
     {
         List<(string gameId, string name, string gameDirectory)> games = new();
