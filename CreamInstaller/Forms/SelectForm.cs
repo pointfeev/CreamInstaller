@@ -264,7 +264,7 @@ internal partial class SelectForm : CustomForm
                             string appId = pair.Key;
                             (DlcType type, string name, string icon) dlcApp = pair.Value;
                             selection.AllDlc[appId] = dlcApp;
-                            if (allCheckBox.Checked) selection.SelectedDlc[appId] = dlcApp;
+                            if (allCheckBox.Checked && dlcApp.name != "Unknown") selection.SelectedDlc[appId] = dlcApp;
                             TreeNode dlcNode = treeNodes.Find(s => s.Tag is Platform.Steam && s.Name == appId) ?? new();
                             dlcNode.Tag = selection.Platform;
                             dlcNode.Name = appId;
@@ -583,6 +583,7 @@ internal partial class SelectForm : CustomForm
     private static void SyncNodeDescendants(TreeNode node) =>
         node.Nodes.Cast<TreeNode>().ToList().ForEach(childNode =>
         {
+            if (childNode.Text == "Unknown") return;
             childNode.Checked = node.Checked;
             SyncNode(childNode);
             SyncNodeDescendants(childNode);
