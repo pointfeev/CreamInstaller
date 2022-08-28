@@ -109,14 +109,8 @@ internal partial class SelectForm : CustomForm
         List<Task> appTasks = new();
         if (ProgramsToScan.Any(c => c.platform is Platform.Paradox))
         {
-            List<string> steamDllDirectories = await SteamLibrary.GetDllDirectoriesFromGameDirectory(ParadoxLauncher.InstallPath);
-            List<string> epicDllDirectories = await EpicLibrary.GetDllDirectoriesFromGameDirectory(ParadoxLauncher.InstallPath);
-            List<string> dllDirectories = new();
-            if (steamDllDirectories is not null)
-                dllDirectories = dllDirectories.Union(steamDllDirectories).ToList();
-            if (epicDllDirectories is not null)
-                dllDirectories = dllDirectories.Union(epicDllDirectories).ToList();
-            if (steamDllDirectories is not null || epicDllDirectories is not null)
+            List<string> dllDirectories = await ParadoxLauncher.InstallPath.GetDllDirectoriesFromGameDirectory(Platform.Paradox);
+            if (dllDirectories is not null)
             {
                 ProgramSelection selection = ProgramSelection.FromPlatformId(Platform.Paradox, "PL");
                 selection ??= new();
@@ -155,7 +149,7 @@ internal partial class SelectForm : CustomForm
                 Task task = Task.Run(async () =>
                 {
                     if (Program.Canceled) return;
-                    List<string> dllDirectories = await SteamLibrary.GetDllDirectoriesFromGameDirectory(gameDirectory);
+                    List<string> dllDirectories = await gameDirectory.GetDllDirectoriesFromGameDirectory(Platform.Steam);
                     if (dllDirectories is null)
                     {
                         Interlocked.Decrement(ref steamGamesToCheck);
@@ -296,7 +290,7 @@ internal partial class SelectForm : CustomForm
                 Task task = Task.Run(async () =>
                 {
                     if (Program.Canceled) return;
-                    List<string> dllDirectories = await EpicLibrary.GetDllDirectoriesFromGameDirectory(directory);
+                    List<string> dllDirectories = await directory.GetDllDirectoriesFromGameDirectory(Platform.Epic);
                     if (dllDirectories is null)
                     {
                         RemoveFromRemainingGames(name);
@@ -410,7 +404,7 @@ internal partial class SelectForm : CustomForm
                 Task task = Task.Run(async () =>
                 {
                     if (Program.Canceled) return;
-                    List<string> dllDirectories = await UbisoftLibrary.GetDllDirectoriesFromGameDirectory(gameDirectory);
+                    List<string> dllDirectories = await gameDirectory.GetDllDirectoriesFromGameDirectory(Platform.Ubisoft);
                     if (dllDirectories is null)
                     {
                         RemoveFromRemainingGames(name);

@@ -23,7 +23,7 @@ internal class ContextMenuItem : ToolStripMenuItem
             {
                 case "Paradox Launcher":
                     if (Directory.Exists(ParadoxLauncher.InstallPath))
-                        foreach (string file in Directory.GetFiles(ParadoxLauncher.InstallPath, "*.exe"))
+                        foreach (string file in Directory.EnumerateFiles(ParadoxLauncher.InstallPath, "*.exe"))
                         {
                             image = IconGrabber.GetFileIconImage(file);
                             break;

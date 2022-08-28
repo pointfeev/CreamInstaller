@@ -165,108 +165,85 @@ internal static class Koaloader
         path.WriteProxy(selection.KoaloaderProxy, binaryType);
         if (installForm is not null)
             installForm.UpdateUser($"Wrote {(binaryType == BinaryType.BIT32 ? "32-bit" : "64-bit")} Koaloader: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
-        if (selection.Platform is Platform.Steam or Platform.Paradox)
-        {
-            bool did32 = false, did64 = false;
-            foreach (string dllDirectory in selection.DllDirectories)
+        bool bit32 = false, bit64 = false;
+        foreach (string executable in Directory.EnumerateFiles(directory, "*.exe"))
+            if (executable.TryGetFileBinaryType(out BinaryType binaryType))
             {
-                dllDirectory.GetSmokeApiComponents(out string api32, out _, out string api64, out _, out _, out _);
-                if (!did32 && File.Exists(api32))
-                {
-                    did32 = true;
-                    path = directory + @"\SmokeAPI32.dll";
-                    "SmokeAPI.steam_api.dll".Write(path);
-                    if (installForm is not null)
-                        installForm.UpdateUser($"Wrote SmokeAPI: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
-                }
-                if (!did64 && File.Exists(api64))
-                {
-                    did64 = true;
-                    path = directory + @"\SmokeAPI64.dll";
-                    "SmokeAPI.steam_api64.dll".Write(path);
-                    if (installForm is not null)
-                        installForm.UpdateUser($"Wrote SmokeAPI: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
-                }
-                if (did32 && did64)
+                if (binaryType == BinaryType.BIT32)
+                    bit32 = true;
+                else if (binaryType == BinaryType.BIT64)
+                    bit64 = true;
+                if (bit32 && bit64)
                     break;
             }
-            if (did32 || did64)
-                SmokeAPI.CheckConfig(directory, selection, installForm);
+        if (selection.Platform is Platform.Steam or Platform.Paradox)
+        {
+            if (bit32)
+            {
+                path = directory + @"\SmokeAPI32.dll";
+                "SmokeAPI.steam_api.dll".Write(path);
+                if (installForm is not null)
+                    installForm.UpdateUser($"Wrote SmokeAPI: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
+            }
+            if (bit64)
+            {
+                path = directory + @"\SmokeAPI64.dll";
+                "SmokeAPI.steam_api64.dll".Write(path);
+                if (installForm is not null)
+                    installForm.UpdateUser($"Wrote SmokeAPI: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
+            }
+            SmokeAPI.CheckConfig(directory, selection, installForm);
         }
         if (selection.Platform is Platform.Epic or Platform.Paradox)
         {
-            bool did32 = false, did64 = false;
-            foreach (string dllDirectory in selection.DllDirectories)
+            if (bit32)
             {
-                dllDirectory.GetScreamApiComponents(out string api32, out _, out string api64, out _, out _);
-                if (!did32 && File.Exists(api32))
-                {
-                    did32 = true;
-                    path = directory + @"\ScreamAPI32.dll";
-                    "ScreamAPI.EOSSDK-Win32-Shipping.dll".Write(path);
-                    if (installForm is not null)
-                        installForm.UpdateUser($"Wrote ScreamAPI: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
-                }
-                if (!did64 && File.Exists(api64))
-                {
-                    did64 = true;
-                    path = directory + @"\ScreamAPI64.dll";
-                    "ScreamAPI.EOSSDK-Win64-Shipping.dll".Write(path);
-                    if (installForm is not null)
-                        installForm.UpdateUser($"Wrote ScreamAPI: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
-                }
-                if (did32 && did64)
-                    break;
+                path = directory + @"\ScreamAPI32.dll";
+                "ScreamAPI.EOSSDK-Win32-Shipping.dll".Write(path);
+                if (installForm is not null)
+                    installForm.UpdateUser($"Wrote ScreamAPI: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
             }
-            if (did32 || did64)
-                ScreamAPI.CheckConfig(directory, selection, installForm);
+            if (bit64)
+            {
+                path = directory + @"\ScreamAPI64.dll";
+                "ScreamAPI.EOSSDK-Win64-Shipping.dll".Write(path);
+                if (installForm is not null)
+                    installForm.UpdateUser($"Wrote ScreamAPI: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
+            }
+            ScreamAPI.CheckConfig(directory, selection, installForm);
         }
         if (selection.Platform is Platform.Ubisoft)
         {
-            bool did32r1 = false, did64r1 = false, did32r2 = false, did64r2 = false;
-            foreach (string dllDirectory in selection.DllDirectories)
+            if (bit32)
             {
-                dllDirectory.GetUplayR1Components(out string api32, out _, out string api64, out _, out _);
-                if (!did32r1 && File.Exists(api32))
-                {
-                    did32r1 = true;
-                    path = directory + @"\UplayR1Unlocker32.dll";
-                    "UplayR1.uplay_r1_loader.dll".Write(path);
-                    if (installForm is not null)
-                        installForm.UpdateUser($"Wrote Uplay R1 Unlocker: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
-                }
-                if (!did64r1 && File.Exists(api64))
-                {
-                    did64r1 = true;
-                    path = directory + @"\UplayR1Unlocker64.dll";
-                    "UplayR1.uplay_r1_loader64.dll".Write(path);
-                    if (installForm is not null)
-                        installForm.UpdateUser($"Wrote Uplay R1 Unlocker: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
-                }
-                dllDirectory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out _, out api64, out _, out _);
-                if (!did32r2 && (File.Exists(old_api32) || File.Exists(old_api32)))
-                {
-                    did32r2 = true;
-                    path = directory + @"\UplayR2Unlocker32.dll";
-                    "UplayR2.upc_r2_loader.dll".Write(path);
-                    if (installForm is not null)
-                        installForm.UpdateUser($"Wrote Uplay R2 Unlocker: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
-                }
-                if (!did64r2 && (File.Exists(old_api64) || File.Exists(api64)))
-                {
-                    did64r2 = true;
-                    path = directory + @"\UplayR2Unlocker64.dll";
-                    "UplayR2.upc_r2_loader64.dll".Write(path);
-                    if (installForm is not null)
-                        installForm.UpdateUser($"Wrote Uplay R2 Unlocker: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
-                }
-                if (did32r1 && did64r1 && did32r2 && did64r2)
-                    break;
+                path = directory + @"\UplayR1Unlocker32.dll";
+                "UplayR1.uplay_r1_loader.dll".Write(path);
+                if (installForm is not null)
+                    installForm.UpdateUser($"Wrote Uplay R1 Unlocker: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
             }
-            if (did32r1 || did64r1)
-                UplayR1.CheckConfig(directory, selection, installForm);
-            if (did32r2 || did64r2)
-                UplayR2.CheckConfig(directory, selection, installForm);
+            if (bit64)
+            {
+                path = directory + @"\UplayR1Unlocker64.dll";
+                "UplayR1.uplay_r1_loader64.dll".Write(path);
+                if (installForm is not null)
+                    installForm.UpdateUser($"Wrote Uplay R1 Unlocker: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
+            }
+            UplayR1.CheckConfig(directory, selection, installForm);
+            if (bit32)
+            {
+                path = directory + @"\UplayR2Unlocker32.dll";
+                "UplayR2.upc_r2_loader.dll".Write(path);
+                if (installForm is not null)
+                    installForm.UpdateUser($"Wrote Uplay R2 Unlocker: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
+            }
+            if (bit64)
+            {
+                path = directory + @"\UplayR2Unlocker64.dll";
+                "UplayR2.upc_r2_loader64.dll".Write(path);
+                if (installForm is not null)
+                    installForm.UpdateUser($"Wrote Uplay R2 Unlocker: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
+            }
+            UplayR2.CheckConfig(directory, selection, installForm);
         }
         if (generateConfig)
             CheckConfig(directory, selection, installForm);

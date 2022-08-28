@@ -156,15 +156,15 @@ internal static class SteamCMD
         try
         {
             if (Directory.Exists(ConfigPath))
-                foreach (string file in Directory.GetFiles(ConfigPath, "*.tmp"))
+                foreach (string file in Directory.EnumerateFiles(ConfigPath, "*.tmp"))
                     File.Delete(file);
-            foreach (string file in Directory.GetFiles(DirectoryPath, "*.old"))
+            foreach (string file in Directory.EnumerateFiles(DirectoryPath, "*.old"))
                 File.Delete(file);
-            foreach (string file in Directory.GetFiles(DirectoryPath, "*.delete"))
+            foreach (string file in Directory.EnumerateFiles(DirectoryPath, "*.delete"))
                 File.Delete(file);
-            foreach (string file in Directory.GetFiles(DirectoryPath, "*.crash"))
+            foreach (string file in Directory.EnumerateFiles(DirectoryPath, "*.crash"))
                 File.Delete(file);
-            foreach (string file in Directory.GetFiles(DirectoryPath, "*.ntfs_transaction_failed"))
+            foreach (string file in Directory.EnumerateFiles(DirectoryPath, "*.ntfs_transaction_failed"))
                 File.Delete(file);
             if (Directory.Exists(AppCachePath))
                 Directory.Delete(AppCachePath, true); // this is definitely needed, so SteamCMD gets the latest information for us

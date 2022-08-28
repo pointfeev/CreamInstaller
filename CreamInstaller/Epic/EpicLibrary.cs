@@ -5,7 +5,6 @@ using Microsoft.Win32;
 
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -37,8 +36,7 @@ internal static class EpicLibrary
         List<Manifest> games = new();
         string manifests = EpicManifestsPath;
         if (!Directory.Exists(manifests)) return games;
-        string[] files = Directory.GetFiles(manifests, "*.item");
-        foreach (string file in files)
+        foreach (string file in Directory.EnumerateFiles(manifests, "*.item"))
         {
             if (Program.Canceled) return games;
             string json = File.ReadAllText(file);
@@ -51,30 +49,5 @@ internal static class EpicLibrary
             catch { };
         }
         return games;
-    });
-
-    internal static async Task<List<string>> GetDllDirectoriesFromGameDirectory(string gameDirectory) => await Task.Run(async () =>
-    {
-        List<string> dllDirectories = new();
-        if (Program.Canceled || !Directory.Exists(gameDirectory)) return null;
-        gameDirectory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
-        if (File.Exists(api32)
-            || File.Exists(api32_o)
-            || File.Exists(api64)
-            || File.Exists(api64_o)
-            || File.Exists(config))
-            dllDirectories.Add(gameDirectory.BeautifyPath());
-        string[] directories = Directory.GetDirectories(gameDirectory);
-        foreach (string _directory in directories)
-        {
-            if (Program.Canceled) return null;
-            try
-            {
-                List<string> moreDllDirectories = await GetDllDirectoriesFromGameDirectory(_directory);
-                if (moreDllDirectories is not null) dllDirectories.AddRange(moreDllDirectories);
-            }
-            catch { }
-        }
-        return !dllDirectories.Any() ? null : dllDirectories;
     });
 }

@@ -41,6 +41,7 @@ internal static class SteamStore
             {
                 IDictionary<string, JToken> apps = (IDictionary<string, JToken>)JsonConvert.DeserializeObject(response);
                 if (apps is not null)
+                {
                     foreach (KeyValuePair<string, JToken> app in apps)
                     {
                         try
@@ -76,7 +77,22 @@ internal static class SteamStore
                         { }
 #endif
                     }
+                }
+#if DEBUG
+                else
+                {
+                    using DialogForm dialogForm = new(null);
+                    dialogForm.Show(SystemIcons.Error, "Response deserialization null for appid: " + appId);
+                }
+#endif
             }
+#if DEBUG
+            else
+            {
+                using DialogForm dialogForm = new(null);
+                dialogForm.Show(SystemIcons.Error, "Response null for appid: " + appId);
+            }
+#endif
         }
         if (cachedExists)
         {

@@ -47,38 +47,11 @@ internal static class SteamLibrary
         return games;
     });
 
-    internal static async Task<List<string>> GetDllDirectoriesFromGameDirectory(string gameDirectory) => await Task.Run(async () =>
-    {
-        List<string> dllDirectories = new();
-        if (Program.Canceled || !Directory.Exists(gameDirectory)) return null;
-        gameDirectory.GetSmokeApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string config, out string cache);
-        if (File.Exists(api)
-            || File.Exists(api_o)
-            || File.Exists(api64)
-            || File.Exists(api64_o)
-            || File.Exists(config)
-            || File.Exists(cache))
-            dllDirectories.Add(gameDirectory.BeautifyPath());
-        string[] directories = Directory.GetDirectories(gameDirectory);
-        foreach (string _directory in directories)
-        {
-            if (Program.Canceled) return null;
-            try
-            {
-                List<string> moreDllDirectories = await GetDllDirectoriesFromGameDirectory(_directory);
-                if (moreDllDirectories is not null) dllDirectories.AddRange(moreDllDirectories);
-            }
-            catch { }
-        }
-        return !dllDirectories.Any() ? null : dllDirectories;
-    });
-
     internal static async Task<List<(string appId, string name, string branch, int buildId, string gameDirectory)>> GetGamesFromLibraryDirectory(string libraryDirectory) => await Task.Run(() =>
     {
         List<(string appId, string name, string branch, int buildId, string gameDirectory)> games = new();
         if (Program.Canceled || !Directory.Exists(libraryDirectory)) return null;
-        string[] files = Directory.GetFiles(libraryDirectory, "*.acf");
-        foreach (string file in files)
+        foreach (string file in Directory.EnumerateFiles(libraryDirectory, "*.acf"))
         {
             if (Program.Canceled) return null;
             if (ValveDataFile.TryDeserialize(File.ReadAllText(file, Encoding.UTF8), out VProperty result))
