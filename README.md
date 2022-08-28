@@ -39,7 +39,7 @@ games and DLCs the user selects; however, through the use of **right-click conte
 3. Wait for the program to download and install SteamCMD (if you chose a Steam game). *very fast, depends on internet speed*
 4. Wait for the program to gather and cache the chosen games' information & DLCs. *may take a good amount of time on the first run, depends on how many games you chose and how many DLCs they have*
 5. **CAREFULLY** select which games' DLCs you wish to unlock. *Obviously none of the DLC unlockers are tested for every single game!*
-6. Choose whether or not to install with Koaloader, and if so then also pick the proxy DLL to use. *If the default version.dll x64 doesn't work, then see [here](https://cs.rin.ru/forum/viewtopic.php?p=2552172#p2552172) to find one that does.*
+6. Choose whether or not to install with Koaloader, and if so then also pick the proxy DLL to use. *If the default version.dll doesn't work, then see [here](https://cs.rin.ru/forum/viewtopic.php?p=2552172#p2552172) to find one that does.*
 7. Click the **Generate and Install** button.
 8. Click the **OK** button to close the program.
 9. If any of the DLC unlockers cause problems with any of the games you installed them on, simply go back to step 5 and select what games you wish you **revert** changes to, and instead click the **Uninstall** button this time.
