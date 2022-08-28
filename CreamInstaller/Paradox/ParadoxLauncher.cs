@@ -27,8 +27,8 @@ internal static class ParadoxLauncher
         }
     }
 
-    internal static async Task<List<string>> GetExecutableDirectories(string gameDirectory) =>
-        await Task.Run(async () => await gameDirectory.GetExecutableDirectories(validFunc: d => !Path.GetFileName(d).Contains("bootstrapper")));
+    internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(string gameDirectory) =>
+        await Task.Run(async () => await gameDirectory.GetExecutableDirectories(validFunc: path => !Path.GetFileName(path).Contains("bootstrapper")));
 
     private static void PopulateDlc(ProgramSelection paradoxLauncher = null)
     {

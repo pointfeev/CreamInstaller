@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using static CreamInstaller.Resources.Resources;
+
 namespace CreamInstaller.Resources;
 
 internal static class Koaloader
@@ -18,7 +20,7 @@ internal static class Koaloader
         )
     {
         proxies = new();
-        foreach (string proxy in Resources.EmbeddedResources.Select(proxy =>
+        foreach (string proxy in EmbeddedResources.Select(proxy =>
         {
             proxy = proxy[(proxy.IndexOf('.') + 1)..];
             return proxy[(proxy.IndexOf('.') + 1)..];
@@ -26,13 +28,26 @@ internal static class Koaloader
         config = directory + @"\Koaloader.json";
     }
 
-    internal static string GetKoaloaderProxyDisplay(this string proxy)
+    internal static void WriteProxy(this string path, string proxyName, BinaryType binaryType)
     {
-        string proxyDisplay = proxy[(proxy.IndexOf('.') + 1)..];
-        proxyDisplay = proxyDisplay[..proxyDisplay.IndexOf('.')];
-        string name = proxyDisplay[..proxyDisplay.LastIndexOf('_')];
-        string bitness = proxyDisplay[(proxyDisplay.LastIndexOf('_') + 1)..];
-        return $"{name}.dll ({bitness}-bit)";
+        foreach (string resourceIdentifier in EmbeddedResources.FindAll(r => r.StartsWith("Koaloader")))
+        {
+            resourceIdentifier.GetProxyInfoFromIdentifier(out string _proxyName, out BinaryType _binaryType);
+            if (_proxyName == proxyName && _binaryType == binaryType)
+            {
+                resourceIdentifier.Write(path);
+                break;
+            }
+        }
+    }
+
+    internal static void GetProxyInfoFromIdentifier(this string resourceIdentifier, out string proxyName, out BinaryType binaryType)
+    {
+        string baseIdentifier = resourceIdentifier[(resourceIdentifier.IndexOf('.') + 1)..];
+        baseIdentifier = baseIdentifier[..baseIdentifier.IndexOf('.')];
+        proxyName = baseIdentifier[..baseIdentifier.LastIndexOf('_')];
+        string bitness = baseIdentifier[(baseIdentifier.LastIndexOf('_') + 1)..];
+        binaryType = bitness == "32" ? BinaryType.BIT32 : bitness == "64" ? BinaryType.BIT64 : BinaryType.Unknown;
     }
 
     internal static readonly List<(string unlocker, string dll)> AutoLoadDlls = new()
@@ -137,22 +152,19 @@ internal static class Koaloader
         await UplayR2.Uninstall(directory, installForm, deleteConfig);
     });
 
-    internal static async Task Install(string directory, ProgramSelection selection, InstallForm installForm = null, bool generateConfig = true) => await Task.Run(() =>
+    internal static async Task Install(string directory, BinaryType binaryType, ProgramSelection selection, InstallForm installForm = null, bool generateConfig = true) => await Task.Run(() =>
     {
         directory.GetKoaloaderComponents(out List<string> proxies, out string config);
-        string proxy = selection.KoaloaderProxy;
-        proxy = proxy[(proxy.IndexOf('.') + 1)..];
-        proxy = proxy[(proxy.IndexOf('.') + 1)..];
-        string path = directory + @"\" + proxy;
-        foreach (string proxyPath in proxies.Where(proxyPath => proxyPath != path && File.Exists(proxyPath) && proxyPath.IsResourceFile(Resources.ResourceIdentifier.Koaloader)))
+        string path = directory + @"\" + selection.KoaloaderProxy + ".dll";
+        foreach (string _path in proxies.Where(p => p != path && File.Exists(p) && p.IsResourceFile(ResourceIdentifier.Koaloader)))
         {
-            File.Delete(proxyPath);
+            File.Delete(_path);
             if (installForm is not null)
-                installForm.UpdateUser($"Deleted Koaloader: {Path.GetFileName(proxyPath)}", InstallationLog.Action, info: false);
+                installForm.UpdateUser($"Deleted Koaloader: {Path.GetFileName(_path)}", InstallationLog.Action, info: false);
         }
-        selection.KoaloaderProxy.Write(path);
+        path.WriteProxy(selection.KoaloaderProxy, binaryType);
         if (installForm is not null)
-            installForm.UpdateUser($"Wrote Koaloader: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
+            installForm.UpdateUser($"Wrote {(binaryType == BinaryType.BIT32 ? "32-bit" : "64-bit")} Koaloader: {Path.GetFileName(path)}", InstallationLog.Action, info: false);
         if (selection.Platform is Platform.Steam or Platform.Paradox)
         {
             bool did32 = false, did64 = false;

@@ -5,7 +5,7 @@
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Resources\ini.ico</ApplicationIcon>
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-		<Version>4.0.2.1</Version>
+		<Version>4.1.0.0</Version>
 		<PackageIcon>Resources\ini.ico</PackageIcon>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<Copyright>2021, pointfeev (https://github.com/pointfeev)</Copyright>
@@ -151,6 +151,7 @@
 		<PackageReference Include="HtmlAgilityPack" Version="1.11.45" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="Onova" Version="2.6.2" />
+		<PackageReference Include="System.Reflection.Metadata" Version="6.0.1" />
 		<PackageReference Include="System.ServiceModel.Primitives" Version="4.10.0" />
 	</ItemGroup>
 	<ItemGroup>

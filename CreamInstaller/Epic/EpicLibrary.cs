@@ -9,6 +9,8 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
+using static CreamInstaller.Resources.Resources;
+
 namespace CreamInstaller.Epic;
 
 internal static class EpicLibrary
@@ -27,7 +29,7 @@ internal static class EpicLibrary
         }
     }
 
-    internal static async Task<List<string>> GetExecutableDirectories(string gameDirectory) =>
+    internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(string gameDirectory) =>
         await Task.Run(async () => await gameDirectory.GetExecutableDirectories(filterCommon: true));
 
     internal static async Task<List<Manifest>> GetGames() => await Task.Run(() =>

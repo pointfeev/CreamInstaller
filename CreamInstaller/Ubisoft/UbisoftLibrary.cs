@@ -8,6 +8,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+using static CreamInstaller.Resources.Resources;
+
 namespace CreamInstaller.Ubisoft;
 
 internal static class UbisoftLibrary
@@ -23,7 +25,7 @@ internal static class UbisoftLibrary
         }
     }
 
-    internal static async Task<List<string>> GetExecutableDirectories(string gameDirectory) =>
+    internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(string gameDirectory) =>
         await Task.Run(async () => await gameDirectory.GetExecutableDirectories(filterCommon: true));
 
     internal static async Task<List<(string gameId, string name, string gameDirectory)>> GetGames() => await Task.Run(() =>

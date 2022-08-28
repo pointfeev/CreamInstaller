@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,9 +30,9 @@ internal static class Resources
         }
     }
 
-    internal static void Write(this string resourceName, string filePath)
+    internal static void Write(this string resourceIdentifier, string filePath)
     {
-        using Stream resource = Assembly.GetExecutingAssembly().GetManifestResourceStream("CreamInstaller.Resources." + resourceName);
+        using Stream resource = Assembly.GetExecutingAssembly().GetManifestResourceStream("CreamInstaller.Resources." + resourceIdentifier);
         using FileStream file = new(filePath, FileMode.Create, FileAccess.Write);
         resource.CopyTo(file);
     }
@@ -59,6 +60,23 @@ internal static class Resources
         return false;
     }
 
+    internal enum BinaryType
+    {
+        Unknown = -1,
+        BIT32 = 0,
+        DOS = 1,
+        WOW = 2,
+        PIF = 3,
+        POSIX = 4,
+        OS216 = 5,
+        BIT64 = 6,
+    }
+
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    private static extern bool GetBinaryType(string lpApplicationName, out BinaryType lpBinaryType);
+    internal static bool TryGetFileBinaryType(this string path, out BinaryType binaryType) => GetBinaryType(path, out binaryType);
+
     internal static bool IsCommonIncorrectExecutable(this string rootDirectory, string path)
     {
         string subPath = path[rootDirectory.Length..].ToUpperInvariant().BeautifyPath();
@@ -66,35 +84,53 @@ internal static class Resources
             || subPath.Contains("CRASH") && (subPath.Contains("PAD") || subPath.Contains("REPORT"));
     }
 
-    internal static async Task<List<string>> GetExecutables(this string rootDirectory, string subDirectory = null, bool filterCommon = false, Func<string, bool> validFunc = null) => await Task.Run(async () =>
-    {
-        List<string> executables = new();
-        if (Program.Canceled || !Directory.Exists(subDirectory ?? rootDirectory)) return null;
-        Thread.Sleep(0);
-        foreach (string path in Directory.GetFiles(subDirectory ?? rootDirectory, "*.exe"))
+    internal static async Task<List<(string path, BinaryType binaryType)>> GetExecutables(this string rootDirectory, string subDirectory = null, bool filterCommon = false, Func<string, bool> validFunc = null) =>
+        await Task.Run(async () =>
         {
+            List<(string path, BinaryType binaryType)> executables = new();
+            if (Program.Canceled || !Directory.Exists(subDirectory ?? rootDirectory)) return null;
             Thread.Sleep(0);
-            if ((!filterCommon || !rootDirectory.IsCommonIncorrectExecutable(path)) && (validFunc is null || validFunc(path)))
-                executables.Add(path);
-        }
-        string[] directories = Directory.GetDirectories(subDirectory ?? rootDirectory);
-        foreach (string directory in directories)
-        {
-            if (Program.Canceled) return null;
-            Thread.Sleep(0);
-            try
+            string[] files = Directory.GetFiles(subDirectory ?? rootDirectory, "*.exe");
+            foreach (string path in files)
             {
-                List<string> moreExecutables = await rootDirectory.GetExecutables(directory, filterCommon, validFunc);
-                if (moreExecutables is not null)
-                    executables.AddRange(moreExecutables);
+                Thread.Sleep(0);
+                if (!executables.Any(e => e.path == path)
+                && (!filterCommon || !rootDirectory.IsCommonIncorrectExecutable(path))
+                && (validFunc is null || validFunc(path))
+                && path.TryGetFileBinaryType(out BinaryType binaryType) && binaryType is BinaryType.BIT64)
+                    executables.Add((path, binaryType));
             }
-            catch { }
-        }
-        return !executables.Any() ? null : executables;
-    });
+            foreach (string path in files)
+            {
+                Thread.Sleep(0);
+                if (!executables.Any(e => e.path == path)
+                && (!filterCommon || !rootDirectory.IsCommonIncorrectExecutable(path))
+                && (validFunc is null || validFunc(path))
+                && path.TryGetFileBinaryType(out BinaryType binaryType) && binaryType is BinaryType.BIT32)
+                    executables.Add((path, binaryType));
+            }
+            string[] directories = Directory.GetDirectories(subDirectory ?? rootDirectory);
+            foreach (string directory in directories)
+            {
+                if (Program.Canceled) return null;
+                Thread.Sleep(0);
+                try
+                {
+                    List<(string path, BinaryType binaryType)> moreExecutables = await rootDirectory.GetExecutables(directory, filterCommon, validFunc);
+                    if (moreExecutables is not null)
+                        executables.AddRange(moreExecutables);
+                }
+                catch { }
+            }
+            return !executables.Any() ? null : executables;
+        });
 
-    internal static async Task<List<string>> GetExecutableDirectories(this string rootDirectory, bool filterCommon = false, Func<string, bool> validFunc = null) => await Task.Run(async () =>
-        (await rootDirectory.GetExecutables(filterCommon: filterCommon, validFunc: validFunc) ?? await rootDirectory.GetExecutables()).Select(e => e = Path.GetDirectoryName(e)).Distinct().ToList());
+    internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(this string rootDirectory, bool filterCommon = false, Func<string, bool> validFunc = null) =>
+        await Task.Run(async () => (await rootDirectory.GetExecutables(filterCommon: filterCommon, validFunc: validFunc) ?? await rootDirectory.GetExecutables()).Select(e =>
+        {
+            e.path = Path.GetDirectoryName(e.path);
+            return e;
+        }).DistinctBy(e => e.path).ToList());
 
     internal static void GetCreamApiComponents(
             this string directory,

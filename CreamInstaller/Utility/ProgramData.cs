@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using CreamInstaller.Resources;
+
+using Newtonsoft.Json;
 
 using System;
 using System.Collections.Generic;
@@ -132,14 +134,17 @@ internal static class ProgramData
 
     internal static void UpdateKoaloaderProxyChoices()
     {
-        string defaultProxy = Resources.Resources.EmbeddedResources.Find(r => r.Contains("version_64"));
+        string defaultProxy = "version";
         List<(Platform platform, string id, string proxy)> choices = ReadKoaloaderProxyChoices() ?? new();
         foreach ((Platform platform, string id, string proxy) choice in choices.ToList())
             if (ProgramSelection.FromPlatformId(choice.platform, choice.id) is ProgramSelection selection)
             {
+                string proxy = choice.proxy;
+                if (proxy.Contains('.')) // convert pre-v4.1.0.0 choices
+                    proxy.GetProxyInfoFromIdentifier(out proxy, out _);
                 if (selection.KoaloaderProxy is null)
-                    selection.KoaloaderProxy = choice.proxy;
-                else if (selection.KoaloaderProxy != choice.proxy && choices.Remove(choice))
+                    selection.KoaloaderProxy = proxy;
+                else if (selection.KoaloaderProxy != proxy && choices.Remove(choice))
                     choices.Add((selection.Platform, selection.Id, selection.KoaloaderProxy));
             }
         foreach (ProgramSelection selection in ProgramSelection.AllSafe)

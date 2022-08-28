@@ -11,6 +11,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using static CreamInstaller.Resources.Resources;
+
 namespace CreamInstaller.Steam;
 
 internal static class SteamLibrary
@@ -26,7 +28,7 @@ internal static class SteamLibrary
         }
     }
 
-    internal static async Task<List<string>> GetExecutableDirectories(string gameDirectory) =>
+    internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(string gameDirectory) =>
         await Task.Run(async () => await gameDirectory.GetExecutableDirectories(filterCommon: true));
 
     internal static async Task<List<(string appId, string name, string branch, int buildId, string gameDirectory)>> GetGames() => await Task.Run(async () =>

@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using static CreamInstaller.Resources.Resources;
+
 namespace CreamInstaller;
 
 public enum Platform
@@ -43,7 +45,7 @@ internal class ProgramSelection
     internal string WebsiteUrl;
 
     internal string RootDirectory;
-    internal List<string> ExecutableDirectories;
+    internal List<(string directory, BinaryType binaryType)> ExecutableDirectories;
     internal List<string> DllDirectories;
 
     internal readonly SortedList<string, (DlcType type, string name, string icon)> AllDlc = new(PlatformIdComparer.String);

@@ -21,6 +21,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using static CreamInstaller.Resources.Resources;
+
 namespace CreamInstaller;
 
 internal partial class SelectForm : CustomForm
@@ -728,14 +730,13 @@ internal partial class SelectForm : CustomForm
             contextMenuStrip.Items.Add(new ToolStripSeparator());
             contextMenuStrip.Items.Add(new ContextMenuItem("Open Root Directory", "File Explorer",
                 new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(selection.RootDirectory))));
-            List<string> directories = selection.ExecutableDirectories.ToList();
             int executables = 0;
-            foreach (string directory in directories)
+            foreach ((string directory, BinaryType binaryType) in selection.ExecutableDirectories.ToList())
             {
-                contextMenuStrip.Items.Add(new ContextMenuItem($"Open Executable Directory #{++executables}", "File Explorer",
+                contextMenuStrip.Items.Add(new ContextMenuItem($"Open Executable Directory #{++executables} ({(binaryType == BinaryType.BIT32 ? "32" : "64")}-bit)", "File Explorer",
                     new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
             }
-            directories = selection.DllDirectories.ToList();
+            List<string> directories = selection.DllDirectories.ToList();
             int steam = 0, epic = 0, r1 = 0, r2 = 0;
             if (selection.Platform is Platform.Steam or Platform.Paradox)
                 foreach (string directory in directories)

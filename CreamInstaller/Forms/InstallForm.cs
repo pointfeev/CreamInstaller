@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using static CreamInstaller.Paradox.ParadoxLauncher;
+using static CreamInstaller.Resources.Resources;
 
 namespace CreamInstaller;
 
@@ -64,13 +65,16 @@ internal partial class InstallForm : CustomForm
             UpdateUser($"Repairing Paradox Launcher . . . ", InstallationLog.Operation);
             _ = await Repair(this, selection);
         }
-        IEnumerable<string> invalidDirectories = (await selection.RootDirectory.GetExecutables()).Where(d => !selection.ExecutableDirectories.Contains(d));
-        if (!selection.ExecutableDirectories.Contains(selection.RootDirectory)) invalidDirectories = invalidDirectories.Append(selection.RootDirectory);
+        IEnumerable<string> invalidDirectories = (await selection.RootDirectory.GetExecutables())
+            .Where(d => !selection.ExecutableDirectories.Any(s => d.path.Contains(s.directory)))
+            .Select(d => Path.GetDirectoryName(d.path));
+        if (!selection.ExecutableDirectories.Any(s => s.directory == selection.RootDirectory))
+            invalidDirectories = invalidDirectories.Append(selection.RootDirectory);
         invalidDirectories = invalidDirectories.Distinct();
         foreach (string directory in invalidDirectories)
         {
             directory.GetKoaloaderComponents(out List<string> proxies, out string config);
-            if (proxies.Any(proxy => File.Exists(proxy) && proxy.IsResourceFile(Resources.Resources.ResourceIdentifier.Koaloader))
+            if (proxies.Any(proxy => File.Exists(proxy) && proxy.IsResourceFile(ResourceIdentifier.Koaloader))
                 || Koaloader.AutoLoadDlls.Any(pair => File.Exists(directory + @"\" + pair.dll))
                 || File.Exists(config))
             {
@@ -81,10 +85,10 @@ internal partial class InstallForm : CustomForm
         }
         if (Uninstalling || !selection.Koaloader)
         {
-            foreach (string directory in selection.ExecutableDirectories)
+            foreach ((string directory, BinaryType binaryType) in selection.ExecutableDirectories)
             {
                 directory.GetKoaloaderComponents(out List<string> proxies, out string config);
-                if (proxies.Any(proxy => File.Exists(proxy) && proxy.IsResourceFile(Resources.Resources.ResourceIdentifier.Koaloader))
+                if (proxies.Any(proxy => File.Exists(proxy) && proxy.IsResourceFile(ResourceIdentifier.Koaloader))
                     || Koaloader.AutoLoadDlls.Any(pair => File.Exists(directory + @"\" + pair.dll))
                     || File.Exists(config))
                 {
@@ -162,10 +166,10 @@ internal partial class InstallForm : CustomForm
         }
         if (selection.Koaloader && !Uninstalling)
         {
-            foreach (string directory in selection.ExecutableDirectories)
+            foreach ((string directory, BinaryType binaryType) in selection.ExecutableDirectories)
             {
                 UpdateUser("Installing Koaloader to " + selection.Name + $" in directory \"{directory}\" . . . ", InstallationLog.Operation);
-                await Koaloader.Install(directory, selection, this);
+                await Koaloader.Install(directory, binaryType, selection, this);
             }
         }
         UpdateProgress(100);
