@@ -52,10 +52,12 @@ internal static class Koaloader
 
     internal static readonly List<(string unlocker, string dll)> AutoLoadDlls = new()
     {
-        ("SmokeAPI", "SmokeAPI32.dll"), ("SmokeAPI", "SmokeAPI64.dll"),
-        ("ScreamAPI", "ScreamAPI32.dll"), ("ScreamAPI", "ScreamAPI64.dll"),
-        ("Uplay R1 Unlocker", "UplayR1Unlocker32.dll"), ("Uplay R1 Unlocker", "UplayR1Unlocker64.dll"),
-        ("Uplay R2 Unlocker", "UplayR2Unlocker32.dll"), ("Uplay R2 Unlocker", "UplayR2Unlocker64.dll")
+        ("Koaloader", "Unlocker.dll"), ("Koaloader", "Unlocker32.dll"), ("Koaloader", "Unlocker64.dll"),
+        ("Lyptus", "Lyptus.dll"), ("Lyptus", "Lyptus32.dll"), ("Lyptus", "Lyptus64.dll"),
+        ("SmokeAPI", "SmokeAPI.dll"), ("SmokeAPI", "SmokeAPI32.dll"), ("SmokeAPI", "SmokeAPI64.dll"),
+        ("ScreamAPI", "ScreamAPI.dll"), ("ScreamAPI", "ScreamAPI32.dll"), ("ScreamAPI", "ScreamAPI64.dll"),
+        ("Uplay R1 Unlocker", "UplayR1Unlocker.dll"), ("Uplay R1 Unlocker", "UplayR1Unlocker32.dll"), ("Uplay R1 Unlocker", "UplayR1Unlocker64.dll"),
+        ("Uplay R2 Unlocker", "UplayR2Unlocker.dll"), ("Uplay R2 Unlocker", "UplayR2Unlocker32.dll"), ("Uplay R2 Unlocker", "UplayR2Unlocker64.dll")
     };
 
     internal static void CheckConfig(string directory, ProgramSelection selection, InstallForm installForm = null)
@@ -134,7 +136,7 @@ internal static class Koaloader
         }
         foreach ((string unlocker, string path) in AutoLoadDlls
             .Select(pair => (pair.unlocker, path: directory + @"\" + pair.dll))
-            .Where(pair => File.Exists(pair.path)))
+            .Where(pair => File.Exists(pair.path) && pair.path.IsResourceFile()))
         {
             File.Delete(path);
             if (installForm is not null)
