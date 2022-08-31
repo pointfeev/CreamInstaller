@@ -46,32 +46,74 @@ internal static class SteamStore
                     {
                         try
                         {
-                            AppData data = JsonConvert.DeserializeObject<AppDetails>(app.Value.ToString()).data;
-                            if (data is not null)
+                            AppDetails appDetails = JsonConvert.DeserializeObject<AppDetails>(app.Value.ToString());
+                            if (appDetails is not null)
                             {
-                                try
+                                AppData data = appDetails.data;
+                                if (!appDetails.success)
                                 {
-                                    File.WriteAllText(cacheFile, JsonConvert.SerializeObject(data, Formatting.Indented));
-                                }
-                                catch
 #if DEBUG
-                                (Exception e)
-                                {
-                                    using DialogForm dialogForm = new(null);
-                                    dialogForm.Show(SystemIcons.Error, "Unsuccessful serialization of query for appid " + appId + ":\n\n" + e.ToString());
-                                }
-#else
-                                { }
+                                    Form.ActiveForm.Invoke(() =>
+                                    {
+                                        using DialogForm dialogForm = new(Form.ActiveForm);
+                                        dialogForm.Show(SystemIcons.Error, "Query unsuccessful for appid: " + appId + $"\nisDlc: {isDlc}\ndata is null: {data is null}\n\n" + app.Value.ToString());
+                                    });
 #endif
-                                return data;
+                                    if (data is null)
+                                        return null;
+                                }
+                                if (data is not null)
+                                {
+                                    try
+                                    {
+                                        File.WriteAllText(cacheFile, JsonConvert.SerializeObject(data, Formatting.Indented));
+                                    }
+                                    catch
+#if DEBUG
+                                    (Exception e)
+                                    {
+                                        Form.ActiveForm.Invoke(() =>
+                                        {
+                                            using DialogForm dialogForm = new(Form.ActiveForm);
+                                            dialogForm.Show(SystemIcons.Error, "Unsuccessful serialization of query for appid " + appId + ":\n\n" + e.ToString());
+                                        });
+                                    }
+#else
+                                    { }
+#endif
+                                    return data;
+                                }
+#if DEBUG
+                                else
+                                {
+                                    Form.ActiveForm.Invoke(() =>
+                                    {
+                                        using DialogForm dialogForm = new(Form.ActiveForm);
+                                        dialogForm.Show(SystemIcons.Error, "Response data null for appid: " + appId + "\n\n" + app.Value.ToString());
+                                    });
+                                }
+#endif
                             }
+#if DEBUG
+                            else
+                            {
+                                Form.ActiveForm.Invoke(() =>
+                                {
+                                    using DialogForm dialogForm = new(Form.ActiveForm);
+                                    dialogForm.Show(SystemIcons.Error, "Response details null for appid: " + appId + "\n\n" + app.Value.ToString());
+                                });
+                            }
+#endif
                         }
                         catch
 #if DEBUG
                         (Exception e)
                         {
-                            using DialogForm dialogForm = new(null);
-                            dialogForm.Show(SystemIcons.Error, "Unsuccessful deserialization of query for appid " + appId + ":\n\n" + e.ToString());
+                            Form.ActiveForm.Invoke(() =>
+                            {
+                                using DialogForm dialogForm = new(Form.ActiveForm);
+                                dialogForm.Show(SystemIcons.Error, "Unsuccessful deserialization of query for appid " + appId + ":\n\n" + e.ToString());
+                            });
                         }
 #else
                         { }
@@ -81,16 +123,22 @@ internal static class SteamStore
 #if DEBUG
                 else
                 {
-                    using DialogForm dialogForm = new(null);
-                    dialogForm.Show(SystemIcons.Error, "Response deserialization null for appid: " + appId);
+                    Form.ActiveForm.Invoke(() =>
+                    {
+                        using DialogForm dialogForm = new(Form.ActiveForm);
+                        dialogForm.Show(SystemIcons.Error, "Response deserialization null for appid: " + appId);
+                    });
                 }
 #endif
             }
 #if DEBUG
             else
             {
-                using DialogForm dialogForm = new(null);
-                dialogForm.Show(SystemIcons.Error, "Response null for appid: " + appId);
+                Form.ActiveForm.Invoke(() =>
+                {
+                    using DialogForm dialogForm = new(Form.ActiveForm);
+                    dialogForm.Show(SystemIcons.Error, "Response null for appid: " + appId);
+                });
             }
 #endif
         }
@@ -108,7 +156,7 @@ internal static class SteamStore
         if (!isDlc)
         {
             Thread.Sleep(1000);
-            return await QueryStoreAPI(appId);
+            return await QueryStoreAPI(appId, isDlc);
         }
         return null;
     }

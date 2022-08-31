@@ -119,12 +119,11 @@ internal static class Resources
             || subPath.Contains("CRASH") && (subPath.Contains("PAD") || subPath.Contains("REPORT"));
     }
 
-    internal static async Task<List<string>> GetDllDirectoriesFromGameDirectory(this string gameDirectory, Platform platform, List<string> dllDirectories = null) => await Task.Run(() =>
+    internal static async Task<List<string>> GetDllDirectoriesFromGameDirectory(this string gameDirectory, Platform platform) => await Task.Run(() =>
     {
-        dllDirectories ??= new();
+        List<string> dllDirectories = new();
         if (Program.Canceled || !Directory.Exists(gameDirectory)) return null;
-        List<string> directories = new(Directory.EnumerateDirectories(gameDirectory, "*", new EnumerationOptions() { RecurseSubdirectories = true })) { gameDirectory };
-        foreach (string subDirectory in directories)
+        foreach (string subDirectory in new List<string>(Directory.EnumerateDirectories(gameDirectory, "*", new EnumerationOptions() { RecurseSubdirectories = true })) { gameDirectory })
         {
             if (Program.Canceled) return null;
             Thread.Sleep(0);
