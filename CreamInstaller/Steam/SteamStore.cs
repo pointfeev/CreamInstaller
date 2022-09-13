@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 #if DEBUG
 using System;
 using System.Drawing;
+using System.Windows.Forms;
 #endif
 
 namespace CreamInstaller.Steam;
