@@ -647,10 +647,14 @@ internal partial class SelectForm : CustomForm
             + progressBar.Size.Height);
     }
 
-    internal void OnNodeRightClick(TreeNode node, Point location)
+    internal void OnNodeRightClick(TreeNode node, Point location) => Invoke(() =>
     {
         ContextMenuStrip contextMenuStrip = ContextMenuStrip;
-        contextMenuStrip.Items.Clear();
+        while (ContextMenuStrip.Tag is bool used && used)
+            Thread.Sleep(100);
+        ContextMenuStrip.Tag = true;
+        ToolStripItemCollection items = contextMenuStrip.Items;
+        items.Clear();
         string id = node.Name;
         Platform platform = (Platform)node.Tag;
         ProgramSelection selection = ProgramSelection.FromPlatformId(platform, id);
@@ -669,7 +673,7 @@ internal partial class SelectForm : CustomForm
             header = new(node.Text, (id, selection.IconUrl));
         else if (dlc is not null && dlcParentSelection is not null)
             header = new(node.Text, (id, dlc.Value.app.icon), (id, dlcParentSelection.IconUrl));
-        contextMenuStrip.Items.Add(header ?? new ContextMenuItem(node.Text));
+        items.Add(header ?? new ContextMenuItem(node.Text));
         string appInfoVDF = $@"{SteamCMD.AppInfoPath}\{id}.vdf";
         string appInfoJSON = $@"{SteamCMD.AppInfoPath}\{id}.json";
         string cooldown = $@"{ProgramData.CooldownPath}\{id}.txt";
@@ -688,10 +692,10 @@ internal partial class SelectForm : CustomForm
                     new EventHandler((sender, e) => Diagnostics.OpenFileInNotepad(appInfoVDF))));
             if (queries.Any())
             {
-                contextMenuStrip.Items.Add(new ToolStripSeparator());
+                items.Add(new ToolStripSeparator());
                 foreach (ContextMenuItem query in queries)
-                    contextMenuStrip.Items.Add(query);
-                contextMenuStrip.Items.Add(new ContextMenuItem("Refresh Queries", "Command Prompt",
+                    items.Add(query);
+                items.Add(new ContextMenuItem("Refresh Queries", "Command Prompt",
                     new EventHandler((sender, e) =>
                     {
                         try
@@ -717,17 +721,17 @@ internal partial class SelectForm : CustomForm
         {
             if (id == "PL")
             {
-                contextMenuStrip.Items.Add(new ToolStripSeparator());
-                contextMenuStrip.Items.Add(new ContextMenuItem("Repair", "Command Prompt",
+                items.Add(new ToolStripSeparator());
+                items.Add(new ContextMenuItem("Repair", "Command Prompt",
                     new EventHandler(async (sender, e) => await ParadoxLauncher.Repair(this, selection))));
             }
-            contextMenuStrip.Items.Add(new ToolStripSeparator());
-            contextMenuStrip.Items.Add(new ContextMenuItem("Open Root Directory", "File Explorer",
+            items.Add(new ToolStripSeparator());
+            items.Add(new ContextMenuItem("Open Root Directory", "File Explorer",
                 new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(selection.RootDirectory))));
             int executables = 0;
             foreach ((string directory, BinaryType binaryType) in selection.ExecutableDirectories.ToList())
             {
-                contextMenuStrip.Items.Add(new ContextMenuItem($"Open Executable Directory #{++executables} ({(binaryType == BinaryType.BIT32 ? "32" : "64")}-bit)", "File Explorer",
+                items.Add(new ContextMenuItem($"Open Executable Directory #{++executables} ({(binaryType == BinaryType.BIT32 ? "32" : "64")}-bit)", "File Explorer",
                     new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
             }
             List<string> directories = selection.DllDirectories.ToList();
@@ -737,7 +741,7 @@ internal partial class SelectForm : CustomForm
                 {
                     directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out string cache);
                     if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config) || File.Exists(cache))
-                        contextMenuStrip.Items.Add(new ContextMenuItem($"Open Steamworks Directory #{++steam}", "File Explorer",
+                        items.Add(new ContextMenuItem($"Open Steamworks Directory #{++steam}", "File Explorer",
                             new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
                 }
             if (selection.Platform is Platform.Epic or Platform.Paradox)
@@ -745,7 +749,7 @@ internal partial class SelectForm : CustomForm
                 {
                     directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
                     if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config))
-                        contextMenuStrip.Items.Add(new ContextMenuItem($"Open Epic Online Services Directory #{++epic}", "File Explorer",
+                        items.Add(new ContextMenuItem($"Open Epic Online Services Directory #{++epic}", "File Explorer",
                             new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
                 }
             if (selection.Platform is Platform.Ubisoft)
@@ -753,11 +757,11 @@ internal partial class SelectForm : CustomForm
                 {
                     directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
                     if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config))
-                        contextMenuStrip.Items.Add(new ContextMenuItem($"Open Uplay R1 Directory #{++r1}", "File Explorer",
+                        items.Add(new ContextMenuItem($"Open Uplay R1 Directory #{++r1}", "File Explorer",
                             new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
                     directory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config);
                     if (File.Exists(old_api32) || File.Exists(old_api64) || File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config))
-                        contextMenuStrip.Items.Add(new ContextMenuItem($"Open Uplay R2 Directory #{++r2}", "File Explorer",
+                        items.Add(new ContextMenuItem($"Open Uplay R2 Directory #{++r2}", "File Explorer",
                             new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
                 }
         }
@@ -766,32 +770,32 @@ internal partial class SelectForm : CustomForm
             if (selection is not null && selection.Platform is Platform.Steam
             || dlcParentSelection is not null && dlcParentSelection.Platform is Platform.Steam)
             {
-                contextMenuStrip.Items.Add(new ToolStripSeparator());
-                contextMenuStrip.Items.Add(new ContextMenuItem("Open SteamDB", "SteamDB",
+                items.Add(new ToolStripSeparator());
+                items.Add(new ContextMenuItem("Open SteamDB", "SteamDB",
                     new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamdb.info/app/" + id))));
             }
             if (selection is not null)
             {
                 if (selection.Platform is Platform.Steam)
                 {
-                    contextMenuStrip.Items.Add(new ContextMenuItem("Open Steam Store", "Steam Store",
+                    items.Add(new ContextMenuItem("Open Steam Store", "Steam Store",
                         new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
-                    contextMenuStrip.Items.Add(new ContextMenuItem("Open Steam Community", ("Sub_" + id, selection.SubIconUrl), "Steam Community",
+                    items.Add(new ContextMenuItem("Open Steam Community", ("Sub_" + id, selection.SubIconUrl), "Steam Community",
                         new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + id))));
                 }
                 if (selection.Platform is Platform.Epic)
                 {
-                    contextMenuStrip.Items.Add(new ToolStripSeparator());
-                    contextMenuStrip.Items.Add(new ContextMenuItem("Open ScreamDB", "ScreamDB",
+                    items.Add(new ToolStripSeparator());
+                    items.Add(new ContextMenuItem("Open ScreamDB", "ScreamDB",
                         new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://scream-db.web.app/offers/" + id))));
-                    contextMenuStrip.Items.Add(new ContextMenuItem("Open Epic Games Store", "Epic Games",
+                    items.Add(new ContextMenuItem("Open Epic Games Store", "Epic Games",
                         new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl))));
                 }
                 if (selection.Platform is Platform.Ubisoft)
                 {
-                    contextMenuStrip.Items.Add(new ToolStripSeparator());
+                    items.Add(new ToolStripSeparator());
 #pragma warning disable CA1308 // Normalize strings to uppercase
-                    contextMenuStrip.Items.Add(new ContextMenuItem("Open Ubisoft Store", "Ubisoft Store",
+                    items.Add(new ContextMenuItem("Open Ubisoft Store", "Ubisoft Store",
                         new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://store.ubi.com/us/" + selection.Name.Replace(" ", "-").ToLowerInvariant()))));
 #pragma warning restore CA1308 // Normalize strings to uppercase
                 }
@@ -799,12 +803,13 @@ internal partial class SelectForm : CustomForm
         }
         if (selection is not null && selection.WebsiteUrl is not null)
         {
-            contextMenuStrip.Items.Add(new ContextMenuItem("Open Official Website", ("Web_" + id, IconGrabber.GetDomainFaviconUrl(selection.WebsiteUrl)),
+            items.Add(new ContextMenuItem("Open Official Website", ("Web_" + id, IconGrabber.GetDomainFaviconUrl(selection.WebsiteUrl)),
                 new EventHandler((sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.WebsiteUrl))));
         }
         contextMenuStrip.Show(selectionTreeView, location);
         contextMenuStrip.Refresh();
-    }
+        ContextMenuStrip.Tag = null;
+    });
 
     private void OnLoad(object sender, EventArgs _)
     {
