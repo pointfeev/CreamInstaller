@@ -164,6 +164,8 @@ internal static class Koaloader
             if (installForm is not null)
                 installForm.UpdateUser($"Deleted Koaloader: {Path.GetFileName(_path)}", InstallationLog.Action, info: false);
         }
+        if (File.Exists(path) && !path.IsResourceFile(ResourceIdentifier.Koaloader))
+            throw new CustomMessageException("A non-Koaloader DLL named " + selection.KoaloaderProxy + ".dll already exists in this directory!");
         path.WriteProxy(selection.KoaloaderProxy, binaryType);
         if (installForm is not null)
             installForm.UpdateUser($"Wrote {(binaryType == BinaryType.BIT32 ? "32-bit" : "64-bit")} Koaloader: {Path.GetFileName(path)}", InstallationLog.Action, info: false);

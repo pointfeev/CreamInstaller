@@ -175,12 +175,13 @@ internal partial class InstallForm : CustomForm
         UpdateProgress(100);
     }
 
+    private readonly List<ProgramSelection> DisabledSelections = new();
+
     private async Task Operate()
     {
         List<ProgramSelection> programSelections = ProgramSelection.AllEnabled;
         OperationsCount = programSelections.Count;
         CompleteOperationsCount = 0;
-        List<ProgramSelection> disabledSelections = new();
         foreach (ProgramSelection selection in programSelections)
         {
             if (Program.Canceled || !Program.IsProgramRunningDialog(this, selection)) throw new CustomMessageException("The operation was canceled.");
@@ -189,7 +190,7 @@ internal partial class InstallForm : CustomForm
                 await OperateFor(selection);
                 UpdateUser($"Operation succeeded for {selection.Name}.", InstallationLog.Success);
                 selection.Enabled = false;
-                disabledSelections.Add(selection);
+                DisabledSelections.Add(selection);
             }
             catch (Exception exception)
             {
@@ -200,9 +201,13 @@ internal partial class InstallForm : CustomForm
         Program.Cleanup();
         List<ProgramSelection> FailedSelections = ProgramSelection.AllEnabled;
         if (FailedSelections.Any())
-            if (FailedSelections.Count == 1) throw new CustomMessageException($"Operation failed for {FailedSelections.First().Name}.");
-            else throw new CustomMessageException($"Operation failed for {FailedSelections.Count} programs.");
-        foreach (ProgramSelection selection in disabledSelections) selection.Enabled = true;
+            if (FailedSelections.Count == 1)
+                throw new CustomMessageException($"Operation failed for {FailedSelections.First().Name}.");
+            else
+                throw new CustomMessageException($"Operation failed for {FailedSelections.Count} programs.");
+        foreach (ProgramSelection selection in DisabledSelections)
+            selection.Enabled = true;
+        DisabledSelections.Clear();
     }
 
     private readonly int ProgramCount = ProgramSelection.AllEnabled.Count;
@@ -265,6 +270,9 @@ internal partial class InstallForm : CustomForm
     {
         Program.Cleanup();
         Reselecting = true;
+        foreach (ProgramSelection selection in DisabledSelections)
+            selection.Enabled = true;
+        DisabledSelections.Clear();
         Close();
     }
 }

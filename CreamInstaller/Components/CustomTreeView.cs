@@ -4,6 +4,7 @@ using CreamInstaller.Utility;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
@@ -223,13 +224,24 @@ internal class CustomTreeView : TreeView
                         comboBoxDropDown.Items.Clear();
                         foreach (string proxy in proxies)
                         {
-                            _ = comboBoxDropDown.Items.Add(new ToolStripButton(proxy + ".dll", null, (s, e) =>
+                            bool canUse = true;
+                            foreach ((string directory, BinaryType binaryType) in pair.Key.ExecutableDirectories)
                             {
-                                pair.Key.KoaloaderProxy = proxy;
-                                ProgramData.UpdateKoaloaderProxyChoices();
-                                Invalidate();
-                            })
-                            { Font = comboBoxFont });
+                                string path = directory + @"\" + proxy + ".dll";
+                                if (File.Exists(path) && !path.IsResourceFile(ResourceIdentifier.Koaloader))
+                                {
+                                    canUse = false;
+                                    break;
+                                }
+                            }
+                            if (canUse)
+                                _ = comboBoxDropDown.Items.Add(new ToolStripButton(proxy + ".dll", null, (s, e) =>
+                                {
+                                    pair.Key.KoaloaderProxy = proxy;
+                                    ProgramData.UpdateKoaloaderProxyChoices();
+                                    Invalidate();
+                                })
+                                { Font = comboBoxFont });
                         }
                         comboBoxDropDown.Show(this, PointToScreen(new(pair.Value.Left, pair.Value.Bottom - 1)));
                         invalidate = true;
