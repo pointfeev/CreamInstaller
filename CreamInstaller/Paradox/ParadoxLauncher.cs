@@ -175,7 +175,7 @@ internal static class ParadoxLauncher
                     "An original Steamworks and/or Epic Online Services file could not be found. " +
                     "You will likely have to reinstall Paradox Launcher to fix this issue.")
                 : dialogForm.Show(SystemIcons.Error, "Paradox Launcher repair failed!"
-                    + "\n\nAn original Steamworks and/or Epic Online Services SDK file could not be found."
+                    + "\n\nAn original Steamworks and/or Epic Online Services file could not be found."
                     + "\nYou will likely have to reinstall Paradox Launcher to fix this issue.", "OK", customFormText: "Paradox Launcher");
             return RepairResult.Failure;
         }
