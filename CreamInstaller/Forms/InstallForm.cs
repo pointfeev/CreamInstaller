@@ -65,6 +65,7 @@ internal partial class InstallForm : CustomForm
             UpdateUser($"Repairing Paradox Launcher . . . ", InstallationLog.Operation);
             _ = await Repair(this, selection);
         }
+        UpdateUser($"Checking directories for {selection.Name} . . . ", InstallationLog.Operation);
         IEnumerable<string> invalidDirectories = (await selection.RootDirectory.GetExecutables())
             .Where(d => !selection.ExecutableDirectories.Any(s => d.path.Contains(s.directory)))
             .Select(d => Path.GetDirectoryName(d.path));
