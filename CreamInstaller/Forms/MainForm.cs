@@ -37,10 +37,16 @@ internal partial class MainForm : CustomForm
             cancellationTokenSource.Dispose();
             cancellationTokenSource = null;
         }
+#pragma warning disable CA2000 // Dispose objects before losing scope
+        SelectForm form = new();
+#pragma warning restore CA2000 // Dispose objects before losing scope
+        form.InheritLocation(this);
+        form.FormClosing += (s, e) => Close();
+        form.Show();
         Hide();
-        using SelectForm form = new(this);
-        _ = form.ShowDialog();
-        Close();
+#if DEBUG
+        DebugForm.Current.Attach(form);
+#endif
     }
 
     private UpdateManager updateManager;
@@ -56,8 +62,10 @@ internal partial class MainForm : CustomForm
         progressLabel.Text = "Checking for updates . . .";
         changelogTreeView.Visible = false;
         changelogTreeView.Location = new(progressLabel.Location.X, progressLabel.Location.Y + progressLabel.Size.Height + 13);
-        Invalidate();
-
+        Refresh();
+#if DEBUG
+        DebugForm.Current.Attach(this);
+#endif
         GithubPackageResolver resolver = new("pointfeev", "CreamInstaller", "CreamInstaller.zip");
         ZipPackageExtractor extractor = new();
         updateManager = new(AssemblyMetadata.FromAssembly(Program.EntryAssembly, Program.CurrentProcessFilePath), resolver, extractor);
@@ -72,16 +80,17 @@ internal partial class MainForm : CustomForm
                 if (checkForUpdatesResult.CanUpdate)
                 {
 #endif
-                    latestVersion = checkForUpdatesResult.LastVersion;
-                    versions = checkForUpdatesResult.Versions;
+                latestVersion = checkForUpdatesResult.LastVersion;
+                versions = checkForUpdatesResult.Versions;
 #if !DEBUG
                 }
 #endif
             }
 #if DEBUG
+            catch (TaskCanceledException) { }
             catch (Exception e)
             {
-                e.HandleException(form: this, caption: "Debug exception", acceptButtonText: "OK", cancelButtonText: null);
+                DebugForm.Current.Log($"Exception while checking for updates: {e.GetType()} ({e.Message})", LogTextBox.Warning);
             }
 #else
             catch { }
@@ -124,10 +133,12 @@ internal partial class MainForm : CustomForm
                     HtmlNodeCollection nodes = await HttpClientManager.GetDocumentNodes(
                         $"https://github.com/pointfeev/CreamInstaller/releases/tag/v{version}",
                         "//div[@data-test-selector='body-content']/ul/li");
-                    if (nodes is null) changelogTreeView.Nodes.Remove(root);
-                    else foreach (HtmlNode node in nodes)
+                    if (nodes is null)
+                        changelogTreeView.Nodes.Remove(root);
+                    else
+                        foreach (HtmlNode node in nodes)
                         {
-                            Program.Invoke(changelogTreeView, delegate
+                            changelogTreeView.Invoke(delegate
                             {
                                 TreeNode change = new()
                                 {
@@ -181,7 +192,7 @@ internal partial class MainForm : CustomForm
         updateButton.Click -= OnUpdate;
         updateButton.Click += new(OnUpdateCancel);
         changelogTreeView.Location = new(progressBar.Location.X, progressBar.Location.Y + progressBar.Size.Height + 6);
-        Invalidate();
+        Refresh();
 
         Progress<double> progress = new();
         progress.ProgressChanged += new(delegate (object sender, double _progress)
@@ -197,9 +208,10 @@ internal partial class MainForm : CustomForm
             await updateManager.PrepareUpdateAsync(latestVersion, progress, cancellationTokenSource.Token);
         }
 #if DEBUG
+        catch (TaskCanceledException) { }
         catch (Exception ex)
         {
-            ex.HandleException(form: this, caption: "Debug exception", acceptButtonText: "OK", cancelButtonText: null);
+            DebugForm.Current.Log($"Exception while preparing update: {ex.GetType()} ({ex.Message})", LogTextBox.Warning);
         }
 #else
         catch { }

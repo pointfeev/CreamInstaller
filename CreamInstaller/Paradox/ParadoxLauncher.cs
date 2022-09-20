@@ -120,14 +120,14 @@ internal static class ParadoxLauncher
                 {
                     steamOriginalSdk32.Write(api32);
                     if (installForm is not null)
-                        installForm.UpdateUser("Corrected Steamworks: " + api32, InstallationLog.Action);
+                        installForm.UpdateUser("Corrected Steamworks: " + api32, LogTextBox.Action);
                     neededRepair = true;
                 }
                 if (steamOriginalSdk64 is not null && api64.IsResourceFile(ResourceIdentifier.Steamworks64))
                 {
                     steamOriginalSdk64.Write(api64);
                     if (installForm is not null)
-                        installForm.UpdateUser("Corrected Steamworks: " + api64, InstallationLog.Action);
+                        installForm.UpdateUser("Corrected Steamworks: " + api64, LogTextBox.Action);
                     neededRepair = true;
                 }
                 if (!selection.Koaloader && smokeConfig)
@@ -138,14 +138,14 @@ internal static class ParadoxLauncher
                 {
                     epicOriginalSdk32.Write(api32);
                     if (installForm is not null)
-                        installForm.UpdateUser("Corrected Epic Online Services: " + api32, InstallationLog.Action);
+                        installForm.UpdateUser("Corrected Epic Online Services: " + api32, LogTextBox.Action);
                     neededRepair = true;
                 }
                 if (epicOriginalSdk64 is not null && api64.IsResourceFile(ResourceIdentifier.EpicOnlineServices64))
                 {
                     epicOriginalSdk64.Write(api64);
                     if (installForm is not null)
-                        installForm.UpdateUser("Corrected Epic Online Services: " + api64, InstallationLog.Action);
+                        installForm.UpdateUser("Corrected Epic Online Services: " + api64, LogTextBox.Action);
                     neededRepair = true;
                 }
                 if (!selection.Koaloader && screamConfig)
@@ -154,7 +154,7 @@ internal static class ParadoxLauncher
             if (neededRepair)
             {
                 if (installForm is not null)
-                    installForm.UpdateUser("Paradox Launcher successfully repaired!", InstallationLog.Success);
+                    installForm.UpdateUser("Paradox Launcher successfully repaired!", LogTextBox.Success);
                 else
                     _ = dialogForm.Show(form.Icon, "Paradox Launcher successfully repaired!", "OK", customFormText: "Paradox Launcher");
                 return RepairResult.Success;
@@ -162,7 +162,7 @@ internal static class ParadoxLauncher
             else
             {
                 if (installForm is not null)
-                    installForm.UpdateUser("Paradox Launcher did not need to be repaired.", InstallationLog.Success);
+                    installForm.UpdateUser("Paradox Launcher did not need to be repaired.", LogTextBox.Success);
                 else
                     _ = dialogForm.Show(SystemIcons.Information, "Paradox Launcher does not need to be repaired.", "OK", customFormText: "Paradox Launcher");
                 return RepairResult.Unnecessary;

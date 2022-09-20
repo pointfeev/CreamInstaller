@@ -321,7 +321,7 @@ namespace CreamInstaller
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "SelectForm";
-            this.StartPosition = FormStartPosition.CenterParent;
+            this.StartPosition = FormStartPosition.Manual;
             this.Text = "SelectForm";
             this.Load += this.OnLoad;
             this.programsGroupBox.ResumeLayout(false);

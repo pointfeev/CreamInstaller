@@ -185,7 +185,8 @@ namespace CreamInstaller
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "SelectDialogForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.ShowInTaskbar = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "SelectDialogForm";
             this.groupBox.ResumeLayout(false);
             this.groupBox.PerformLayout();

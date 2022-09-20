@@ -27,7 +27,7 @@ namespace CreamInstaller;
 
 internal partial class SelectForm : CustomForm
 {
-    internal SelectForm(IWin32Window owner) : base(owner)
+    internal SelectForm() : base()
     {
         InitializeComponent();
         Text = Program.ApplicationName;
@@ -43,7 +43,7 @@ internal partial class SelectForm : CustomForm
     private void AddToRemainingGames(string gameName)
     {
         if (Program.Canceled) return;
-        Program.Invoke(progressLabelGames, delegate
+        progressLabelGames.Invoke(delegate
         {
             if (Program.Canceled) return;
             if (!RemainingGames.Contains(gameName))
@@ -54,7 +54,7 @@ internal partial class SelectForm : CustomForm
     private void RemoveFromRemainingGames(string gameName)
     {
         if (Program.Canceled) return;
-        Program.Invoke(progressLabelGames, delegate
+        progressLabelGames.Invoke(delegate
         {
             if (Program.Canceled) return;
             RemainingGames.Remove(gameName);
@@ -67,7 +67,7 @@ internal partial class SelectForm : CustomForm
     private void AddToRemainingDLCs(string dlcId)
     {
         if (Program.Canceled) return;
-        Program.Invoke(progressLabelDLCs, delegate
+        progressLabelDLCs.Invoke(delegate
         {
             if (Program.Canceled) return;
             if (!RemainingDLCs.Contains(dlcId))
@@ -78,7 +78,7 @@ internal partial class SelectForm : CustomForm
     private void RemoveFromRemainingDLCs(string dlcId)
     {
         if (Program.Canceled) return;
-        Program.Invoke(progressLabelDLCs, delegate
+        progressLabelDLCs.Invoke(delegate
         {
             if (Program.Canceled) return;
             RemainingDLCs.Remove(dlcId);
@@ -128,8 +128,8 @@ internal partial class SelectForm : CustomForm
                 programNode.Name = selection.Id;
                 programNode.Text = selection.Name;
                 programNode.Checked = selection.Enabled;
-                programNode.Remove();
-                _ = selectionTreeView.Nodes.Add(programNode);
+                if (programNode.TreeView is null)
+                    _ = selectionTreeView.Nodes.Add(programNode);
             }
         }
         int steamGamesToCheck;
@@ -244,7 +244,7 @@ internal partial class SelectForm : CustomForm
                     selection.WebsiteUrl = appData?.website;
 
                     if (Program.Canceled) return;
-                    Program.Invoke(selectionTreeView, delegate
+                    selectionTreeView.Invoke(delegate
                     {
                         if (Program.Canceled) return;
                         TreeNode programNode = treeNodes.Find(s => s.Tag is Platform.Steam && s.Name == appId) ?? new();
@@ -252,8 +252,8 @@ internal partial class SelectForm : CustomForm
                         programNode.Name = appId;
                         programNode.Text = appData?.name ?? name;
                         programNode.Checked = selection.Enabled;
-                        programNode.Remove();
-                        _ = selectionTreeView.Nodes.Add(programNode);
+                        if (programNode.TreeView is null)
+                            _ = selectionTreeView.Nodes.Add(programNode);
                         foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in dlc)
                         {
                             if (Program.Canceled || programNode is null) return;
@@ -266,8 +266,8 @@ internal partial class SelectForm : CustomForm
                             dlcNode.Name = appId;
                             dlcNode.Text = dlcApp.name;
                             dlcNode.Checked = selection.SelectedDlc.ContainsKey(appId);
-                            dlcNode.Remove();
-                            _ = programNode.Nodes.Add(dlcNode);
+                            if (dlcNode.Parent is null)
+                                _ = programNode.Nodes.Add(dlcNode);
                         }
                     });
                     if (Program.Canceled) return;
@@ -344,7 +344,7 @@ internal partial class SelectForm : CustomForm
                     }
 
                     if (Program.Canceled) return;
-                    Program.Invoke(selectionTreeView, delegate
+                    selectionTreeView.Invoke(delegate
                     {
                         if (Program.Canceled) return;
                         TreeNode programNode = treeNodes.Find(s => s.Tag is Platform.Epic && s.Name == @namespace) ?? new();
@@ -352,15 +352,15 @@ internal partial class SelectForm : CustomForm
                         programNode.Name = @namespace;
                         programNode.Text = name;
                         programNode.Checked = selection.Enabled;
-                        programNode.Remove();
-                        _ = selectionTreeView.Nodes.Add(programNode);
+                        if (programNode.TreeView is null)
+                            _ = selectionTreeView.Nodes.Add(programNode);
                         /*TreeNode catalogItemsNode = treeNodes.Find(s => s.Tag is Platform.Epic && s.Name == @namespace + "_catalogItems") ?? new();
                         catalogItemsNode.Tag = selection.Platform;
                         catalogItemsNode.Name = @namespace + "_catalogItems";
                         catalogItemsNode.Text = "Catalog Items";
                         catalogItemsNode.Checked = selection.SelectedDlc.Any(pair => pair.Value.type == DlcType.CatalogItem);
-                        catalogItemsNode.Remove();
-                        programNode.Nodes.Add(catalogItemsNode);*/
+                        if (catalogItemsNode.Parent is null)
+                            programNode.Nodes.Add(catalogItemsNode);*/
                         if (entitlements.Any())
                         {
                             /*TreeNode entitlementsNode = treeNodes.Find(s => s.Tag is Platform.Epic && s.Name == @namespace + "_entitlements") ?? new();
@@ -368,8 +368,8 @@ internal partial class SelectForm : CustomForm
                             entitlementsNode.Name = @namespace + "_entitlements";
                             entitlementsNode.Text = "Entitlements";
                             entitlementsNode.Checked = selection.SelectedDlc.Any(pair => pair.Value.type == DlcType.Entitlement);
-                            entitlementsNode.Remove();
-                            programNode.Nodes.Add(entitlementsNode);*/
+                            if (entitlementsNode.Parent is null)
+                                programNode.Nodes.Add(entitlementsNode);*/
                             foreach (KeyValuePair<string, (string name, string product, string icon, string developer)> pair in entitlements)
                             {
                                 if (programNode is null/* || entitlementsNode is null*/) return;
@@ -382,8 +382,8 @@ internal partial class SelectForm : CustomForm
                                 dlcNode.Name = dlcId;
                                 dlcNode.Text = dlcApp.name;
                                 dlcNode.Checked = selection.SelectedDlc.ContainsKey(dlcId);
-                                dlcNode.Remove();
-                                _ = programNode.Nodes.Add(dlcNode); //entitlementsNode.Nodes.Add(dlcNode);
+                                if (dlcNode.Parent is null)
+                                    _ = programNode.Nodes.Add(dlcNode); //entitlementsNode.Nodes.Add(dlcNode);
                             }
                         }
                     });
@@ -423,7 +423,7 @@ internal partial class SelectForm : CustomForm
                     selection.Platform = Platform.Ubisoft;
                     selection.IconUrl = IconGrabber.GetDomainFaviconUrl("store.ubi.com");
 
-                    Program.Invoke(selectionTreeView, delegate
+                    selectionTreeView.Invoke(delegate
                     {
                         if (Program.Canceled) return;
                         TreeNode programNode = treeNodes.Find(s => s.Tag is Platform.Ubisoft && s.Name == gameId) ?? new();
@@ -431,8 +431,8 @@ internal partial class SelectForm : CustomForm
                         programNode.Name = gameId;
                         programNode.Text = name;
                         programNode.Checked = selection.Enabled;
-                        programNode.Remove();
-                        _ = selectionTreeView.Nodes.Add(programNode);
+                        if (programNode.TreeView is null)
+                            _ = selectionTreeView.Nodes.Add(programNode);
                     });
                     if (Program.Canceled) return;
                     RemoveFromRemainingGames(name);
@@ -524,14 +524,15 @@ internal partial class SelectForm : CustomForm
             setup = false;
             progressLabel.Text = "Gathering and caching your applicable games and their DLCs . . . ";
             ProgramSelection.ValidateAll(ProgramsToScan);
-            TreeNodes.ForEach(node =>
+            /*TreeNodes.ForEach(node =>
             {
                 if (node.Tag is not Platform platform
                 || node.Name is not string platformId
                 || ProgramSelection.FromPlatformId(platform, platformId) is null
                 && ProgramSelection.GetDlcFromPlatformId(platform, platformId) is null)
                     node.Remove();
-            });
+            });*/
+            TreeNodes.ForEach(node => node.Remove()); // nodes cause lots of lag during rescan for now
             await GetApplicablePrograms(iProgress);
             await SteamCMD.Cleanup();
         }
@@ -835,15 +836,28 @@ internal partial class SelectForm : CustomForm
                 if (!Program.IsProgramRunningDialog(this, selection)) return;
             if (!uninstall && ParadoxLauncher.DlcDialog(this)) return;
             Hide();
-            using InstallForm installForm = new(this, uninstall);
-            _ = installForm.ShowDialog();
-            if (installForm.Reselecting)
+#pragma warning disable CA2000 // Dispose objects before losing scope
+            InstallForm form = new(uninstall);
+#pragma warning restore CA2000 // Dispose objects before losing scope
+            form.InheritLocation(this);
+            form.FormClosing += (s, e) =>
             {
-                InheritLocation(installForm);
-                Show();
-                OnLoad();
-            }
-            else Close();
+                if (form.Reselecting)
+                {
+                    InheritLocation(form);
+                    Show();
+#if DEBUG
+                    DebugForm.Current.Attach(this);
+#endif
+                    OnLoad();
+                }
+                else Close();
+            };
+            form.Show();
+            Hide();
+#if DEBUG
+            DebugForm.Current.Attach(form);
+#endif
         }
     }
 

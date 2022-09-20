@@ -8,7 +8,11 @@ namespace CreamInstaller;
 
 internal partial class DialogForm : CustomForm
 {
-    internal DialogForm(IWin32Window owner) : base(owner) => InitializeComponent();
+    internal DialogForm(IWin32Window owner) : base(owner)
+    {
+        InitializeComponent();
+        TopLevel = true;
+    }
 
     internal DialogResult Show(Icon descriptionIcon, string descriptionText, string acceptButtonText = "OK", string cancelButtonText = null, string customFormText = null, Icon customFormIcon = null)
     {

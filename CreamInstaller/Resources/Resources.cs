@@ -78,36 +78,35 @@ internal static class Resources
     internal static bool TryGetFileBinaryType(this string path, out BinaryType binaryType) => GetBinaryType(path, out binaryType);
 
     internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(this string rootDirectory, bool filterCommon = false, Func<string, bool> validFunc = null) =>
-        await Task.Run(async () => (await rootDirectory.GetExecutables(filterCommon: filterCommon, validFunc: validFunc) ?? await rootDirectory.GetExecutables()).Select(e =>
+        await Task.Run(async () => (await rootDirectory.GetExecutables(filterCommon: filterCommon, validFunc: validFunc) ?? await rootDirectory.GetExecutables())?.Select(e =>
         {
             e.path = Path.GetDirectoryName(e.path);
             return e;
-        }).DistinctBy(e => e.path).ToList());
+        })?.DistinctBy(e => e.path).ToList());
 
     internal static async Task<List<(string path, BinaryType binaryType)>> GetExecutables(this string rootDirectory, bool filterCommon = false, Func<string, bool> validFunc = null) => await Task.Run(() =>
     {
         List<(string path, BinaryType binaryType)> executables = new();
         if (Program.Canceled || !Directory.Exists(rootDirectory)) return null;
-        List<string> files = new(Directory.EnumerateFiles(rootDirectory, "*.exe", new EnumerationOptions() { RecurseSubdirectories = true }));
-        foreach (string path in files)
+        foreach (string path in Directory.EnumerateFiles(rootDirectory, "*.exe", new EnumerationOptions() { RecurseSubdirectories = true }))
         {
             if (Program.Canceled) return null;
-            Thread.Sleep(0);
             if (!executables.Any(e => e.path == path)
             && (!filterCommon || !rootDirectory.IsCommonIncorrectExecutable(path))
             && (validFunc is null || validFunc(path))
             && path.TryGetFileBinaryType(out BinaryType binaryType) && binaryType is BinaryType.BIT64)
                 executables.Add((path, binaryType));
+            Thread.Sleep(1);
         }
-        foreach (string path in files)
+        foreach (string path in Directory.EnumerateFiles(rootDirectory, "*.exe", new EnumerationOptions() { RecurseSubdirectories = true }))
         {
             if (Program.Canceled) return null;
-            Thread.Sleep(0);
             if (!executables.Any(e => e.path == path)
             && (!filterCommon || !rootDirectory.IsCommonIncorrectExecutable(path))
             && (validFunc is null || validFunc(path))
             && path.TryGetFileBinaryType(out BinaryType binaryType) && binaryType is BinaryType.BIT32)
                 executables.Add((path, binaryType));
+            Thread.Sleep(1);
         }
         return !executables.Any() ? null : executables;
     });
@@ -115,7 +114,7 @@ internal static class Resources
     internal static bool IsCommonIncorrectExecutable(this string rootDirectory, string path)
     {
         string subPath = path[rootDirectory.Length..].ToUpperInvariant().BeautifyPath();
-        return subPath.Contains("SETUP") || subPath.Contains("REDIST")
+        return subPath.Contains("SETUP") || subPath.Contains("REDIST") //|| subPath.Contains("SUPPORT")
             || subPath.Contains("CRASH") && (subPath.Contains("PAD") || subPath.Contains("REPORT"));
     }
 
@@ -123,52 +122,55 @@ internal static class Resources
     {
         List<string> dllDirectories = new();
         if (Program.Canceled || !Directory.Exists(gameDirectory)) return null;
-        foreach (string subDirectory in new List<string>(Directory.EnumerateDirectories(gameDirectory, "*", new EnumerationOptions() { RecurseSubdirectories = true })) { gameDirectory })
+        foreach (string directory in Directory.EnumerateDirectories(gameDirectory, "*", new EnumerationOptions() { RecurseSubdirectories = true }).Append(gameDirectory))
         {
             if (Program.Canceled) return null;
-            Thread.Sleep(0);
-            if (platform is Platform.Steam or Platform.Paradox)
+            string subDirectory = directory.BeautifyPath();
+            if (!dllDirectories.Contains(subDirectory))
             {
-                subDirectory.GetSmokeApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string config, out string cache);
-                if (File.Exists(api)
-                    || File.Exists(api_o)
-                    || File.Exists(api64)
-                    || File.Exists(api64_o)
-                    || File.Exists(config)
-                    || File.Exists(cache))
-                    dllDirectories.Add(subDirectory.BeautifyPath());
-            }
-            if (platform is Platform.Epic or Platform.Paradox)
-            {
-                subDirectory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
-                if (File.Exists(api32)
-                    || File.Exists(api32_o)
-                    || File.Exists(api64)
-                    || File.Exists(api64_o)
-                    || File.Exists(config))
-                    dllDirectories.Add(subDirectory.BeautifyPath());
-            }
-            if (platform is Platform.Ubisoft)
-            {
-                subDirectory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
-                if (File.Exists(api32)
-                    || File.Exists(api32_o)
-                    || File.Exists(api64)
-                    || File.Exists(api64_o)
-                    || File.Exists(config))
-                    dllDirectories.Add(subDirectory.BeautifyPath());
-                subDirectory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config);
-                if (File.Exists(old_api32)
-                    || File.Exists(old_api64)
-                    || File.Exists(api32)
-                    || File.Exists(api32_o)
-                    || File.Exists(api64)
-                    || File.Exists(api64_o)
-                    || File.Exists(config))
-                    dllDirectories.Add(subDirectory.BeautifyPath());
+                if (platform is Platform.Steam or Platform.Paradox)
+                {
+                    subDirectory.GetSmokeApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string config, out string cache);
+                    if (File.Exists(api)
+                        || File.Exists(api_o)
+                        || File.Exists(api64)
+                        || File.Exists(api64_o)
+                        || File.Exists(config)
+                        || File.Exists(cache))
+                        dllDirectories.Add(subDirectory);
+                }
+                if (platform is Platform.Epic or Platform.Paradox)
+                {
+                    subDirectory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+                    if (File.Exists(api32)
+                        || File.Exists(api32_o)
+                        || File.Exists(api64)
+                        || File.Exists(api64_o)
+                        || File.Exists(config))
+                        dllDirectories.Add(subDirectory);
+                }
+                if (platform is Platform.Ubisoft)
+                {
+                    subDirectory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+                    if (File.Exists(api32)
+                        || File.Exists(api32_o)
+                        || File.Exists(api64)
+                        || File.Exists(api64_o)
+                        || File.Exists(config))
+                        dllDirectories.Add(subDirectory);
+                    subDirectory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config);
+                    if (File.Exists(old_api32)
+                        || File.Exists(old_api64)
+                        || File.Exists(api32)
+                        || File.Exists(api32_o)
+                        || File.Exists(api64)
+                        || File.Exists(api64_o)
+                        || File.Exists(config))
+                        dllDirectories.Add(subDirectory);
+                }
             }
         }
-        return !dllDirectories.Any() ? null : new List<string>(dllDirectories.Distinct());
+        return !dllDirectories.Any() ? null : dllDirectories;
     });
 
     internal static void GetCreamApiComponents(

@@ -10,8 +10,6 @@ using System.Threading.Tasks;
 
 #if DEBUG
 using System;
-using System.Drawing;
-using System.Windows.Forms;
 #endif
 
 namespace CreamInstaller.Steam;
@@ -54,11 +52,7 @@ internal static class SteamStore
                                 if (!appDetails.success)
                                 {
 #if DEBUG
-                                    Form.ActiveForm.Invoke(() =>
-                                    {
-                                        using DialogForm dialogForm = new(Form.ActiveForm);
-                                        dialogForm.Show(SystemIcons.Error, "Query unsuccessful for appid: " + appId + $"\nisDlc: {isDlc}\ndata is null: {data is null}\n\n" + app.Value.ToString());
-                                    });
+                                    DebugForm.Current.Log($"Query unsuccessful for appid {appId}{(isDlc ? " (DLC)" : "")}: {app.Value.ToString(Formatting.None)}", LogTextBox.Warning);
 #endif
                                     if (data is null)
                                         return null;
@@ -73,11 +67,7 @@ internal static class SteamStore
 #if DEBUG
                                     (Exception e)
                                     {
-                                        Form.ActiveForm.Invoke(() =>
-                                        {
-                                            using DialogForm dialogForm = new(Form.ActiveForm);
-                                            dialogForm.Show(SystemIcons.Error, "Unsuccessful serialization of query for appid " + appId + ":\n\n" + e.ToString());
-                                        });
+                                        DebugForm.Current.Log($"Unsuccessful serialization of query for appid {appId}{(isDlc ? " (DLC)" : "")}: {e.GetType()} ({e.Message})");
                                     }
 #else
                                     { }
@@ -85,36 +75,18 @@ internal static class SteamStore
                                     return data;
                                 }
 #if DEBUG
-                                else
-                                {
-                                    Form.ActiveForm.Invoke(() =>
-                                    {
-                                        using DialogForm dialogForm = new(Form.ActiveForm);
-                                        dialogForm.Show(SystemIcons.Error, "Response data null for appid: " + appId + "\n\n" + app.Value.ToString());
-                                    });
-                                }
+                                else DebugForm.Current.Log($"Response data null for appid {appId}{(isDlc ? " (DLC)" : "")}: {app.Value.ToString(Formatting.None)}");
 #endif
                             }
 #if DEBUG
-                            else
-                            {
-                                Form.ActiveForm.Invoke(() =>
-                                {
-                                    using DialogForm dialogForm = new(Form.ActiveForm);
-                                    dialogForm.Show(SystemIcons.Error, "Response details null for appid: " + appId + "\n\n" + app.Value.ToString());
-                                });
-                            }
+                            else DebugForm.Current.Log($"Response details null for appid {appId}{(isDlc ? " (DLC)" : "")}: {app.Value.ToString(Formatting.None)}");
 #endif
                         }
                         catch
 #if DEBUG
                         (Exception e)
                         {
-                            Form.ActiveForm.Invoke(() =>
-                            {
-                                using DialogForm dialogForm = new(Form.ActiveForm);
-                                dialogForm.Show(SystemIcons.Error, "Unsuccessful deserialization of query for appid " + appId + ":\n\n" + e.ToString());
-                            });
+                            DebugForm.Current.Log($"Unsuccessful deserialization of query for appid {appId}{(isDlc ? " (DLC)" : "")}: {e.GetType()} ({e.Message})");
                         }
 #else
                         { }
@@ -122,25 +94,11 @@ internal static class SteamStore
                     }
                 }
 #if DEBUG
-                else
-                {
-                    Form.ActiveForm.Invoke(() =>
-                    {
-                        using DialogForm dialogForm = new(Form.ActiveForm);
-                        dialogForm.Show(SystemIcons.Error, "Response deserialization null for appid: " + appId);
-                    });
-                }
+                else DebugForm.Current.Log("Response deserialization null for appid " + appId);
 #endif
             }
 #if DEBUG
-            else
-            {
-                Form.ActiveForm.Invoke(() =>
-                {
-                    using DialogForm dialogForm = new(Form.ActiveForm);
-                    dialogForm.Show(SystemIcons.Error, "Response null for appid: " + appId);
-                });
-            }
+            else DebugForm.Current.Log("Response null for appid " + appId, LogTextBox.Warning);
 #endif
         }
         if (cachedExists)

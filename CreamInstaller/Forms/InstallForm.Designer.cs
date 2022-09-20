@@ -136,7 +136,7 @@ namespace CreamInstaller
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "InstallForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "InstallForm";
             this.Load += new System.EventHandler(this.OnLoad);
             this.ResumeLayout(false);

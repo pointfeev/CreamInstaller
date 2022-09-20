@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace CreamInstaller.Utility;
 
-internal static class InstallationLog
+internal static class LogTextBox
 {
     internal static readonly Color Background = Color.DarkSlateGray;
     internal static readonly Color Operation = Color.LightGray;
@@ -13,12 +13,15 @@ internal static class InstallationLog
     internal static readonly Color Warning = Color.Yellow;
     internal static readonly Color Error = Color.DarkOrange;
 
-    internal static void AppendText(this RichTextBox logTextBox, string text, Color color)
+    internal static void AppendText(this RichTextBox textBox, string text, Color color, bool scroll = false)
     {
-        logTextBox.SelectionStart = logTextBox.TextLength;
-        logTextBox.SelectionLength = 0;
-        logTextBox.SelectionColor = color;
-        logTextBox.AppendText(text);
-        logTextBox.SelectionColor = logTextBox.ForeColor;
+        textBox.SelectionStart = textBox.TextLength;
+        textBox.SelectionLength = 0;
+        textBox.SelectionColor = color;
+        if (scroll) textBox.ScrollToCaret();
+        textBox.AppendText(text);
+        if (scroll) textBox.ScrollToCaret();
+        textBox.SelectionColor = textBox.ForeColor;
+        textBox.Invalidate();
     }
 }

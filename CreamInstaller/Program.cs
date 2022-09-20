@@ -74,6 +74,9 @@ internal static class Program
             {
                 HttpClientManager.Setup();
                 using MainForm form = new();
+#if DEBUG
+                DebugForm.Current.Attach(form);
+#endif
                 Application.Run(form);
             }
             catch (Exception e)
@@ -85,8 +88,6 @@ internal static class Program
         }
         mutex.Close();
     }
-
-    internal static void Invoke(this Control control, MethodInvoker methodInvoker) => control.Invoke(methodInvoker);
 
     internal static bool Canceled;
     internal static async void Cleanup(bool cancel = true)
