@@ -47,11 +47,13 @@ internal partial class DebugForm : CustomForm
             attachedForm.Activated -= OnChange;
             attachedForm.LocationChanged -= OnChange;
             attachedForm.SizeChanged -= OnChange;
+            attachedForm.VisibleChanged -= OnChange;
         }
         attachedForm = form;
         attachedForm.Activated += OnChange;
         attachedForm.LocationChanged += OnChange;
         attachedForm.SizeChanged += OnChange;
+        attachedForm.VisibleChanged += OnChange;
         UpdateAttachment();
     }
 
@@ -59,12 +61,12 @@ internal partial class DebugForm : CustomForm
 
     internal void UpdateAttachment()
     {
-        if (attachedForm is null)
-            return;
-        Size = new(Size.Width, attachedForm.Size.Height);
-        Location = new(attachedForm.Right, attachedForm.Top);
-        Show();
-        BringToFrontWithoutActivation();
+        if (attachedForm is not null && attachedForm.Visible)
+        {
+            //Size = new(Size.Width, attachedForm.Size.Height);
+            Location = new(attachedForm.Right, attachedForm.Top);
+            BringToFrontWithoutActivation();
+        }
     }
 
     internal void Log(string text) => Log(text, LogTextBox.Error);
