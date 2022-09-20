@@ -13,7 +13,6 @@
 		<PackageProjectUrl>https://github.com/pointfeev/CreamInstaller</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/pointfeev/CreamInstaller</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<AssemblyName>CreamInstaller</AssemblyName>
 		<Company>CreamInstaller</Company>
 		<Product>Automatic DLC Unlocker Installer &amp; Configuration Generator</Product>
 		<Authors>pointfeev</Authors>
@@ -24,21 +23,23 @@
 		<SignAssembly>False</SignAssembly>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<AnalysisLevel>latest-all</AnalysisLevel>
-		<Title>CreamInstaller</Title>
-		<Description>Automatic DLC Unlocker Installer &amp; Configuration Generator</Description>
+		<Title>$(Company)</Title>
+		<Description>$(Product)</Description>
 		<SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<AssemblyName>$(Company)</AssemblyName>
 		<DebugType>embedded</DebugType>
 		<DebugSymbols>true</DebugSymbols>
 		<DefineConstants>$(DefineConstants)</DefineConstants>
 		<CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-	  <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
-	  <Optimize>True</Optimize>
-	  <DebugType>embedded</DebugType>
-	  <DefineConstants>$(DefineConstants)</DefineConstants>
+		<AssemblyName>$(Company)-debug</AssemblyName>
+		<CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+		<Optimize>True</Optimize>
+		<DebugType>embedded</DebugType>
+		<DefineConstants>$(DefineConstants)</DefineConstants>
 	</PropertyGroup>
 	<ItemGroup>
 	  <None Remove="Resources\Koaloader\audioses-32\audioses.dll" />

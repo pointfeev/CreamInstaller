@@ -14,12 +14,21 @@ namespace CreamInstaller;
 
 internal static class Program
 {
+    internal static readonly string Name = Application.CompanyName;
+    internal static readonly string Description = Application.ProductName;
+    internal static readonly string Version = Application.ProductVersion;
+
+    internal const string RepositoryOwner = "pointfeev";
+    internal static readonly string RepositoryName = Name;
+    internal static readonly string RepositoryPackage = Name + ".zip";
 #if DEBUG
-    internal static readonly string ApplicationName = Application.CompanyName + " v" + Application.ProductVersion + "-debug: " + Application.ProductName;
-    internal static readonly string ApplicationNameShort = Application.CompanyName + " v" + Application.ProductVersion + "-debug";
+    internal static readonly string ApplicationName = Name + " v" + Version + "-debug: " + Description;
+    internal static readonly string ApplicationNameShort = Name + " v" + Version + "-debug";
+    internal static readonly string ApplicationExecutable = Name + "-debug.exe"; // should be the same as in .csproj
 #else
-    internal static readonly string ApplicationName = Application.CompanyName + " v" + Application.ProductVersion + ": " + Application.ProductName;
-    internal static readonly string ApplicationNameShort = Application.CompanyName + " v" + Application.ProductVersion;
+    internal static readonly string ApplicationName = Name + " v" + Version + ": " + Description;
+    internal static readonly string ApplicationNameShort = Name + " v" + Version;
+    internal static readonly string ApplicationExecutable = Name + ".exe"; // should be the same as in .csproj
 #endif
 
     internal static readonly Assembly EntryAssembly = Assembly.GetEntryAssembly();
@@ -59,7 +68,7 @@ internal static class Program
     [STAThread]
     private static void Main()
     {
-        using Mutex mutex = new(true, "CreamInstaller", out bool createdNew);
+        using Mutex mutex = new(true, Name, out bool createdNew);
         if (createdNew)
         {
             _ = Application.SetHighDpiMode(HighDpiMode.SystemAware);

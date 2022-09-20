@@ -7,8 +7,9 @@ namespace CreamInstaller.Utility;
 
 internal static class ExceptionHandler
 {
-    internal static bool HandleException(this Exception e, Form form = null, string caption = "CreamInstaller encountered an exception", string acceptButtonText = "Retry", string cancelButtonText = "Cancel")
+    internal static bool HandleException(this Exception e, Form form = null, string caption = null, string acceptButtonText = "Retry", string cancelButtonText = "Cancel")
     {
+        caption ??= Program.Name + " encountered a fatal exception";
         while (e.InnerException is not null) // we usually don't need the outer exceptions
             e = e.InnerException;
         StringBuilder output = new();
@@ -53,7 +54,7 @@ internal static class ExceptionHandler
 
     internal static void HandleFatalException(this Exception e)
     {
-        bool? restart = e?.HandleException(caption: "CreamInstaller encountered a fatal exception", acceptButtonText: "Restart");
+        bool? restart = e?.HandleException(acceptButtonText: "Restart");
         if (restart.HasValue && restart.Value)
             Application.Restart();
         Application.Exit();

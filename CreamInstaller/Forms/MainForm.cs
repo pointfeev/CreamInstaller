@@ -66,7 +66,7 @@ internal partial class MainForm : CustomForm
 #if DEBUG
         DebugForm.Current.Attach(this);
 #endif
-        GithubPackageResolver resolver = new("pointfeev", "CreamInstaller", "CreamInstaller.zip");
+        GithubPackageResolver resolver = new(Program.RepositoryOwner, Program.RepositoryName, Program.RepositoryPackage);
         ZipPackageExtractor extractor = new();
         updateManager = new(AssemblyMetadata.FromAssembly(Program.EntryAssembly, Program.CurrentProcessFilePath), resolver, extractor);
         if (latestVersion is null)
@@ -80,8 +80,8 @@ internal partial class MainForm : CustomForm
                 if (checkForUpdatesResult.CanUpdate)
                 {
 #endif
-                latestVersion = checkForUpdatesResult.LastVersion;
-                versions = checkForUpdatesResult.Versions;
+                    latestVersion = checkForUpdatesResult.LastVersion;
+                    versions = checkForUpdatesResult.Versions;
 #if !DEBUG
                 }
 #endif
@@ -114,7 +114,7 @@ internal partial class MainForm : CustomForm
             updateButton.Enabled = true;
             updateButton.Click += new(OnUpdate);
             changelogTreeView.Visible = true;
-            Version currentVersion = new(Application.ProductVersion);
+            Version currentVersion = new(Program.Version);
 #if DEBUG
             foreach (Version version in versions.Where(v => (v > currentVersion || v == latestVersion) && !changelogTreeView.Nodes.ContainsKey(v.ToString())))
 #else
@@ -161,12 +161,12 @@ internal partial class MainForm : CustomForm
         try
         {
             string FileName = Path.GetFileName(Program.CurrentProcessFilePath);
-            if (FileName != "CreamInstaller.exe")
+            if (FileName != Program.ApplicationExecutable)
             {
                 using DialogForm form = new(this);
                 if (form.Show(SystemIcons.Warning,
-                    "WARNING: CreamInstaller.exe was renamed!" +
-                    "\n\nThis will cause unwanted behavior when updating the program!",
+                    "WARNING: " + Program.ApplicationExecutable + " was renamed!" +
+                    "\n\nThis will cause undesirable behavior when updating the program!",
                     "Ignore", "Abort") == DialogResult.Cancel)
                 {
                     Application.Exit();

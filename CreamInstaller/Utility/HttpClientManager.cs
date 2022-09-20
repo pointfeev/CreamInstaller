@@ -14,7 +14,7 @@ internal static class HttpClientManager
     internal static void Setup()
     {
         HttpClient = new();
-        HttpClient.DefaultRequestHeaders.Add("User-Agent", $"CI{Application.ProductVersion.Replace(".", "")}");
+        HttpClient.DefaultRequestHeaders.Add("User-Agent", $"CI{Program.Version.Replace(".", "")}");
     }
 
     internal static async Task<string> EnsureGet(string url)

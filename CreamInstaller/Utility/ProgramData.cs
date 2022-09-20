@@ -41,7 +41,7 @@ internal static class ProgramData
         {
             if (Directory.Exists(AppInfoPath)) Directory.Delete(AppInfoPath, true);
             _ = Directory.CreateDirectory(AppInfoPath);
-            File.WriteAllText(AppInfoVersionPath, Application.ProductVersion, Encoding.UTF8);
+            File.WriteAllText(AppInfoVersionPath, Program.Version, Encoding.UTF8);
         }
         if (!Directory.Exists(CooldownPath))
             _ = Directory.CreateDirectory(CooldownPath);
