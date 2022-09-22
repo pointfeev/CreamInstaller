@@ -1,23 +1,42 @@
 ﻿using CreamInstaller.Components;
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace CreamInstaller;
 
 internal partial class DialogForm : CustomForm
 {
-    internal DialogForm(IWin32Window owner) : base(owner)
-    {
-        InitializeComponent();
-        TopLevel = true;
-    }
+    internal DialogForm(IWin32Window owner) : base(owner) => InitializeComponent();
 
     internal DialogResult Show(Icon descriptionIcon, string descriptionText, string acceptButtonText = "OK", string cancelButtonText = null, string customFormText = null, Icon customFormIcon = null)
     {
         descriptionIcon ??= Icon;
         icon.Image = descriptionIcon.ToBitmap();
+        List<LinkLabel.Link> links = new();
+        for (int i = 0; i < descriptionText.Length; i++)
+        {
+            if (descriptionText[i] == '[')
+            {
+                int textLeft = descriptionText.IndexOf("[", i);
+                int textRight = descriptionText.IndexOf("]", textLeft == -1 ? i : textLeft);
+                int linkLeft = descriptionText.IndexOf("(", textRight == -1 ? i : textRight);
+                int linkRight = descriptionText.IndexOf(")", linkLeft == -1 ? i : linkLeft);
+                if (textLeft != -1 && textRight == linkLeft - 1 && linkRight != -1)
+                {
+                    string text = descriptionText[(textLeft + 1)..textRight];
+                    string link = descriptionText[(linkLeft + 1)..linkRight];
+                    if (string.IsNullOrWhiteSpace(link))
+                        link = text;
+                    descriptionText = descriptionText.Remove(i, linkRight + 1 - i).Insert(i, text);
+                    links.Add(new LinkLabel.Link(i, text.Length, link));
+                }
+            }
+        }
         descriptionLabel.Text = descriptionText;
         acceptButton.Text = acceptButtonText;
         if (cancelButtonText is null)
@@ -35,11 +54,19 @@ internal partial class DialogForm : CustomForm
         }
         if (customFormIcon is not null)
             Icon = customFormIcon;
+        if (links.Any())
+        {
+            foreach (LinkLabel.Link link in links)
+                _ = descriptionLabel.Links.Add(link);
+            descriptionLabel.LinkClicked += (s, e) => Process.Start(new ProcessStartInfo((string)e.Link.LinkData) { UseShellExecute = true });
+        }
         return ShowDialog();
     }
 
     private void OnResize(object s, EventArgs e) =>
         Text = TextRenderer.MeasureText(Program.ApplicationName, Font).Width > Size.Width - 100
-            ? Program.ApplicationNameShort
+            ? TextRenderer.MeasureText(Program.ApplicationNameShort, Font).Width > Size.Width - 100
+            ? Program.Name
+            : Program.ApplicationNameShort
             : Program.ApplicationName;
 }

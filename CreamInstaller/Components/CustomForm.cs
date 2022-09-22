@@ -15,6 +15,32 @@ internal class CustomForm : Form
         KeyPreview = true;
         KeyPress += OnKeyPress;
         ResizeRedraw = true;
+        HelpButton = true;
+        HelpButtonClicked += OnHelpButtonClicked;
+    }
+
+    internal void OnHelpButtonClicked(object sender, EventArgs args)
+    {
+        using DialogForm helpDialog = new(this);
+        helpDialog.HelpButton = false;
+        _ = helpDialog.Show(SystemIcons.Information,
+            "Automatically finds all installed Steam, Epic and Ubisoft games with their respective DLC-related DLL locations on the user's computer,\n"
+          + "parses SteamCMD, Steam Store and Epic Games Store for user-selected games' DLCs, then provides a very simple graphical interface\n"
+          + "utilizing the gathered information for the maintenance of DLC unlockers."
+          + "\n\n"
+          + "The program utilizes the latest versions of [Koaloader](https://github.com/acidicoala/Koaloader), [SmokeAPI](https://github.com/acidicoala/SmokeAPI), [ScreamAPI](https://github.com/acidicoala/ScreamAPI), [Uplay R1 Unlocker](https://github.com/acidicoala/UplayR1Unlocker) and [Uplay R2 Unlocker](https://github.com/acidicoala/UplayR2Unlocker), all by\n"
+          + "the wonderful [acidicoala](https://github.com/acidicoala), and all downloaded and embedded into the program itself; no further downloads necessary on your part!"
+          + "\n\n"
+          + "NOTE: This program does not automatically download nor install actual DLC files for you. As the title of the program says, it's\n"
+          + "only a DLC Unlocker installer. Should the game you wish to unlock DLC for not already come with the DLCs installed (very many\n"
+          + "do not), you have to find, download, and install those yourself. Preferably, you should be referring to the proper cs.rin.ru post for\n"
+          + "the game(s) you're tinkering with; you'll usually find any answer to your problems there."
+          + "\n\n"
+          + "For reliable and quick assistance, all bugs, crashes and other issues should be referred to the [GitHub Issues](https://github.com/pointfeev/CreamInstaller/issues) page!"
+          + "\n\n"
+          + "SteamCMD installation and appinfo cache can be found at [C:\\ProgramData\\CreamInstaller]().\n"
+          + "The program automatically and very quickly updates from [GitHub](https://github.com/pointfeev/CreamInstaller) using [Onova](https://github.com/Tyrrrz/Onova).\n"
+          + "The program source and other information can be found on [GitHub](https://github.com/pointfeev/CreamInstaller).");
     }
 
     internal CustomForm(IWin32Window owner) : this()
@@ -26,17 +52,18 @@ internal class CustomForm : Form
             SizeChanged += (s, e) => InheritLocation(form);
             form.Activated += OnActivation;
             FormClosing += (s, e) => form.Activated -= OnActivation;
+            TopLevel = true;
         }
     }
 
     internal void OnActivation(object sender, EventArgs args) => Activate();
 
-    public static readonly IntPtr HWND_NOTOPMOST = new(-2);
-    public static readonly IntPtr HWND_TOPMOST = new(-1);
-    public const short SWP_NOACTIVATE = 0x0010;
-    public const short SWP_SHOWWINDOW = 0x0040;
-    public const short SWP_NOMOVE = 0x0002;
-    public const short SWP_NOSIZE = 0x0001;
+    internal static readonly IntPtr HWND_NOTOPMOST = new(-2);
+    internal static readonly IntPtr HWND_TOPMOST = new(-1);
+    internal const short SWP_NOACTIVATE = 0x0010;
+    internal const short SWP_SHOWWINDOW = 0x0040;
+    internal const short SWP_NOMOVE = 0x0002;
+    internal const short SWP_NOSIZE = 0x0001;
 
     [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]

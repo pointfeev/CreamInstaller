@@ -24,7 +24,7 @@ namespace CreamInstaller
         {
             this.cancelButton = new System.Windows.Forms.Button();
             this.acceptButton = new System.Windows.Forms.Button();
-            this.descriptionLabel = new System.Windows.Forms.Label();
+            this.descriptionLabel = new System.Windows.Forms.LinkLabel();
             this.icon = new System.Windows.Forms.PictureBox();
             this.descriptionPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.buttonPanel = new System.Windows.Forms.FlowLayoutPanel();
@@ -67,7 +67,9 @@ namespace CreamInstaller
             // 
             this.descriptionLabel.AutoSize = true;
             this.descriptionLabel.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.descriptionLabel.Location = new System.Drawing.Point(69, 12);
+            this.descriptionLabel.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
+            this.descriptionLabel.Location = new System.Drawing.Point(75, 12);
+            this.descriptionLabel.Margin = new System.Windows.Forms.Padding(9, 0, 3, 0);
             this.descriptionLabel.Name = "descriptionLabel";
             this.descriptionLabel.Size = new System.Drawing.Size(94, 15);
             this.descriptionLabel.TabIndex = 2;
@@ -142,9 +144,9 @@ namespace CreamInstaller
 
         private Button cancelButton;
         private Button acceptButton;
-        private Label descriptionLabel;
         private PictureBox icon;
         private FlowLayoutPanel descriptionPanel;
         private FlowLayoutPanel buttonPanel;
+        private LinkLabel descriptionLabel;
     }
 }

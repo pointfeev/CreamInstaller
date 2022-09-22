@@ -21,7 +21,7 @@ internal partial class DebugForm : CustomForm
         set => current = value;
     }
 
-    internal DebugForm()
+    internal DebugForm() : base()
     {
         InitializeComponent();
         debugTextBox.BackColor = LogTextBox.Background;
