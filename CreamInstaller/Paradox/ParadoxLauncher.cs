@@ -85,24 +85,29 @@ internal static class ParadoxLauncher
         if (!Program.IsProgramRunningDialog(form, selection))
             return form is InstallForm ? throw new CustomMessageException("Repair failed! The launcher is currently running!")
                 : RepairResult.ProgramRunning;
-        bool smokeConfig = false;
+        bool smokeInstalled = false;
         byte[] steamOriginalSdk32 = null;
         byte[] steamOriginalSdk64 = null;
-        bool screamConfig = false;
+        bool screamInstalled = false;
         byte[] epicOriginalSdk32 = null;
         byte[] epicOriginalSdk64 = null;
         foreach (string directory in selection.DllDirectories)
         {
-            directory.GetSmokeApiComponents(out string api32, out _, out string api64, out _, out string config, out _);
-            smokeConfig = smokeConfig || File.Exists(config);
+            directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out _);
+            smokeInstalled = smokeInstalled
+                || File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config)
+                || File.Exists(api32) && api32.IsResourceFile(ResourceIdentifier.Steamworks32)
+                || File.Exists(api64) && api64.IsResourceFile(ResourceIdentifier.Steamworks64);
             await SmokeAPI.Uninstall(directory, deleteConfig: false);
             if (steamOriginalSdk32 is null && File.Exists(api32) && !api32.IsResourceFile(ResourceIdentifier.Steamworks32))
                 steamOriginalSdk32 = File.ReadAllBytes(api32);
             if (steamOriginalSdk64 is null && File.Exists(api64) && !api64.IsResourceFile(ResourceIdentifier.Steamworks64))
                 steamOriginalSdk64 = File.ReadAllBytes(api64);
-
-            directory.GetScreamApiComponents(out api32, out _, out api64, out _, out config);
-            screamConfig = screamConfig || File.Exists(config);
+            directory.GetScreamApiComponents(out api32, out api32_o, out api64, out api64_o, out config);
+            screamInstalled = screamInstalled
+                || File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config)
+                || File.Exists(api32) && api32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32)
+                || File.Exists(api64) && api64.IsResourceFile(ResourceIdentifier.EpicOnlineServices64);
             await ScreamAPI.Uninstall(directory, deleteConfig: false);
             if (epicOriginalSdk32 is null && File.Exists(api32) && !api32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32))
                 epicOriginalSdk32 = File.ReadAllBytes(api32);
@@ -130,9 +135,8 @@ internal static class ParadoxLauncher
                         installForm.UpdateUser("Corrected Steamworks: " + api64, LogTextBox.Action);
                     neededRepair = true;
                 }
-                if (!selection.Koaloader && smokeConfig)
+                if (smokeInstalled)
                     await SmokeAPI.Install(directory, selection, generateConfig: false);
-
                 directory.GetScreamApiComponents(out api32, out _, out api64, out _, out _);
                 if (epicOriginalSdk32 is not null && api32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32))
                 {
@@ -148,7 +152,7 @@ internal static class ParadoxLauncher
                         installForm.UpdateUser("Corrected Epic Online Services: " + api64, LogTextBox.Action);
                     neededRepair = true;
                 }
-                if (!selection.Koaloader && screamConfig)
+                if (screamInstalled)
                     await ScreamAPI.Install(directory, selection, generateConfig: false);
             }
             if (neededRepair)

@@ -107,6 +107,13 @@ internal static class SmokeAPI
 
     internal static async Task Uninstall(string directory, InstallForm installForm = null, bool deleteConfig = true) => await Task.Run(() =>
     {
+        directory.GetCreamApiComponents(out _, out _, out _, out _, out string oldConfig);
+        if (File.Exists(oldConfig))
+        {
+            File.Delete(oldConfig);
+            if (installForm is not null)
+                installForm.UpdateUser($"Deleted old CreamAPI configuration: {Path.GetFileName(oldConfig)}", LogTextBox.Action, info: false);
+        }
         directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out string cache);
         if (File.Exists(api32_o))
         {

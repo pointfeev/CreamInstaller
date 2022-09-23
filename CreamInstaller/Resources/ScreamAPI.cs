@@ -117,7 +117,7 @@ internal static class ScreamAPI
             }
             File.Move(api32_o, api32);
             if (installForm is not null)
-                installForm.UpdateUser($"Restored Epic Online Services: {Path.GetFileName(api32_o)} -> {Path.GetFileName(api32)}", LogTextBox.Action, info: false);
+                installForm.UpdateUser($"Restored EOS: {Path.GetFileName(api32_o)} -> {Path.GetFileName(api32)}", LogTextBox.Action, info: false);
         }
         if (File.Exists(api64_o))
         {
@@ -129,7 +129,7 @@ internal static class ScreamAPI
             }
             File.Move(api64_o, api64);
             if (installForm is not null)
-                installForm.UpdateUser($"Restored Epic Online Services: {Path.GetFileName(api64_o)} -> {Path.GetFileName(api64)}", LogTextBox.Action, info: false);
+                installForm.UpdateUser($"Restored EOS: {Path.GetFileName(api64_o)} -> {Path.GetFileName(api64)}", LogTextBox.Action, info: false);
         }
         if (deleteConfig && File.Exists(config))
         {
@@ -146,7 +146,7 @@ internal static class ScreamAPI
         {
             File.Move(api32, api32_o);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed Epic Online Services: {Path.GetFileName(api32)} -> {Path.GetFileName(api32_o)}", LogTextBox.Action, info: false);
+                installForm.UpdateUser($"Renamed EOS: {Path.GetFileName(api32)} -> {Path.GetFileName(api32_o)}", LogTextBox.Action, info: false);
         }
         if (File.Exists(api32_o))
         {
@@ -158,7 +158,7 @@ internal static class ScreamAPI
         {
             File.Move(api64, api64_o);
             if (installForm is not null)
-                installForm.UpdateUser($"Renamed Epic Online Services: {Path.GetFileName(api64)} -> {Path.GetFileName(api64_o)}", LogTextBox.Action, info: false);
+                installForm.UpdateUser($"Renamed EOS: {Path.GetFileName(api64)} -> {Path.GetFileName(api64_o)}", LogTextBox.Action, info: false);
         }
         if (File.Exists(api64_o))
         {

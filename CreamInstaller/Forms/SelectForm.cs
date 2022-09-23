@@ -750,7 +750,7 @@ internal partial class SelectForm : CustomForm
                 {
                     directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
                     if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config))
-                        items.Add(new ContextMenuItem($"Open Epic Online Services Directory #{++epic}", "File Explorer",
+                        items.Add(new ContextMenuItem($"Open EOS Directory #{++epic}", "File Explorer",
                             new EventHandler((sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory))));
                 }
             if (selection.Platform is Platform.Ubisoft)

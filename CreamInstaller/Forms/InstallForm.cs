@@ -106,14 +106,10 @@ internal partial class InstallForm : CustomForm
         foreach (string directory in selection.DllDirectories)
         {
             if (Program.Canceled) throw new CustomMessageException("The operation was canceled.");
-            if (selection.Platform is Platform.Steam or Platform.Paradox
-                && (selection.SelectedDlc.Any(d => d.Value.type is DlcType.Steam or DlcType.SteamHidden)
-                    || selection.ExtraSelectedDlc.Any(item => item.dlc.Any(dlc => dlc.Value.type is DlcType.Steam or DlcType.SteamHidden))))
+            if (selection.Platform is Platform.Steam or Platform.Paradox)
             {
                 directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out string cache);
-                if (!uninstallProxy && (File.Exists(api32) || File.Exists(api64))
-                    || uninstallProxy && (File.Exists(api32_o) || File.Exists(api64_o)
-                        || !selection.Koaloader && (File.Exists(config) || File.Exists(cache))))
+                if (uninstallProxy ? File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config) || File.Exists(cache) : File.Exists(api32) || File.Exists(api64))
                 {
                     UpdateUser($"{(uninstallProxy ? "Uninstalling" : "Installing")} SmokeAPI" +
                         $" {(uninstallProxy ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
@@ -123,14 +119,10 @@ internal partial class InstallForm : CustomForm
                         await SmokeAPI.Install(directory, selection, this);
                 }
             }
-            if (selection.Platform is Platform.Epic or Platform.Paradox
-                && (selection.SelectedDlc.Any(d => d.Value.type is DlcType.EpicCatalogItem or DlcType.EpicEntitlement)
-                    || selection.ExtraSelectedDlc.Any(item => item.dlc.Any(dlc => dlc.Value.type is DlcType.EpicCatalogItem or DlcType.EpicEntitlement))))
+            if (selection.Platform is Platform.Epic or Platform.Paradox)
             {
                 directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
-                if (!uninstallProxy && (File.Exists(api32) || File.Exists(api64))
-                    || uninstallProxy && (File.Exists(api32_o) || File.Exists(api64_o)
-                        || !selection.Koaloader && File.Exists(config)))
+                if (uninstallProxy ? File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config) : File.Exists(api32) || File.Exists(api64))
                 {
                     UpdateUser($"{(uninstallProxy ? "Uninstalling" : "Installing")} ScreamAPI" +
                         $" {(uninstallProxy ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
@@ -143,9 +135,7 @@ internal partial class InstallForm : CustomForm
             if (selection.Platform is Platform.Ubisoft)
             {
                 directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
-                if (!uninstallProxy && (File.Exists(api32) || File.Exists(api64))
-                    || uninstallProxy && (File.Exists(api32_o) || File.Exists(api64_o)
-                        || !selection.Koaloader && File.Exists(config)))
+                if (uninstallProxy ? File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config) : File.Exists(api32) || File.Exists(api64))
                 {
                     UpdateUser($"{(uninstallProxy ? "Uninstalling" : "Installing")} Uplay R1 Unlocker" +
                         $" {(uninstallProxy ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
@@ -155,9 +145,7 @@ internal partial class InstallForm : CustomForm
                         await UplayR1.Install(directory, selection, this);
                 }
                 directory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config);
-                if (!uninstallProxy && (File.Exists(old_api32) || File.Exists(old_api64) || File.Exists(api32) || File.Exists(api64))
-                    || uninstallProxy && (File.Exists(api32_o) || File.Exists(api64_o)
-                        || !selection.Koaloader && File.Exists(config)))
+                if (uninstallProxy ? File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config) : File.Exists(old_api32) || File.Exists(old_api64) || File.Exists(api32) || File.Exists(api64))
                 {
                     UpdateUser($"{(uninstallProxy ? "Uninstalling" : "Installing")} Uplay R2 Unlocker" +
                         $" {(uninstallProxy ? "from" : "for")} " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
