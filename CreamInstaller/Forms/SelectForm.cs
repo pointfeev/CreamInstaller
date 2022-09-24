@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using static CreamInstaller.Resources.Resources;
+using static System.ComponentModel.Design.ObjectSelectorEditor;
 
 namespace CreamInstaller;
 
@@ -465,6 +466,8 @@ internal partial class SelectForm : CustomForm
         saveButton.Enabled = false;
         loadButton.Enabled = false;
         resetButton.Enabled = false;
+        saveKoaloaderButton.Enabled = false;
+        loadKoaloaderButton.Enabled = false;
         resetKoaloaderButton.Enabled = false;
         progressLabel.Text = "Waiting for user to select which programs/games to scan . . .";
         ShowProgressBar();
@@ -541,8 +544,8 @@ internal partial class SelectForm : CustomForm
             await SteamCMD.Cleanup();
         }
 
-        ProgramData.UpdateKoaloaderProxyChoices(initial: true);
         OnLoadDlc(null, null);
+        OnLoadKoaloader(null, null);
 
         HideProgressBar();
         selectionTreeView.Enabled = ProgramSelection.All.Any();
@@ -552,8 +555,11 @@ internal partial class SelectForm : CustomForm
         installButton.Enabled = ProgramSelection.AllEnabled.Any();
         uninstallButton.Enabled = installButton.Enabled;
         saveButton.Enabled = CanSaveDlc();
-        loadButton.Enabled = ProgramData.ReadDlcChoices() is not null;
+        loadButton.Enabled = CanLoadDlc();
         resetButton.Enabled = CanResetDlc();
+        saveKoaloaderButton.Enabled = CanSaveKoaloader();
+        loadKoaloaderButton.Enabled = CanLoadKoaloader();
+        resetKoaloaderButton.Enabled = CanResetKoaloader();
         cancelButton.Enabled = false;
         scanButton.Enabled = true;
         blockedGamesCheckBox.Enabled = true;
@@ -903,6 +909,23 @@ internal partial class SelectForm : CustomForm
         allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
     }
 
+    internal void OnKoaloaderAllCheckBoxChanged(object sender, EventArgs e)
+    {
+        bool shouldCheck = false;
+        foreach (ProgramSelection selection in ProgramSelection.AllSafe)
+            if (!selection.Koaloader)
+            {
+                shouldCheck = true;
+                break;
+            }
+        foreach (ProgramSelection selection in ProgramSelection.AllSafe)
+            selection.Koaloader = shouldCheck;
+        selectionTreeView.Invalidate();
+        koaloaderAllCheckBox.CheckedChanged -= OnKoaloaderAllCheckBoxChanged;
+        koaloaderAllCheckBox.Checked = shouldCheck;
+        koaloaderAllCheckBox.CheckedChanged += OnKoaloaderAllCheckBoxChanged;
+    }
+
     private bool AreSelectionsDefault()
     {
         foreach (TreeNode node in TreeNodes)
@@ -926,9 +949,11 @@ internal partial class SelectForm : CustomForm
             }
         choices = choices.Distinct().ToList();
         ProgramData.WriteDlcChoices(choices);
-        loadButton.Enabled = ProgramData.ReadDlcChoices() is not null;
+        loadButton.Enabled = CanLoadDlc();
         saveButton.Enabled = CanSaveDlc();
     }
+
+    private static bool CanLoadDlc() => ProgramData.ReadDlcChoices() is not null;
 
     private void OnLoadDlc(object sender, EventArgs e)
     {
@@ -937,7 +962,7 @@ internal partial class SelectForm : CustomForm
         foreach (TreeNode node in TreeNodes)
             if (node.Parent is TreeNode parent && node.Tag is Platform platform)
             {
-                node.Checked = choices.Any(choice => choice.platform == platform && choice.gameId == parent.Name && choice.dlcId == node.Name)
+                node.Checked = choices.Any(c => c.platform == platform && c.gameId == parent.Name && c.dlcId == node.Name)
                     ? node.Text == "Unknown"
                     : node.Text != "Unknown";
                 OnTreeViewNodeCheckedChanged(null, new(node, TreeViewAction.ByMouse));
@@ -957,32 +982,87 @@ internal partial class SelectForm : CustomForm
         resetButton.Enabled = CanResetDlc();
     }
 
-    internal CheckBox KoaloaderAllCheckBox() => koaloaderAllCheckBox;
-    internal void OnKoaloaderAllCheckBoxChanged(object sender, EventArgs e)
+    private static bool AreKoaloaderSelectionsDefault()
     {
-        bool shouldCheck = false;
         foreach (ProgramSelection selection in ProgramSelection.AllSafe)
-            if (!selection.Koaloader)
-            {
-                shouldCheck = true;
-                break;
-            }
-        foreach (ProgramSelection selection in ProgramSelection.AllSafe)
-            selection.Koaloader = shouldCheck;
-        selectionTreeView.Invalidate();
-        koaloaderAllCheckBox.CheckedChanged -= OnKoaloaderAllCheckBoxChanged;
-        koaloaderAllCheckBox.Checked = shouldCheck;
-        koaloaderAllCheckBox.CheckedChanged += OnKoaloaderAllCheckBoxChanged;
+            if (!selection.Koaloader || selection.KoaloaderProxy is not null)
+                return false;
+        return true;
     }
 
-    private static bool CanResetKoaloader() => File.Exists(ProgramData.KoaloaderProxyChoicesPath);
+    private static bool CanSaveKoaloader() => ProgramData.ReadKoaloaderChoices() is not null || !AreKoaloaderSelectionsDefault();
 
-    private void OnResetKoaloader(object sender, EventArgs e) => ProgramData.ResetKoaloaderProxyChoices();
+    private void OnSaveKoaloader(object sender, EventArgs e)
+    {
+        List<(Platform platform, string id, string proxy, bool enabled)> choices = ProgramData.ReadKoaloaderChoices() ?? new();
+        foreach (ProgramSelection selection in ProgramSelection.AllSafe)
+        {
+            _ = choices.RemoveAll(c => c.platform == selection.Platform && c.id == selection.Id);
+            if (selection.KoaloaderProxy is not null and not ProgramSelection.DefaultKoaloaderProxy || !selection.Koaloader)
+                choices.Add((selection.Platform, selection.Id, selection.KoaloaderProxy == ProgramSelection.DefaultKoaloaderProxy ? null : selection.KoaloaderProxy, selection.Koaloader));
+        }
+        ProgramData.WriteKoaloaderProxyChoices(choices);
+        saveKoaloaderButton.Enabled = CanSaveKoaloader();
+        loadKoaloaderButton.Enabled = CanLoadKoaloader();
+    }
 
-    internal void OnKoaloaderProxiesChanged()
+    private static bool CanLoadKoaloader() => ProgramData.ReadKoaloaderChoices() is not null;
+
+    private void OnLoadKoaloader(object sender, EventArgs e)
+    {
+        List<(Platform platform, string id, string proxy, bool enabled)> choices = ProgramData.ReadKoaloaderChoices();
+        if (choices is null) return;
+        foreach (ProgramSelection selection in ProgramSelection.AllSafe)
+        {
+            if (choices.Any(c => c.platform == selection.Platform && c.id == selection.Id))
+            {
+                (Platform platform, string id, string proxy, bool enabled) choice =
+                    choices.First(c => c.platform == selection.Platform && c.id == selection.Id);
+                (Platform platform, string id, string proxy, bool enabled) = choice;
+                string currentProxy = proxy;
+                if (proxy is not null && proxy.Contains('.')) // convert pre-v4.1.0.0 choices
+                    proxy.GetProxyInfoFromIdentifier(out currentProxy, out _);
+                if (proxy != currentProxy && choices.Remove(choice)) // convert pre-v4.1.0.0 choices
+                    choices.Add((platform, id, currentProxy, enabled));
+                if (currentProxy is null or ProgramSelection.DefaultKoaloaderProxy && enabled)
+                    _ = choices.RemoveAll(c => c.platform == platform && c.id == id);
+                else
+                {
+                    selection.Koaloader = enabled;
+                    selection.KoaloaderProxy = currentProxy == ProgramSelection.DefaultKoaloaderProxy ? currentProxy : proxy;
+                }
+            }
+            else
+            {
+                selection.Koaloader = true;
+                selection.KoaloaderProxy = null;
+            }
+        }
+        ProgramData.WriteKoaloaderProxyChoices(choices);
+        loadKoaloaderButton.Enabled = CanLoadKoaloader();
+        OnKoaloaderChanged();
+    }
+
+    private static bool CanResetKoaloader() => !AreKoaloaderSelectionsDefault();
+
+    private void OnResetKoaloader(object sender, EventArgs e)
+    {
+        foreach (ProgramSelection selection in ProgramSelection.AllSafe)
+        {
+            selection.Koaloader = true;
+            selection.KoaloaderProxy = null;
+        }
+        OnKoaloaderChanged();
+    }
+
+    internal void OnKoaloaderChanged()
     {
         selectionTreeView.Invalidate();
+        saveKoaloaderButton.Enabled = CanSaveKoaloader();
         resetKoaloaderButton.Enabled = CanResetKoaloader();
+        koaloaderAllCheckBox.CheckedChanged -= OnKoaloaderAllCheckBoxChanged;
+        koaloaderAllCheckBox.Checked = ProgramSelection.AllSafe.TrueForAll(selection => selection.Koaloader);
+        koaloaderAllCheckBox.CheckedChanged += OnKoaloaderAllCheckBoxChanged;
     }
 
     private void OnBlockProtectedGamesCheckBoxChanged(object sender, EventArgs e)

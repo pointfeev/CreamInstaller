@@ -1,5 +1,4 @@
 ﻿using CreamInstaller.Resources;
-using CreamInstaller.Utility;
 
 using System;
 using System.Collections.Generic;
@@ -206,7 +205,6 @@ internal class CustomTreeView : TreeView
         }
         if (e.Button is MouseButtons.Left)
         {
-            bool invalidate = false;
             if (comboBoxBounds.Any() && selectForm is not null)
                 foreach (KeyValuePair<ProgramSelection, Rectangle> pair in comboBoxBounds.ToList())
                 {
@@ -239,38 +237,25 @@ internal class CustomTreeView : TreeView
                                 _ = comboBoxDropDown.Items.Add(new ToolStripButton(proxy + ".dll", null, (s, e) =>
                                 {
                                     pair.Key.KoaloaderProxy = proxy == ProgramSelection.DefaultKoaloaderProxy ? null : proxy;
-                                    ProgramData.UpdateKoaloaderProxyChoices();
-                                    Invalidate();
+                                    selectForm.OnKoaloaderChanged();
                                 })
                                 { Font = comboBoxFont });
                         }
                         comboBoxDropDown.Show(this, PointToScreen(new(pair.Value.Left, pair.Value.Bottom - 1)));
-                        invalidate = true;
                         break;
                     }
                 }
-            if (!invalidate)
+            foreach (KeyValuePair<ProgramSelection, Rectangle> pair in checkBoxBounds.ToList())
             {
-                foreach (KeyValuePair<ProgramSelection, Rectangle> pair in checkBoxBounds.ToList())
+                if (!ProgramSelection.All.Contains(pair.Key))
+                    _ = checkBoxBounds.Remove(pair.Key);
+                else if (pair.Value.Contains(clickPoint))
                 {
-                    if (!ProgramSelection.All.Contains(pair.Key))
-                        _ = checkBoxBounds.Remove(pair.Key);
-                    else if (pair.Value.Contains(clickPoint))
-                    {
-                        pair.Key.Koaloader = !pair.Key.Koaloader;
-                        invalidate = true;
-                        break;
-                    }
-                }
-                if (invalidate && selectForm is not null)
-                {
-                    CheckBox koaloaderAllCheckBox = selectForm.KoaloaderAllCheckBox();
-                    koaloaderAllCheckBox.CheckedChanged -= selectForm.OnKoaloaderAllCheckBoxChanged;
-                    koaloaderAllCheckBox.Checked = ProgramSelection.AllSafe.TrueForAll(selection => selection.Koaloader);
-                    koaloaderAllCheckBox.CheckedChanged += selectForm.OnKoaloaderAllCheckBoxChanged;
+                    pair.Key.Koaloader = !pair.Key.Koaloader;
+                    selectForm.OnKoaloaderChanged();
+                    break;
                 }
             }
-            if (invalidate) Invalidate();
         }
     }
 }

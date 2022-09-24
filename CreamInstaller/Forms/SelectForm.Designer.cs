@@ -43,6 +43,8 @@ namespace CreamInstaller
             this.loadButton = new System.Windows.Forms.Button();
             this.resetKoaloaderButton = new System.Windows.Forms.Button();
             this.resetButton = new System.Windows.Forms.Button();
+            this.saveKoaloaderButton = new System.Windows.Forms.Button();
+            this.loadKoaloaderButton = new System.Windows.Forms.Button();
             this.programsGroupBox.SuspendLayout();
             this.koaloaderFlowPanel.SuspendLayout();
             this.blockedGamesFlowPanel.SuspendLayout();
@@ -60,7 +62,7 @@ namespace CreamInstaller
             this.installButton.Name = "installButton";
             this.installButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
             this.installButton.Size = new System.Drawing.Size(149, 24);
-            this.installButton.TabIndex = 10004;
+            this.installButton.TabIndex = 10000;
             this.installButton.Text = "Generate and Install";
             this.installButton.UseVisualStyleBackColor = true;
             this.installButton.Click += new System.EventHandler(this.OnInstall);
@@ -75,7 +77,7 @@ namespace CreamInstaller
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
             this.cancelButton.Size = new System.Drawing.Size(81, 24);
-            this.cancelButton.TabIndex = 10000;
+            this.cancelButton.TabIndex = 10004;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.OnCancel);
@@ -183,15 +185,15 @@ namespace CreamInstaller
             // selectionTreeView
             // 
             this.selectionTreeView.BackColor = System.Drawing.SystemColors.Control;
-            this.selectionTreeView.BorderStyle = BorderStyle.None;
+            this.selectionTreeView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.selectionTreeView.CheckBoxes = true;
-            this.selectionTreeView.Dock = DockStyle.Fill;
-            this.selectionTreeView.DrawMode = TreeViewDrawMode.OwnerDrawAll;
+            this.selectionTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.selectionTreeView.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawAll;
             this.selectionTreeView.Enabled = false;
             this.selectionTreeView.FullRowSelect = true;
-            this.selectionTreeView.Location = new Point(3, 19);
+            this.selectionTreeView.Location = new System.Drawing.Point(3, 19);
             this.selectionTreeView.Name = "selectionTreeView";
-            this.selectionTreeView.Size = new Size(554, 217);
+            this.selectionTreeView.Size = new System.Drawing.Size(554, 187);
             this.selectionTreeView.Sorted = true;
             this.selectionTreeView.TabIndex = 1001;
             // 
@@ -244,7 +246,7 @@ namespace CreamInstaller
             // 
             // scanButton
             // 
-            this.scanButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.scanButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.scanButton.AutoSize = true;
             this.scanButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.scanButton.Enabled = false;
@@ -269,7 +271,7 @@ namespace CreamInstaller
             this.uninstallButton.Name = "uninstallButton";
             this.uninstallButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
             this.uninstallButton.Size = new System.Drawing.Size(91, 24);
-            this.uninstallButton.TabIndex = 10003;
+            this.uninstallButton.TabIndex = 10001;
             this.uninstallButton.Text = "Uninstall";
             this.uninstallButton.UseVisualStyleBackColor = true;
             this.uninstallButton.Click += new System.EventHandler(this.OnUninstall);
@@ -298,14 +300,14 @@ namespace CreamInstaller
             // 
             // sortCheckBox
             // 
-            this.sortCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.sortCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.sortCheckBox.AutoSize = true;
             this.sortCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.sortCheckBox.Location = new System.Drawing.Point(120, 328);
             this.sortCheckBox.Margin = new System.Windows.Forms.Padding(3, 0, 0, 0);
             this.sortCheckBox.Name = "sortCheckBox";
             this.sortCheckBox.Size = new System.Drawing.Size(104, 20);
-            this.sortCheckBox.TabIndex = 10001;
+            this.sortCheckBox.TabIndex = 10003;
             this.sortCheckBox.Text = "Sort By Name";
             this.sortCheckBox.CheckedChanged += new System.EventHandler(this.OnSortCheckBoxChanged);
             // 
@@ -316,11 +318,10 @@ namespace CreamInstaller
             this.saveButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.saveButton.Enabled = false;
             this.saveButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.saveButton.Location = new System.Drawing.Point(376, 295);
+            this.saveButton.Location = new System.Drawing.Point(424, 295);
             this.saveButton.Name = "saveButton";
-            this.saveButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.saveButton.Size = new System.Drawing.Size(94, 24);
-            this.saveButton.TabIndex = 10005;
+            this.saveButton.Size = new System.Drawing.Size(70, 24);
+            this.saveButton.TabIndex = 10006;
             this.saveButton.Text = "Save DLC";
             this.saveButton.UseVisualStyleBackColor = true;
             this.saveButton.Click += new System.EventHandler(this.OnSaveDlc);
@@ -332,11 +333,10 @@ namespace CreamInstaller
             this.loadButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.loadButton.Enabled = false;
             this.loadButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.loadButton.Location = new System.Drawing.Point(476, 295);
+            this.loadButton.Location = new System.Drawing.Point(500, 295);
             this.loadButton.Name = "loadButton";
-            this.loadButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.loadButton.Size = new System.Drawing.Size(96, 24);
-            this.loadButton.TabIndex = 10006;
+            this.loadButton.Size = new System.Drawing.Size(72, 24);
+            this.loadButton.TabIndex = 10005;
             this.loadButton.Text = "Load DLC";
             this.loadButton.UseVisualStyleBackColor = true;
             this.loadButton.Click += new System.EventHandler(this.OnLoadDlc);
@@ -350,9 +350,8 @@ namespace CreamInstaller
             this.resetKoaloaderButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.resetKoaloaderButton.Location = new System.Drawing.Point(12, 295);
             this.resetKoaloaderButton.Name = "resetKoaloaderButton";
-            this.resetKoaloaderButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.resetKoaloaderButton.Size = new System.Drawing.Size(129, 24);
-            this.resetKoaloaderButton.TabIndex = 10007;
+            this.resetKoaloaderButton.Size = new System.Drawing.Size(105, 24);
+            this.resetKoaloaderButton.TabIndex = 10010;
             this.resetKoaloaderButton.Text = "Reset Koaloader";
             this.resetKoaloaderButton.UseVisualStyleBackColor = true;
             this.resetKoaloaderButton.Click += new System.EventHandler(this.OnResetKoaloader);
@@ -364,14 +363,43 @@ namespace CreamInstaller
             this.resetButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.resetButton.Enabled = false;
             this.resetButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.resetButton.Location = new System.Drawing.Point(272, 295);
+            this.resetButton.Location = new System.Drawing.Point(344, 295);
             this.resetButton.Name = "resetButton";
-            this.resetButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.resetButton.Size = new System.Drawing.Size(98, 24);
-            this.resetButton.TabIndex = 10008;
+            this.resetButton.Size = new System.Drawing.Size(74, 24);
+            this.resetButton.TabIndex = 10007;
             this.resetButton.Text = "Reset DLC";
             this.resetButton.UseVisualStyleBackColor = true;
             this.resetButton.Click += new System.EventHandler(this.OnResetDlc);
+            // 
+            // saveKoaloaderButton
+            // 
+            this.saveKoaloaderButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.saveKoaloaderButton.AutoSize = true;
+            this.saveKoaloaderButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.saveKoaloaderButton.Enabled = false;
+            this.saveKoaloaderButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.saveKoaloaderButton.Location = new System.Drawing.Point(123, 295);
+            this.saveKoaloaderButton.Name = "saveKoaloaderButton";
+            this.saveKoaloaderButton.Size = new System.Drawing.Size(101, 24);
+            this.saveKoaloaderButton.TabIndex = 10009;
+            this.saveKoaloaderButton.Text = "Save Koaloader";
+            this.saveKoaloaderButton.UseVisualStyleBackColor = true;
+            this.saveKoaloaderButton.Click += new System.EventHandler(this.OnSaveKoaloader);
+            // 
+            // loadKoaloaderButton
+            // 
+            this.loadKoaloaderButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.loadKoaloaderButton.AutoSize = true;
+            this.loadKoaloaderButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.loadKoaloaderButton.Enabled = false;
+            this.loadKoaloaderButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.loadKoaloaderButton.Location = new System.Drawing.Point(230, 295);
+            this.loadKoaloaderButton.Name = "loadKoaloaderButton";
+            this.loadKoaloaderButton.Size = new System.Drawing.Size(103, 24);
+            this.loadKoaloaderButton.TabIndex = 10008;
+            this.loadKoaloaderButton.Text = "Load Koaloader";
+            this.loadKoaloaderButton.UseVisualStyleBackColor = true;
+            this.loadKoaloaderButton.Click += new System.EventHandler(this.OnLoadKoaloader);
             // 
             // SelectForm
             // 
@@ -380,6 +408,8 @@ namespace CreamInstaller
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(584, 361);
+            this.Controls.Add(this.loadKoaloaderButton);
+            this.Controls.Add(this.saveKoaloaderButton);
             this.Controls.Add(this.resetButton);
             this.Controls.Add(this.resetKoaloaderButton);
             this.Controls.Add(this.loadButton);
@@ -437,6 +467,8 @@ namespace CreamInstaller
         private Button loadButton;
         private Button resetKoaloaderButton;
         private Button resetButton;
+        private Button saveKoaloaderButton;
+        private Button loadKoaloaderButton;
     }
 }
 
