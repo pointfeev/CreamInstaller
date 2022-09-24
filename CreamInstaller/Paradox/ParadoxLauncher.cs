@@ -93,9 +93,13 @@ internal static class ParadoxLauncher
         byte[] epicOriginalSdk64 = null;
         foreach (string directory in selection.DllDirectories)
         {
+            bool koaloaderInstalled = Koaloader.AutoLoadDlls
+                .Select(pair => (pair.unlocker, path: directory + @"\" + pair.dll))
+                .Any(pair => File.Exists(pair.path) && pair.path.IsResourceFile());
             directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out _);
             smokeInstalled = smokeInstalled
-                || File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config)
+                || File.Exists(api32_o) || File.Exists(api64_o)
+                || File.Exists(config) && !koaloaderInstalled
                 || File.Exists(api32) && api32.IsResourceFile(ResourceIdentifier.Steamworks32)
                 || File.Exists(api64) && api64.IsResourceFile(ResourceIdentifier.Steamworks64);
             await SmokeAPI.Uninstall(directory, deleteConfig: false);
@@ -105,7 +109,8 @@ internal static class ParadoxLauncher
                 steamOriginalSdk64 = File.ReadAllBytes(api64);
             directory.GetScreamApiComponents(out api32, out api32_o, out api64, out api64_o, out config);
             screamInstalled = screamInstalled
-                || File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config)
+                || File.Exists(api32_o) || File.Exists(api64_o)
+                || File.Exists(config) && !koaloaderInstalled
                 || File.Exists(api32) && api32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32)
                 || File.Exists(api64) && api64.IsResourceFile(ResourceIdentifier.EpicOnlineServices64);
             await ScreamAPI.Uninstall(directory, deleteConfig: false);

@@ -128,6 +128,9 @@ internal static class Resources
             string subDirectory = directory.BeautifyPath();
             if (!dllDirectories.Contains(subDirectory))
             {
+                bool koaloaderInstalled = Koaloader.AutoLoadDlls
+                    .Select(pair => (pair.unlocker, path: directory + @"\" + pair.dll))
+                    .Any(pair => File.Exists(pair.path) && pair.path.IsResourceFile());
                 if (platform is Platform.Steam or Platform.Paradox)
                 {
                     subDirectory.GetSmokeApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string config, out string cache);
@@ -135,8 +138,8 @@ internal static class Resources
                         || File.Exists(api_o)
                         || File.Exists(api64)
                         || File.Exists(api64_o)
-                        || File.Exists(config)
-                        || File.Exists(cache))
+                        || File.Exists(config) && !koaloaderInstalled
+                        || File.Exists(cache) && !koaloaderInstalled)
                         dllDirectories.Add(subDirectory);
                 }
                 if (platform is Platform.Epic or Platform.Paradox)
@@ -146,7 +149,7 @@ internal static class Resources
                         || File.Exists(api32_o)
                         || File.Exists(api64)
                         || File.Exists(api64_o)
-                        || File.Exists(config))
+                        || File.Exists(config) && !koaloaderInstalled)
                         dllDirectories.Add(subDirectory);
                 }
                 if (platform is Platform.Ubisoft)
@@ -156,7 +159,7 @@ internal static class Resources
                         || File.Exists(api32_o)
                         || File.Exists(api64)
                         || File.Exists(api64_o)
-                        || File.Exists(config))
+                        || File.Exists(config) && !koaloaderInstalled)
                         dllDirectories.Add(subDirectory);
                     subDirectory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config);
                     if (File.Exists(old_api32)
@@ -165,7 +168,7 @@ internal static class Resources
                         || File.Exists(api32_o)
                         || File.Exists(api64)
                         || File.Exists(api64_o)
-                        || File.Exists(config))
+                        || File.Exists(config) && !koaloaderInstalled)
                         dllDirectories.Add(subDirectory);
                 }
             }
