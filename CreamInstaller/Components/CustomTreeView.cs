@@ -155,12 +155,13 @@ internal class CustomTreeView : TreeView
 
                 this.checkBoxBounds[selection] = RectangleToClient(checkBoxBounds);
 
-                if (selection.Koaloader && selection.KoaloaderProxy is not null)
+                string proxy = selection.KoaloaderProxy ?? ProgramSelection.DefaultKoaloaderProxy;
+                if (selection.Koaloader && proxy is not null)
                 {
                     comboBoxFont ??= new(font.FontFamily, 6, font.Style, font.Unit, font.GdiCharSet, font.GdiVerticalFont);
                     ComboBoxState comboBoxState = Enabled ? ComboBoxState.Normal : ComboBoxState.Disabled;
 
-                    text = selection.KoaloaderProxy + ".dll";
+                    text = proxy + ".dll";
                     size = TextRenderer.MeasureText(graphics, text, comboBoxFont) + new Size(6, 0);
                     int padding = 2;
                     bounds = new(bounds.X + bounds.Width, bounds.Y + padding / 2, size.Width, bounds.Height - padding);
@@ -237,7 +238,7 @@ internal class CustomTreeView : TreeView
                             if (canUse)
                                 _ = comboBoxDropDown.Items.Add(new ToolStripButton(proxy + ".dll", null, (s, e) =>
                                 {
-                                    pair.Key.KoaloaderProxy = proxy;
+                                    pair.Key.KoaloaderProxy = proxy == ProgramSelection.DefaultKoaloaderProxy ? null : proxy;
                                     ProgramData.UpdateKoaloaderProxyChoices();
                                     Invalidate();
                                 })

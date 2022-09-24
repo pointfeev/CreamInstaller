@@ -157,7 +157,8 @@ internal static class Koaloader
     internal static async Task Install(string directory, BinaryType binaryType, ProgramSelection selection, InstallForm installForm = null, bool generateConfig = true) => await Task.Run(() =>
     {
         directory.GetKoaloaderComponents(out List<string> proxies, out string config);
-        string path = directory + @"\" + selection.KoaloaderProxy + ".dll";
+        string proxy = selection.KoaloaderProxy ?? ProgramSelection.DefaultKoaloaderProxy;
+        string path = directory + @"\" + proxy + ".dll";
         foreach (string _path in proxies.Where(p => p != path && File.Exists(p) && p.IsResourceFile(ResourceIdentifier.Koaloader)))
         {
             File.Delete(_path);
@@ -165,8 +166,8 @@ internal static class Koaloader
                 installForm.UpdateUser($"Deleted Koaloader: {Path.GetFileName(_path)}", LogTextBox.Action, info: false);
         }
         if (File.Exists(path) && !path.IsResourceFile(ResourceIdentifier.Koaloader))
-            throw new CustomMessageException("A non-Koaloader DLL named " + selection.KoaloaderProxy + ".dll already exists in this directory!");
-        path.WriteProxy(selection.KoaloaderProxy, binaryType);
+            throw new CustomMessageException("A non-Koaloader DLL named " + proxy + ".dll already exists in this directory!");
+        path.WriteProxy(proxy, binaryType);
         if (installForm is not null)
             installForm.UpdateUser($"Wrote {(binaryType == BinaryType.BIT32 ? "32-bit" : "64-bit")} Koaloader: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
         bool bit32 = false, bit64 = false;

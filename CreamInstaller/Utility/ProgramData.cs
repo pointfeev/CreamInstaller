@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace CreamInstaller.Utility;
 
@@ -23,9 +24,9 @@ internal static class ProgramData
 
     internal static readonly string CooldownPath = DirectoryPath + @"\cooldown";
 
-    internal static readonly string OldChoicesPath = DirectoryPath + @"\choices.txt";
-    internal static readonly string ChoicesPath = DirectoryPath + @"\choices.json";
-
+    internal static readonly string OldProgramChoicesPath = DirectoryPath + @"\choices.txt";
+    internal static readonly string ProgramChoicesPath = DirectoryPath + @"\choices.json";
+    internal static readonly string DlcChoicesPath = DirectoryPath + @"\dlc.json";
     internal static readonly string KoaloaderProxyChoicesPath = DirectoryPath + @"\proxies.json";
 
     internal static async Task Setup() => await Task.Run(() =>
@@ -44,8 +45,8 @@ internal static class ProgramData
         }
         if (!Directory.Exists(CooldownPath))
             _ = Directory.CreateDirectory(CooldownPath);
-        if (File.Exists(OldChoicesPath))
-            File.Delete(OldChoicesPath);
+        if (File.Exists(OldProgramChoicesPath))
+            File.Delete(OldProgramChoicesPath);
     });
 
     internal static bool CheckCooldown(string identifier, int cooldown)
@@ -86,12 +87,12 @@ internal static class ProgramData
         catch { }
     }
 
-    internal static List<(Platform platform, string id)> ReadChoices()
+    internal static List<(Platform platform, string id)> ReadProgramChoices()
     {
-        if (!File.Exists(ChoicesPath)) return null;
+        if (!File.Exists(ProgramChoicesPath)) return null;
         try
         {
-            return JsonConvert.DeserializeObject(File.ReadAllText(ChoicesPath),
+            return JsonConvert.DeserializeObject(File.ReadAllText(ProgramChoicesPath),
                 typeof(List<(Platform platform, string id)>)) as List<(Platform platform, string id)>;
         }
         catch
@@ -99,11 +100,39 @@ internal static class ProgramData
             return new();
         }
     }
-    internal static void WriteChoices(List<(Platform platform, string id)> choices)
+    internal static void WriteProgramChoices(List<(Platform platform, string id)> choices)
     {
         try
         {
-            File.WriteAllText(ChoicesPath, JsonConvert.SerializeObject(choices));
+            if (choices is null || !choices.Any())
+                File.Delete(ProgramChoicesPath);
+            else
+                File.WriteAllText(ProgramChoicesPath, JsonConvert.SerializeObject(choices));
+        }
+        catch { }
+    }
+
+    internal static List<(Platform platform, string gameId, string dlcId)> ReadDlcChoices()
+    {
+        if (!File.Exists(DlcChoicesPath)) return null;
+        try
+        {
+            return JsonConvert.DeserializeObject(File.ReadAllText(DlcChoicesPath),
+                typeof(List<(Platform platform, string gameId, string dlcId)>)) as List<(Platform platform, string gameId, string dlcId)>;
+        }
+        catch
+        {
+            return new();
+        }
+    }
+    internal static void WriteDlcChoices(List<(Platform platform, string gameId, string dlcId)> choices)
+    {
+        try
+        {
+            if (choices is null || !choices.Any())
+                File.Delete(DlcChoicesPath);
+            else
+                File.WriteAllText(DlcChoicesPath, JsonConvert.SerializeObject(choices));
         }
         catch { }
     }
@@ -126,40 +155,46 @@ internal static class ProgramData
     {
         try
         {
-            File.WriteAllText(KoaloaderProxyChoicesPath, JsonConvert.SerializeObject(choices));
+            if (choices is null || !choices.Any())
+                File.Delete(KoaloaderProxyChoicesPath);
+            else
+                File.WriteAllText(KoaloaderProxyChoicesPath, JsonConvert.SerializeObject(choices));
         }
         catch { }
     }
 
-    internal static void UpdateKoaloaderProxyChoices()
+    internal static void UpdateKoaloaderProxyChoices(bool initial = false)
     {
-        string defaultProxy = "version";
         List<(Platform platform, string id, string proxy)> choices = ReadKoaloaderProxyChoices() ?? new();
-        foreach ((Platform platform, string id, string proxy) choice in choices.ToList())
-            if (ProgramSelection.FromPlatformId(choice.platform, choice.id) is ProgramSelection selection)
+        if (!initial)
+            foreach (ProgramSelection selection in ProgramSelection.AllSafe)
             {
-                string proxy = choice.proxy;
-                if (proxy.Contains('.')) // convert pre-v4.1.0.0 choices
-                    proxy.GetProxyInfoFromIdentifier(out proxy, out _);
-                if (selection.KoaloaderProxy is null)
-                    selection.KoaloaderProxy = proxy;
-                else if (selection.KoaloaderProxy != proxy && choices.Remove(choice))
+                _ = choices.RemoveAll(c => c.platform == selection.Platform && c.id == selection.Id);
+                if (selection.KoaloaderProxy is not null and not ProgramSelection.DefaultKoaloaderProxy)
                     choices.Add((selection.Platform, selection.Id, selection.KoaloaderProxy));
             }
-        foreach (ProgramSelection selection in ProgramSelection.AllSafe)
-            if (selection.KoaloaderProxy is null)
-            {
-                selection.KoaloaderProxy = defaultProxy;
-                choices.Add((selection.Platform, selection.Id, selection.KoaloaderProxy));
-            }
-        if (choices.Any())
-            WriteKoaloaderProxyChoices(choices);
+        foreach ((Platform platform, string id, string proxy) choice in choices.ToList())
+        {
+            string proxy = choice.proxy;
+            if (proxy is not null && proxy.Contains('.')) // convert pre-v4.1.0.0 choices
+                proxy.GetProxyInfoFromIdentifier(out proxy, out _);
+            if (choice.proxy != proxy && choices.Remove(choice)) // convert pre-v4.1.0.0 choices
+                choices.Add((choice.platform, choice.id, proxy));
+            if (proxy is null or ProgramSelection.DefaultKoaloaderProxy)
+                _ = choices.RemoveAll(c => c.platform == choice.platform && c.id == choice.id);
+            else if (ProgramSelection.FromPlatformId(choice.platform, choice.id) is ProgramSelection selection)
+                selection.KoaloaderProxy = proxy;
+        }
+        WriteKoaloaderProxyChoices(choices);
+        foreach (Form form in Application.OpenForms)
+            if (form is SelectForm selectForm)
+                selectForm.OnKoaloaderProxiesChanged();
     }
 
     internal static void ResetKoaloaderProxyChoices()
     {
-        if (File.Exists(KoaloaderProxyChoicesPath))
-            File.Delete(KoaloaderProxyChoicesPath);
+        foreach (ProgramSelection selection in ProgramSelection.AllSafe)
+            selection.KoaloaderProxy = null;
         UpdateKoaloaderProxyChoices();
     }
 }

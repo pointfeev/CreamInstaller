@@ -4,7 +4,6 @@ using CreamInstaller.Utility;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -41,7 +40,7 @@ internal partial class SelectDialogForm : CustomForm
         allCheckBox.Enabled = true;
         acceptButton.Enabled = selected.Any();
         saveButton.Enabled = acceptButton.Enabled;
-        loadButton.Enabled = ProgramData.ReadChoices() is not null;
+        loadButton.Enabled = ProgramData.ReadProgramChoices() is not null;
         OnResize(null, null);
         Resize += OnResize;
         return ShowDialog() == DialogResult.OK ? selected : null;
@@ -92,7 +91,7 @@ internal partial class SelectDialogForm : CustomForm
 
     private void OnLoad(object sender, EventArgs e)
     {
-        List<(Platform platform, string id)> choices = ProgramData.ReadChoices();
+        List<(Platform platform, string id)> choices = ProgramData.ReadProgramChoices();
         if (choices is null) return;
         foreach (TreeNode node in selectionTreeView.Nodes)
         {
@@ -106,7 +105,7 @@ internal partial class SelectDialogForm : CustomForm
         List<(Platform platform, string id)> choices = new();
         foreach (TreeNode node in selectionTreeView.Nodes.Cast<TreeNode>().Where(n => n.Checked))
             choices.Add(((Platform)node.Tag, node.Name));
-        ProgramData.WriteChoices(choices);
-        loadButton.Enabled = File.Exists(ProgramData.ChoicesPath);
+        ProgramData.WriteProgramChoices(choices);
+        loadButton.Enabled = ProgramData.ReadProgramChoices() is not null;
     }
 }

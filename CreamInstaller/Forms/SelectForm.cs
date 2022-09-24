@@ -462,6 +462,10 @@ internal partial class SelectForm : CustomForm
         installButton.Enabled = false;
         uninstallButton.Enabled = installButton.Enabled;
         selectionTreeView.Enabled = false;
+        saveButton.Enabled = false;
+        loadButton.Enabled = false;
+        resetButton.Enabled = false;
+        resetKoaloaderButton.Enabled = false;
         progressLabel.Text = "Waiting for user to select which programs/games to scan . . .";
         ShowProgressBar();
 
@@ -537,7 +541,8 @@ internal partial class SelectForm : CustomForm
             await SteamCMD.Cleanup();
         }
 
-        ProgramData.UpdateKoaloaderProxyChoices();
+        ProgramData.UpdateKoaloaderProxyChoices(initial: true);
+        OnLoadDlc(null, null);
 
         HideProgressBar();
         selectionTreeView.Enabled = ProgramSelection.All.Any();
@@ -546,6 +551,9 @@ internal partial class SelectForm : CustomForm
         noneFoundLabel.Visible = !selectionTreeView.Enabled;
         installButton.Enabled = ProgramSelection.AllEnabled.Any();
         uninstallButton.Enabled = installButton.Enabled;
+        saveButton.Enabled = CanSaveDlc();
+        loadButton.Enabled = ProgramData.ReadDlcChoices() is not null;
+        resetButton.Enabled = CanResetDlc();
         cancelButton.Enabled = false;
         scanButton.Enabled = true;
         blockedGamesCheckBox.Enabled = true;
@@ -561,10 +569,12 @@ internal partial class SelectForm : CustomForm
         SyncNodeAncestors(node);
         SyncNodeDescendants(node);
         allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
-        allCheckBox.Checked = TreeNodes.TrueForAll(treeNode => treeNode.Checked);
+        allCheckBox.Checked = TreeNodes.TrueForAll(node => node.Text == "Unknown" || node.Checked);
         allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
         installButton.Enabled = ProgramSelection.AllEnabled.Any();
         uninstallButton.Enabled = installButton.Enabled;
+        saveButton.Enabled = CanSaveDlc();
+        resetButton.Enabled = CanResetDlc();
     }
 
     private static void SyncNodeAncestors(TreeNode node)
@@ -893,6 +903,60 @@ internal partial class SelectForm : CustomForm
         allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
     }
 
+    private bool AreSelectionsDefault()
+    {
+        foreach (TreeNode node in TreeNodes)
+            if (node.Parent is not null && node.Tag is Platform && (node.Text == "Unknown" ? node.Checked : !node.Checked))
+                return false;
+        return true;
+    }
+
+    private bool CanSaveDlc() => installButton.Enabled && (ProgramData.ReadDlcChoices() is not null || !AreSelectionsDefault());
+
+    private void OnSaveDlc(object sender, EventArgs e)
+    {
+        List<(Platform platform, string gameId, string dlcId)> choices = ProgramData.ReadDlcChoices() ?? new();
+        foreach (TreeNode node in TreeNodes)
+            if (node.Parent is TreeNode parent && node.Tag is Platform platform)
+            {
+                if (node.Text == "Unknown" ? node.Checked : !node.Checked)
+                    choices.Add((platform, node.Parent.Name, node.Name));
+                else
+                    choices.RemoveAll(n => n.platform == platform && n.gameId == parent.Name && n.dlcId == node.Name);
+            }
+        choices = choices.Distinct().ToList();
+        ProgramData.WriteDlcChoices(choices);
+        loadButton.Enabled = ProgramData.ReadDlcChoices() is not null;
+        saveButton.Enabled = CanSaveDlc();
+    }
+
+    private void OnLoadDlc(object sender, EventArgs e)
+    {
+        List<(Platform platform, string gameId, string dlcId)> choices = ProgramData.ReadDlcChoices();
+        if (choices is null) return;
+        foreach (TreeNode node in TreeNodes)
+            if (node.Parent is TreeNode parent && node.Tag is Platform platform)
+            {
+                node.Checked = choices.Any(choice => choice.platform == platform && choice.gameId == parent.Name && choice.dlcId == node.Name)
+                    ? node.Text == "Unknown"
+                    : node.Text != "Unknown";
+                OnTreeViewNodeCheckedChanged(null, new(node, TreeViewAction.ByMouse));
+            }
+    }
+
+    private bool CanResetDlc() => !AreSelectionsDefault();
+
+    private void OnResetDlc(object sender, EventArgs e)
+    {
+        foreach (TreeNode node in TreeNodes)
+            if (node.Parent is not null && node.Tag is Platform)
+            {
+                node.Checked = node.Text != "Unknown";
+                OnTreeViewNodeCheckedChanged(null, new(node, TreeViewAction.ByMouse));
+            }
+        resetButton.Enabled = CanResetDlc();
+    }
+
     internal CheckBox KoaloaderAllCheckBox() => koaloaderAllCheckBox;
     internal void OnKoaloaderAllCheckBoxChanged(object sender, EventArgs e)
     {
@@ -909,6 +973,16 @@ internal partial class SelectForm : CustomForm
         koaloaderAllCheckBox.CheckedChanged -= OnKoaloaderAllCheckBoxChanged;
         koaloaderAllCheckBox.Checked = shouldCheck;
         koaloaderAllCheckBox.CheckedChanged += OnKoaloaderAllCheckBoxChanged;
+    }
+
+    private static bool CanResetKoaloader() => File.Exists(ProgramData.KoaloaderProxyChoicesPath);
+
+    private void OnResetKoaloader(object sender, EventArgs e) => ProgramData.ResetKoaloaderProxyChoices();
+
+    internal void OnKoaloaderProxiesChanged()
+    {
+        selectionTreeView.Invalidate();
+        resetKoaloaderButton.Enabled = CanResetKoaloader();
     }
 
     private void OnBlockProtectedGamesCheckBoxChanged(object sender, EventArgs e)

@@ -30,6 +30,7 @@ internal class ProgramSelection
 {
     internal bool Enabled;
     internal bool Koaloader;
+    internal const string DefaultKoaloaderProxy = "version";
     internal string KoaloaderProxy;
 
     internal Platform Platform;
