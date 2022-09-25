@@ -131,7 +131,7 @@ internal partial class MainForm : CustomForm
                 _ = Task.Run(async () =>
                 {
                     HtmlNodeCollection nodes = await HttpClientManager.GetDocumentNodes(
-                        $"https://github.com/pointfeev/CreamInstaller/releases/tag/v{version}",
+                        $"https://github.com/{Program.RepositoryOwner}/{Program.RepositoryName}/releases/tag/v{version}",
                         "//div[@data-test-selector='body-content']/ul/li");
                     if (nodes is null)
                         changelogTreeView.Nodes.Remove(root);

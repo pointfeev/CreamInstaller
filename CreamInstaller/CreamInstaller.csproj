@@ -4,43 +4,28 @@
 		<TargetFramework>net6.0-windows10.0.22621.0</TargetFramework>
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Resources\ini.ico</ApplicationIcon>
-		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-		<Version>4.2.1.0</Version>
-		<PackageIcon>Resources\ini.ico</PackageIcon>
-		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<Version>4.2.1.1</Version>
 		<Copyright>2021, pointfeev (https://github.com/pointfeev)</Copyright>
-		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-		<PackageProjectUrl>https://github.com/pointfeev/CreamInstaller</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/pointfeev/CreamInstaller</RepositoryUrl>
-		<RepositoryType>git</RepositoryType>
 		<Company>CreamInstaller</Company>
 		<Product>Automatic DLC Unlocker Installer &amp; Configuration Generator</Product>
-		<Authors>pointfeev</Authors>
-		<PackageId>pointfeev.creaminstaller</PackageId>
 		<StartupObject>CreamInstaller.Program</StartupObject>
-		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
-		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
-		<SignAssembly>False</SignAssembly>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<AnalysisLevel>latest-all</AnalysisLevel>
-		<Title>$(Company)</Title>
-		<Description>$(Product)</Description>
 		<SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
 		<PlatformTarget>AnyCPU</PlatformTarget>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)'=='Release'">
-		<AssemblyName>$(Company)</AssemblyName>
+		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+		<Deterministic>true</Deterministic>
+		<Optimize>True</Optimize>
 		<DebugType>embedded</DebugType>
 		<DebugSymbols>true</DebugSymbols>
 		<DefineConstants>$(DefineConstants)</DefineConstants>
-		<CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<AssemblyName>$(Company)</AssemblyName>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
 		<AssemblyName>$(Company)-debug</AssemblyName>
-		<CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
-		<Optimize>True</Optimize>
-		<DebugType>embedded</DebugType>
-		<DefineConstants>$(DefineConstants)</DefineConstants>
 	</PropertyGroup>
 	<ItemGroup>
 	  <None Remove="Resources\Koaloader\audioses-32\audioses.dll" />
@@ -176,11 +161,5 @@
 			<Generator>ResXFileCodeGenerator</Generator>
 			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
 		</EmbeddedResource>
-	</ItemGroup>
-	<ItemGroup>
-		<None Include="..\LICENSE">
-			<Pack>True</Pack>
-			<PackagePath></PackagePath>
-		</None>
 	</ItemGroup>
 </Project>

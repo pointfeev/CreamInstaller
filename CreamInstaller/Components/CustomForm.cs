@@ -23,13 +23,15 @@ internal class CustomForm : Form
     {
         using DialogForm helpDialog = new(this);
         helpDialog.HelpButton = false;
+        string acidicoala = "https://github.com/acidicoala";
+        string repository = $"https://github.com/{Program.RepositoryOwner}/{Program.RepositoryName}";
         _ = helpDialog.Show(SystemIcons.Information,
             "Automatically finds all installed Steam, Epic and Ubisoft games with their respective DLC-related DLL locations on the user's computer,\n"
           + "parses SteamCMD, Steam Store and Epic Games Store for user-selected games' DLCs, then provides a very simple graphical interface\n"
           + "utilizing the gathered information for the maintenance of DLC unlockers.\n"
           + "\n"
-          + "The program utilizes the latest versions of [Koaloader](https://github.com/acidicoala/Koaloader), [SmokeAPI](https://github.com/acidicoala/SmokeAPI), [ScreamAPI](https://github.com/acidicoala/ScreamAPI), [Uplay R1 Unlocker](https://github.com/acidicoala/UplayR1Unlocker) and [Uplay R2 Unlocker](https://github.com/acidicoala/UplayR2Unlocker), all by\n"
-          + "the wonderful [acidicoala](https://github.com/acidicoala), and all downloaded and embedded into the program itself; no further downloads necessary on your part!\n"
+          + $"The program utilizes the latest versions of [Koaloader]({acidicoala}/Koaloader), [SmokeAPI]({acidicoala}/SmokeAPI), [ScreamAPI]({acidicoala}/ScreamAPI), [Uplay R1 Unlocker]({acidicoala}/UplayR1Unlocker) and [Uplay R2 Unlocker]({acidicoala}/UplayR2Unlocker), all by\n"
+          + $"the wonderful [acidicoala]({acidicoala}), and all downloaded and embedded into the program itself; no further downloads necessary on your part!\n"
           + "\n"
           + "NOTE: This program does not automatically download nor install actual DLC files for you. As the title of the program says, it's\n"
           + "only a DLC Unlocker installer. Should the game you wish to unlock DLC for not already come with the DLCs installed (very many\n"
@@ -51,11 +53,11 @@ internal class CustomForm : Form
           + "    8. If any of the DLC unlockers cause problems with any of the games you installed them on, simply go back\n"
           + "        to step 5 and select what games you wish you revert changes to, and instead click the \"Uninstall\" button this time.\n"
           + "\n"
-          + "For reliable and quick assistance, all bugs, crashes and other issues should be referred to the [GitHub Issues](https://github.com/pointfeev/CreamInstaller/issues) page!\n"
+          + $"For reliable and quick assistance, all bugs, crashes and other issues should be referred to the [GitHub Issues]({repository}/issues) page!\n"
           + "\n"
           + "SteamCMD installation and appinfo cache can be found at [C:\\ProgramData\\CreamInstaller]().\n"
-          + "The program automatically and very quickly updates from [GitHub](https://github.com/pointfeev/CreamInstaller) using [Onova](https://github.com/Tyrrrz/Onova). (updates can be ignored)\n"
-          + "The program source and other information can be found on [GitHub](https://github.com/pointfeev/CreamInstaller).");
+          + $"The program automatically and very quickly updates from [GitHub]({repository}) using [Onova](https://github.com/Tyrrrz/Onova). (updates can be ignored)\n"
+          + $"The program source and other information can be found on [GitHub]({repository}).");
     }
 
     internal CustomForm(IWin32Window owner) : this()
