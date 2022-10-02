@@ -78,7 +78,8 @@ internal static class Resources
     internal static bool TryGetFileBinaryType(this string path, out BinaryType binaryType) => GetBinaryType(path, out binaryType);
 
     internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(this string rootDirectory, bool filterCommon = false, Func<string, bool> validFunc = null) =>
-        await Task.Run(async () => (await rootDirectory.GetExecutables(filterCommon: filterCommon, validFunc: validFunc) ?? await rootDirectory.GetExecutables())?.Select(e =>
+        await Task.Run(async () => (await rootDirectory.GetExecutables(filterCommon: filterCommon, validFunc: validFunc)
+            ?? (filterCommon || validFunc is not null ? await rootDirectory.GetExecutables() : null))?.Select(e =>
         {
             e.path = Path.GetDirectoryName(e.path);
             return e;
@@ -114,8 +115,19 @@ internal static class Resources
     internal static bool IsCommonIncorrectExecutable(this string rootDirectory, string path)
     {
         string subPath = path[rootDirectory.Length..].ToUpperInvariant().BeautifyPath();
-        return subPath.Contains("SETUP") || subPath.Contains("REDIST") //|| subPath.Contains("SUPPORT")
-            || subPath.Contains("CRASH") && (subPath.Contains("PAD") || subPath.Contains("REPORT"));
+        return subPath.Contains("SETUP")
+            || subPath.Contains("REDIST")
+            || subPath.Contains("SUPPORT")
+            || subPath.Contains("CRASH") && (subPath.Contains("PAD") || subPath.Contains("REPORT"))
+            || subPath.Contains("HELPER")
+            || subPath.Contains("CEFPROCESS")
+            || subPath.Contains("ZFGAMEBROWSER")
+            || subPath.Contains("MONO")
+            || subPath.Contains("PLUGINS")
+            || subPath.Contains("MODDING")
+            || subPath.Contains("MOD") && subPath.Contains("MANAGER")
+            || subPath.Contains("BATTLEYE")
+            || subPath.Contains("ANTICHEAT");
     }
 
     internal static async Task<List<string>> GetDllDirectoriesFromGameDirectory(this string gameDirectory, Platform platform) => await Task.Run(() =>

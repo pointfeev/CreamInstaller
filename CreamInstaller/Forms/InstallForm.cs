@@ -66,7 +66,7 @@ internal partial class InstallForm : CustomForm
         }
         UpdateUser($"Checking directories for {selection.Name} . . . ", LogTextBox.Operation);
         IEnumerable<string> invalidDirectories = (await selection.RootDirectory.GetExecutables())
-            ?.Where(d => !selection.ExecutableDirectories.Any(s => d.path.Contains(s.directory)))
+            ?.Where(d => !selection.ExecutableDirectories.Any(s => s.directory == Path.GetDirectoryName(d.path)))
             ?.Select(d => Path.GetDirectoryName(d.path));
         if (!selection.ExecutableDirectories.Any(s => s.directory == selection.RootDirectory))
             invalidDirectories = invalidDirectories?.Append(selection.RootDirectory);
