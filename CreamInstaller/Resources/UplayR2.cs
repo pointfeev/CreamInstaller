@@ -35,8 +35,8 @@ internal static class UplayR2
             blacklistDlc = blacklistDlc.Except(extraDlc);
         if (blacklistDlc.Any())
         {
-            if (installForm is not null)
-                installForm.UpdateUser("Generating Uplay R2 Unlocker configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
+            /*if (installForm is not null)
+                installForm.UpdateUser("Generating Uplay R2 Unlocker configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);*/
             File.Create(config).Close();
             StreamWriter writer = new(config, true, Encoding.UTF8);
             WriteConfig(writer, new(blacklistDlc.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String), installForm);

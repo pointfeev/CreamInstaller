@@ -64,7 +64,8 @@ internal partial class InstallForm : CustomForm
             UpdateUser($"Repairing Paradox Launcher . . . ", LogTextBox.Operation);
             _ = await Repair(this, selection);
         }
-        UpdateUser($"Checking directories for {selection.Name} . . . ", LogTextBox.Operation);
+        UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")}" +
+            $" {(Uninstalling ? "from" : "for")} " + selection.Name + $" with root directory \"{selection.RootDirectory}\" . . . ", LogTextBox.Operation);
         IEnumerable<string> invalidDirectories = (await selection.RootDirectory.GetExecutables())
             ?.Where(d => !selection.ExecutableDirectories.Any(s => s.directory == Path.GetDirectoryName(d.path)))
             ?.Select(d => Path.GetDirectoryName(d.path));
@@ -77,11 +78,11 @@ internal partial class InstallForm : CustomForm
                 if (Program.Canceled) throw new CustomMessageException("The operation was canceled.");
                 directory.GetKoaloaderComponents(out List<string> proxies, out string config);
                 if (proxies.Any(proxy => File.Exists(proxy) && proxy.IsResourceFile(ResourceIdentifier.Koaloader))
-                    || Koaloader.AutoLoadDlls.Any(pair => File.Exists(directory + @"\" + pair.dll))
+                    || directory != selection.RootDirectory && Koaloader.AutoLoadDlls.Any(pair => File.Exists(directory + @"\" + pair.dll))
                     || File.Exists(config))
                 {
                     UpdateUser("Uninstalling Koaloader from " + selection.Name + $" in incorrect directory \"{directory}\" . . . ", LogTextBox.Operation);
-                    await Koaloader.Uninstall(directory, this);
+                    await Koaloader.Uninstall(directory, rootDirectory: selection.RootDirectory, this);
                 }
                 Thread.Sleep(1);
             }
@@ -96,7 +97,7 @@ internal partial class InstallForm : CustomForm
                     || File.Exists(config))
                 {
                     UpdateUser("Uninstalling Koaloader from " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
-                    await Koaloader.Uninstall(directory, this);
+                    await Koaloader.Uninstall(directory, rootDirectory: selection.RootDirectory, this);
                 }
                 Thread.Sleep(1);
             }
@@ -164,7 +165,7 @@ internal partial class InstallForm : CustomForm
             {
                 if (Program.Canceled) throw new CustomMessageException("The operation was canceled.");
                 UpdateUser("Installing Koaloader to " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
-                await Koaloader.Install(directory, binaryType, selection, this);
+                await Koaloader.Install(directory, binaryType, selection, rootDirectory: selection.RootDirectory, this);
                 Thread.Sleep(1);
             }
         }

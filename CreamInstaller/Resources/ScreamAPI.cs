@@ -36,8 +36,8 @@ internal static class ScreamAPI
             entitlements = entitlements.Concat(_dlc.Where(pair => pair.Value.type == DlcType.EpicEntitlement));
         if (overrideCatalogItems.Any() || entitlements.Any())
         {
-            if (installForm is not null)
-                installForm.UpdateUser("Generating ScreamAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
+            /*if (installForm is not null)
+                installForm.UpdateUser("Generating ScreamAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);*/
             File.Create(config).Close();
             StreamWriter writer = new(config, true, Encoding.UTF8);
             WriteConfig(writer,

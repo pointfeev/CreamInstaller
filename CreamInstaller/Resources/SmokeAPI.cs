@@ -42,8 +42,8 @@ internal static class SmokeAPI
         }
         if (overrideDlc.Any() || injectDlc.Any())
         {
-            if (installForm is not null)
-                installForm.UpdateUser("Generating SmokeAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
+            /*if (installForm is not null)
+                installForm.UpdateUser("Generating SmokeAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);*/
             File.Create(config).Close();
             StreamWriter writer = new(config, true, Encoding.UTF8);
             WriteConfig(writer,

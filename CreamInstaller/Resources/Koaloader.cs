@@ -67,8 +67,8 @@ internal static class Koaloader
         SortedList<string, string> modules = new(PlatformIdComparer.String);
         if (targets.Any() || modules.Any())
         {
-            if (installForm is not null)
-                installForm.UpdateUser("Generating Koaloader configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
+            /*if (installForm is not null)
+                installForm.UpdateUser("Generating Koaloader configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);*/
             File.Create(config).Close();
             StreamWriter writer = new(config, true, Encoding.UTF8);
             WriteConfig(writer, targets, modules, installForm);
@@ -125,10 +125,10 @@ internal static class Koaloader
         writer.WriteLine("}");
     }
 
-    internal static async Task Uninstall(string directory, InstallForm installForm = null, bool deleteConfig = true) => await Task.Run(async () =>
+    internal static async Task Uninstall(string directory, string rootDirectory = null, InstallForm installForm = null, bool deleteConfig = true) => await Task.Run(async () =>
     {
         directory.GetKoaloaderComponents(out List<string> proxies, out string config);
-        foreach (string proxyPath in proxies.Where(proxyPath => File.Exists(proxyPath) && proxyPath.IsResourceFile(Resources.ResourceIdentifier.Koaloader)))
+        foreach (string proxyPath in proxies.Where(proxyPath => File.Exists(proxyPath) && proxyPath.IsResourceFile(ResourceIdentifier.Koaloader)))
         {
             File.Delete(proxyPath);
             if (installForm is not null)
@@ -152,9 +152,11 @@ internal static class Koaloader
         await ScreamAPI.Uninstall(directory, installForm, deleteConfig);
         await UplayR1.Uninstall(directory, installForm, deleteConfig);
         await UplayR2.Uninstall(directory, installForm, deleteConfig);
+        if (rootDirectory is not null && directory != rootDirectory)
+            await Uninstall(rootDirectory, null, installForm, deleteConfig);
     });
 
-    internal static async Task Install(string directory, BinaryType binaryType, ProgramSelection selection, InstallForm installForm = null, bool generateConfig = true) => await Task.Run(() =>
+    internal static async Task Install(string directory, BinaryType binaryType, ProgramSelection selection, string rootDirectory = null, InstallForm installForm = null, bool generateConfig = true) => await Task.Run(() =>
     {
         directory.GetKoaloaderComponents(out List<string> proxies, out string config);
         string proxy = selection.KoaloaderProxy ?? ProgramSelection.DefaultKoaloaderProxy;
@@ -186,69 +188,149 @@ internal static class Koaloader
             if (bit32)
             {
                 path = directory + @"\SmokeAPI32.dll";
+                if (rootDirectory is not null && directory != rootDirectory)
+                {
+                    if (File.Exists(path))
+                    {
+                        File.Delete(path);
+                        if (installForm is not null)
+                            installForm.UpdateUser($"Deleted SmokeAPI from non-root directory: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
+                    }
+                    path = rootDirectory + @"\SmokeAPI32.dll";
+                }
                 "SmokeAPI.steam_api.dll".Write(path);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Wrote SmokeAPI: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
+                    installForm.UpdateUser($"Wrote SmokeAPI{(rootDirectory is not null && directory != rootDirectory ? " to root directory" : "")}: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
             }
             if (bit64)
             {
                 path = directory + @"\SmokeAPI64.dll";
+                if (rootDirectory is not null && directory != rootDirectory)
+                {
+                    if (File.Exists(path))
+                    {
+                        File.Delete(path);
+                        if (installForm is not null)
+                            installForm.UpdateUser($"Deleted SmokeAPI from non-root directory: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
+                    }
+                    path = rootDirectory + @"\SmokeAPI64.dll";
+                }
                 "SmokeAPI.steam_api64.dll".Write(path);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Wrote SmokeAPI: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
+                    installForm.UpdateUser($"Wrote SmokeAPI{(rootDirectory is not null && directory != rootDirectory ? " to root directory" : "")}: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
             }
-            SmokeAPI.CheckConfig(directory, selection, installForm);
+            SmokeAPI.CheckConfig(rootDirectory ?? directory, selection, installForm);
         }
         if (selection.Platform is Platform.Epic or Platform.Paradox)
         {
             if (bit32)
             {
                 path = directory + @"\ScreamAPI32.dll";
+                if (rootDirectory is not null && directory != rootDirectory)
+                {
+                    if (File.Exists(path))
+                    {
+                        File.Delete(path);
+                        if (installForm is not null)
+                            installForm.UpdateUser($"Deleted ScreamAPI from non-root directory: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
+                    }
+                    path = rootDirectory + @"\ScreamAPI32.dll";
+                }
                 "ScreamAPI.EOSSDK-Win32-Shipping.dll".Write(path);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Wrote ScreamAPI: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
+                    installForm.UpdateUser($"Wrote ScreamAPI{(rootDirectory is not null && directory != rootDirectory ? " to root directory" : "")}: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
             }
             if (bit64)
             {
                 path = directory + @"\ScreamAPI64.dll";
+                if (rootDirectory is not null && directory != rootDirectory)
+                {
+                    if (File.Exists(path))
+                    {
+                        File.Delete(path);
+                        if (installForm is not null)
+                            installForm.UpdateUser($"Deleted ScreamAPI from non-root directory: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
+                    }
+                    path = rootDirectory + @"\ScreamAPI64.dll";
+                }
                 "ScreamAPI.EOSSDK-Win64-Shipping.dll".Write(path);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Wrote ScreamAPI: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
+                    installForm.UpdateUser($"Wrote ScreamAPI{(rootDirectory is not null && directory != rootDirectory ? " to root directory" : "")}: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
             }
-            ScreamAPI.CheckConfig(directory, selection, installForm);
+            ScreamAPI.CheckConfig(rootDirectory ?? directory, selection, installForm);
         }
         if (selection.Platform is Platform.Ubisoft)
         {
             if (bit32)
             {
                 path = directory + @"\UplayR1Unlocker32.dll";
+                if (rootDirectory is not null && directory != rootDirectory)
+                {
+                    if (File.Exists(path))
+                    {
+                        File.Delete(path);
+                        if (installForm is not null)
+                            installForm.UpdateUser($"Deleted Uplay R1 Unlocker from non-root directory: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
+                    }
+                    path = rootDirectory + @"\UplayR1Unlocker32.dll";
+                }
                 "UplayR1.uplay_r1_loader.dll".Write(path);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Wrote Uplay R1 Unlocker: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
+                    installForm.UpdateUser($"Wrote Uplay R1 Unlocker{(rootDirectory is not null && directory != rootDirectory ? " to root directory" : "")}: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
             }
             if (bit64)
             {
                 path = directory + @"\UplayR1Unlocker64.dll";
+                if (rootDirectory is not null && directory != rootDirectory)
+                {
+                    if (File.Exists(path))
+                    {
+                        File.Delete(path);
+                        if (installForm is not null)
+                            installForm.UpdateUser($"Deleted Uplay R1 Unlocker from non-root directory: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
+                    }
+                    path = rootDirectory + @"\UplayR1Unlocker64.dll";
+                }
                 "UplayR1.uplay_r1_loader64.dll".Write(path);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Wrote Uplay R1 Unlocker: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
+                    installForm.UpdateUser($"Wrote Uplay R1 Unlocker{(rootDirectory is not null && directory != rootDirectory ? " to root directory" : "")}: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
             }
-            UplayR1.CheckConfig(directory, selection, installForm);
+            UplayR1.CheckConfig(rootDirectory ?? directory, selection, installForm);
             if (bit32)
             {
                 path = directory + @"\UplayR2Unlocker32.dll";
+                if (rootDirectory is not null && directory != rootDirectory)
+                {
+                    if (File.Exists(path))
+                    {
+                        File.Delete(path);
+                        if (installForm is not null)
+                            installForm.UpdateUser($"Deleted Uplay R2 Unlocker from non-root directory: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
+                    }
+                    path = rootDirectory + @"\UplayR2Unlocker32.dll";
+                }
                 "UplayR2.upc_r2_loader.dll".Write(path);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Wrote Uplay R2 Unlocker: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
+                    installForm.UpdateUser($"Wrote Uplay R2 Unlocker{(rootDirectory is not null && directory != rootDirectory ? " to root directory" : "")}: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
             }
             if (bit64)
             {
                 path = directory + @"\UplayR2Unlocker64.dll";
+                if (rootDirectory is not null && directory != rootDirectory)
+                {
+                    if (File.Exists(path))
+                    {
+                        File.Delete(path);
+                        if (installForm is not null)
+                            installForm.UpdateUser($"Deleted Uplay R2 Unlocker from non-root directory: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
+                    }
+                    path = rootDirectory + @"\UplayR2Unlocker64.dll";
+                }
                 "UplayR2.upc_r2_loader64.dll".Write(path);
                 if (installForm is not null)
-                    installForm.UpdateUser($"Wrote Uplay R2 Unlocker: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
+                    installForm.UpdateUser($"Wrote Uplay R2 Unlocker{(rootDirectory is not null && directory != rootDirectory ? " to root directory" : "")}: {Path.GetFileName(path)}", LogTextBox.Action, info: false);
             }
-            UplayR2.CheckConfig(directory, selection, installForm);
+            UplayR2.CheckConfig(rootDirectory ?? directory, selection, installForm);
         }
         if (generateConfig)
             CheckConfig(directory, selection, installForm);

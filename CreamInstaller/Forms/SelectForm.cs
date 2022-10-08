@@ -22,7 +22,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using static CreamInstaller.Resources.Resources;
-using static System.ComponentModel.Design.ObjectSelectorEditor;
 
 namespace CreamInstaller;
 
