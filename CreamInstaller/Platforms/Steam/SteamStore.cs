@@ -86,6 +86,10 @@ internal static class SteamStore
                         {
                             DebugForm.Current.Log($"Unsuccessful deserialization of query for appid {appId}{(isDlc ? " (DLC)" : "")}: {e.GetType()} ({e.Message})");
                         }
+#else
+                        { }
+#endif
+#if DEBUG
                 else DebugForm.Current.Log("Response deserialization null for appid " + appId);
 #endif
             }
