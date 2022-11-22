@@ -1,4 +1,4 @@
-﻿using CreamInstaller.Epic.GraphQL;
+﻿using CreamInstaller.Platforms.Epic.GraphQL;
 using CreamInstaller.Utility;
 
 using Newtonsoft.Json;
@@ -12,7 +12,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace CreamInstaller.Epic;
+namespace CreamInstaller.Platforms.Epic;
 
 internal static class EpicStore
 {
@@ -40,7 +40,6 @@ internal static class EpicStore
             catch { }
         }
         else if (cachedExists)
-        {
             try
             {
                 response = JsonConvert.DeserializeObject<Response>(File.ReadAllText(cacheFile));
@@ -49,14 +48,13 @@ internal static class EpicStore
             {
                 File.Delete(cacheFile);
             }
-        }
         if (response is null)
             return dlcIds;
         List<Element> searchStore = new(response.Data.Catalog.SearchStore.Elements);
         foreach (Element element in searchStore)
         {
             string title = element.Title;
-            string product = (element.CatalogNs is not null && element.CatalogNs.Mappings.Any())
+            string product = element.CatalogNs is not null && element.CatalogNs.Mappings.Any()
                 ? element.CatalogNs.Mappings.First().PageSlug : null;
             string icon = null;
             for (int i = 0; i < element.KeyImages?.Length; i++)
@@ -75,7 +73,7 @@ internal static class EpicStore
         foreach (Element element in catalogOffers)
         {
             string title = element.Title;
-            string product = (element.CatalogNs is not null && element.CatalogNs.Mappings.Any())
+            string product = element.CatalogNs is not null && element.CatalogNs.Mappings.Any()
                 ? element.CatalogNs.Mappings.First().PageSlug : null;
             string icon = null;
             for (int i = 0; i < element.KeyImages?.Length; i++)

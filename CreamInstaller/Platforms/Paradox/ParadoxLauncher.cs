@@ -12,7 +12,7 @@ using System.Windows.Forms;
 
 using static CreamInstaller.Resources.Resources;
 
-namespace CreamInstaller.Paradox;
+namespace CreamInstaller.Platforms.Paradox;
 
 internal static class ParadoxLauncher
 {
@@ -43,13 +43,11 @@ internal static class ParadoxLauncher
                 paradoxLauncher.ExtraSelectedDlc.Add(new(selection.Id, selection.Name, selection.SelectedDlc));
             }
             if (!paradoxLauncher.ExtraDlc.Any())
-            {
                 foreach (ProgramSelection selection in ProgramSelection.AllSafe.Where(s => s != paradoxLauncher && s.Publisher == "Paradox Interactive"))
                 {
                     paradoxLauncher.ExtraDlc.Add(new(selection.Id, selection.Name, selection.AllDlc));
                     paradoxLauncher.ExtraSelectedDlc.Add(new(selection.Id, selection.Name, selection.AllDlc));
                 }
-            }
         }
     }
 
@@ -129,15 +127,13 @@ internal static class ParadoxLauncher
                 if (steamOriginalSdk32 is not null && api32.IsResourceFile(ResourceIdentifier.Steamworks32))
                 {
                     steamOriginalSdk32.Write(api32);
-                    if (installForm is not null)
-                        installForm.UpdateUser("Corrected Steamworks: " + api32, LogTextBox.Action);
+                    installForm?.UpdateUser("Corrected Steamworks: " + api32, LogTextBox.Action);
                     neededRepair = true;
                 }
                 if (steamOriginalSdk64 is not null && api64.IsResourceFile(ResourceIdentifier.Steamworks64))
                 {
                     steamOriginalSdk64.Write(api64);
-                    if (installForm is not null)
-                        installForm.UpdateUser("Corrected Steamworks: " + api64, LogTextBox.Action);
+                    installForm?.UpdateUser("Corrected Steamworks: " + api64, LogTextBox.Action);
                     neededRepair = true;
                 }
                 if (smokeInstalled)
@@ -146,15 +142,13 @@ internal static class ParadoxLauncher
                 if (epicOriginalSdk32 is not null && api32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32))
                 {
                     epicOriginalSdk32.Write(api32);
-                    if (installForm is not null)
-                        installForm.UpdateUser("Corrected Epic Online Services: " + api32, LogTextBox.Action);
+                    installForm?.UpdateUser("Corrected Epic Online Services: " + api32, LogTextBox.Action);
                     neededRepair = true;
                 }
                 if (epicOriginalSdk64 is not null && api64.IsResourceFile(ResourceIdentifier.EpicOnlineServices64))
                 {
                     epicOriginalSdk64.Write(api64);
-                    if (installForm is not null)
-                        installForm.UpdateUser("Corrected Epic Online Services: " + api64, LogTextBox.Action);
+                    installForm?.UpdateUser("Corrected Epic Online Services: " + api64, LogTextBox.Action);
                     neededRepair = true;
                 }
                 if (screamInstalled)

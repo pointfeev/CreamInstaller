@@ -15,7 +15,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CreamInstaller.Steam;
+namespace CreamInstaller.Platforms.Steam;
 
 internal static class SteamCMD
 {
@@ -42,12 +42,10 @@ internal static class SteamCMD
             if (Interlocked.CompareExchange(ref locks[i], 1, 0) == 0)
             {
                 if (appId is not null)
-                {
                     if (AttemptCount.ContainsKey(appId))
                         AttemptCount[appId]++;
                     else
                         AttemptCount[appId] = 0;
-                }
                 if (Program.Canceled) return "";
                 ProcessStartInfo processStartInfo = new()
                 {

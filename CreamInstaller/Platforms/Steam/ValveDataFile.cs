@@ -1,8 +1,7 @@
-﻿
-using Gameloop.Vdf;
+﻿using Gameloop.Vdf;
 using Gameloop.Vdf.Linq;
 
-namespace CreamInstaller.Steam;
+namespace CreamInstaller.Platforms.Steam;
 
 internal static class ValveDataFile
 {

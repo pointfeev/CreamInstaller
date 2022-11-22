@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 using System;
 
-namespace CreamInstaller.Epic.GraphQL;
+namespace CreamInstaller.Platforms.Epic.GraphQL;
 
 public class Response
 {

@@ -1,4 +1,4 @@
-﻿using CreamInstaller.Paradox;
+﻿using CreamInstaller.Platforms.Paradox;
 using CreamInstaller.Utility;
 
 using System;

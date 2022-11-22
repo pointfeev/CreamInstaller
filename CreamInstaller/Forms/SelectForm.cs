@@ -1,11 +1,11 @@
 ﻿#pragma warning disable IDE0058
 
 using CreamInstaller.Components;
-using CreamInstaller.Epic;
-using CreamInstaller.Paradox;
+using CreamInstaller.Platforms.Epic;
+using CreamInstaller.Platforms.Paradox;
+using CreamInstaller.Platforms.Steam;
+using CreamInstaller.Platforms.Ubisoft;
 using CreamInstaller.Resources;
-using CreamInstaller.Steam;
-using CreamInstaller.Ubisoft;
 using CreamInstaller.Utility;
 
 using Gameloop.Vdf.Linq;
@@ -610,8 +610,7 @@ internal partial class SelectForm : CustomForm
         {
             (string gameId, _) = dlc.Value;
             ProgramSelection selection = ProgramSelection.FromPlatformId(platform, gameId);
-            if (selection is not null)
-                selection.ToggleDlc(node.Name, node.Checked);
+            selection?.ToggleDlc(node.Name, node.Checked);
         }
         else
         {

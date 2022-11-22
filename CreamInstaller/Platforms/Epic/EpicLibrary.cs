@@ -5,12 +5,13 @@ using Microsoft.Win32;
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
 using static CreamInstaller.Resources.Resources;
 
-namespace CreamInstaller.Epic;
+namespace CreamInstaller.Platforms.Epic;
 
 internal static class EpicLibrary
 {
@@ -43,7 +44,8 @@ internal static class EpicLibrary
             try
             {
                 Manifest manifest = JsonSerializer.Deserialize<Manifest>(json);
-                if (manifest is not null && manifest.CatalogItemId == manifest.MainGameCatalogItemId)
+                if (manifest is not null && manifest.CatalogItemId == manifest.MainGameCatalogItemId
+                    && !games.Any(g => g.CatalogItemId == manifest.CatalogItemId && g.InstallLocation == manifest.InstallLocation))
                     games.Add(manifest);
             }
             catch { };

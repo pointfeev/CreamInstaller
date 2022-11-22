@@ -5,7 +5,7 @@
 
 using Newtonsoft.Json;
 
-namespace CreamInstaller.Epic.GraphQL;
+namespace CreamInstaller.Platforms.Epic.GraphQL;
 
 internal class Request
 {

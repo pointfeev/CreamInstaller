@@ -40,14 +40,11 @@ internal class CustomTreeView : TreeView
 
     private void OnDisposed(object sender, EventArgs e)
     {
-        if (backBrush is not null)
-            backBrush.Dispose();
+        backBrush?.Dispose();
         backBrush = null;
-        if (comboBoxFont is not null)
-            comboBoxFont.Dispose();
+        comboBoxFont?.Dispose();
         comboBoxFont = null;
-        if (comboBoxDropDown is not null)
-            comboBoxDropDown.Dispose();
+        comboBoxDropDown?.Dispose();
         comboBoxDropDown = null;
     }
 

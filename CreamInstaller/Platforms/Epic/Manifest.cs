@@ -1,4 +1,4 @@
-﻿namespace CreamInstaller.Epic;
+﻿namespace CreamInstaller.Platforms.Epic;
 
 public class Manifest
 {

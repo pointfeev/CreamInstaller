@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using System;
 #endif
 
-namespace CreamInstaller.Steam;
+namespace CreamInstaller.Platforms.Steam;
 
 internal static class SteamStore
 {
@@ -40,9 +40,7 @@ internal static class SteamStore
             {
                 IDictionary<string, JToken> apps = (IDictionary<string, JToken>)JsonConvert.DeserializeObject(response);
                 if (apps is not null)
-                {
                     foreach (KeyValuePair<string, JToken> app in apps)
-                    {
                         try
                         {
                             AppDetails appDetails = JsonConvert.DeserializeObject<AppDetails>(app.Value.ToString());
@@ -88,12 +86,6 @@ internal static class SteamStore
                         {
                             DebugForm.Current.Log($"Unsuccessful deserialization of query for appid {appId}{(isDlc ? " (DLC)" : "")}: {e.GetType()} ({e.Message})");
                         }
-#else
-                        { }
-#endif
-                    }
-                }
-#if DEBUG
                 else DebugForm.Current.Log("Response deserialization null for appid " + appId);
 #endif
             }
@@ -102,7 +94,6 @@ internal static class SteamStore
 #endif
         }
         if (cachedExists)
-        {
             try
             {
                 return JsonConvert.DeserializeObject<AppData>(File.ReadAllText(cacheFile));
@@ -111,7 +102,6 @@ internal static class SteamStore
             {
                 File.Delete(cacheFile);
             }
-        }
         if (!isDlc)
         {
             Thread.Sleep(1000);

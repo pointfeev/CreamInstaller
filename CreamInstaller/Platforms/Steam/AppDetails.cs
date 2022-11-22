@@ -5,7 +5,7 @@
 
 using System.Collections.Generic;
 
-namespace CreamInstaller.Steam;
+namespace CreamInstaller.Platforms.Steam;
 
 public class AppData
 {

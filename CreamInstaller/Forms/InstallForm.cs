@@ -10,7 +10,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-using static CreamInstaller.Paradox.ParadoxLauncher;
+using static CreamInstaller.Platforms.Paradox.ParadoxLauncher;
 using static CreamInstaller.Resources.Resources;
 
 namespace CreamInstaller;

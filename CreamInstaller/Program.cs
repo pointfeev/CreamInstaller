@@ -1,4 +1,4 @@
-using CreamInstaller.Steam;
+using CreamInstaller.Platforms.Steam;
 using CreamInstaller.Utility;
 
 using System;

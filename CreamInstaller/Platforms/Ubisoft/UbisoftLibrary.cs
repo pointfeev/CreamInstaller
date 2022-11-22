@@ -5,11 +5,12 @@ using Microsoft.Win32;
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 using static CreamInstaller.Resources.Resources;
 
-namespace CreamInstaller.Ubisoft;
+namespace CreamInstaller.Platforms.Ubisoft;
 
 internal static class UbisoftLibrary
 {
@@ -35,9 +36,9 @@ internal static class UbisoftLibrary
         foreach (string gameId in installsKey.GetSubKeyNames())
         {
             RegistryKey installKey = installsKey.OpenSubKey(gameId);
-            string installDir = installKey?.GetValue("InstallDir")?.ToString();
-            if (installDir is not null)
-                games.Add((gameId, new DirectoryInfo(installDir).Name, installDir.BeautifyPath()));
+            string installDir = installKey?.GetValue("InstallDir")?.ToString()?.BeautifyPath();
+            if (installDir is not null && !games.Any(g => g.gameId == gameId && g.gameDirectory == installDir))
+                games.Add((gameId, new DirectoryInfo(installDir).Name, installDir));
         }
         return games;
     });
