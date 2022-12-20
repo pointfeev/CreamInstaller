@@ -87,9 +87,9 @@ internal class CustomTreeView : TreeView
                 : ColorTranslator.FromHtml("#AAAA69");
         text = platform.ToString();
         size = TextRenderer.MeasureText(graphics, text, font);
-        bounds = new Rectangle(bounds.X + bounds.Width, bounds.Y, size.Width, bounds.Height);
+        bounds = bounds with { X = bounds.X + bounds.Width, Width = size.Width };
         selectionBounds
-            = new Rectangle(selectionBounds.Location, selectionBounds.Size + new Size(bounds.Size.Width, 0));
+            = new Rectangle(selectionBounds.Location, selectionBounds.Size + bounds.Size with { Height = 0 });
         graphics.FillRectangle(brush, bounds);
         point = new Point(bounds.Location.X - 1, bounds.Location.Y + 1);
         TextRenderer.DrawText(graphics, text, font, point, color, TextFormatFlags.Default);
@@ -103,7 +103,7 @@ internal class CustomTreeView : TreeView
             text = platformId;
             size = TextRenderer.MeasureText(graphics, text, font);
             int left = -4;
-            bounds = new Rectangle(bounds.X + bounds.Width + left, bounds.Y, size.Width, bounds.Height);
+            bounds = bounds with { X = bounds.X + bounds.Width + left, Width = size.Width };
             selectionBounds = new Rectangle(selectionBounds.Location,
                                             selectionBounds.Size + new Size(bounds.Size.Width + left, 0));
             graphics.FillRectangle(brush, bounds);
@@ -120,7 +120,7 @@ internal class CustomTreeView : TreeView
                 if (bounds == node.Bounds)
                 {
                     size = new Size(4, 0);
-                    bounds = new Rectangle(bounds.X + bounds.Width, bounds.Y, size.Width, bounds.Height);
+                    bounds = bounds with { X = bounds.X + bounds.Width, Width = size.Width };
                     graphics.FillRectangle(brush, bounds);
                 }
                 CheckBoxState checkBoxState = selection.Koaloader
@@ -129,9 +129,9 @@ internal class CustomTreeView : TreeView
                         ? CheckBoxState.UncheckedPressed
                         : CheckBoxState.UncheckedDisabled;
                 size = CheckBoxRenderer.GetGlyphSize(graphics, checkBoxState);
-                bounds = new Rectangle(bounds.X + bounds.Width, bounds.Y, size.Width, bounds.Height);
+                bounds = bounds with { X = bounds.X + bounds.Width, Width = size.Width };
                 selectionBounds = new Rectangle(selectionBounds.Location,
-                                                selectionBounds.Size + new Size(bounds.Size.Width, 0));
+                                                selectionBounds.Size + bounds.Size with { Height = 0 });
                 Rectangle checkBoxBounds = bounds;
                 graphics.FillRectangle(backBrush, bounds);
                 point = new Point(bounds.Left, bounds.Top + bounds.Height / 2 - size.Height / 2 - 1);
@@ -139,11 +139,11 @@ internal class CustomTreeView : TreeView
                 text = koaloaderToggleString;
                 size = TextRenderer.MeasureText(graphics, text, font);
                 int left = 1;
-                bounds = new Rectangle(bounds.X + bounds.Width, bounds.Y, size.Width + left, bounds.Height);
+                bounds = bounds with { X = bounds.X + bounds.Width, Width = size.Width + left };
                 selectionBounds = new Rectangle(selectionBounds.Location,
-                                                selectionBounds.Size + new Size(bounds.Size.Width, 0));
+                                                selectionBounds.Size + bounds.Size with { Height = 0 });
                 checkBoxBounds = new Rectangle(checkBoxBounds.Location,
-                                               checkBoxBounds.Size + new Size(bounds.Size.Width, 0));
+                                               checkBoxBounds.Size + bounds.Size with { Height = 0 });
                 graphics.FillRectangle(backBrush, bounds);
                 point = new Point(bounds.Location.X - 1 + left, bounds.Location.Y + 1);
                 TextRenderer.DrawText(graphics, text, font, point,
@@ -164,13 +164,13 @@ internal class CustomTreeView : TreeView
                     bounds = new Rectangle(bounds.X + bounds.Width, bounds.Y + padding / 2, size.Width,
                                            bounds.Height - padding);
                     selectionBounds = new Rectangle(selectionBounds.Location,
-                                                    selectionBounds.Size + new Size(bounds.Size.Width, 0));
+                                                    selectionBounds.Size + bounds.Size with { Height = 0 });
                     Rectangle comboBoxBounds = bounds;
                     graphics.FillRectangle(backBrush, bounds);
                     ComboBoxRenderer.DrawTextBox(graphics, bounds, text, comboBoxFont, comboBoxState);
                     size = new Size(14, 0);
                     left = -1;
-                    bounds = new Rectangle(bounds.X + bounds.Width + left, bounds.Y, size.Width, bounds.Height);
+                    bounds = bounds with { X = bounds.X + bounds.Width + left, Width = size.Width };
                     selectionBounds = new Rectangle(selectionBounds.Location,
                                                     selectionBounds.Size + new Size(bounds.Size.Width + left, 0));
                     comboBoxBounds = new Rectangle(comboBoxBounds.Location,

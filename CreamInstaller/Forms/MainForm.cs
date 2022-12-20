@@ -58,8 +58,10 @@ internal partial class MainForm : CustomForm
         updateButton.Click -= OnUpdateCancel;
         progressLabel.Text = "Checking for updates . . .";
         changelogTreeView.Visible = false;
-        changelogTreeView.Location = new Point(progressLabel.Location.X,
-                                               progressLabel.Location.Y + progressLabel.Size.Height + 13);
+        changelogTreeView.Location = progressLabel.Location with
+        {
+            Y = progressLabel.Location.Y + progressLabel.Size.Height + 13
+        };
         Refresh();
 #if DEBUG
         DebugForm.Current.Attach(this);
@@ -187,7 +189,7 @@ internal partial class MainForm : CustomForm
         updateButton.Click -= OnUpdate;
         updateButton.Click += OnUpdateCancel;
         changelogTreeView.Location
-            = new Point(progressBar.Location.X, progressBar.Location.Y + progressBar.Size.Height + 6);
+            = progressBar.Location with { Y = progressBar.Location.Y + progressBar.Size.Height + 6 };
         Refresh();
         Progress<double> progress = new();
         progress.ProgressChanged += delegate(object sender, double _progress)

@@ -690,11 +690,14 @@ internal partial class SelectForm : CustomForm
         progressLabelDLCs.Text = "";
         progressLabelDLCs.Visible = true;
         progressBar.Visible = true;
-        programsGroupBox.Size = new Size(programsGroupBox.Size.Width, programsGroupBox.Size.Height - 3
-                                       - progressLabel.Size.Height
-                                       - progressLabelGames.Size.Height
-                                       - progressLabelDLCs.Size.Height
-                                       - progressBar.Size.Height);
+        programsGroupBox.Size = programsGroupBox.Size with
+        {
+            Height = programsGroupBox.Size.Height - 3
+                                                  - progressLabel.Size.Height
+                                                  - progressLabelGames.Size.Height
+                                                  - progressLabelDLCs.Size.Height
+                                                  - progressBar.Size.Height
+        };
     }
 
     private void HideProgressBar()
@@ -704,11 +707,14 @@ internal partial class SelectForm : CustomForm
         progressLabelGames.Visible = false;
         progressLabelDLCs.Visible = false;
         progressBar.Visible = false;
-        programsGroupBox.Size = new Size(programsGroupBox.Size.Width, programsGroupBox.Size.Height + 3
-                                       + progressLabel.Size.Height
-                                       + progressLabelGames.Size.Height
-                                       + progressLabelDLCs.Size.Height
-                                       + progressBar.Size.Height);
+        programsGroupBox.Size = programsGroupBox.Size with
+        {
+            Height = programsGroupBox.Size.Height + 3
+                                                  + progressLabel.Size.Height
+                                                  + progressLabelGames.Size.Height
+                                                  + progressLabelDLCs.Size.Height
+                                                  + progressBar.Size.Height
+        };
     }
 
     internal void OnNodeRightClick(TreeNode node, Point location) => Invoke(() =>
