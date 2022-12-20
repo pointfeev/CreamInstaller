@@ -1,10 +1,8 @@
-﻿using System;
+﻿using System.ComponentModel;
 using System.Windows.Forms;
-using System.Drawing;
-using System.ComponentModel;
 using CreamInstaller.Components;
 
-namespace CreamInstaller
+namespace CreamInstaller.Forms
 {
     partial class SelectForm
     {

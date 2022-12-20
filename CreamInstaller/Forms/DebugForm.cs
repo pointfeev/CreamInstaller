@@ -1,30 +1,32 @@
-﻿using CreamInstaller.Components;
-using CreamInstaller.Utility;
-
-using System;
+﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using CreamInstaller.Components;
+using CreamInstaller.Utility;
 
-namespace CreamInstaller;
+namespace CreamInstaller.Forms;
 
 internal partial class DebugForm : CustomForm
 {
     internal static DebugForm current;
+
+    private Form attachedForm;
+
+    internal DebugForm()
+    {
+        InitializeComponent();
+        debugTextBox.BackColor = LogTextBox.Background;
+    }
+
     internal static DebugForm Current
     {
         get
         {
             if (current is not null && (current.Disposing || current.IsDisposed))
                 current = null;
-            return current ??= new();
+            return current ??= new DebugForm();
         }
         set => current = value;
-    }
-
-    internal DebugForm() : base()
-    {
-        InitializeComponent();
-        debugTextBox.BackColor = LogTextBox.Background;
     }
 
     protected override void WndProc(ref Message message) // make form immovable by user
@@ -37,8 +39,6 @@ internal partial class DebugForm : CustomForm
         }
         base.WndProc(ref message);
     }
-
-    private Form attachedForm;
 
     internal void Attach(Form form)
     {
@@ -64,7 +64,7 @@ internal partial class DebugForm : CustomForm
         if (attachedForm is not null && attachedForm.Visible)
         {
             //Size = new(Size.Width, attachedForm.Size.Height);
-            Location = new(attachedForm.Right, attachedForm.Top);
+            Location = new Point(attachedForm.Right, attachedForm.Top);
             BringToFrontWithoutActivation();
         }
     }
@@ -74,13 +74,11 @@ internal partial class DebugForm : CustomForm
     internal void Log(string text, Color color)
     {
         if (!debugTextBox.Disposing && !debugTextBox.IsDisposed)
-        {
             debugTextBox.Invoke(() =>
             {
                 if (debugTextBox.Text.Length > 0)
-                    debugTextBox.AppendText(Environment.NewLine, color, scroll: true);
-                debugTextBox.AppendText(text, color, scroll: true);
+                    debugTextBox.AppendText(Environment.NewLine, color, true);
+                debugTextBox.AppendText(text, color, true);
             });
-        }
     }
 }

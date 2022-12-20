@@ -1,11 +1,14 @@
-﻿namespace CreamInstaller;
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+
+namespace CreamInstaller.Forms;
 
 partial class DebugForm
 {
     /// <summary>
     /// Required designer variable.
     /// </summary>
-    private System.ComponentModel.IContainer components = null;
+    private IContainer components = null;
 
     /// <summary>
     /// Clean up any resources being used.
@@ -65,5 +68,5 @@ partial class DebugForm
 
     #endregion
 
-    private System.Windows.Forms.RichTextBox debugTextBox;
+    private RichTextBox debugTextBox;
 }

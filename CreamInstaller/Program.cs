@@ -1,6 +1,3 @@
-using CreamInstaller.Platforms.Steam;
-using CreamInstaller.Utility;
-
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -9,6 +6,9 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
+using CreamInstaller.Forms;
+using CreamInstaller.Platforms.Steam;
+using CreamInstaller.Utility;
 
 namespace CreamInstaller;
 
@@ -46,7 +46,8 @@ internal static class Program
         if (ProtectedGames.Contains(name)) return true;
         if (directory is not null && !ProtectedGameDirectoryExceptions.Contains(name))
             foreach (string path in ProtectedGameDirectories)
-                if (Directory.Exists(directory + path)) return true;
+                if (Directory.Exists(directory + path))
+                    return true;
         return false;
     }
 
@@ -56,12 +57,15 @@ internal static class Program
         {
             using DialogForm dialogForm = new(form);
             if (dialogForm.Show(SystemIcons.Error,
-            $"ERROR: {selection.Name} is currently running!" +
-            "\n\nPlease close the program/game to continue . . . ",
-            "Retry", "Cancel") == DialogResult.OK)
+                                $"ERROR: {selection.Name} is currently running!" +
+                                "\n\nPlease close the program/game to continue . . . ",
+                                "Retry", "Cancel") == DialogResult.OK)
                 return IsProgramRunningDialog(form, selection);
         }
-        else return true;
+        else
+        {
+            return true;
+        }
         return false;
     }
 
@@ -74,11 +78,12 @@ internal static class Program
             _ = Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.ApplicationExit += new(OnApplicationExit);
-            Application.ThreadException += new((s, e) => e.Exception?.HandleFatalException());
+            Application.ApplicationExit += OnApplicationExit;
+            Application.ThreadException += (s, e) => e.Exception?.HandleFatalException();
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-            AppDomain.CurrentDomain.UnhandledException += new((s, e) => (e.ExceptionObject as Exception)?.HandleFatalException());
-            retry:
+            AppDomain.CurrentDomain.UnhandledException += (s, e)
+                => (e.ExceptionObject as Exception)?.HandleFatalException();
+        retry:
             try
             {
                 HttpClientManager.Setup();
@@ -99,6 +104,7 @@ internal static class Program
     }
 
     internal static bool Canceled;
+
     internal static async void Cleanup(bool cancel = true)
     {
         Canceled = cancel;

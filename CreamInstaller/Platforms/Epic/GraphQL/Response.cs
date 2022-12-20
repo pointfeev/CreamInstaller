@@ -1,15 +1,13 @@
 ﻿#pragma warning disable CA1819 // Properties should not return arrays
 
-using Newtonsoft.Json;
-
 using System;
+using Newtonsoft.Json;
 
 namespace CreamInstaller.Platforms.Epic.GraphQL;
 
 public class Response
 {
-    [JsonProperty(PropertyName = "data")]
-    public ResponseData Data { get; protected set; }
+    [JsonProperty(PropertyName = "data")] public ResponseData Data { get; protected set; }
 }
 
 public class ResponseData
@@ -35,17 +33,14 @@ public class ElementContainer
 
 public class Element
 {
-    [JsonProperty(PropertyName = "id")]
-    public string Id { get; protected set; }
+    [JsonProperty(PropertyName = "id")] public string Id { get; protected set; }
 
-    [JsonProperty(PropertyName = "title")]
-    public string Title { get; protected set; }
+    [JsonProperty(PropertyName = "title")] public string Title { get; protected set; }
 
     [JsonProperty(PropertyName = "keyImages")]
     public KeyImage[] KeyImages { get; protected set; }
 
-    [JsonProperty(PropertyName = "items")]
-    public Item[] Items { get; protected set; }
+    [JsonProperty(PropertyName = "items")] public Item[] Items { get; protected set; }
 
     [JsonProperty(PropertyName = "catalogNs")]
     public CatalogNs CatalogNs { get; protected set; }
@@ -53,11 +48,9 @@ public class Element
 
 public class Item
 {
-    [JsonProperty(PropertyName = "id")]
-    public string Id { get; protected set; }
+    [JsonProperty(PropertyName = "id")] public string Id { get; protected set; }
 
-    [JsonProperty(PropertyName = "title")]
-    public string Title { get; protected set; }
+    [JsonProperty(PropertyName = "title")] public string Title { get; protected set; }
 
     [JsonProperty(PropertyName = "developer")]
     public string Developer { get; protected set; }
@@ -65,11 +58,9 @@ public class Item
 
 public class KeyImage
 {
-    [JsonProperty(PropertyName = "type")]
-    public string Type { get; protected set; }
+    [JsonProperty(PropertyName = "type")] public string Type { get; protected set; }
 
-    [JsonProperty(PropertyName = "url")]
-    public Uri Url { get; protected set; }
+    [JsonProperty(PropertyName = "url")] public Uri Url { get; protected set; }
 }
 
 public class CatalogNs

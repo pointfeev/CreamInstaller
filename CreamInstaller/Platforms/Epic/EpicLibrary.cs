@@ -1,14 +1,10 @@
-﻿using CreamInstaller.Resources;
-using CreamInstaller.Utility;
-
-using Microsoft.Win32;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-
+using CreamInstaller.Utility;
+using Microsoft.Win32;
 using static CreamInstaller.Resources.Resources;
 
 namespace CreamInstaller.Platforms.Epic;
@@ -16,21 +12,32 @@ namespace CreamInstaller.Platforms.Epic;
 internal static class EpicLibrary
 {
     private static string epicManifestsPath;
+
     internal static string EpicManifestsPath
     {
         get
         {
-            epicManifestsPath ??= Registry.GetValue(@"HKEY_CURRENT_USER\Software\Epic Games\EOS", "ModSdkMetadataDir", null) as string;
-            epicManifestsPath ??= Registry.GetValue(@"HKEY_CURRENT_USER\Software\Wow6432Node\Epic Games\EOS", "ModSdkMetadataDir", null) as string;
-            epicManifestsPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Epic Games\EpicGamesLauncher", "AppDataPath", null) as string;
-            epicManifestsPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Epic Games\EpicGamesLauncher", "AppDataPath", null) as string;
-            if (epicManifestsPath is not null && epicManifestsPath.EndsWith(@"\Data")) epicManifestsPath += @"\Manifests";
+            epicManifestsPath
+                ??= Registry.GetValue(@"HKEY_CURRENT_USER\Software\Epic Games\EOS", "ModSdkMetadataDir",
+                                      null) as string;
+            epicManifestsPath
+                ??= Registry.GetValue(@"HKEY_CURRENT_USER\Software\Wow6432Node\Epic Games\EOS", "ModSdkMetadataDir",
+                                      null) as string;
+            epicManifestsPath
+                ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Epic Games\EpicGamesLauncher", "AppDataPath",
+                                      null) as string;
+            epicManifestsPath
+                ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Epic Games\EpicGamesLauncher",
+                                      "AppDataPath", null) as string;
+            if (epicManifestsPath is not null && epicManifestsPath.EndsWith(@"\Data"))
+                epicManifestsPath += @"\Manifests";
             return epicManifestsPath.BeautifyPath();
         }
     }
 
-    internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(string gameDirectory) =>
-        await Task.Run(async () => await gameDirectory.GetExecutableDirectories(filterCommon: true));
+    internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(
+        string gameDirectory) =>
+        await Task.Run(async () => await gameDirectory.GetExecutableDirectories(true));
 
     internal static async Task<List<Manifest>> GetGames() => await Task.Run(() =>
     {
@@ -45,10 +52,12 @@ internal static class EpicLibrary
             {
                 Manifest manifest = JsonSerializer.Deserialize<Manifest>(json);
                 if (manifest is not null && manifest.CatalogItemId == manifest.MainGameCatalogItemId
-                    && !games.Any(g => g.CatalogItemId == manifest.CatalogItemId && g.InstallLocation == manifest.InstallLocation))
+                                         && !games.Any(g => g.CatalogItemId == manifest.CatalogItemId
+                                                         && g.InstallLocation == manifest.InstallLocation))
                     games.Add(manifest);
             }
-            catch { };
+            catch { }
+            ;
         }
         return games;
     });

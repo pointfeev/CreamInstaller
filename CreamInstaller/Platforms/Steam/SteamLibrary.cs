@@ -1,16 +1,11 @@
-﻿using CreamInstaller.Resources;
-using CreamInstaller.Utility;
-
-using Gameloop.Vdf.Linq;
-
-using Microsoft.Win32;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using CreamInstaller.Utility;
+using Gameloop.Vdf.Linq;
+using Microsoft.Win32;
 using static CreamInstaller.Resources.Resources;
 
 namespace CreamInstaller.Platforms.Steam;
@@ -18,34 +13,42 @@ namespace CreamInstaller.Platforms.Steam;
 internal static class SteamLibrary
 {
     private static string installPath;
+
     internal static string InstallPath
     {
         get
         {
-            installPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam", "InstallPath", null) as string;
-            installPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Valve\Steam", "InstallPath", null) as string;
+            installPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam", "InstallPath",
+                                              null) as string;
+            installPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Valve\Steam", "InstallPath",
+                                              null) as string;
             return installPath.BeautifyPath();
         }
     }
 
-    internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(string gameDirectory) =>
-        await Task.Run(async () => await gameDirectory.GetExecutableDirectories(filterCommon: true));
+    internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(
+        string gameDirectory) =>
+        await Task.Run(async () => await gameDirectory.GetExecutableDirectories(true));
 
-    internal static async Task<List<(string appId, string name, string branch, int buildId, string gameDirectory)>> GetGames() => await Task.Run(async () =>
+    internal static async Task<List<(string appId, string name, string branch, int buildId, string gameDirectory)>>
+        GetGames() => await Task.Run(async () =>
     {
         List<(string appId, string name, string branch, int buildId, string gameDirectory)> games = new();
         List<string> gameLibraryDirectories = await GetLibraryDirectories();
         foreach (string libraryDirectory in gameLibraryDirectories)
         {
             if (Program.Canceled) return games;
-            foreach ((string appId, string name, string branch, int buildId, string gameDirectory) game in (await GetGamesFromLibraryDirectory(libraryDirectory))
-                .Where(game => !games.Any(_game => _game.appId == game.appId && _game.gameDirectory == game.gameDirectory)))
+            foreach ((string appId, string name, string branch, int buildId, string gameDirectory) game in
+                     (await GetGamesFromLibraryDirectory(libraryDirectory))
+                    .Where(game => !games.Any(_game => _game.appId == game.appId
+                                                    && _game.gameDirectory == game.gameDirectory)))
                 games.Add(game);
         }
         return games;
     });
 
-    internal static async Task<List<(string appId, string name, string branch, int buildId, string gameDirectory)>> GetGamesFromLibraryDirectory(string libraryDirectory) => await Task.Run(() =>
+    internal static async Task<List<(string appId, string name, string branch, int buildId, string gameDirectory)>>
+        GetGamesFromLibraryDirectory(string libraryDirectory) => await Task.Run(() =>
     {
         List<(string appId, string name, string branch, int buildId, string gameDirectory)> games = new();
         if (Program.Canceled || !Directory.Exists(libraryDirectory)) return games;
@@ -59,9 +62,9 @@ internal static class SteamLibrary
                 string name = result.Value.GetChild("name")?.ToString();
                 string buildId = result.Value.GetChild("buildid")?.ToString();
                 if (string.IsNullOrWhiteSpace(appId)
-                    || string.IsNullOrWhiteSpace(installdir)
-                    || string.IsNullOrWhiteSpace(name)
-                    || string.IsNullOrWhiteSpace(buildId))
+                 || string.IsNullOrWhiteSpace(installdir)
+                 || string.IsNullOrWhiteSpace(name)
+                 || string.IsNullOrWhiteSpace(buildId))
                     continue;
                 string gameDirectory = (libraryDirectory + @"\common\" + installdir).BeautifyPath();
                 if (games.Any(g => g.appId == appId && g.gameDirectory == gameDirectory)) continue;
@@ -87,9 +90,11 @@ internal static class SteamLibrary
             {
                 gameDirectories.Add(libraryFolder);
                 string libraryFolders = libraryFolder + @"\libraryfolders.vdf";
-                if (File.Exists(libraryFolders) && ValveDataFile.TryDeserialize(File.ReadAllText(libraryFolders, Encoding.UTF8), out VProperty result))
+                if (File.Exists(libraryFolders)
+                 && ValveDataFile.TryDeserialize(File.ReadAllText(libraryFolders, Encoding.UTF8), out VProperty result))
 #pragma warning disable IDE0220 // Add explicit cast
-                    foreach (VProperty property in result.Value.Where(p => p is VProperty && int.TryParse((p as VProperty).Key, out int _)))
+                    foreach (VProperty property in result.Value.Where(
+                                 p => p is VProperty && int.TryParse((p as VProperty).Key, out int _)))
                     {
                         string path = property.Value.GetChild("path")?.ToString();
                         if (string.IsNullOrWhiteSpace(path)) continue;

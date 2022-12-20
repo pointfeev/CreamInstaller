@@ -1,18 +1,21 @@
-﻿using Newtonsoft.Json;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace CreamInstaller.Utility;
 
 internal static class ProgramData
 {
-    internal static readonly string DirectoryPathOld = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\CreamInstaller";
-    internal static readonly string DirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\CreamInstaller";
+    internal static readonly string DirectoryPathOld
+        = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\CreamInstaller";
+
+    internal static readonly string DirectoryPath
+        = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\CreamInstaller";
 
     internal static readonly string AppInfoPath = DirectoryPath + @"\appinfo";
     internal static readonly string AppInfoVersionPath = AppInfoPath + @"\version.txt";
@@ -34,7 +37,9 @@ internal static class ProgramData
             Directory.Move(DirectoryPathOld, DirectoryPath);
         }
         if (!Directory.Exists(DirectoryPath)) _ = Directory.CreateDirectory(DirectoryPath);
-        if (!File.Exists(AppInfoVersionPath) || !Version.TryParse(File.ReadAllText(AppInfoVersionPath, Encoding.UTF8), out Version version) || version < MinimumAppInfoVersion)
+        if (!File.Exists(AppInfoVersionPath)
+         || !Version.TryParse(File.ReadAllText(AppInfoVersionPath, Encoding.UTF8), out Version version)
+         || version < MinimumAppInfoVersion)
         {
             if (Directory.Exists(AppInfoPath)) Directory.Delete(AppInfoPath, true);
             _ = Directory.CreateDirectory(AppInfoPath);
@@ -55,23 +60,23 @@ internal static class ProgramData
             SetCooldown(identifier, now);
         return cooldownOver;
     }
+
     private static DateTime? GetCooldown(string identifier)
     {
         if (Directory.Exists(CooldownPath))
         {
             string cooldownFile = CooldownPath + @$"\{identifier}.txt";
             if (File.Exists(cooldownFile))
-            {
                 try
                 {
                     if (DateTime.TryParse(File.ReadAllText(cooldownFile), out DateTime cooldown))
                         return cooldown;
                 }
                 catch { }
-            }
         }
         return null;
     }
+
     private static void SetCooldown(string identifier, DateTime time)
     {
         if (!Directory.Exists(CooldownPath))
@@ -79,7 +84,7 @@ internal static class ProgramData
         string cooldownFile = CooldownPath + @$"\{identifier}.txt";
         try
         {
-            File.WriteAllText(cooldownFile, time.ToString());
+            File.WriteAllText(cooldownFile, time.ToString(CultureInfo.InvariantCulture));
         }
         catch { }
     }
@@ -90,13 +95,15 @@ internal static class ProgramData
         try
         {
             return JsonConvert.DeserializeObject(File.ReadAllText(ProgramChoicesPath),
-                typeof(List<(Platform platform, string id)>)) as List<(Platform platform, string id)>;
+                                                 typeof(List<(Platform platform, string id)>)) as
+                List<(Platform platform, string id)>;
         }
         catch
         {
-            return new();
+            return new List<(Platform platform, string id)>();
         }
     }
+
     internal static void WriteProgramChoices(List<(Platform platform, string id)> choices)
     {
         try
@@ -115,13 +122,15 @@ internal static class ProgramData
         try
         {
             return JsonConvert.DeserializeObject(File.ReadAllText(DlcChoicesPath),
-                typeof(List<(Platform platform, string gameId, string dlcId)>)) as List<(Platform platform, string gameId, string dlcId)>;
+                                                 typeof(List<(Platform platform, string gameId, string dlcId)>)) as
+                List<(Platform platform, string gameId, string dlcId)>;
         }
         catch
         {
-            return new();
+            return new List<(Platform platform, string gameId, string dlcId)>();
         }
     }
+
     internal static void WriteDlcChoices(List<(Platform platform, string gameId, string dlcId)> choices)
     {
         try
@@ -140,15 +149,18 @@ internal static class ProgramData
         try
         {
             return JsonConvert.DeserializeObject(File.ReadAllText(KoaloaderProxyChoicesPath),
-                typeof(List<(Platform platform, string id, string proxy, bool enabled)>)) as List<(Platform platform, string id, string proxy, bool enabled)>;
+                                                 typeof(
+                                                     List<(Platform platform, string id, string proxy, bool enabled)>))
+                as List<(Platform platform, string id, string proxy, bool enabled)>;
         }
         catch
         {
-            return new();
+            return new List<(Platform platform, string id, string proxy, bool enabled)>();
         }
     }
 
-    internal static void WriteKoaloaderProxyChoices(List<(Platform platform, string id, string proxy, bool enabled)> choices)
+    internal static void WriteKoaloaderProxyChoices(
+        List<(Platform platform, string id, string proxy, bool enabled)> choices)
     {
         try
         {

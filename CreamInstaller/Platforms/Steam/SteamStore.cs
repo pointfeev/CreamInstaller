@@ -1,13 +1,11 @@
-﻿using CreamInstaller.Utility;
-
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-
+using CreamInstaller.Forms;
+using CreamInstaller.Utility;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 #if DEBUG
 using System;
 #endif
@@ -16,6 +14,9 @@ namespace CreamInstaller.Platforms.Steam;
 
 internal static class SteamStore
 {
+    private const int COOLDOWN_GAME = 600;
+    private const int COOLDOWN_DLC = 1200;
+
     internal static async Task<List<string>> ParseDlcAppIds(AppData appData) => await Task.Run(() =>
     {
         List<string> dlcIds = new();
@@ -25,17 +26,15 @@ internal static class SteamStore
         return dlcIds;
     });
 
-    private const int COOLDOWN_GAME = 600;
-    private const int COOLDOWN_DLC = 1200;
-
-    internal static async Task<AppData> QueryStoreAPI(string appId, bool isDlc = false)
+    internal static async Task<AppData> QueryStoreAPI(string appId, bool isDlc = false, int attempts = 0)
     {
         if (Program.Canceled) return null;
         string cacheFile = ProgramData.AppInfoPath + @$"\{appId}.json";
         bool cachedExists = File.Exists(cacheFile);
         if (!cachedExists || ProgramData.CheckCooldown(appId, isDlc ? COOLDOWN_DLC : COOLDOWN_GAME))
         {
-            string response = await HttpClientManager.EnsureGet($"https://store.steampowered.com/api/appdetails?appids={appId}");
+            string response
+                = await HttpClientManager.EnsureGet($"https://store.steampowered.com/api/appdetails?appids={appId}");
             if (response is not null)
             {
                 IDictionary<string, JToken> apps = (IDictionary<string, JToken>)JsonConvert.DeserializeObject(response);
@@ -50,7 +49,9 @@ internal static class SteamStore
                                 if (!appDetails.success)
                                 {
 #if DEBUG
-                                    DebugForm.Current.Log($"Query unsuccessful for appid {appId}{(isDlc ? " (DLC)" : "")}: {app.Value.ToString(Formatting.None)}", LogTextBox.Warning);
+                                    DebugForm.Current.Log(
+                                        $"Query unsuccessful for appid {appId}{(isDlc ? " (DLC)" : "")}: {app.Value.ToString(Formatting.None)}",
+                                        LogTextBox.Warning);
 #endif
                                     if (data is null)
                                         return null;
@@ -59,13 +60,15 @@ internal static class SteamStore
                                 {
                                     try
                                     {
-                                        File.WriteAllText(cacheFile, JsonConvert.SerializeObject(data, Formatting.Indented));
+                                        await File.WriteAllTextAsync(
+                                            cacheFile, JsonConvert.SerializeObject(data, Formatting.Indented));
                                     }
                                     catch
 #if DEBUG
-                                    (Exception e)
+                                        (Exception e)
                                     {
-                                        DebugForm.Current.Log($"Unsuccessful serialization of query for appid {appId}{(isDlc ? " (DLC)" : "")}: {e.GetType()} ({e.Message})");
+                                        DebugForm.Current.Log(
+                                            $"Unsuccessful serialization of query for appid {appId}{(isDlc ? " (DLC)" : "")}: {e.GetType()} ({e.Message})");
                                     }
 #else
                                     { }
@@ -73,18 +76,24 @@ internal static class SteamStore
                                     return data;
                                 }
 #if DEBUG
-                                else DebugForm.Current.Log($"Response data null for appid {appId}{(isDlc ? " (DLC)" : "")}: {app.Value.ToString(Formatting.None)}");
+                                DebugForm.Current.Log(
+                                    $"Response data null for appid {appId}{(isDlc ? " (DLC)" : "")}: {app.Value.ToString(Formatting.None)}");
 #endif
                             }
 #if DEBUG
-                            else DebugForm.Current.Log($"Response details null for appid {appId}{(isDlc ? " (DLC)" : "")}: {app.Value.ToString(Formatting.None)}");
+                            else
+                            {
+                                DebugForm.Current.Log(
+                                    $"Response details null for appid {appId}{(isDlc ? " (DLC)" : "")}: {app.Value.ToString(Formatting.None)}");
+                            }
 #endif
                         }
                         catch
 #if DEBUG
-                        (Exception e)
+                            (Exception e)
                         {
-                            DebugForm.Current.Log($"Unsuccessful deserialization of query for appid {appId}{(isDlc ? " (DLC)" : "")}: {e.GetType()} ({e.Message})");
+                            DebugForm.Current.Log(
+                                $"Unsuccessful deserialization of query for appid {appId}{(isDlc ? " (DLC)" : "")}: {e.GetType()} ({e.Message})");
                         }
 #else
                         { }
@@ -93,23 +102,26 @@ internal static class SteamStore
                 else DebugForm.Current.Log("Response deserialization null for appid " + appId);
 #endif
             }
+            else
+            {
 #if DEBUG
-            else DebugForm.Current.Log("Response null for appid " + appId, LogTextBox.Warning);
+                DebugForm.Current.Log("Response null for appid " + appId, LogTextBox.Warning);
 #endif
+            }
         }
         if (cachedExists)
             try
             {
-                return JsonConvert.DeserializeObject<AppData>(File.ReadAllText(cacheFile));
+                return JsonConvert.DeserializeObject<AppData>(await File.ReadAllTextAsync(cacheFile));
             }
             catch
             {
                 File.Delete(cacheFile);
             }
-        if (!isDlc)
+        if (!isDlc && attempts < 10)
         {
             Thread.Sleep(1000);
-            return await QueryStoreAPI(appId, isDlc);
+            return await QueryStoreAPI(appId, isDlc, ++attempts);
         }
         return null;
     }

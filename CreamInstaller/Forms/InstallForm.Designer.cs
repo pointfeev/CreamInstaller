@@ -1,8 +1,7 @@
-﻿
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows.Forms;
 
-namespace CreamInstaller
+namespace CreamInstaller.Forms
 {
     partial class InstallForm
     {

@@ -1,11 +1,8 @@
-﻿
-using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows.Forms;
-
 using CreamInstaller.Components;
 
-namespace CreamInstaller
+namespace CreamInstaller.Forms
 {
     partial class MainForm
     {

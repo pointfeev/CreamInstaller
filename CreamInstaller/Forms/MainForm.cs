@@ -1,13 +1,4 @@
-﻿using CreamInstaller.Components;
-using CreamInstaller.Utility;
-
-using HtmlAgilityPack;
-
-using Onova;
-using Onova.Models;
-using Onova.Services;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -16,18 +7,28 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
+using CreamInstaller.Components;
+using CreamInstaller.Utility;
+using HtmlAgilityPack;
+using Onova;
+using Onova.Models;
+using Onova.Services;
 
-namespace CreamInstaller;
+namespace CreamInstaller.Forms;
 
 internal partial class MainForm : CustomForm
 {
-    internal MainForm() : base()
+    private CancellationTokenSource cancellationTokenSource;
+    private Version latestVersion;
+
+    private UpdateManager updateManager;
+    private IReadOnlyList<Version> versions;
+
+    internal MainForm()
     {
         InitializeComponent();
         Text = Program.ApplicationNameShort;
     }
-
-    private CancellationTokenSource cancellationTokenSource;
 
     private void StartProgram()
     {
@@ -49,10 +50,6 @@ internal partial class MainForm : CustomForm
 #endif
     }
 
-    private UpdateManager updateManager;
-    private Version latestVersion;
-    private IReadOnlyList<Version> versions;
-
     private async void OnLoad()
     {
         progressBar.Visible = false;
@@ -61,18 +58,22 @@ internal partial class MainForm : CustomForm
         updateButton.Click -= OnUpdateCancel;
         progressLabel.Text = "Checking for updates . . .";
         changelogTreeView.Visible = false;
-        changelogTreeView.Location = new(progressLabel.Location.X, progressLabel.Location.Y + progressLabel.Size.Height + 13);
+        changelogTreeView.Location = new Point(progressLabel.Location.X,
+                                               progressLabel.Location.Y + progressLabel.Size.Height + 13);
         Refresh();
 #if DEBUG
         DebugForm.Current.Attach(this);
 #endif
-        GithubPackageResolver resolver = new(Program.RepositoryOwner, Program.RepositoryName, Program.RepositoryPackage);
+        GithubPackageResolver resolver = new(Program.RepositoryOwner, Program.RepositoryName,
+                                             Program.RepositoryPackage);
         ZipPackageExtractor extractor = new();
-        updateManager = new(AssemblyMetadata.FromAssembly(Program.EntryAssembly, Program.CurrentProcessFilePath), resolver, extractor);
+        updateManager
+            = new UpdateManager(AssemblyMetadata.FromAssembly(Program.EntryAssembly, Program.CurrentProcessFilePath),
+                                resolver, extractor);
         if (latestVersion is null)
         {
             CheckForUpdatesResult checkForUpdatesResult = null;
-            cancellationTokenSource = new();
+            cancellationTokenSource = new CancellationTokenSource();
             try
             {
                 checkForUpdatesResult = await updateManager.CheckForUpdatesAsync(cancellationTokenSource.Token);
@@ -80,8 +81,8 @@ internal partial class MainForm : CustomForm
                 if (checkForUpdatesResult.CanUpdate)
                 {
 #endif
-                    latestVersion = checkForUpdatesResult.LastVersion;
-                    versions = checkForUpdatesResult.Versions;
+                latestVersion = checkForUpdatesResult.LastVersion;
+                versions = checkForUpdatesResult.Versions;
 #if !DEBUG
                 }
 #endif
@@ -90,7 +91,8 @@ internal partial class MainForm : CustomForm
             catch (TaskCanceledException) { }
             catch (Exception e)
             {
-                DebugForm.Current.Log($"Exception while checking for updates: {e.GetType()} ({e.Message})", LogTextBox.Warning);
+                DebugForm.Current.Log($"Exception while checking for updates: {e.GetType()} ({e.Message})",
+                                      LogTextBox.Warning);
             }
 #else
             catch { }
@@ -112,19 +114,17 @@ internal partial class MainForm : CustomForm
             progressLabel.Text = $"An update is available: v{latestVersion}";
             ignoreButton.Enabled = true;
             updateButton.Enabled = true;
-            updateButton.Click += new(OnUpdate);
+            updateButton.Click += OnUpdate;
             changelogTreeView.Visible = true;
             Version currentVersion = new(Program.Version);
 #if DEBUG
-            foreach (Version version in versions.Where(v => (v > currentVersion || v == latestVersion) && !changelogTreeView.Nodes.ContainsKey(v.ToString())))
+            foreach (Version version in versions.Where(v => (v > currentVersion || v == latestVersion)
+                                                         && !changelogTreeView.Nodes.ContainsKey(v.ToString())))
 #else
             foreach (Version version in versions.Where(v => v > currentVersion && !changelogTreeView.Nodes.ContainsKey(v.ToString())))
 #endif
             {
-                TreeNode root = new($"v{version}")
-                {
-                    Name = version.ToString()
-                };
+                TreeNode root = new($"v{version}") { Name = version.ToString() };
                 changelogTreeView.Nodes.Add(root);
                 if (changelogTreeView.Nodes.Count > 0)
                     changelogTreeView.Nodes[0].EnsureVisible();
@@ -137,19 +137,14 @@ internal partial class MainForm : CustomForm
                         changelogTreeView.Nodes.Remove(root);
                     else
                         foreach (HtmlNode node in nodes)
-                        {
                             changelogTreeView.Invoke(delegate
                             {
-                                TreeNode change = new()
-                                {
-                                    Text = HttpUtility.HtmlDecode(node.InnerText)
-                                };
+                                TreeNode change = new() { Text = HttpUtility.HtmlDecode(node.InnerText) };
                                 root.Nodes.Add(change);
                                 root.Expand();
                                 if (changelogTreeView.Nodes.Count > 0)
                                     changelogTreeView.Nodes[0].EnsureVisible();
                             });
-                        }
                 });
             }
         }
@@ -157,7 +152,7 @@ internal partial class MainForm : CustomForm
 
     private void OnLoad(object sender, EventArgs _)
     {
-        retry:
+    retry:
         try
         {
             string FileName = Path.GetFileName(Program.CurrentProcessFilePath);
@@ -165,9 +160,9 @@ internal partial class MainForm : CustomForm
             {
                 using DialogForm form = new(this);
                 if (form.Show(SystemIcons.Warning,
-                    "WARNING: " + Program.ApplicationExecutable + " was renamed!" +
-                    "\n\nThis will cause undesirable behavior when updating the program!",
-                    "Ignore", "Abort") == DialogResult.Cancel)
+                              "WARNING: " + Program.ApplicationExecutable + " was renamed!" +
+                              "\n\nThis will cause undesirable behavior when updating the program!",
+                              "Ignore", "Abort") == DialogResult.Cancel)
                 {
                     Application.Exit();
                     return;
@@ -177,7 +172,7 @@ internal partial class MainForm : CustomForm
         }
         catch (Exception e)
         {
-            if (e.HandleException(form: this)) goto retry;
+            if (e.HandleException(this)) goto retry;
             Close();
         }
     }
@@ -190,19 +185,18 @@ internal partial class MainForm : CustomForm
         ignoreButton.Visible = false;
         updateButton.Text = "Cancel";
         updateButton.Click -= OnUpdate;
-        updateButton.Click += new(OnUpdateCancel);
-        changelogTreeView.Location = new(progressBar.Location.X, progressBar.Location.Y + progressBar.Size.Height + 6);
+        updateButton.Click += OnUpdateCancel;
+        changelogTreeView.Location
+            = new Point(progressBar.Location.X, progressBar.Location.Y + progressBar.Size.Height + 6);
         Refresh();
-
         Progress<double> progress = new();
-        progress.ProgressChanged += new(delegate (object sender, double _progress)
+        progress.ProgressChanged += delegate(object sender, double _progress)
         {
             progressLabel.Text = $"Updating . . . {(int)_progress}%";
             progressBar.Value = (int)_progress;
-        });
-
+        };
         progressLabel.Text = "Updating . . . ";
-        cancellationTokenSource = new();
+        cancellationTokenSource = new CancellationTokenSource();
         try
         {
             await updateManager.PrepareUpdateAsync(latestVersion, progress, cancellationTokenSource.Token);
@@ -211,7 +205,8 @@ internal partial class MainForm : CustomForm
         catch (TaskCanceledException) { }
         catch (Exception ex)
         {
-            DebugForm.Current.Log($"Exception while preparing update: {ex.GetType()} ({ex.Message})", LogTextBox.Warning);
+            DebugForm.Current.Log($"Exception while preparing update: {ex.GetType()} ({ex.Message})",
+                                  LogTextBox.Warning);
         }
 #else
         catch { }
@@ -221,14 +216,13 @@ internal partial class MainForm : CustomForm
             cancellationTokenSource.Dispose();
             cancellationTokenSource = null;
         }
-
         if (updateManager is not null && updateManager.IsUpdatePrepared(latestVersion))
         {
             updateManager.LaunchUpdater(latestVersion);
             Application.Exit();
             return;
         }
-        else OnLoad();
+        OnLoad();
     }
 
     private void OnUpdateCancel(object sender, EventArgs e)

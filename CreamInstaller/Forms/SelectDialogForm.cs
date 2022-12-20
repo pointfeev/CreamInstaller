@@ -1,20 +1,19 @@
-﻿using CreamInstaller.Components;
-using CreamInstaller.Utility;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using CreamInstaller.Components;
+using CreamInstaller.Utility;
 
-namespace CreamInstaller;
+namespace CreamInstaller.Forms;
 
 internal partial class SelectDialogForm : CustomForm
 {
+    private readonly List<(Platform platform, string id, string name)> selected = new();
     internal SelectDialogForm(IWin32Window owner) : base(owner) => InitializeComponent();
 
-    private readonly List<(Platform platform, string id, string name)> selected = new();
-    internal List<(Platform platform, string id, string name)> QueryUser(string groupBoxText, List<(Platform platform, string id, string name, bool alreadySelected)> choices)
+    internal List<(Platform platform, string id, string name)> QueryUser(
+        string groupBoxText, List<(Platform platform, string id, string name, bool alreadySelected)> choices)
     {
         if (!choices.Any()) return null;
         groupBox.Text = groupBoxText;
@@ -23,13 +22,7 @@ internal partial class SelectDialogForm : CustomForm
         selectionTreeView.AfterCheck += OnTreeNodeChecked;
         foreach ((Platform platform, string id, string name, bool alreadySelected) in choices)
         {
-            TreeNode node = new()
-            {
-                Tag = platform,
-                Name = id,
-                Text = name,
-                Checked = alreadySelected
-            };
+            TreeNode node = new() { Tag = platform, Name = id, Text = name, Checked = alreadySelected };
             OnTreeNodeChecked(node);
             _ = selectionTreeView.Nodes.Add(node);
         }

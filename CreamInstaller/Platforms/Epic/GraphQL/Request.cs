@@ -64,7 +64,6 @@ internal class Request
     {
         [JsonProperty(PropertyName = "Content-Type")]
         private string ContentType => "application/graphql";
-
     }
 
     private class Variables

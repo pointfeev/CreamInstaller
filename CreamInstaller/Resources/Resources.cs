@@ -1,6 +1,4 @@
-﻿using CreamInstaller.Utility;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,12 +7,14 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using CreamInstaller.Utility;
 
 namespace CreamInstaller.Resources;
 
 internal static class Resources
 {
     internal static List<string> embeddedResources;
+
     internal static List<string> EmbeddedResources
     {
         get
@@ -22,7 +22,7 @@ internal static class Resources
             if (embeddedResources is null)
             {
                 string[] names = Assembly.GetExecutingAssembly().GetManifestResourceNames();
-                embeddedResources = new();
+                embeddedResources = new List<string>();
                 foreach (string resourceName in names.Where(n => n.StartsWith("CreamInstaller.Resources.")))
                     embeddedResources.Add(resourceName[25..]);
             }
@@ -32,7 +32,8 @@ internal static class Resources
 
     internal static void Write(this string resourceIdentifier, string filePath)
     {
-        using Stream resource = Assembly.GetExecutingAssembly().GetManifestResourceStream("CreamInstaller.Resources." + resourceIdentifier);
+        using Stream resource = Assembly.GetExecutingAssembly()
+                                        .GetManifestResourceStream("CreamInstaller.Resources." + resourceIdentifier);
         using FileStream file = new(filePath, FileMode.Create, FileAccess.Write);
         resource.CopyTo(file);
     }
@@ -62,55 +63,59 @@ internal static class Resources
 
     internal enum BinaryType
     {
-        Unknown = -1,
-        BIT32 = 0,
-        DOS = 1,
-        WOW = 2,
-        PIF = 3,
-        POSIX = 4,
-        OS216 = 5,
-        BIT64 = 6,
+        Unknown = -1, BIT32 = 0, DOS = 1,
+        WOW = 2, PIF = 3, POSIX = 4,
+        OS216 = 5, BIT64 = 6
     }
 
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static extern bool GetBinaryType(string lpApplicationName, out BinaryType lpBinaryType);
-    internal static bool TryGetFileBinaryType(this string path, out BinaryType binaryType) => GetBinaryType(path, out binaryType);
 
-    internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(this string rootDirectory, bool filterCommon = false, Func<string, bool> validFunc = null) =>
-        await Task.Run(async () => (await rootDirectory.GetExecutables(filterCommon: filterCommon, validFunc: validFunc)
-            ?? (filterCommon || validFunc is not null ? await rootDirectory.GetExecutables() : null))?.Select(e =>
+    internal static bool TryGetFileBinaryType(this string path, out BinaryType binaryType)
+        => GetBinaryType(path, out binaryType);
+
+    internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(
+        this string rootDirectory, bool filterCommon = false, Func<string, bool> validFunc = null) =>
+        await Task.Run(async () => (await rootDirectory.GetExecutables(filterCommon, validFunc)
+                                 ?? (filterCommon || validFunc is not null
+                                        ? await rootDirectory.GetExecutables()
+                                        : null))?.Select(e =>
         {
             e.path = Path.GetDirectoryName(e.path);
             return e;
         })?.DistinctBy(e => e.path).ToList());
 
-    internal static async Task<List<(string path, BinaryType binaryType)>> GetExecutables(this string rootDirectory, bool filterCommon = false, Func<string, bool> validFunc = null) => await Task.Run(() =>
-    {
-        List<(string path, BinaryType binaryType)> executables = new();
-        if (Program.Canceled || !Directory.Exists(rootDirectory)) return null;
-        foreach (string path in Directory.EnumerateFiles(rootDirectory, "*.exe", new EnumerationOptions() { RecurseSubdirectories = true }))
+    internal static async Task<List<(string path, BinaryType binaryType)>> GetExecutables(
+        this string rootDirectory, bool filterCommon = false, Func<string, bool> validFunc = null) => await Task.Run(
+        () =>
         {
-            if (Program.Canceled) return null;
-            if (!executables.Any(e => e.path == path)
-            && (!filterCommon || !rootDirectory.IsCommonIncorrectExecutable(path))
-            && (validFunc is null || validFunc(path))
-            && path.TryGetFileBinaryType(out BinaryType binaryType) && binaryType is BinaryType.BIT64)
-                executables.Add((path, binaryType));
-            Thread.Sleep(1);
-        }
-        foreach (string path in Directory.EnumerateFiles(rootDirectory, "*.exe", new EnumerationOptions() { RecurseSubdirectories = true }))
-        {
-            if (Program.Canceled) return null;
-            if (!executables.Any(e => e.path == path)
-            && (!filterCommon || !rootDirectory.IsCommonIncorrectExecutable(path))
-            && (validFunc is null || validFunc(path))
-            && path.TryGetFileBinaryType(out BinaryType binaryType) && binaryType is BinaryType.BIT32)
-                executables.Add((path, binaryType));
-            Thread.Sleep(1);
-        }
-        return !executables.Any() ? null : executables;
-    });
+            List<(string path, BinaryType binaryType)> executables = new();
+            if (Program.Canceled || !Directory.Exists(rootDirectory)) return null;
+            foreach (string path in Directory.EnumerateFiles(rootDirectory, "*.exe",
+                                                             new EnumerationOptions { RecurseSubdirectories = true }))
+            {
+                if (Program.Canceled) return null;
+                if (!executables.Any(e => e.path == path)
+                 && (!filterCommon || !rootDirectory.IsCommonIncorrectExecutable(path))
+                 && (validFunc is null || validFunc(path))
+                 && path.TryGetFileBinaryType(out BinaryType binaryType) && binaryType is BinaryType.BIT64)
+                    executables.Add((path, binaryType));
+                Thread.Sleep(1);
+            }
+            foreach (string path in Directory.EnumerateFiles(rootDirectory, "*.exe",
+                                                             new EnumerationOptions { RecurseSubdirectories = true }))
+            {
+                if (Program.Canceled) return null;
+                if (!executables.Any(e => e.path == path)
+                 && (!filterCommon || !rootDirectory.IsCommonIncorrectExecutable(path))
+                 && (validFunc is null || validFunc(path))
+                 && path.TryGetFileBinaryType(out BinaryType binaryType) && binaryType is BinaryType.BIT32)
+                    executables.Add((path, binaryType));
+                Thread.Sleep(1);
+            }
+            return !executables.Any() ? null : executables;
+        });
 
     internal static bool IsCommonIncorrectExecutable(this string rootDirectory, string path)
     {
@@ -118,69 +123,77 @@ internal static class Resources
         return subPath.Contains("SETUP")
             || subPath.Contains("REDIST")
             || subPath.Contains("SUPPORT")
-            || subPath.Contains("CRASH") && (subPath.Contains("PAD") || subPath.Contains("REPORT"))
+            || (subPath.Contains("CRASH") && (subPath.Contains("PAD") || subPath.Contains("REPORT")))
             || subPath.Contains("HELPER")
             || subPath.Contains("CEFPROCESS")
             || subPath.Contains("ZFGAMEBROWSER")
             || subPath.Contains("MONO")
             || subPath.Contains("PLUGINS")
             || subPath.Contains("MODDING")
-            || subPath.Contains("MOD") && subPath.Contains("MANAGER")
+            || (subPath.Contains("MOD") && subPath.Contains("MANAGER"))
             || subPath.Contains("BATTLEYE")
             || subPath.Contains("ANTICHEAT");
     }
 
-    internal static async Task<List<string>> GetDllDirectoriesFromGameDirectory(this string gameDirectory, Platform platform) => await Task.Run(() =>
+    internal static async Task<List<string>> GetDllDirectoriesFromGameDirectory(
+        this string gameDirectory, Platform platform) => await Task.Run(() =>
     {
         List<string> dllDirectories = new();
         if (Program.Canceled || !Directory.Exists(gameDirectory)) return null;
-        foreach (string directory in Directory.EnumerateDirectories(gameDirectory, "*", new EnumerationOptions() { RecurseSubdirectories = true }).Append(gameDirectory))
+        foreach (string directory in Directory
+                                    .EnumerateDirectories(gameDirectory, "*",
+                                                          new EnumerationOptions { RecurseSubdirectories = true })
+                                    .Append(gameDirectory))
         {
             if (Program.Canceled) return null;
             string subDirectory = directory.BeautifyPath();
             if (!dllDirectories.Contains(subDirectory))
             {
                 bool koaloaderInstalled = Koaloader.AutoLoadDlls
-                    .Select(pair => (pair.unlocker, path: directory + @"\" + pair.dll))
-                    .Any(pair => File.Exists(pair.path) && pair.path.IsResourceFile());
+                                                   .Select(pair => (pair.unlocker, path: directory + @"\" + pair.dll))
+                                                   .Any(pair => File.Exists(pair.path) && pair.path.IsResourceFile());
                 if (platform is Platform.Steam or Platform.Paradox)
                 {
-                    subDirectory.GetSmokeApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string config, out string cache);
+                    subDirectory.GetSmokeApiComponents(out string api, out string api_o, out string api64,
+                                                       out string api64_o, out string config, out string cache);
                     if (File.Exists(api)
-                        || File.Exists(api_o)
-                        || File.Exists(api64)
-                        || File.Exists(api64_o)
-                        || File.Exists(config) && !koaloaderInstalled
-                        || File.Exists(cache) && !koaloaderInstalled)
+                     || File.Exists(api_o)
+                     || File.Exists(api64)
+                     || File.Exists(api64_o)
+                     || (File.Exists(config) && !koaloaderInstalled)
+                     || (File.Exists(cache) && !koaloaderInstalled))
                         dllDirectories.Add(subDirectory);
                 }
                 if (platform is Platform.Epic or Platform.Paradox)
                 {
-                    subDirectory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+                    subDirectory.GetScreamApiComponents(out string api32, out string api32_o, out string api64,
+                                                        out string api64_o, out string config);
                     if (File.Exists(api32)
-                        || File.Exists(api32_o)
-                        || File.Exists(api64)
-                        || File.Exists(api64_o)
-                        || File.Exists(config) && !koaloaderInstalled)
+                     || File.Exists(api32_o)
+                     || File.Exists(api64)
+                     || File.Exists(api64_o)
+                     || (File.Exists(config) && !koaloaderInstalled))
                         dllDirectories.Add(subDirectory);
                 }
                 if (platform is Platform.Ubisoft)
                 {
-                    subDirectory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+                    subDirectory.GetUplayR1Components(out string api32, out string api32_o, out string api64,
+                                                      out string api64_o, out string config);
                     if (File.Exists(api32)
-                        || File.Exists(api32_o)
-                        || File.Exists(api64)
-                        || File.Exists(api64_o)
-                        || File.Exists(config) && !koaloaderInstalled)
+                     || File.Exists(api32_o)
+                     || File.Exists(api64)
+                     || File.Exists(api64_o)
+                     || (File.Exists(config) && !koaloaderInstalled))
                         dllDirectories.Add(subDirectory);
-                    subDirectory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config);
+                    subDirectory.GetUplayR2Components(out string old_api32, out string old_api64, out api32,
+                                                      out api32_o, out api64, out api64_o, out config);
                     if (File.Exists(old_api32)
-                        || File.Exists(old_api64)
-                        || File.Exists(api32)
-                        || File.Exists(api32_o)
-                        || File.Exists(api64)
-                        || File.Exists(api64_o)
-                        || File.Exists(config) && !koaloaderInstalled)
+                     || File.Exists(old_api64)
+                     || File.Exists(api32)
+                     || File.Exists(api32_o)
+                     || File.Exists(api64)
+                     || File.Exists(api64_o)
+                     || (File.Exists(config) && !koaloaderInstalled))
                         dllDirectories.Add(subDirectory);
                 }
             }
@@ -189,10 +202,10 @@ internal static class Resources
     });
 
     internal static void GetCreamApiComponents(
-            this string directory,
-            out string api32, out string api32_o,
-            out string api64, out string api64_o,
-            out string config)
+        this string directory,
+        out string api32, out string api32_o,
+        out string api64, out string api64_o,
+        out string config)
     {
         api32 = directory + @"\steam_api.dll";
         api32_o = directory + @"\steam_api_o.dll";
@@ -203,22 +216,15 @@ internal static class Resources
 
     internal enum ResourceIdentifier
     {
-        Koaloader,
-        Steamworks32,
-        Steamworks64,
-        EpicOnlineServices32,
-        EpicOnlineServices64,
-        Uplay32,
-        Uplay64,
-        Upc32,
-        Upc64,
+        Koaloader, Steamworks32, Steamworks64,
+        EpicOnlineServices32, EpicOnlineServices64, Uplay32,
+        Uplay64, Upc32, Upc64
     }
 
     internal static readonly Dictionary<ResourceIdentifier, IReadOnlyList<string>> ResourceMD5s = new()
     {
         {
-            ResourceIdentifier.Koaloader,
-            new List<string>()
+            ResourceIdentifier.Koaloader, new List<string>
             {
                 "8A0958687B5ED7C34DAD037856DD1530", // Koaloader v2.0.0
                 "8FECDEB40980F4E687C10E056232D96B", // Koaloader v2.0.0
@@ -463,75 +469,67 @@ internal static class Resources
                 "76CAB00C7DD33FC19F7CDD1849FF9CA2", // Koaloader v2.4.0
                 "DA4D6A7C0872757A74DDAE05A2C1D160", // Koaloader v2.4.0
                 "1F46DE8747C0A157841AFFE6185CE4C9", // Koaloader v2.4.0
-                "BE16B588D018D8EFF1F3B6A600F26BED"  // Koaloader v2.4.0
+                "BE16B588D018D8EFF1F3B6A600F26BED" // Koaloader v2.4.0
             }
         },
         {
-            ResourceIdentifier.EpicOnlineServices32,
-            new List<string>()
+            ResourceIdentifier.EpicOnlineServices32, new List<string>
             {
                 "069A57B1834A960193D2AD6B96926D70", // ScreamAPI v3.0.0
-                "E2FB3A4A9583FDC215832E5F935E4440"  // ScreamAPI v3.0.1
+                "E2FB3A4A9583FDC215832E5F935E4440" // ScreamAPI v3.0.1
             }
         },
         {
-            ResourceIdentifier.EpicOnlineServices64,
-            new List<string>()
+            ResourceIdentifier.EpicOnlineServices64, new List<string>
             {
                 "0D62E57139F1A64F807A9934946A9474", // ScreamAPI v3.0.0
-                "3875C7B735EE80C23239CC4749FDCBE6"  // ScreamAPI v3.0.1
+                "3875C7B735EE80C23239CC4749FDCBE6" // ScreamAPI v3.0.1
             }
         },
         {
-            ResourceIdentifier.Steamworks32,
-            new List<string>()
+            ResourceIdentifier.Steamworks32, new List<string>
             {
                 "02594110FE56B2945955D46670B9A094", // CreamAPI v4.5.0.0 Hotfix
                 "B2434578957CBE38BDCE0A671C1262FC", // SmokeAPI v1.0.0
                 "973AB1632B747D4BF3B2666F32E34327", // SmokeAPI v1.0.1
                 "C7E41F569FC6A347D67D2BFB2BD10F25", // SmokeAPI v1.0.2
-                "F9E7D5B248B86D1C2F2F2905A9F37755"  // SmokeAPI v1.0.3
+                "F9E7D5B248B86D1C2F2F2905A9F37755" // SmokeAPI v1.0.3
             }
         },
         {
-            ResourceIdentifier.Steamworks64,
-            new List<string>()
+            ResourceIdentifier.Steamworks64, new List<string>
             {
                 "30091B91923D9583A54A93ED1145554B", // CreamAPI v4.5.0.0 Hotfix
                 "08713035CAD6F52548FF324D0487B88D", // SmokeAPI v1.0.0
                 "D077737B9979D32458AC938A2978FA3C", // SmokeAPI v1.0.1
                 "49122A2E2E51CBB0AE5E1D59B280E4CD", // SmokeAPI v1.0.2
-                "13F3E9476116F7670E21365A400357AC"  // SmokeAPI v1.0.3
+                "13F3E9476116F7670E21365A400357AC" // SmokeAPI v1.0.3
             }
         },
         {
-            ResourceIdentifier.Uplay32,
-            new List<string>()
+            ResourceIdentifier.Uplay32, new List<string>
             {
                 "1977967B2549A38EC2DB39D4C8ED499B" // Uplay R1 Unlocker v2.0.0
             }
         },
         {
-            ResourceIdentifier.Uplay64,
-            new List<string>()
+            ResourceIdentifier.Uplay64, new List<string>
             {
                 "333FEDD9DC2B299419B37ED1624FF8DB" // Uplay R1 Unlocker v2.0.0
             }
         },
         {
-            ResourceIdentifier.Upc32,
-            new List<string>()
+            ResourceIdentifier.Upc32, new List<string>
             {
                 "C14368BC4EE19FDE8DBAC07E31C67AE4", // Uplay R2 Unlocker v3.0.0
-                "DED3A3EA1876E3110D7D87B9A22946B0"  // Uplay R2 Unlocker v3.0.1
+                "DED3A3EA1876E3110D7D87B9A22946B0" // Uplay R2 Unlocker v3.0.1
             }
         },
         {
-            ResourceIdentifier.Upc64,
-            new List<string>()
+            ResourceIdentifier.Upc64, new List<string>
             {
                 "7D9A4C12972BAABCB6C181920CC0F19B", // Uplay R2 Unlocker v3.0.0
-                "D7FDBFE0FC8D7600FEB8EC0A97713184"  // Uplay R2 Unlocker v3.0.1
+                "D7FDBFE0FC8D7600FEB8EC0A97713184" // Uplay R2 Unlocker v3.0.1
             }
         }
     };
@@ -547,7 +545,10 @@ internal static class Resources
         return BitConverter.ToString(hash).Replace("-", "").ToUpperInvariant();
     }
 
-    internal static bool IsResourceFile(this string filePath, ResourceIdentifier identifier) => filePath.ComputeMD5() is string hash && ResourceMD5s[identifier].Contains(hash);
+    internal static bool IsResourceFile(this string filePath, ResourceIdentifier identifier)
+        => filePath.ComputeMD5() is string hash && ResourceMD5s[identifier].Contains(hash);
 
-    internal static bool IsResourceFile(this string filePath) => filePath.ComputeMD5() is string hash && ResourceMD5s.Values.Any(hashes => hashes.Contains(hash));
+    internal static bool IsResourceFile(this string filePath) => filePath.ComputeMD5() is string hash
+                                                              && ResourceMD5s.Values.Any(
+                                                                     hashes => hashes.Contains(hash));
 }
