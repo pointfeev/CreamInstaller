@@ -6,16 +6,16 @@ namespace CreamInstaller.Utility;
 
 internal static class IconGrabber
 {
+    internal const string SteamAppImagesPath
+        = "https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/apps/";
+
+    internal const string GoogleFaviconsApiUrl = "https://www.google.com/s2/favicons";
+
     internal static Icon ToIcon(this Image image)
     {
         using Bitmap dialogIconBitmap = new(image, new Size(image.Width, image.Height));
         return Icon.FromHandle(dialogIconBitmap.GetHicon());
     }
-
-    internal const string SteamAppImagesPath
-        = "https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/apps/";
-
-    internal const string GoogleFaviconsApiUrl = "https://www.google.com/s2/favicons";
 
     internal static string GetDomainFaviconUrl(string domain, int size = 16)
         => GoogleFaviconsApiUrl + $"?domain={domain}&sz={size}";

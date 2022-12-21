@@ -8,15 +8,15 @@ namespace CreamInstaller.Components;
 internal static class PlatformIdComparer
 {
     private static StringComparer stringComparer;
-    internal static StringComparer String => stringComparer ??= new StringComparer();
 
     private static NodeComparer nodeComparer;
-    internal static NodeComparer Node => nodeComparer ??= new NodeComparer();
 
     private static NodeNameComparer nodeNameComparer;
-    internal static NodeNameComparer NodeName => nodeNameComparer ??= new NodeNameComparer();
 
     private static NodeTextComparer nodeTextComparer;
+    internal static StringComparer String => stringComparer ??= new StringComparer();
+    internal static NodeComparer Node => nodeComparer ??= new NodeComparer();
+    internal static NodeNameComparer NodeName => nodeNameComparer ??= new NodeNameComparer();
     internal static NodeTextComparer NodeText => nodeTextComparer ??= new NodeTextComparer();
 }
 

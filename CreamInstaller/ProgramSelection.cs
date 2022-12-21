@@ -21,31 +21,11 @@ public enum DlcType
 
 internal class ProgramSelection
 {
-    internal bool Enabled;
-    internal bool Koaloader;
     internal const string DefaultKoaloaderProxy = "version";
-    internal string KoaloaderProxy;
 
-    internal Platform Platform;
-    internal string Id = "0";
-    internal string Name = "Program";
-
-    internal string ProductUrl;
-    internal string IconUrl;
-    internal string SubIconUrl;
-
-    internal string Publisher;
-
-    internal string WebsiteUrl;
-
-    internal string RootDirectory;
-    internal List<(string directory, BinaryType binaryType)> ExecutableDirectories;
-    internal List<string> DllDirectories;
+    internal static readonly List<ProgramSelection> All = new();
 
     internal readonly SortedList<string, (DlcType type, string name, string icon)> AllDlc
-        = new(PlatformIdComparer.String);
-
-    internal readonly SortedList<string, (DlcType type, string name, string icon)> SelectedDlc
         = new(PlatformIdComparer.String);
 
     internal readonly List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)>
@@ -53,6 +33,31 @@ internal class ProgramSelection
 
     internal readonly List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)>
         ExtraSelectedDlc = new(); // for Paradox Launcher
+
+    internal readonly SortedList<string, (DlcType type, string name, string icon)> SelectedDlc
+        = new(PlatformIdComparer.String);
+
+    internal List<string> DllDirectories;
+    internal bool Enabled;
+    internal List<(string directory, BinaryType binaryType)> ExecutableDirectories;
+    internal string IconUrl;
+    internal string Id = "0";
+    internal bool Koaloader;
+    internal string KoaloaderProxy;
+    internal string Name = "Program";
+
+    internal Platform Platform;
+
+    internal string ProductUrl;
+
+    internal string Publisher;
+
+    internal string RootDirectory;
+    internal string SubIconUrl;
+
+    internal string WebsiteUrl;
+
+    internal ProgramSelection() => All.Add(this);
 
     internal bool AreDllsLocked
     {
@@ -117,6 +122,10 @@ internal class ProgramSelection
         }
     }
 
+    internal static List<ProgramSelection> AllSafe => All.ToList();
+
+    internal static List<ProgramSelection> AllEnabled => AllSafe.FindAll(s => s.Enabled);
+
     private void Toggle(string dlcAppId, (DlcType type, string name, string icon) dlcApp, bool enabled)
     {
         if (enabled) SelectedDlc[dlcAppId] = dlcApp;
@@ -137,8 +146,6 @@ internal class ProgramSelection
         }
         Enabled = SelectedDlc.Any() || ExtraSelectedDlc.Any();
     }
-
-    internal ProgramSelection() => All.Add(this);
 
     internal void Validate()
     {
@@ -170,12 +177,6 @@ internal class ProgramSelection
 
     internal static void ValidateAll(List<(Platform platform, string id, string name)> programsToScan)
         => AllSafe.ForEach(selection => selection.Validate(programsToScan));
-
-    internal static readonly List<ProgramSelection> All = new();
-
-    internal static List<ProgramSelection> AllSafe => All.ToList();
-
-    internal static List<ProgramSelection> AllEnabled => AllSafe.FindAll(s => s.Enabled);
 
     internal static ProgramSelection FromPlatformId(Platform platform, string gameId)
         => AllSafe.Find(s => s.Platform == platform && s.Id == gameId);

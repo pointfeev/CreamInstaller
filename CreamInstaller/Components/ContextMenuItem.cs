@@ -13,6 +13,32 @@ internal class ContextMenuItem : ToolStripMenuItem
 {
     private static readonly ConcurrentDictionary<string, Image> images = new();
 
+    private readonly EventHandler OnClickEvent;
+
+    internal ContextMenuItem(string text, EventHandler onClick = null)
+    {
+        Text = text;
+        OnClickEvent = onClick;
+    }
+
+    internal ContextMenuItem(string text, string imageIdentifier, EventHandler onClick = null)
+        : this(text, onClick) => _ = TryImageIdentifier(this, imageIdentifier);
+
+    internal ContextMenuItem(string text, (string id, string iconUrl) imageIdentifierInfo, EventHandler onClick = null)
+        : this(text, onClick) => _ = TryImageIdentifierInfo(this, imageIdentifierInfo);
+
+    internal ContextMenuItem(string text, (string id, string iconUrl) imageIdentifierInfo,
+                             string imageIdentifierFallback, EventHandler onClick = null)
+        : this(text, onClick) => _ = TryImageIdentifierInfo(this, imageIdentifierInfo,
+                                                            async () => await TryImageIdentifier(
+                                                                this, imageIdentifierFallback));
+
+    internal ContextMenuItem(string text, (string id, string iconUrl) imageIdentifierInfo,
+                             (string id, string iconUrl) imageIdentifierInfoFallback, EventHandler onClick = null)
+        : this(text, onClick) => _ = TryImageIdentifierInfo(this, imageIdentifierInfo,
+                                                            async () => await TryImageIdentifierInfo(
+                                                                this, imageIdentifierInfoFallback));
+
     private static async Task TryImageIdentifier(ContextMenuItem item, string imageIdentifier) => await Task.Run(
         async () =>
         {
@@ -101,36 +127,10 @@ internal class ContextMenuItem : ToolStripMenuItem
         }
     });
 
-    private readonly EventHandler OnClickEvent;
-
     protected override void OnClick(EventArgs e)
     {
         base.OnClick(e);
         if (OnClickEvent is null) return;
         OnClickEvent.Invoke(this, e);
     }
-
-    internal ContextMenuItem(string text, EventHandler onClick = null)
-    {
-        Text = text;
-        OnClickEvent = onClick;
-    }
-
-    internal ContextMenuItem(string text, string imageIdentifier, EventHandler onClick = null)
-        : this(text, onClick) => _ = TryImageIdentifier(this, imageIdentifier);
-
-    internal ContextMenuItem(string text, (string id, string iconUrl) imageIdentifierInfo, EventHandler onClick = null)
-        : this(text, onClick) => _ = TryImageIdentifierInfo(this, imageIdentifierInfo);
-
-    internal ContextMenuItem(string text, (string id, string iconUrl) imageIdentifierInfo,
-                             string imageIdentifierFallback, EventHandler onClick = null)
-        : this(text, onClick) => _ = TryImageIdentifierInfo(this, imageIdentifierInfo,
-                                                            async () => await TryImageIdentifier(
-                                                                this, imageIdentifierFallback));
-
-    internal ContextMenuItem(string text, (string id, string iconUrl) imageIdentifierInfo,
-                             (string id, string iconUrl) imageIdentifierInfoFallback, EventHandler onClick = null)
-        : this(text, onClick) => _ = TryImageIdentifierInfo(this, imageIdentifierInfo,
-                                                            async () => await TryImageIdentifierInfo(
-                                                                this, imageIdentifierInfoFallback));
 }

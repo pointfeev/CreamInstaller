@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CreamInstaller.Forms;
@@ -21,8 +22,7 @@ internal static class SteamStore
     {
         List<string> dlcIds = new();
         if (appData.dlc is null) return dlcIds;
-        foreach (int appId in appData.dlc)
-            dlcIds.Add(appId.ToString());
+        dlcIds.AddRange(from appId in appData.dlc where appId > 0 select appId.ToString());
         return dlcIds;
     });
 

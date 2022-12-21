@@ -15,8 +15,8 @@ internal class CustomForm : Form
     internal const short SWP_NOMOVE = 0x0002;
     internal const short SWP_NOSIZE = 0x0001;
 
-    internal static readonly IntPtr HWND_NOTOPMOST = new(-2);
-    internal static readonly IntPtr HWND_TOPMOST = new(-1);
+    internal static readonly nint HWND_NOTOPMOST = new(-2);
+    internal static readonly nint HWND_TOPMOST = new(-1);
 
     internal CustomForm()
     {
@@ -96,7 +96,7 @@ internal class CustomForm : Form
 
     [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    internal static extern void SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy,
+    internal static extern void SetWindowPos(nint hWnd, nint hWndInsertAfter, int x, int y, int cx, int cy,
                                              uint uFlags);
 
     internal void BringToFrontWithoutActivation()

@@ -9,6 +9,8 @@ namespace CreamInstaller.Platforms.Epic.GraphQL;
 
 internal class Request
 {
+    internal Request(string @namespace) => Vars = new Variables(@namespace);
+
     [JsonProperty(PropertyName = "query")]
     private string Query => @"query searchOffers($namespace: String!) {
     Catalog {
@@ -58,8 +60,6 @@ internal class Request
     [JsonProperty(PropertyName = "variables")]
     private Variables Vars { get; set; }
 
-    internal Request(string @namespace) => Vars = new Variables(@namespace);
-
     private class Headers
     {
         [JsonProperty(PropertyName = "Content-Type")]
@@ -68,9 +68,9 @@ internal class Request
 
     private class Variables
     {
+        internal Variables(string @namespace) => Namespace = @namespace;
+
         [JsonProperty(PropertyName = "namespace")]
         private string Namespace { get; set; }
-
-        internal Variables(string @namespace) => Namespace = @namespace;
     }
 }
