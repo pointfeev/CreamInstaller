@@ -30,15 +30,17 @@ games and DLCs the user selects; however, through the use of **right-click conte
 1. Click [here](https://github.com/pointfeev/CreamInstaller/releases/latest/download/CreamInstaller.zip) to download the latest release from [GitHub](https://github.com/pointfeev/CreamInstaller).
 2. Extract the executable to anywhere on your computer you want. *it's completely self-contained*
 
+If the program doesn't seem to launch, try downloading and installing [.NET 7 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-7.0.1-windows-x64-installer).
+
 ---
 #### **NOTE:** This program does not automatically download nor install actual DLC files for you. As the title of the program says, it's only a DLC Unlocker installer. Should the game you wish to unlock DLC for not already come with the DLCs installed (very many do not), you have to find, download, and install those yourself. Preferably, you should be referring to the proper cs.rin.ru post for the game(s) you're tinkering with; you'll usually find any answer to your problems there.
 
 ---
 #### Usage:
-1. Start the program executable.
-2. Choose which programs and/or games the program should scan for DLC. *the program automatically gathers all installed games from Steam, Epic and Ubisoft directories*
-3. Wait for the program to download and install SteamCMD (if you chose a Steam game). *very fast, depends on internet speed*
-4. Wait for the program to gather and cache the chosen games' information & DLCs. *may take a good amount of time on the first run, depends on how many games you chose and how many DLCs they have*
+1. Start the program executable. *Read above under Installation if it doesn't launch.*
+2. Choose which programs and/or games the program should scan for DLC. *The program automatically gathers all installed games from Steam, Epic and Ubisoft directories.*
+3. Wait for the program to download and install SteamCMD (if you chose a Steam game). *Very fast, depends on internet speed.*
+4. Wait for the program to gather and cache the chosen games' information & DLCs. *May take a good amount of time on the first run, depends on how many games you chose and how many DLCs they have.*
 5. **CAREFULLY** select which games' DLCs you wish to unlock. *Obviously none of the DLC unlockers are tested for every single game!*
 6. Choose whether or not to install with Koaloader, and if so then also pick the proxy DLL to use. *If the default version.dll doesn't work, then see [here](https://cs.rin.ru/forum/viewtopic.php?p=2552172#p2552172) to find one that does.*
 7. Click the **Generate and Install** button.
