@@ -19,11 +19,11 @@ games and DLCs the user selects; however, through the use of **right-click conte
 
 ---
 #### Features:
-* Automatic download and installation of SteamCMD as necessary whenever a Steam game is chosen. *for gathering appinfo such as name, buildid, listofdlc, depots*
+* Automatic download and installation of SteamCMD as necessary whenever a Steam game is chosen. *For gathering appinfo such as name, buildid, listofdlc, depots, etc.*
 * Automatic gathering and caching of information for all selected Steam and Epic games and **ALL** of their DLCs.
 * Automatic DLL installation and configuration generation for Koaloader, SmokeAPI, ScreamAPI, Uplay R1 Unlocker and Uplay R2 Unlocker.
 * Automatic uninstallation of DLLs and configurations for Koaloader, CreamAPI, SmokeAPI, ScreamAPI, Uplay R1 Unlocker and Uplay R2 Unlocker.
-* Automatic reparation of the Paradox Launcher (and manually via the right-click context menu "Repair" option). *for when the launcher updates whilst you have CreamAPI, SmokeAPI or ScreamAPI installed to it*
+* Automatic reparation of the Paradox Launcher (and manually via the right-click context menu "Repair" option). *For when the launcher updates whilst you have CreamAPI, SmokeAPI or ScreamAPI installed to it.*
 
 ---
 #### Installation:
