@@ -28,7 +28,7 @@ games and DLCs the user selects; however, through the use of **right-click conte
 ---
 #### Installation:
 1. Click [here](https://github.com/pointfeev/CreamInstaller/releases/latest/download/CreamInstaller.zip) to download the latest release from [GitHub](https://github.com/pointfeev/CreamInstaller).
-2. Extract the executable to anywhere on your computer you want. *it's completely self-contained*
+2. Extract the executable to anywhere on your computer you want. *It's completely self-contained.*
 
 If the program doesn't seem to launch, try downloading and installing [.NET 7 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-7.0.1-windows-x64-installer).
 
