@@ -25,17 +25,14 @@ internal class ProgramSelection
 
     internal static readonly List<ProgramSelection> All = new();
 
-    internal readonly SortedList<string, (DlcType type, string name, string icon)> AllDlc
-        = new(PlatformIdComparer.String);
+    internal readonly SortedList<string, (DlcType type, string name, string icon)> AllDlc = new(PlatformIdComparer.String);
 
-    internal readonly List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)>
-        ExtraDlc = new(); // for Paradox Launcher
+    internal readonly List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> ExtraDlc = new(); // for Paradox Launcher
 
     internal readonly List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)>
         ExtraSelectedDlc = new(); // for Paradox Launcher
 
-    internal readonly SortedList<string, (DlcType type, string name, string icon)> SelectedDlc
-        = new(PlatformIdComparer.String);
+    internal readonly SortedList<string, (DlcType type, string name, string icon)> SelectedDlc = new(PlatformIdComparer.String);
 
     internal List<string> DllDirectories;
     internal bool Enabled;
@@ -67,54 +64,31 @@ internal class ProgramSelection
             {
                 if (Platform is Platform.Steam or Platform.Paradox)
                 {
-                    directory.GetCreamApiComponents(out string api32, out string api32_o, out string api64,
-                                                    out string api64_o, out string config);
-                    if (api32.IsFilePathLocked()
-                     || api32_o.IsFilePathLocked()
-                     || api64.IsFilePathLocked()
-                     || api64_o.IsFilePathLocked()
+                    directory.GetCreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+                    if (api32.IsFilePathLocked() || api32_o.IsFilePathLocked() || api64.IsFilePathLocked() || api64_o.IsFilePathLocked()
                      || config.IsFilePathLocked())
                         return true;
-                    directory.GetSmokeApiComponents(out api32, out api32_o, out api64, out api64_o, out config,
-                                                    out string cache);
-                    if (api32.IsFilePathLocked()
-                     || api32_o.IsFilePathLocked()
-                     || api64.IsFilePathLocked()
-                     || api64_o.IsFilePathLocked()
-                     || config.IsFilePathLocked()
-                     || cache.IsFilePathLocked())
+                    directory.GetSmokeApiComponents(out api32, out api32_o, out api64, out api64_o, out config, out string cache);
+                    if (api32.IsFilePathLocked() || api32_o.IsFilePathLocked() || api64.IsFilePathLocked() || api64_o.IsFilePathLocked()
+                     || config.IsFilePathLocked() || cache.IsFilePathLocked())
                         return true;
                 }
                 if (Platform is Platform.Epic or Platform.Paradox)
                 {
-                    directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64,
-                                                     out string api64_o, out string config);
-                    if (api32.IsFilePathLocked()
-                     || api32_o.IsFilePathLocked()
-                     || api64.IsFilePathLocked()
-                     || api64_o.IsFilePathLocked()
+                    directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+                    if (api32.IsFilePathLocked() || api32_o.IsFilePathLocked() || api64.IsFilePathLocked() || api64_o.IsFilePathLocked()
                      || config.IsFilePathLocked())
                         return true;
                 }
                 if (Platform is Platform.Ubisoft)
                 {
-                    directory.GetUplayR1Components(out string api32, out string api32_o, out string api64,
-                                                   out string api64_o, out string config);
-                    if (api32.IsFilePathLocked()
-                     || api32_o.IsFilePathLocked()
-                     || api64.IsFilePathLocked()
-                     || api64_o.IsFilePathLocked()
+                    directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+                    if (api32.IsFilePathLocked() || api32_o.IsFilePathLocked() || api64.IsFilePathLocked() || api64_o.IsFilePathLocked()
                      || config.IsFilePathLocked())
                         return true;
-                    directory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o,
-                                                   out api64, out api64_o, out config);
-                    if (old_api32.IsFilePathLocked()
-                     || old_api64.IsFilePathLocked()
-                     || api32.IsFilePathLocked()
-                     || api32_o.IsFilePathLocked()
-                     || api64.IsFilePathLocked()
-                     || api64_o.IsFilePathLocked()
-                     || config.IsFilePathLocked())
+                    directory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config);
+                    if (old_api32.IsFilePathLocked() || old_api64.IsFilePathLocked() || api32.IsFilePathLocked() || api32_o.IsFilePathLocked()
+                     || api64.IsFilePathLocked() || api64_o.IsFilePathLocked() || config.IsFilePathLocked())
                         return true;
                 }
             }
@@ -128,8 +102,10 @@ internal class ProgramSelection
 
     private void Toggle(string dlcAppId, (DlcType type, string name, string icon) dlcApp, bool enabled)
     {
-        if (enabled) SelectedDlc[dlcAppId] = dlcApp;
-        else _ = SelectedDlc.Remove(dlcAppId);
+        if (enabled)
+            SelectedDlc[dlcAppId] = dlcApp;
+        else
+            _ = SelectedDlc.Remove(dlcAppId);
     }
 
     internal void ToggleDlc(string dlcId, bool enabled)
@@ -160,7 +136,8 @@ internal class ProgramSelection
             return;
         }
         _ = DllDirectories.RemoveAll(directory => !Directory.Exists(directory));
-        if (!DllDirectories.Any()) _ = All.Remove(this);
+        if (!DllDirectories.Any())
+            _ = All.Remove(this);
     }
 
     internal void Validate(List<(Platform platform, string id, string name)> programsToScan)
@@ -178,15 +155,12 @@ internal class ProgramSelection
     internal static void ValidateAll(List<(Platform platform, string id, string name)> programsToScan)
         => AllSafe.ForEach(selection => selection.Validate(programsToScan));
 
-    internal static ProgramSelection FromPlatformId(Platform platform, string gameId)
-        => AllSafe.Find(s => s.Platform == platform && s.Id == gameId);
+    internal static ProgramSelection FromPlatformId(Platform platform, string gameId) => AllSafe.Find(s => s.Platform == platform && s.Id == gameId);
 
-    internal static (string gameId, (DlcType type, string name, string icon) app)? GetDlcFromPlatformId(
-        Platform platform, string dlcId)
+    internal static (string gameId, (DlcType type, string name, string icon) app)? GetDlcFromPlatformId(Platform platform, string dlcId)
     {
         foreach (ProgramSelection selection in AllSafe.Where(s => s.Platform == platform))
-            foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in selection.AllDlc.Where(
-                         p => p.Key == dlcId))
+            foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in selection.AllDlc.Where(p => p.Key == dlcId))
                 return (selection.Id, pair.Value);
         return null;
     }

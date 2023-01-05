@@ -9,10 +9,11 @@ namespace CreamInstaller.Platforms.Epic.GraphQL;
 
 internal class Request
 {
-    internal Request(string @namespace) => Vars = new Variables(@namespace);
+    internal Request(string @namespace) => Vars = new(@namespace);
 
     [JsonProperty(PropertyName = "query")]
-    private string Query => @"query searchOffers($namespace: String!) {
+    private string Query
+        => @"query searchOffers($namespace: String!) {
     Catalog {
         searchStore(category: ""*"", namespace: $namespace){
             elements {

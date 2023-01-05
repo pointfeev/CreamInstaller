@@ -24,7 +24,7 @@ internal partial class DebugForm : CustomForm
         {
             if (current is not null && (current.Disposing || current.IsDisposed))
                 current = null;
-            return current ??= new DebugForm();
+            return current ??= new();
         }
         set => current = value;
     }
@@ -64,7 +64,7 @@ internal partial class DebugForm : CustomForm
         if (attachedForm is not null && attachedForm.Visible)
         {
             //Size = new(Size.Width, attachedForm.Size.Height);
-            Location = new Point(attachedForm.Right, attachedForm.Top);
+            Location = new(attachedForm.Right, attachedForm.Top);
             BringToFrontWithoutActivation();
         }
     }

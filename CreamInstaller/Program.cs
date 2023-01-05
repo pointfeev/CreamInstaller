@@ -42,8 +42,10 @@ internal static class Program
 
     internal static bool IsGameBlocked(string name, string directory = null)
     {
-        if (!BlockProtectedGames) return false;
-        if (ProtectedGames.Contains(name)) return true;
+        if (!BlockProtectedGames)
+            return false;
+        if (ProtectedGames.Contains(name))
+            return true;
         if (directory is not null && !ProtectedGameDirectoryExceptions.Contains(name))
             foreach (string path in ProtectedGameDirectories)
                 if (Directory.Exists(directory + path))
@@ -56,16 +58,12 @@ internal static class Program
         if (selection.AreDllsLocked)
         {
             using DialogForm dialogForm = new(form);
-            if (dialogForm.Show(SystemIcons.Error,
-                                $"ERROR: {selection.Name} is currently running!" +
-                                "\n\nPlease close the program/game to continue . . . ",
-                                "Retry", "Cancel") == DialogResult.OK)
+            if (dialogForm.Show(SystemIcons.Error, $"ERROR: {selection.Name} is currently running!" + "\n\nPlease close the program/game to continue . . . ",
+                    "Retry", "Cancel") == DialogResult.OK)
                 return IsProgramRunningDialog(form, selection);
         }
         else
-        {
             return true;
-        }
         return false;
     }
 
@@ -81,8 +79,7 @@ internal static class Program
             Application.ApplicationExit += OnApplicationExit;
             Application.ThreadException += (s, e) => e.Exception?.HandleFatalException();
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-            AppDomain.CurrentDomain.UnhandledException += (s, e)
-                => (e.ExceptionObject as Exception)?.HandleFatalException();
+            AppDomain.CurrentDomain.UnhandledException += (s, e) => (e.ExceptionObject as Exception)?.HandleFatalException();
         retry:
             try
             {
@@ -95,7 +92,8 @@ internal static class Program
             }
             catch (Exception e)
             {
-                if (e.HandleException()) goto retry;
+                if (e.HandleException())
+                    goto retry;
                 Application.Exit();
                 return;
             }

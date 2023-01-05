@@ -18,23 +18,25 @@ internal static class SteamStore
     private const int COOLDOWN_GAME = 600;
     private const int COOLDOWN_DLC = 1200;
 
-    internal static async Task<List<string>> ParseDlcAppIds(AppData appData) => await Task.Run(() =>
-    {
-        List<string> dlcIds = new();
-        if (appData.dlc is null) return dlcIds;
-        dlcIds.AddRange(from appId in appData.dlc where appId > 0 select appId.ToString());
-        return dlcIds;
-    });
+    internal static async Task<List<string>> ParseDlcAppIds(AppData appData)
+        => await Task.Run(() =>
+        {
+            List<string> dlcIds = new();
+            if (appData.dlc is null)
+                return dlcIds;
+            dlcIds.AddRange(from appId in appData.dlc where appId > 0 select appId.ToString());
+            return dlcIds;
+        });
 
     internal static async Task<AppData> QueryStoreAPI(string appId, bool isDlc = false, int attempts = 0)
     {
-        if (Program.Canceled) return null;
+        if (Program.Canceled)
+            return null;
         string cacheFile = ProgramData.AppInfoPath + @$"\{appId}.json";
         bool cachedExists = File.Exists(cacheFile);
         if (!cachedExists || ProgramData.CheckCooldown(appId, isDlc ? COOLDOWN_DLC : COOLDOWN_GAME))
         {
-            string response
-                = await HttpClientManager.EnsureGet($"https://store.steampowered.com/api/appdetails?appids={appId}");
+            string response = await HttpClientManager.EnsureGet($"https://store.steampowered.com/api/appdetails?appids={appId}");
             if (response is not null)
             {
                 IDictionary<string, JToken> apps = (IDictionary<string, JToken>)JsonConvert.DeserializeObject(response);
@@ -60,8 +62,7 @@ internal static class SteamStore
                                 {
                                     try
                                     {
-                                        await File.WriteAllTextAsync(
-                                            cacheFile, JsonConvert.SerializeObject(data, Formatting.Indented));
+                                        await File.WriteAllTextAsync(cacheFile, JsonConvert.SerializeObject(data, Formatting.Indented));
                                     }
                                     catch
 #if DEBUG
@@ -76,16 +77,13 @@ internal static class SteamStore
                                     return data;
                                 }
 #if DEBUG
-                                DebugForm.Current.Log(
-                                    $"Response data null for appid {appId}{(isDlc ? " (DLC)" : "")}: {app.Value.ToString(Formatting.None)}");
+                                DebugForm.Current.Log($"Response data null for appid {appId}{(isDlc ? " (DLC)" : "")}: {app.Value.ToString(Formatting.None)}");
 #endif
                             }
 #if DEBUG
                             else
-                            {
                                 DebugForm.Current.Log(
                                     $"Response details null for appid {appId}{(isDlc ? " (DLC)" : "")}: {app.Value.ToString(Formatting.None)}");
-                            }
 #endif
                         }
                         catch
@@ -99,7 +97,8 @@ internal static class SteamStore
                         { }
 #endif
 #if DEBUG
-                else DebugForm.Current.Log("Response deserialization null for appid " + appId);
+                else
+                    DebugForm.Current.Log("Response deserialization null for appid " + appId);
 #endif
             }
             else

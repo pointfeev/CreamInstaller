@@ -38,18 +38,21 @@ internal partial class InstallForm : CustomForm
             userProgressBar.Invoke(() =>
             {
                 int value = (int)((float)CompleteOperationsCount / OperationsCount * 100) + progress / OperationsCount;
-                if (value < userProgressBar.Value) return;
+                if (value < userProgressBar.Value)
+                    return;
                 userProgressBar.Value = value;
             });
     }
 
     internal void UpdateUser(string text, Color color, bool info = true, bool log = true)
     {
-        if (info) _ = userInfoLabel.Invoke(() => userInfoLabel.Text = text);
+        if (info)
+            _ = userInfoLabel.Invoke(() => userInfoLabel.Text = text);
         if (log && !logTextBox.Disposing && !logTextBox.IsDisposed)
             logTextBox.Invoke(() =>
             {
-                if (logTextBox.Text.Length > 0) logTextBox.AppendText(Environment.NewLine, color);
+                if (logTextBox.Text.Length > 0)
+                    logTextBox.AppendText(Environment.NewLine, color);
                 logTextBox.AppendText(text, color);
                 logTextBox.Invalidate();
             });
@@ -63,12 +66,11 @@ internal partial class InstallForm : CustomForm
             UpdateUser("Repairing Paradox Launcher . . . ", LogTextBox.Operation);
             _ = await Repair(this, selection);
         }
-        UpdateUser($"{(Uninstalling ? "Uninstalling" : "Installing")}" +
-                   $" {(Uninstalling ? "from" : "for")} " + selection.Name
-                 + $" with root directory \"{selection.RootDirectory}\" . . . ", LogTextBox.Operation);
+        UpdateUser(
+            $"{(Uninstalling ? "Uninstalling" : "Installing")}" + $" {(Uninstalling ? "from" : "for")} " + selection.Name
+          + $" with root directory \"{selection.RootDirectory}\" . . . ", LogTextBox.Operation);
         IEnumerable<string> invalidDirectories = (await selection.RootDirectory.GetExecutables())
-                                               ?.Where(d => !selection.ExecutableDirectories.Any(
-                                                           s => s.directory == Path.GetDirectoryName(d.path)))
+                                               ?.Where(d => !selection.ExecutableDirectories.Any(s => s.directory == Path.GetDirectoryName(d.path)))
                                                ?.Select(d => Path.GetDirectoryName(d.path));
         if (!selection.ExecutableDirectories.Any(s => s.directory == selection.RootDirectory))
             invalidDirectories = invalidDirectories?.Append(selection.RootDirectory);
@@ -76,16 +78,13 @@ internal partial class InstallForm : CustomForm
         if (invalidDirectories is not null)
             foreach (string directory in invalidDirectories)
             {
-                if (Program.Canceled) throw new CustomMessageException("The operation was canceled.");
+                if (Program.Canceled)
+                    throw new CustomMessageException("The operation was canceled.");
                 directory.GetKoaloaderComponents(out List<string> proxies, out string config);
                 if (proxies.Any(proxy => File.Exists(proxy) && proxy.IsResourceFile(ResourceIdentifier.Koaloader))
-                 || (directory != selection.RootDirectory
-                  && Koaloader.AutoLoadDlls.Any(pair => File.Exists(directory + @"\" + pair.dll)))
-                 || File.Exists(config))
+                 || directory != selection.RootDirectory && Koaloader.AutoLoadDlls.Any(pair => File.Exists(directory + @"\" + pair.dll)) || File.Exists(config))
                 {
-                    UpdateUser("Uninstalling Koaloader from " + selection.Name
-                                                              + $" in incorrect directory \"{directory}\" . . . ",
-                               LogTextBox.Operation);
+                    UpdateUser("Uninstalling Koaloader from " + selection.Name + $" in incorrect directory \"{directory}\" . . . ", LogTextBox.Operation);
                     await Koaloader.Uninstall(directory, selection.RootDirectory, this);
                 }
                 Thread.Sleep(1);
@@ -93,15 +92,13 @@ internal partial class InstallForm : CustomForm
         if (Uninstalling || !selection.Koaloader)
             foreach ((string directory, BinaryType binaryType) in selection.ExecutableDirectories)
             {
-                if (Program.Canceled) throw new CustomMessageException("The operation was canceled.");
+                if (Program.Canceled)
+                    throw new CustomMessageException("The operation was canceled.");
                 directory.GetKoaloaderComponents(out List<string> proxies, out string config);
                 if (proxies.Any(proxy => File.Exists(proxy) && proxy.IsResourceFile(ResourceIdentifier.Koaloader))
-                 || Koaloader.AutoLoadDlls.Any(pair => File.Exists(directory + @"\" + pair.dll))
-                 || File.Exists(config))
+                 || Koaloader.AutoLoadDlls.Any(pair => File.Exists(directory + @"\" + pair.dll)) || File.Exists(config))
                 {
-                    UpdateUser(
-                        "Uninstalling Koaloader from " + selection.Name + $" in directory \"{directory}\" . . . ",
-                        LogTextBox.Operation);
+                    UpdateUser("Uninstalling Koaloader from " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
                     await Koaloader.Uninstall(directory, selection.RootDirectory, this);
                 }
                 Thread.Sleep(1);
@@ -110,18 +107,19 @@ internal partial class InstallForm : CustomForm
         int count = selection.DllDirectories.Count, cur = 0;
         foreach (string directory in selection.DllDirectories)
         {
-            if (Program.Canceled) throw new CustomMessageException("The operation was canceled.");
+            if (Program.Canceled)
+                throw new CustomMessageException("The operation was canceled.");
             if (selection.Platform is Platform.Steam or Platform.Paradox)
             {
-                directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64,
-                                                out string api64_o, out string config, out string cache);
+                directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config,
+                    out string cache);
                 if (uninstallProxy
                         ? File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config) || File.Exists(cache)
                         : File.Exists(api32) || File.Exists(api64))
                 {
-                    UpdateUser($"{(uninstallProxy ? "Uninstalling" : "Installing")} SmokeAPI" +
-                               $" {(uninstallProxy ? "from" : "for")} " + selection.Name
-                             + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
+                    UpdateUser(
+                        $"{(uninstallProxy ? "Uninstalling" : "Installing")} SmokeAPI" + $" {(uninstallProxy ? "from" : "for")} " + selection.Name
+                      + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
                     if (uninstallProxy)
                         await SmokeAPI.Uninstall(directory, this);
                     else
@@ -130,15 +128,12 @@ internal partial class InstallForm : CustomForm
             }
             if (selection.Platform is Platform.Epic or Platform.Paradox)
             {
-                directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64,
-                                                 out string api64_o, out string config);
-                if (uninstallProxy
-                        ? File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config)
-                        : File.Exists(api32) || File.Exists(api64))
+                directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+                if (uninstallProxy ? File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config) : File.Exists(api32) || File.Exists(api64))
                 {
-                    UpdateUser($"{(uninstallProxy ? "Uninstalling" : "Installing")} ScreamAPI" +
-                               $" {(uninstallProxy ? "from" : "for")} " + selection.Name
-                             + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
+                    UpdateUser(
+                        $"{(uninstallProxy ? "Uninstalling" : "Installing")} ScreamAPI" + $" {(uninstallProxy ? "from" : "for")} " + selection.Name
+                      + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
                     if (uninstallProxy)
                         await ScreamAPI.Uninstall(directory, this);
                     else
@@ -147,29 +142,25 @@ internal partial class InstallForm : CustomForm
             }
             if (selection.Platform is Platform.Ubisoft)
             {
-                directory.GetUplayR1Components(out string api32, out string api32_o, out string api64,
-                                               out string api64_o, out string config);
-                if (uninstallProxy
-                        ? File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config)
-                        : File.Exists(api32) || File.Exists(api64))
+                directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+                if (uninstallProxy ? File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config) : File.Exists(api32) || File.Exists(api64))
                 {
-                    UpdateUser($"{(uninstallProxy ? "Uninstalling" : "Installing")} Uplay R1 Unlocker" +
-                               $" {(uninstallProxy ? "from" : "for")} " + selection.Name
-                             + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
+                    UpdateUser(
+                        $"{(uninstallProxy ? "Uninstalling" : "Installing")} Uplay R1 Unlocker" + $" {(uninstallProxy ? "from" : "for")} " + selection.Name
+                      + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
                     if (uninstallProxy)
                         await UplayR1.Uninstall(directory, this);
                     else
                         await UplayR1.Install(directory, selection, this);
                 }
-                directory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o,
-                                               out api64, out api64_o, out config);
+                directory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config);
                 if (uninstallProxy
                         ? File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config)
                         : File.Exists(old_api32) || File.Exists(old_api64) || File.Exists(api32) || File.Exists(api64))
                 {
-                    UpdateUser($"{(uninstallProxy ? "Uninstalling" : "Installing")} Uplay R2 Unlocker" +
-                               $" {(uninstallProxy ? "from" : "for")} " + selection.Name
-                             + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
+                    UpdateUser(
+                        $"{(uninstallProxy ? "Uninstalling" : "Installing")} Uplay R2 Unlocker" + $" {(uninstallProxy ? "from" : "for")} " + selection.Name
+                      + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
                     if (uninstallProxy)
                         await UplayR2.Uninstall(directory, this);
                     else
@@ -182,9 +173,9 @@ internal partial class InstallForm : CustomForm
         if (selection.Koaloader && !Uninstalling)
             foreach ((string directory, BinaryType binaryType) in selection.ExecutableDirectories)
             {
-                if (Program.Canceled) throw new CustomMessageException("The operation was canceled.");
-                UpdateUser("Installing Koaloader to " + selection.Name + $" in directory \"{directory}\" . . . ",
-                           LogTextBox.Operation);
+                if (Program.Canceled)
+                    throw new CustomMessageException("The operation was canceled.");
+                UpdateUser("Installing Koaloader to " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
                 await Koaloader.Install(directory, binaryType, selection, selection.RootDirectory, this);
                 Thread.Sleep(1);
             }
@@ -236,13 +227,12 @@ internal partial class InstallForm : CustomForm
         try
         {
             await Operate();
-            UpdateUser($"DLC unlocker(s) successfully {(Uninstalling ? "uninstalled" : "installed and generated")} for "
-                     + ProgramCount + " program(s).", LogTextBox.Success);
+            UpdateUser($"DLC unlocker(s) successfully {(Uninstalling ? "uninstalled" : "installed and generated")} for " + ProgramCount + " program(s).",
+                LogTextBox.Success);
         }
         catch (Exception exception)
         {
-            UpdateUser($"DLC unlocker {(Uninstalling ? "uninstallation" : "installation and/or generation")} failed: "
-                     + exception, LogTextBox.Error);
+            UpdateUser($"DLC unlocker {(Uninstalling ? "uninstallation" : "installation and/or generation")} failed: " + exception, LogTextBox.Error);
             retryButton.Enabled = true;
         }
         userProgressBar.Value = userProgressBar.Maximum;
@@ -262,7 +252,8 @@ internal partial class InstallForm : CustomForm
         }
         catch (Exception e)
         {
-            if (e.HandleException(this)) goto retry;
+            if (e.HandleException(this))
+                goto retry;
             Close();
         }
     }

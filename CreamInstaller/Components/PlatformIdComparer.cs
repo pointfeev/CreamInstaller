@@ -14,16 +14,16 @@ internal static class PlatformIdComparer
     private static NodeNameComparer nodeNameComparer;
 
     private static NodeTextComparer nodeTextComparer;
-    internal static StringComparer String => stringComparer ??= new StringComparer();
-    internal static NodeComparer Node => nodeComparer ??= new NodeComparer();
-    internal static NodeNameComparer NodeName => nodeNameComparer ??= new NodeNameComparer();
-    internal static NodeTextComparer NodeText => nodeTextComparer ??= new NodeTextComparer();
+    internal static StringComparer String => stringComparer ??= new();
+    internal static NodeComparer Node => nodeComparer ??= new();
+    internal static NodeNameComparer NodeName => nodeNameComparer ??= new();
+    internal static NodeTextComparer NodeText => nodeTextComparer ??= new();
 }
 
 internal class StringComparer : IComparer<string>
 {
-    public int Compare(string a, string b) =>
-        !int.TryParse(a, out _) && !int.TryParse(b, out _)
+    public int Compare(string a, string b)
+        => !int.TryParse(a, out _) && !int.TryParse(b, out _)
             ? string.Compare(a, b, StringComparison.Ordinal)
             : !int.TryParse(a, out int A)
                 ? 1
@@ -38,8 +38,8 @@ internal class StringComparer : IComparer<string>
 
 internal class NodeComparer : IComparer<TreeNode>
 {
-    public int Compare(TreeNode a, TreeNode b) =>
-        a.Tag is not Platform A
+    public int Compare(TreeNode a, TreeNode b)
+        => a.Tag is not Platform A
             ? 1
             : b.Tag is not Platform B
                 ? -1
@@ -52,8 +52,8 @@ internal class NodeComparer : IComparer<TreeNode>
 
 internal class NodeNameComparer : IComparer
 {
-    public int Compare(object a, object b) =>
-        a is not TreeNode A
+    public int Compare(object a, object b)
+        => a is not TreeNode A
             ? 1
             : b is not TreeNode B
                 ? -1
@@ -64,8 +64,8 @@ internal class NodeNameComparer : IComparer
 
 internal class NodeTextComparer : IComparer
 {
-    public int Compare(object a, object b) =>
-        a is not TreeNode A
+    public int Compare(object a, object b)
+        => a is not TreeNode A
             ? 1
             : b is not TreeNode B
                 ? -1

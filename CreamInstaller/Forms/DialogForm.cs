@@ -12,8 +12,8 @@ internal partial class DialogForm : CustomForm
 {
     internal DialogForm(IWin32Window owner) : base(owner) => InitializeComponent();
 
-    internal DialogResult Show(Icon descriptionIcon, string descriptionText, string acceptButtonText = "OK",
-                               string cancelButtonText = null, string customFormText = null, Icon customFormIcon = null)
+    internal DialogResult Show(Icon descriptionIcon, string descriptionText, string acceptButtonText = "OK", string cancelButtonText = null,
+        string customFormText = null, Icon customFormIcon = null)
     {
         descriptionIcon ??= Icon;
         icon.Image = descriptionIcon.ToBitmap();
@@ -32,7 +32,7 @@ internal partial class DialogForm : CustomForm
                     if (string.IsNullOrWhiteSpace(link))
                         link = text;
                     descriptionText = descriptionText.Remove(i, linkRight + 1 - i).Insert(i, text);
-                    links.Add(new LinkLabel.Link(i, text.Length, link));
+                    links.Add(new(i, text.Length, link));
                 }
             }
         descriptionLabel.Text = descriptionText;
@@ -43,13 +43,9 @@ internal partial class DialogForm : CustomForm
             cancelButton.Visible = false;
         }
         else
-        {
             cancelButton.Text = cancelButtonText;
-        }
         if (customFormText is not null)
-        {
             Text = customFormText;
-        }
         else
         {
             OnResize(null, null);
@@ -61,16 +57,13 @@ internal partial class DialogForm : CustomForm
         {
             foreach (LinkLabel.Link link in links)
                 _ = descriptionLabel.Links.Add(link);
-            descriptionLabel.LinkClicked += (s, e)
-                => Process.Start(new ProcessStartInfo((string)e.Link.LinkData) { UseShellExecute = true });
+            descriptionLabel.LinkClicked += (s, e) => Process.Start(new ProcessStartInfo((string)e.Link.LinkData) { UseShellExecute = true });
         }
         return ShowDialog();
     }
 
-    private void OnResize(object s, EventArgs e) =>
-        Text = TextRenderer.MeasureText(Program.ApplicationName, Font).Width > Size.Width - 100
-            ? TextRenderer.MeasureText(Program.ApplicationNameShort, Font).Width > Size.Width - 100
-                ? Program.Name
-                : Program.ApplicationNameShort
+    private void OnResize(object s, EventArgs e)
+        => Text = TextRenderer.MeasureText(Program.ApplicationName, Font).Width > Size.Width - 100
+            ? TextRenderer.MeasureText(Program.ApplicationNameShort, Font).Width > Size.Width - 100 ? Program.Name : Program.ApplicationNameShort
             : Program.ApplicationName;
 }

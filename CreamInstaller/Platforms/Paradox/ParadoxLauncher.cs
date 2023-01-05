@@ -27,20 +27,16 @@ internal static class ParadoxLauncher
     {
         get
         {
-            installPath ??= Registry.GetValue(@"HKEY_CURRENT_USER\Software\Paradox Interactive\Paradox Launcher v2",
-                                              "LauncherInstallation", null) as string;
-            installPath ??= Registry.GetValue(
-                @"HKEY_CURRENT_USER\Software\Wow6432Node\Paradox Interactive\Paradox Launcher v2",
-                "LauncherInstallation", null) as string;
+            installPath ??= Registry.GetValue(@"HKEY_CURRENT_USER\Software\Paradox Interactive\Paradox Launcher v2", "LauncherInstallation", null) as string;
+            installPath
+                ??= Registry.GetValue(@"HKEY_CURRENT_USER\Software\Wow6432Node\Paradox Interactive\Paradox Launcher v2", "LauncherInstallation",
+                    null) as string;
             return installPath.BeautifyPath();
         }
     }
 
-    internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(
-        string gameDirectory) =>
-        await Task.Run(async () => await gameDirectory.GetExecutableDirectories(validFunc: path
-                           => !Path.GetFileName(path)
-                                   .Contains("bootstrapper")));
+    internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(string gameDirectory)
+        => await Task.Run(async () => await gameDirectory.GetExecutableDirectories(validFunc: path => !Path.GetFileName(path).Contains("bootstrapper")));
 
     private static void PopulateDlc(ProgramSelection paradoxLauncher = null)
     {
@@ -49,26 +45,24 @@ internal static class ParadoxLauncher
         {
             paradoxLauncher.ExtraDlc.Clear();
             paradoxLauncher.ExtraSelectedDlc.Clear();
-            foreach (ProgramSelection selection in ProgramSelection.AllEnabled.Where(
-                         s => s != paradoxLauncher && s.Publisher == "Paradox Interactive"))
+            foreach (ProgramSelection selection in ProgramSelection.AllEnabled.Where(s => s != paradoxLauncher && s.Publisher == "Paradox Interactive"))
             {
                 paradoxLauncher.ExtraDlc.Add(
-                    new ValueTuple<string, string, SortedList<string, (DlcType type, string name, string icon)>>(
-                        selection.Id, selection.Name, selection.AllDlc));
+                    new ValueTuple<string, string, SortedList<string, (DlcType type, string name, string icon)>>(selection.Id, selection.Name,
+                        selection.AllDlc));
                 paradoxLauncher.ExtraSelectedDlc.Add(
-                    new ValueTuple<string, string, SortedList<string, (DlcType type, string name, string icon)>>(
-                        selection.Id, selection.Name, selection.SelectedDlc));
+                    new ValueTuple<string, string, SortedList<string, (DlcType type, string name, string icon)>>(selection.Id, selection.Name,
+                        selection.SelectedDlc));
             }
             if (!paradoxLauncher.ExtraDlc.Any())
-                foreach (ProgramSelection selection in ProgramSelection.AllSafe.Where(
-                             s => s != paradoxLauncher && s.Publisher == "Paradox Interactive"))
+                foreach (ProgramSelection selection in ProgramSelection.AllSafe.Where(s => s != paradoxLauncher && s.Publisher == "Paradox Interactive"))
                 {
                     paradoxLauncher.ExtraDlc.Add(
-                        new ValueTuple<string, string, SortedList<string, (DlcType type, string name, string icon)>>(
-                            selection.Id, selection.Name, selection.AllDlc));
+                        new ValueTuple<string, string, SortedList<string, (DlcType type, string name, string icon)>>(selection.Id, selection.Name,
+                            selection.AllDlc));
                     paradoxLauncher.ExtraSelectedDlc.Add(
-                        new ValueTuple<string, string, SortedList<string, (DlcType type, string name, string icon)>>(
-                            selection.Id, selection.Name, selection.AllDlc));
+                        new ValueTuple<string, string, SortedList<string, (DlcType type, string name, string icon)>>(selection.Id, selection.Name,
+                            selection.AllDlc));
                 }
         }
     }
@@ -83,10 +77,9 @@ internal static class ParadoxLauncher
             {
                 using DialogForm dialogForm = new(form);
                 return dialogForm.Show(SystemIcons.Warning,
-                                       "WARNING: There are no scanned games with DLC that can be added to the Paradox Launcher!"
-                                      +
-                                       "\n\nInstalling DLC unlockers for the Paradox Launcher alone can cause existing configurations to be deleted!",
-                                       "Ignore", "Cancel", "Paradox Launcher") != DialogResult.OK;
+                    "WARNING: There are no scanned games with DLC that can be added to the Paradox Launcher!"
+                  + "\n\nInstalling DLC unlockers for the Paradox Launcher alone can cause existing configurations to be deleted!", "Ignore", "Cancel",
+                    "Paradox Launcher") != DialogResult.OK;
             }
         }
         return false;
@@ -96,9 +89,7 @@ internal static class ParadoxLauncher
     {
         InstallForm installForm = form as InstallForm;
         if (!Program.IsProgramRunningDialog(form, selection))
-            return form is InstallForm
-                ? throw new CustomMessageException("Repair failed! The launcher is currently running!")
-                : RepairResult.ProgramRunning;
+            return form is InstallForm ? throw new CustomMessageException("Repair failed! The launcher is currently running!") : RepairResult.ProgramRunning;
         bool smokeInstalled = false;
         byte[] steamOriginalSdk32 = null;
         byte[] steamOriginalSdk64 = null;
@@ -107,40 +98,29 @@ internal static class ParadoxLauncher
         byte[] epicOriginalSdk64 = null;
         foreach (string directory in selection.DllDirectories)
         {
-            bool koaloaderInstalled = Koaloader.AutoLoadDlls
-                                               .Select(pair => (pair.unlocker, path: directory + @"\" + pair.dll))
+            bool koaloaderInstalled = Koaloader.AutoLoadDlls.Select(pair => (pair.unlocker, path: directory + @"\" + pair.dll))
                                                .Any(pair => File.Exists(pair.path) && pair.path.IsResourceFile());
-            directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o,
-                                            out string config, out _);
-            smokeInstalled = smokeInstalled
-                          || File.Exists(api32_o) || File.Exists(api64_o)
-                          || (File.Exists(config) && !koaloaderInstalled)
-                          || (File.Exists(api32) && api32.IsResourceFile(ResourceIdentifier.Steamworks32))
-                          || (File.Exists(api64) && api64.IsResourceFile(ResourceIdentifier.Steamworks64));
+            directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out _);
+            smokeInstalled = smokeInstalled || File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config) && !koaloaderInstalled
+                          || File.Exists(api32) && api32.IsResourceFile(ResourceIdentifier.Steamworks32)
+                          || File.Exists(api64) && api64.IsResourceFile(ResourceIdentifier.Steamworks64);
             await SmokeAPI.Uninstall(directory, deleteConfig: false);
-            if (steamOriginalSdk32 is null && File.Exists(api32)
-                                           && !api32.IsResourceFile(ResourceIdentifier.Steamworks32))
+            if (steamOriginalSdk32 is null && File.Exists(api32) && !api32.IsResourceFile(ResourceIdentifier.Steamworks32))
                 steamOriginalSdk32 = await File.ReadAllBytesAsync(api32);
-            if (steamOriginalSdk64 is null && File.Exists(api64)
-                                           && !api64.IsResourceFile(ResourceIdentifier.Steamworks64))
+            if (steamOriginalSdk64 is null && File.Exists(api64) && !api64.IsResourceFile(ResourceIdentifier.Steamworks64))
                 steamOriginalSdk64 = await File.ReadAllBytesAsync(api64);
             directory.GetScreamApiComponents(out api32, out api32_o, out api64, out api64_o, out config);
-            screamInstalled = screamInstalled
-                           || File.Exists(api32_o) || File.Exists(api64_o)
-                           || (File.Exists(config) && !koaloaderInstalled)
-                           || (File.Exists(api32) && api32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32))
-                           || (File.Exists(api64) && api64.IsResourceFile(ResourceIdentifier.EpicOnlineServices64));
+            screamInstalled = screamInstalled || File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config) && !koaloaderInstalled
+                           || File.Exists(api32) && api32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32)
+                           || File.Exists(api64) && api64.IsResourceFile(ResourceIdentifier.EpicOnlineServices64);
             await ScreamAPI.Uninstall(directory, deleteConfig: false);
-            if (epicOriginalSdk32 is null && File.Exists(api32)
-                                          && !api32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32))
+            if (epicOriginalSdk32 is null && File.Exists(api32) && !api32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32))
                 epicOriginalSdk32 = await File.ReadAllBytesAsync(api32);
-            if (epicOriginalSdk64 is null && File.Exists(api64)
-                                          && !api64.IsResourceFile(ResourceIdentifier.EpicOnlineServices64))
+            if (epicOriginalSdk64 is null && File.Exists(api64) && !api64.IsResourceFile(ResourceIdentifier.EpicOnlineServices64))
                 epicOriginalSdk64 = await File.ReadAllBytesAsync(api64);
         }
         using DialogForm dialogForm = new(form);
-        if (steamOriginalSdk32 is not null || steamOriginalSdk64 is not null || epicOriginalSdk32 is not null
-         || epicOriginalSdk64 is not null)
+        if (steamOriginalSdk32 is not null || steamOriginalSdk64 is not null || epicOriginalSdk32 is not null || epicOriginalSdk64 is not null)
         {
             bool neededRepair = false;
             foreach (string directory in selection.DllDirectories)
@@ -181,26 +161,22 @@ internal static class ParadoxLauncher
                 if (installForm is not null)
                     installForm.UpdateUser("Paradox Launcher successfully repaired!", LogTextBox.Success);
                 else
-                    _ = dialogForm.Show(form.Icon, "Paradox Launcher successfully repaired!", "OK",
-                                        customFormText: "Paradox Launcher");
+                    _ = dialogForm.Show(form.Icon, "Paradox Launcher successfully repaired!", "OK", customFormText: "Paradox Launcher");
                 return RepairResult.Success;
             }
             if (installForm is not null)
                 installForm.UpdateUser("Paradox Launcher did not need to be repaired.", LogTextBox.Success);
             else
-                _ = dialogForm.Show(SystemIcons.Information, "Paradox Launcher does not need to be repaired.", "OK",
-                                    customFormText: "Paradox Launcher");
+                _ = dialogForm.Show(SystemIcons.Information, "Paradox Launcher does not need to be repaired.", "OK", customFormText: "Paradox Launcher");
             return RepairResult.Unnecessary;
         }
         _ = form is InstallForm
-            ? throw new CustomMessageException("Repair failed! " +
-                                               "An original Steamworks and/or Epic Online Services file could not be found. "
-                                              +
-                                               "You will likely have to reinstall Paradox Launcher to fix this issue.")
-            : dialogForm.Show(SystemIcons.Error, "Paradox Launcher repair failed!"
-                                               + "\n\nAn original Steamworks and/or Epic Online Services file could not be found."
-                                               + "\nYou will likely have to reinstall Paradox Launcher to fix this issue.",
-                              "OK", customFormText: "Paradox Launcher");
+            ? throw new CustomMessageException("Repair failed! " + "An original Steamworks and/or Epic Online Services file could not be found. "
+                                                                 + "You will likely have to reinstall Paradox Launcher to fix this issue.")
+            : dialogForm.Show(SystemIcons.Error,
+                "Paradox Launcher repair failed!" + "\n\nAn original Steamworks and/or Epic Online Services file could not be found."
+                                                  + "\nYou will likely have to reinstall Paradox Launcher to fix this issue.", "OK",
+                customFormText: "Paradox Launcher");
         return RepairResult.Failure;
     }
 }

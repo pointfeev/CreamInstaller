@@ -11,11 +11,9 @@ namespace CreamInstaller.Utility;
 
 internal static class ProgramData
 {
-    internal static readonly string DirectoryPathOld
-        = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\CreamInstaller";
+    internal static readonly string DirectoryPathOld = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\CreamInstaller";
 
-    internal static readonly string DirectoryPath
-        = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\CreamInstaller";
+    internal static readonly string DirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\CreamInstaller";
 
     internal static readonly string AppInfoPath = DirectoryPath + @"\appinfo";
     internal static readonly string AppInfoVersionPath = AppInfoPath + @"\version.txt";
@@ -29,27 +27,30 @@ internal static class ProgramData
     internal static readonly string DlcChoicesPath = DirectoryPath + @"\dlc.json";
     internal static readonly string KoaloaderProxyChoicesPath = DirectoryPath + @"\proxies.json";
 
-    internal static async Task Setup() => await Task.Run(() =>
-    {
-        if (Directory.Exists(DirectoryPathOld))
+    internal static async Task Setup()
+        => await Task.Run(() =>
         {
-            if (Directory.Exists(DirectoryPath)) Directory.Delete(DirectoryPath, true);
-            Directory.Move(DirectoryPathOld, DirectoryPath);
-        }
-        if (!Directory.Exists(DirectoryPath)) _ = Directory.CreateDirectory(DirectoryPath);
-        if (!File.Exists(AppInfoVersionPath)
-         || !Version.TryParse(File.ReadAllText(AppInfoVersionPath, Encoding.UTF8), out Version version)
-         || version < MinimumAppInfoVersion)
-        {
-            if (Directory.Exists(AppInfoPath)) Directory.Delete(AppInfoPath, true);
-            _ = Directory.CreateDirectory(AppInfoPath);
-            File.WriteAllText(AppInfoVersionPath, Program.Version, Encoding.UTF8);
-        }
-        if (!Directory.Exists(CooldownPath))
-            _ = Directory.CreateDirectory(CooldownPath);
-        if (File.Exists(OldProgramChoicesPath))
-            File.Delete(OldProgramChoicesPath);
-    });
+            if (Directory.Exists(DirectoryPathOld))
+            {
+                if (Directory.Exists(DirectoryPath))
+                    Directory.Delete(DirectoryPath, true);
+                Directory.Move(DirectoryPathOld, DirectoryPath);
+            }
+            if (!Directory.Exists(DirectoryPath))
+                _ = Directory.CreateDirectory(DirectoryPath);
+            if (!File.Exists(AppInfoVersionPath) || !Version.TryParse(File.ReadAllText(AppInfoVersionPath, Encoding.UTF8), out Version version)
+                                                 || version < MinimumAppInfoVersion)
+            {
+                if (Directory.Exists(AppInfoPath))
+                    Directory.Delete(AppInfoPath, true);
+                _ = Directory.CreateDirectory(AppInfoPath);
+                File.WriteAllText(AppInfoVersionPath, Program.Version, Encoding.UTF8);
+            }
+            if (!Directory.Exists(CooldownPath))
+                _ = Directory.CreateDirectory(CooldownPath);
+            if (File.Exists(OldProgramChoicesPath))
+                File.Delete(OldProgramChoicesPath);
+        });
 
     internal static bool CheckCooldown(string identifier, int cooldown)
     {
@@ -91,16 +92,16 @@ internal static class ProgramData
 
     internal static List<(Platform platform, string id)> ReadProgramChoices()
     {
-        if (!File.Exists(ProgramChoicesPath)) return null;
+        if (!File.Exists(ProgramChoicesPath))
+            return null;
         try
         {
-            return JsonConvert.DeserializeObject(File.ReadAllText(ProgramChoicesPath),
-                                                 typeof(List<(Platform platform, string id)>)) as
+            return JsonConvert.DeserializeObject(File.ReadAllText(ProgramChoicesPath), typeof(List<(Platform platform, string id)>)) as
                 List<(Platform platform, string id)>;
         }
         catch
         {
-            return new List<(Platform platform, string id)>();
+            return new();
         }
     }
 
@@ -118,16 +119,16 @@ internal static class ProgramData
 
     internal static List<(Platform platform, string gameId, string dlcId)> ReadDlcChoices()
     {
-        if (!File.Exists(DlcChoicesPath)) return null;
+        if (!File.Exists(DlcChoicesPath))
+            return null;
         try
         {
-            return JsonConvert.DeserializeObject(File.ReadAllText(DlcChoicesPath),
-                                                 typeof(List<(Platform platform, string gameId, string dlcId)>)) as
+            return JsonConvert.DeserializeObject(File.ReadAllText(DlcChoicesPath), typeof(List<(Platform platform, string gameId, string dlcId)>)) as
                 List<(Platform platform, string gameId, string dlcId)>;
         }
         catch
         {
-            return new List<(Platform platform, string gameId, string dlcId)>();
+            return new();
         }
     }
 
@@ -145,22 +146,20 @@ internal static class ProgramData
 
     internal static List<(Platform platform, string id, string proxy, bool enabled)> ReadKoaloaderChoices()
     {
-        if (!File.Exists(KoaloaderProxyChoicesPath)) return null;
+        if (!File.Exists(KoaloaderProxyChoicesPath))
+            return null;
         try
         {
             return JsonConvert.DeserializeObject(File.ReadAllText(KoaloaderProxyChoicesPath),
-                                                 typeof(
-                                                     List<(Platform platform, string id, string proxy, bool enabled)>))
-                as List<(Platform platform, string id, string proxy, bool enabled)>;
+                typeof(List<(Platform platform, string id, string proxy, bool enabled)>)) as List<(Platform platform, string id, string proxy, bool enabled)>;
         }
         catch
         {
-            return new List<(Platform platform, string id, string proxy, bool enabled)>();
+            return new();
         }
     }
 
-    internal static void WriteKoaloaderProxyChoices(
-        List<(Platform platform, string id, string proxy, bool enabled)> choices)
+    internal static void WriteKoaloaderProxyChoices(List<(Platform platform, string id, string proxy, bool enabled)> choices)
     {
         try
         {

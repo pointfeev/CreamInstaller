@@ -65,8 +65,7 @@ internal class CustomTreeView : TreeView
         Size size;
         Rectangle bounds = node.Bounds;
         Rectangle selectionBounds = bounds;
-        Color
-            color; // = highlighted ? SystemColors.HighlightText : (node.ForeColor != Color.Empty) ? node.ForeColor : node.TreeView.ForeColor;
+        Color color; // = highlighted ? SystemColors.HighlightText : (node.ForeColor != Color.Empty) ? node.ForeColor : node.TreeView.ForeColor;
         Point point;
         /*Size textSize = TextRenderer.MeasureText(text, font);
         Point textLoc = new(bounds.X - 1, bounds.Y);
@@ -88,8 +87,7 @@ internal class CustomTreeView : TreeView
         text = platform.ToString();
         size = TextRenderer.MeasureText(graphics, text, font);
         bounds = bounds with { X = bounds.X + bounds.Width, Width = size.Width };
-        selectionBounds
-            = new Rectangle(selectionBounds.Location, selectionBounds.Size + bounds.Size with { Height = 0 });
+        selectionBounds = new Rectangle(selectionBounds.Location, selectionBounds.Size + bounds.Size with { Height = 0 });
         graphics.FillRectangle(brush, bounds);
         point = new Point(bounds.Location.X - 1, bounds.Location.Y + 1);
         TextRenderer.DrawText(graphics, text, font, point, color, TextFormatFlags.Default);
@@ -104,8 +102,7 @@ internal class CustomTreeView : TreeView
             size = TextRenderer.MeasureText(graphics, text, font);
             int left = -4;
             bounds = bounds with { X = bounds.X + bounds.Width + left, Width = size.Width };
-            selectionBounds = new Rectangle(selectionBounds.Location,
-                                            selectionBounds.Size + new Size(bounds.Size.Width + left, 0));
+            selectionBounds = new Rectangle(selectionBounds.Location, selectionBounds.Size + new Size(bounds.Size.Width + left, 0));
             graphics.FillRectangle(brush, bounds);
             point = new Point(bounds.Location.X - 1, bounds.Location.Y + 1);
             TextRenderer.DrawText(graphics, text, font, point, color, TextFormatFlags.Default);
@@ -130,8 +127,7 @@ internal class CustomTreeView : TreeView
                         : CheckBoxState.UncheckedDisabled;
                 size = CheckBoxRenderer.GetGlyphSize(graphics, checkBoxState);
                 bounds = bounds with { X = bounds.X + bounds.Width, Width = size.Width };
-                selectionBounds = new Rectangle(selectionBounds.Location,
-                                                selectionBounds.Size + bounds.Size with { Height = 0 });
+                selectionBounds = new Rectangle(selectionBounds.Location, selectionBounds.Size + bounds.Size with { Height = 0 });
                 Rectangle checkBoxBounds = bounds;
                 graphics.FillRectangle(backBrush, bounds);
                 point = new Point(bounds.Left, bounds.Top + bounds.Height / 2 - size.Height / 2 - 1);
@@ -140,41 +136,31 @@ internal class CustomTreeView : TreeView
                 size = TextRenderer.MeasureText(graphics, text, font);
                 int left = 1;
                 bounds = bounds with { X = bounds.X + bounds.Width, Width = size.Width + left };
-                selectionBounds = new Rectangle(selectionBounds.Location,
-                                                selectionBounds.Size + bounds.Size with { Height = 0 });
-                checkBoxBounds = new Rectangle(checkBoxBounds.Location,
-                                               checkBoxBounds.Size + bounds.Size with { Height = 0 });
+                selectionBounds = new Rectangle(selectionBounds.Location, selectionBounds.Size + bounds.Size with { Height = 0 });
+                checkBoxBounds = new Rectangle(checkBoxBounds.Location, checkBoxBounds.Size + bounds.Size with { Height = 0 });
                 graphics.FillRectangle(backBrush, bounds);
                 point = new Point(bounds.Location.X - 1 + left, bounds.Location.Y + 1);
-                TextRenderer.DrawText(graphics, text, font, point,
-                                      Enabled
-                                          ? ColorTranslator.FromHtml("#006900")
-                                          : ColorTranslator.FromHtml("#69AA69"),
-                                      TextFormatFlags.Default);
+                TextRenderer.DrawText(graphics, text, font, point, Enabled ? ColorTranslator.FromHtml("#006900") : ColorTranslator.FromHtml("#69AA69"),
+                    TextFormatFlags.Default);
                 this.checkBoxBounds[selection] = RectangleToClient(checkBoxBounds);
                 string proxy = selection.KoaloaderProxy ?? ProgramSelection.DefaultKoaloaderProxy;
                 if (selection.Koaloader && proxy is not null)
                 {
-                    comboBoxFont ??= new Font(font.FontFamily, 6, font.Style, font.Unit, font.GdiCharSet,
-                                              font.GdiVerticalFont);
+                    comboBoxFont ??= new Font(font.FontFamily, 6, font.Style, font.Unit, font.GdiCharSet, font.GdiVerticalFont);
                     ComboBoxState comboBoxState = Enabled ? ComboBoxState.Normal : ComboBoxState.Disabled;
                     text = proxy + ".dll";
                     size = TextRenderer.MeasureText(graphics, text, comboBoxFont) + new Size(6, 0);
                     int padding = 2;
-                    bounds = new Rectangle(bounds.X + bounds.Width, bounds.Y + padding / 2, size.Width,
-                                           bounds.Height - padding);
-                    selectionBounds = new Rectangle(selectionBounds.Location,
-                                                    selectionBounds.Size + bounds.Size with { Height = 0 });
+                    bounds = new Rectangle(bounds.X + bounds.Width, bounds.Y + padding / 2, size.Width, bounds.Height - padding);
+                    selectionBounds = new Rectangle(selectionBounds.Location, selectionBounds.Size + bounds.Size with { Height = 0 });
                     Rectangle comboBoxBounds = bounds;
                     graphics.FillRectangle(backBrush, bounds);
                     ComboBoxRenderer.DrawTextBox(graphics, bounds, text, comboBoxFont, comboBoxState);
                     size = new Size(14, 0);
                     left = -1;
                     bounds = bounds with { X = bounds.X + bounds.Width + left, Width = size.Width };
-                    selectionBounds = new Rectangle(selectionBounds.Location,
-                                                    selectionBounds.Size + new Size(bounds.Size.Width + left, 0));
-                    comboBoxBounds = new Rectangle(comboBoxBounds.Location,
-                                                   comboBoxBounds.Size + new Size(bounds.Size.Width + left, 0));
+                    selectionBounds = new Rectangle(selectionBounds.Location, selectionBounds.Size + new Size(bounds.Size.Width + left, 0));
+                    comboBoxBounds = new Rectangle(comboBoxBounds.Location, comboBoxBounds.Size + new Size(bounds.Size.Width + left, 0));
                     ComboBoxRenderer.DrawDropDownButton(graphics, bounds, comboBoxState);
                     this.comboBoxBounds[selection] = RectangleToClient(comboBoxBounds);
                 }
@@ -215,13 +201,11 @@ internal class CustomTreeView : TreeView
                     }
                     else if (pair.Value.Contains(clickPoint))
                     {
-                        List<string> proxies = EmbeddedResources.FindAll(r => r.StartsWith("Koaloader"))
-                                                                .Select(p =>
-                                                                 {
-                                                                     p.GetProxyInfoFromIdentifier(
-                                                                         out string proxyName, out _);
-                                                                     return proxyName;
-                                                                 }).Distinct().ToList();
+                        List<string> proxies = EmbeddedResources.FindAll(r => r.StartsWith("Koaloader")).Select(p =>
+                        {
+                            p.GetProxyInfoFromIdentifier(out string proxyName, out _);
+                            return proxyName;
+                        }).Distinct().ToList();
                         comboBoxDropDown ??= new ToolStripDropDown();
                         comboBoxDropDown.ShowItemToolTips = false;
                         comboBoxDropDown.Items.Clear();
@@ -240,8 +224,7 @@ internal class CustomTreeView : TreeView
                             if (canUse)
                                 _ = comboBoxDropDown.Items.Add(new ToolStripButton(proxy + ".dll", null, (s, e) =>
                                 {
-                                    pair.Key.KoaloaderProxy
-                                        = proxy == ProgramSelection.DefaultKoaloaderProxy ? null : proxy;
+                                    pair.Key.KoaloaderProxy = proxy == ProgramSelection.DefaultKoaloaderProxy ? null : proxy;
                                     selectForm.OnKoaloaderChanged();
                                 }) { Font = comboBoxFont });
                         }

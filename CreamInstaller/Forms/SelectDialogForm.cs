@@ -12,10 +12,11 @@ internal partial class SelectDialogForm : CustomForm
     private readonly List<(Platform platform, string id, string name)> selected = new();
     internal SelectDialogForm(IWin32Window owner) : base(owner) => InitializeComponent();
 
-    internal List<(Platform platform, string id, string name)> QueryUser(
-        string groupBoxText, List<(Platform platform, string id, string name, bool alreadySelected)> choices)
+    internal List<(Platform platform, string id, string name)> QueryUser(string groupBoxText,
+        List<(Platform platform, string id, string name, bool alreadySelected)> choices)
     {
-        if (!choices.Any()) return null;
+        if (!choices.Any())
+            return null;
         groupBox.Text = groupBoxText;
         allCheckBox.Enabled = false;
         acceptButton.Enabled = false;
@@ -26,7 +27,8 @@ internal partial class SelectDialogForm : CustomForm
             OnTreeNodeChecked(node);
             _ = selectionTreeView.Nodes.Add(node);
         }
-        if (!selected.Any()) OnLoad(null, null);
+        if (!selected.Any())
+            OnLoad(null, null);
         allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
         allCheckBox.Checked = selectionTreeView.Nodes.Cast<TreeNode>().All(n => n.Checked);
         allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
@@ -59,13 +61,11 @@ internal partial class SelectDialogForm : CustomForm
         allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
     }
 
-    private void OnResize(object s, EventArgs e) =>
-        Text = TextRenderer.MeasureText(Program.ApplicationName, Font).Width > Size.Width - 100
-            ? Program.ApplicationNameShort
-            : Program.ApplicationName;
+    private void OnResize(object s, EventArgs e)
+        => Text = TextRenderer.MeasureText(Program.ApplicationName, Font).Width > Size.Width - 100 ? Program.ApplicationNameShort : Program.ApplicationName;
 
-    private void OnSortCheckBoxChanged(object sender, EventArgs e) => selectionTreeView.TreeViewNodeSorter
-        = sortCheckBox.Checked ? PlatformIdComparer.NodeText : PlatformIdComparer.NodeName;
+    private void OnSortCheckBoxChanged(object sender, EventArgs e)
+        => selectionTreeView.TreeViewNodeSorter = sortCheckBox.Checked ? PlatformIdComparer.NodeText : PlatformIdComparer.NodeName;
 
     private void OnAllCheckBoxChanged(object sender, EventArgs e)
     {
@@ -85,7 +85,8 @@ internal partial class SelectDialogForm : CustomForm
     private void OnLoad(object sender, EventArgs e)
     {
         List<(Platform platform, string id)> choices = ProgramData.ReadProgramChoices();
-        if (choices is null) return;
+        if (choices is null)
+            return;
         foreach (TreeNode node in selectionTreeView.Nodes)
         {
             node.Checked = choices.Any(n => n.platform == (Platform)node.Tag && n.id == node.Name);

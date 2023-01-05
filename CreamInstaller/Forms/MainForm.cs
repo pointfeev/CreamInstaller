@@ -58,24 +58,18 @@ internal partial class MainForm : CustomForm
         updateButton.Click -= OnUpdateCancel;
         progressLabel.Text = "Checking for updates . . .";
         changelogTreeView.Visible = false;
-        changelogTreeView.Location = progressLabel.Location with
-        {
-            Y = progressLabel.Location.Y + progressLabel.Size.Height + 13
-        };
+        changelogTreeView.Location = progressLabel.Location with { Y = progressLabel.Location.Y + progressLabel.Size.Height + 13 };
         Refresh();
 #if DEBUG
         DebugForm.Current.Attach(this);
 #endif
-        GithubPackageResolver resolver = new(Program.RepositoryOwner, Program.RepositoryName,
-                                             Program.RepositoryPackage);
+        GithubPackageResolver resolver = new(Program.RepositoryOwner, Program.RepositoryName, Program.RepositoryPackage);
         ZipPackageExtractor extractor = new();
-        updateManager
-            = new UpdateManager(AssemblyMetadata.FromAssembly(Program.EntryAssembly, Program.CurrentProcessFilePath),
-                                resolver, extractor);
+        updateManager = new(AssemblyMetadata.FromAssembly(Program.EntryAssembly, Program.CurrentProcessFilePath), resolver, extractor);
         if (latestVersion is null)
         {
             CheckForUpdatesResult checkForUpdatesResult = null;
-            cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource = new();
             try
             {
                 checkForUpdatesResult = await updateManager.CheckForUpdatesAsync(cancellationTokenSource.Token);
@@ -93,8 +87,7 @@ internal partial class MainForm : CustomForm
             catch (TaskCanceledException) { }
             catch (Exception e)
             {
-                DebugForm.Current.Log($"Exception while checking for updates: {e.GetType()} ({e.Message})",
-                                      LogTextBox.Warning);
+                DebugForm.Current.Log($"Exception while checking for updates: {e.GetType()} ({e.Message})", LogTextBox.Warning);
             }
 #else
             catch { }
@@ -120,8 +113,7 @@ internal partial class MainForm : CustomForm
             changelogTreeView.Visible = true;
             Version currentVersion = new(Program.Version);
 #if DEBUG
-            foreach (Version version in versions.Where(v => (v > currentVersion || v == latestVersion)
-                                                         && !changelogTreeView.Nodes.ContainsKey(v.ToString())))
+            foreach (Version version in versions.Where(v => (v > currentVersion || v == latestVersion) && !changelogTreeView.Nodes.ContainsKey(v.ToString())))
 #else
             foreach (Version version in versions.Where(v => v > currentVersion && !changelogTreeView.Nodes.ContainsKey(v.ToString())))
 #endif
@@ -162,9 +154,8 @@ internal partial class MainForm : CustomForm
             {
                 using DialogForm form = new(this);
                 if (form.Show(SystemIcons.Warning,
-                              "WARNING: " + Program.ApplicationExecutable + " was renamed!" +
-                              "\n\nThis will cause undesirable behavior when updating the program!",
-                              "Ignore", "Abort") == DialogResult.Cancel)
+                        "WARNING: " + Program.ApplicationExecutable + " was renamed!" + "\n\nThis will cause undesirable behavior when updating the program!",
+                        "Ignore", "Abort") == DialogResult.Cancel)
                 {
                     Application.Exit();
                     return;
@@ -174,7 +165,8 @@ internal partial class MainForm : CustomForm
         }
         catch (Exception e)
         {
-            if (e.HandleException(this)) goto retry;
+            if (e.HandleException(this))
+                goto retry;
             Close();
         }
     }
@@ -188,8 +180,7 @@ internal partial class MainForm : CustomForm
         updateButton.Text = "Cancel";
         updateButton.Click -= OnUpdate;
         updateButton.Click += OnUpdateCancel;
-        changelogTreeView.Location
-            = progressBar.Location with { Y = progressBar.Location.Y + progressBar.Size.Height + 6 };
+        changelogTreeView.Location = progressBar.Location with { Y = progressBar.Location.Y + progressBar.Size.Height + 6 };
         Refresh();
         Progress<double> progress = new();
         progress.ProgressChanged += delegate(object sender, double _progress)
@@ -198,7 +189,7 @@ internal partial class MainForm : CustomForm
             progressBar.Value = (int)_progress;
         };
         progressLabel.Text = "Updating . . . ";
-        cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource = new();
         try
         {
             await updateManager.PrepareUpdateAsync(latestVersion, progress, cancellationTokenSource.Token);
@@ -207,8 +198,7 @@ internal partial class MainForm : CustomForm
         catch (TaskCanceledException) { }
         catch (Exception ex)
         {
-            DebugForm.Current.Log($"Exception while preparing update: {ex.GetType()} ({ex.Message})",
-                                  LogTextBox.Warning);
+            DebugForm.Current.Log($"Exception while preparing update: {ex.GetType()} ({ex.Message})", LogTextBox.Warning);
         }
 #else
         catch { }

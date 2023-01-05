@@ -22,16 +22,16 @@ internal static class UbisoftLibrary
         }
     }
 
-    internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(
-        string gameDirectory) =>
-        await Task.Run(async () => await gameDirectory.GetExecutableDirectories(true));
+    internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(string gameDirectory)
+        => await Task.Run(async () => await gameDirectory.GetExecutableDirectories(true));
 
-    internal static async Task<List<(string gameId, string name, string gameDirectory)>> GetGames() => await Task.Run(
-        () =>
+    internal static async Task<List<(string gameId, string name, string gameDirectory)>> GetGames()
+        => await Task.Run(() =>
         {
             List<(string gameId, string name, string gameDirectory)> games = new();
             RegistryKey installsKey = InstallsKey;
-            if (installsKey is null) return games;
+            if (installsKey is null)
+                return games;
             foreach (string gameId in installsKey.GetSubKeyNames())
             {
                 RegistryKey installKey = installsKey.OpenSubKey(gameId);

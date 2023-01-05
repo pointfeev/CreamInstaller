@@ -18,9 +18,11 @@ internal static class LogTextBox
         textBox.SelectionStart = textBox.TextLength;
         textBox.SelectionLength = 0;
         textBox.SelectionColor = color;
-        if (scroll) textBox.ScrollToCaret();
+        if (scroll)
+            textBox.ScrollToCaret();
         textBox.AppendText(text);
-        if (scroll) textBox.ScrollToCaret();
+        if (scroll)
+            textBox.ScrollToCaret();
         textBox.SelectionColor = textBox.ForeColor;
         textBox.Invalidate();
     }

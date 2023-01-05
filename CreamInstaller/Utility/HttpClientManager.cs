@@ -12,7 +12,7 @@ internal static class HttpClientManager
 
     internal static void Setup()
     {
-        HttpClient = new HttpClient();
+        HttpClient = new();
         HttpClient.DefaultRequestHeaders.Add("User-Agent", $"CI{Program.Version.Replace(".", "")}");
     }
 
@@ -21,8 +21,7 @@ internal static class HttpClientManager
         try
         {
             using HttpRequestMessage request = new(HttpMethod.Get, url);
-            using HttpResponseMessage response
-                = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            using HttpResponseMessage response = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             _ = response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
         }
@@ -42,8 +41,7 @@ internal static class HttpClientManager
     internal static async Task<HtmlNodeCollection> GetDocumentNodes(string url, string xpath)
         => (await EnsureGet(url))?.ToHtmlDocument()?.DocumentNode?.SelectNodes(xpath);
 
-    internal static HtmlNodeCollection GetDocumentNodes(this HtmlDocument htmlDocument, string xpath)
-        => htmlDocument.DocumentNode?.SelectNodes(xpath);
+    internal static HtmlNodeCollection GetDocumentNodes(this HtmlDocument htmlDocument, string xpath) => htmlDocument.DocumentNode?.SelectNodes(xpath);
 
     internal static async Task<Image> GetImageFromUrl(string url)
     {
