@@ -3,12 +3,12 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CreamInstaller.Forms;
 using CreamInstaller.Utility;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 #if DEBUG
 using System;
+using CreamInstaller.Forms;
 #endif
 
 namespace CreamInstaller.Platforms.Steam;

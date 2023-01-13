@@ -53,7 +53,7 @@ internal static class Koaloader
         binaryType = bitness switch { "32" => BinaryType.BIT32, "64" => BinaryType.BIT64, _ => BinaryType.Unknown };
     }
 
-    private static void CheckConfig(string directory, ProgramSelection selection, InstallForm installForm = null)
+    private static void CheckConfig(string directory, InstallForm installForm = null)
     {
         directory.GetKoaloaderComponents(out _, out string old_config, out string config);
         if (File.Exists(old_config))
@@ -345,6 +345,6 @@ internal static class Koaloader
                 }
             }
             if (generateConfig)
-                CheckConfig(directory, selection, installForm);
+                CheckConfig(directory, installForm);
         });
 }

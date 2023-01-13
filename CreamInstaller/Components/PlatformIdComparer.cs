@@ -39,9 +39,9 @@ internal sealed class StringComparer : IComparer<string>
 internal sealed class NodeComparer : IComparer<TreeNode>
 {
     public int Compare(TreeNode a, TreeNode b)
-        => a.Tag is not Platform A
+        => a?.Tag is not Platform A
             ? 1
-            : b.Tag is not Platform B
+            : b?.Tag is not Platform B
                 ? -1
                 : A > B
                     ? 1
@@ -57,7 +57,7 @@ internal sealed class NodeNameComparer : IComparer
             ? 1
             : b is not TreeNode B
                 ? -1
-                : PlatformIdComparer.Node.Compare(A, B) is int c && c != 0
+                : PlatformIdComparer.Node.Compare(A, B) is var c && c != 0
                     ? c
                     : PlatformIdComparer.String.Compare(A.Name, B.Name);
 }
@@ -69,7 +69,7 @@ internal sealed class NodeTextComparer : IComparer
             ? 1
             : b is not TreeNode B
                 ? -1
-                : PlatformIdComparer.Node.Compare(A, B) is int c && c != 0
+                : PlatformIdComparer.Node.Compare(A, B) is var c && c != 0
                     ? c
                     : PlatformIdComparer.String.Compare(A.Text, B.Text);
 }

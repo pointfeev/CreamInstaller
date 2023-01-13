@@ -30,15 +30,14 @@ internal class CustomForm : Form
 
     internal CustomForm(IWin32Window owner) : this()
     {
-        if (owner is Form form)
-        {
-            Owner = form;
-            InheritLocation(form);
-            SizeChanged += (s, e) => InheritLocation(form);
-            form.Activated += OnActivation;
-            FormClosing += (s, e) => form.Activated -= OnActivation;
-            TopLevel = true;
-        }
+        if (owner is not Form form)
+            return;
+        Owner = form;
+        InheritLocation(form);
+        SizeChanged += (_, _) => InheritLocation(form);
+        form.Activated += OnActivation;
+        FormClosing += (_, _) => form.Activated -= OnActivation;
+        TopLevel = true;
     }
 
     protected override CreateParams CreateParams // Double buffering for all controls
@@ -51,7 +50,7 @@ internal class CustomForm : Form
         }
     }
 
-    internal void OnHelpButtonClicked(object sender, EventArgs args)
+    private void OnHelpButtonClicked(object sender, EventArgs args)
     {
         using DialogForm helpDialog = new(this);
         helpDialog.HelpButton = false;
@@ -85,11 +84,11 @@ internal class CustomForm : Form
           + $"The program source and other information can be found on [GitHub]({repository}).");
     }
 
-    internal void OnActivation(object sender, EventArgs args) => Activate();
+    private void OnActivation(object sender, EventArgs args) => Activate();
 
     [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    internal static extern void SetWindowPos(nint hWnd, nint hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
+    private static extern void SetWindowPos(nint hWnd, nint hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
 
     internal void BringToFrontWithoutActivation()
     {

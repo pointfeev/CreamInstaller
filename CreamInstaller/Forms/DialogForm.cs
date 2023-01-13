@@ -56,7 +56,11 @@ internal sealed partial class DialogForm : CustomForm
             return ShowDialog();
         foreach (LinkLabel.Link link in links)
             _ = descriptionLabel.Links.Add(link);
-        descriptionLabel.LinkClicked += (s, e) => Process.Start(new ProcessStartInfo((string)e.Link.LinkData) { UseShellExecute = true });
+        descriptionLabel.LinkClicked += (_, e) =>
+        {
+            if (e.Link != null)
+                Process.Start(new ProcessStartInfo((string)e.Link.LinkData) { UseShellExecute = true });
+        };
         return ShowDialog();
     }
 

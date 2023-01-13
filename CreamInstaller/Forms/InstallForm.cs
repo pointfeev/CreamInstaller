@@ -71,7 +71,7 @@ internal sealed partial class InstallForm : CustomForm
           + $" with root directory \"{selection.RootDirectory}\" . . . ", LogTextBox.Operation);
         IEnumerable<string> invalidDirectories = (await selection.RootDirectory.GetExecutables())
                                                ?.Where(d => selection.ExecutableDirectories.All(s => s.directory != Path.GetDirectoryName(d.path)))
-                                               ?.Select(d => Path.GetDirectoryName(d.path));
+                                                .Select(d => Path.GetDirectoryName(d.path));
         if (selection.ExecutableDirectories.All(s => s.directory != selection.RootDirectory))
             invalidDirectories = invalidDirectories?.Append(selection.RootDirectory);
         invalidDirectories = invalidDirectories?.Distinct();
@@ -91,7 +91,7 @@ internal sealed partial class InstallForm : CustomForm
                 Thread.Sleep(1);
             }
         if (uninstalling || !selection.Koaloader)
-            foreach ((string directory, BinaryType binaryType) in selection.ExecutableDirectories)
+            foreach ((string directory, BinaryType _) in selection.ExecutableDirectories)
             {
                 if (Program.Canceled)
                     throw new CustomMessageException("The operation was canceled.");

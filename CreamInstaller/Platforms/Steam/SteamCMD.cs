@@ -141,7 +141,7 @@ internal static class SteamCMD
                 progress.Report(-1660); // install
             int cur = 0;
             progress.Report(cur);
-            watcher.Changed += (sender, e) => progress.Report(++cur);
+            watcher.Changed += (_, _) => progress.Report(++cur);
             _ = await Run(null);
             watcher.Dispose();
         }

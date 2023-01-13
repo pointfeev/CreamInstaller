@@ -79,9 +79,9 @@ internal static class Program
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.ApplicationExit += OnApplicationExit;
-            Application.ThreadException += (s, e) => e.Exception?.HandleFatalException();
+            Application.ThreadException += (_, e) => e.Exception.HandleFatalException();
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-            AppDomain.CurrentDomain.UnhandledException += (s, e) => (e.ExceptionObject as Exception)?.HandleFatalException();
+            AppDomain.CurrentDomain.UnhandledException += (_, e) => (e.ExceptionObject as Exception)?.HandleFatalException();
         retry:
             try
             {

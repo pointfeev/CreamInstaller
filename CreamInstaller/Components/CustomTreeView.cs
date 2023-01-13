@@ -206,7 +206,7 @@ internal sealed class CustomTreeView : TreeView
                     foreach (string proxy in proxies)
                     {
                         bool canUse = true;
-                        foreach ((string directory, BinaryType binaryType) in pair.Key.ExecutableDirectories)
+                        foreach ((string directory, BinaryType _) in pair.Key.ExecutableDirectories)
                         {
                             string path = directory + @"\" + proxy + ".dll";
                             if (!File.Exists(path) || path.IsResourceFile(ResourceIdentifier.Koaloader))
@@ -215,7 +215,7 @@ internal sealed class CustomTreeView : TreeView
                             break;
                         }
                         if (canUse)
-                            _ = comboBoxDropDown.Items.Add(new ToolStripButton(proxy + ".dll", null, (s, e) =>
+                            _ = comboBoxDropDown.Items.Add(new ToolStripButton(proxy + ".dll", null, (_, _) =>
                             {
                                 pair.Key.KoaloaderProxy = proxy == ProgramSelection.DefaultKoaloaderProxy ? null : proxy;
                                 selectForm.OnKoaloaderChanged();

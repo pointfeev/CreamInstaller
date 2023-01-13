@@ -42,7 +42,7 @@ internal sealed partial class MainForm : CustomForm
         SelectForm form = new();
 #pragma warning restore CA2000 // Dispose objects before losing scope
         form.InheritLocation(this);
-        form.FormClosing += (s, e) => Close();
+        form.FormClosing += (_, _) => Close();
         form.Show();
         Hide();
 #if DEBUG
@@ -89,7 +89,10 @@ internal sealed partial class MainForm : CustomForm
                 DebugForm.Current.Log($"Exception while checking for updates: {e.GetType()} ({e.Message})", LogTextBox.Warning);
             }
 #else
-            catch { }
+            catch
+            {
+                // ignored
+            }
 #endif
             finally
             {
@@ -182,7 +185,7 @@ internal sealed partial class MainForm : CustomForm
         changelogTreeView.Location = progressBar.Location with { Y = progressBar.Location.Y + progressBar.Size.Height + 6 };
         Refresh();
         Progress<double> progress = new();
-        progress.ProgressChanged += delegate(object sender, double _progress)
+        progress.ProgressChanged += delegate(object _, double _progress)
         {
             progressLabel.Text = $"Updating . . . {(int)_progress}%";
             progressBar.Value = (int)_progress;
@@ -200,7 +203,10 @@ internal sealed partial class MainForm : CustomForm
             DebugForm.Current.Log($"Exception while preparing update: {ex.GetType()} ({ex.Message})", LogTextBox.Warning);
         }
 #else
-        catch { }
+        catch
+        {
+            // ignored
+        }
 #endif
         finally
         {

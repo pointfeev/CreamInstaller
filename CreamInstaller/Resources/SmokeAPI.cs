@@ -27,17 +27,19 @@ internal static class SmokeAPI
     {
         directory.GetSmokeApiComponents(out _, out _, out _, out _, out string old_config, out _, out _);
         IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> overrideDlc = selection.AllDlc.Except(selection.SelectedDlc);
-        foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
+        foreach ((string _, string _, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
             overrideDlc = overrideDlc.Except(extraDlc);
         IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> injectDlc
             = new List<KeyValuePair<string, (DlcType type, string name, string icon)>>();
         if (selection.AllDlc.Count > 64 || selection.ExtraDlc.Any(e => e.dlc.Count > 64))
         {
             injectDlc = injectDlc.Concat(selection.SelectedDlc.Where(pair => pair.Value.type is DlcType.SteamHidden));
-            foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
+            foreach ((string id, string _, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
                 if (selection.ExtraDlc.Single(e => e.id == id).dlc.Count > 64)
                     injectDlc = injectDlc.Concat(extraDlc.Where(pair => pair.Value.type is DlcType.SteamHidden));
         }
+        overrideDlc = overrideDlc.ToList();
+        injectDlc = injectDlc.ToList();
         if (overrideDlc.Any() || injectDlc.Any())
         {
             /*if (installForm is not null)
@@ -117,7 +119,7 @@ internal static class SmokeAPI
                     File.Delete(api32);
                     installForm?.UpdateUser($"Deleted SmokeAPI: {Path.GetFileName(api32)}", LogTextBox.Action, false);
                 }
-                File.Move(api32_o, api32);
+                File.Move(api32_o, api32!);
                 installForm?.UpdateUser($"Restored Steamworks: {Path.GetFileName(api32_o)} -> {Path.GetFileName(api32)}", LogTextBox.Action, false);
             }
             if (File.Exists(api64_o))
@@ -127,7 +129,7 @@ internal static class SmokeAPI
                     File.Delete(api64);
                     installForm?.UpdateUser($"Deleted SmokeAPI: {Path.GetFileName(api64)}", LogTextBox.Action, false);
                 }
-                File.Move(api64_o, api64);
+                File.Move(api64_o, api64!);
                 installForm?.UpdateUser($"Restored Steamworks: {Path.GetFileName(api64_o)} -> {Path.GetFileName(api64)}", LogTextBox.Action, false);
             }
             if (deleteConfig && File.Exists(old_config))
@@ -159,7 +161,7 @@ internal static class SmokeAPI
             directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out _, out _, out _);
             if (File.Exists(api32) && !File.Exists(api32_o))
             {
-                File.Move(api32, api32_o);
+                File.Move(api32, api32_o!);
                 installForm?.UpdateUser($"Renamed Steamworks: {Path.GetFileName(api32)} -> {Path.GetFileName(api32_o)}", LogTextBox.Action, false);
             }
             if (File.Exists(api32_o))
@@ -169,7 +171,7 @@ internal static class SmokeAPI
             }
             if (File.Exists(api64) && !File.Exists(api64_o))
             {
-                File.Move(api64, api64_o);
+                File.Move(api64, api64_o!);
                 installForm?.UpdateUser($"Renamed Steamworks: {Path.GetFileName(api64)} -> {Path.GetFileName(api64_o)}", LogTextBox.Action, false);
             }
             if (File.Exists(api64_o))

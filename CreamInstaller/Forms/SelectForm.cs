@@ -223,10 +223,10 @@ internal sealed partial class SelectForm : CustomForm
                                     VProperty dlcAppInfo = await SteamCMD.GetAppInfo(dlcAppId);
                                     if (dlcAppInfo is not null)
                                     {
-                                        dlcName = dlcAppInfo.Value?.GetChild("common")?.GetChild("name")?.ToString();
-                                        string dlcIconStaticId = dlcAppInfo.Value?.GetChild("common")?.GetChild("icon")?.ToString();
-                                        dlcIconStaticId ??= dlcAppInfo.Value?.GetChild("common")?.GetChild("logo_small")?.ToString();
-                                        dlcIconStaticId ??= dlcAppInfo.Value?.GetChild("common")?.GetChild("logo")?.ToString();
+                                        dlcName = dlcAppInfo.Value.GetChild("common")?.GetChild("name")?.ToString();
+                                        string dlcIconStaticId = dlcAppInfo.Value.GetChild("common")?.GetChild("icon")?.ToString();
+                                        dlcIconStaticId ??= dlcAppInfo.Value.GetChild("common")?.GetChild("logo_small")?.ToString();
+                                        dlcIconStaticId ??= dlcAppInfo.Value.GetChild("common")?.GetChild("logo")?.ToString();
                                         if (dlcIconStaticId is not null)
                                             dlcIcon = IconGrabber.SteamAppImagesPath + @$"\{dlcAppId}\{dlcIconStaticId}.jpg";
                                     }
@@ -265,10 +265,10 @@ internal sealed partial class SelectForm : CustomForm
                     selection.DllDirectories = dllDirectories;
                     selection.Platform = Platform.Steam;
                     selection.ProductUrl = "https://store.steampowered.com/app/" + appId;
-                    selection.IconUrl = IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("icon")}.jpg";
+                    selection.IconUrl = IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value.GetChild("common")?.GetChild("icon")}.jpg";
                     selection.SubIconUrl = appData?.header_image ?? IconGrabber.SteamAppImagesPath
-                      + @$"\{appId}\{appInfo?.Value?.GetChild("common")?.GetChild("clienticon")}.ico";
-                    selection.Publisher = appData?.publishers[0] ?? appInfo?.Value?.GetChild("extended")?.GetChild("publisher")?.ToString();
+                      + @$"\{appId}\{appInfo?.Value.GetChild("common")?.GetChild("clienticon")}.ico";
+                    selection.Publisher = appData?.publishers[0] ?? appInfo?.Value.GetChild("extended")?.GetChild("publisher")?.ToString();
                     selection.WebsiteUrl = appData?.website;
                     if (Program.Canceled)
                         return;
@@ -412,8 +412,6 @@ internal sealed partial class SelectForm : CustomForm
                                 programNode.Nodes.Add(entitlementsNode);*/
                             foreach (KeyValuePair<string, (string name, string product, string icon, string developer)> pair in entitlements)
                             {
-                                if (programNode is null /* || entitlementsNode is null*/)
-                                    return;
                                 string dlcId = pair.Key;
                                 (DlcType type, string name, string icon) dlcApp = (DlcType.EpicEntitlement, pair.Value.name, pair.Value.icon);
                                 selection.AllDlc[dlcId] = dlcApp;
@@ -526,7 +524,7 @@ internal sealed partial class SelectForm : CustomForm
                 gameChoices.Add((Platform.Paradox, "PL", "Paradox Launcher",
                     programsToScan is not null && programsToScan.Any(p => p.platform is Platform.Paradox && p.id == "PL")));
             if (Directory.Exists(SteamLibrary.InstallPath))
-                foreach ((string appId, string name, string branch, int buildId, string gameDirectory) in (await SteamLibrary.GetGames()).Where(g
+                foreach ((string appId, string name, string _, int _, string _) in (await SteamLibrary.GetGames()).Where(g
                              => !Program.IsGameBlocked(g.name, g.gameDirectory)))
                     gameChoices.Add((Platform.Steam, appId, name,
                         programsToScan is not null && programsToScan.Any(p => p.platform is Platform.Steam && p.id == appId)));
@@ -534,8 +532,7 @@ internal sealed partial class SelectForm : CustomForm
                 foreach (Manifest manifest in (await EpicLibrary.GetGames()).Where(m => !Program.IsGameBlocked(m.DisplayName, m.InstallLocation)))
                     gameChoices.Add((Platform.Epic, manifest.CatalogNamespace, manifest.DisplayName,
                         programsToScan is not null && programsToScan.Any(p => p.platform is Platform.Epic && p.id == manifest.CatalogNamespace)));
-            foreach ((string gameId, string name, string gameDirectory) in (await UbisoftLibrary.GetGames()).Where(g
-                         => !Program.IsGameBlocked(g.name, g.gameDirectory)))
+            foreach ((string gameId, string name, string _) in (await UbisoftLibrary.GetGames()).Where(g => !Program.IsGameBlocked(g.name, g.gameDirectory)))
                 gameChoices.Add((Platform.Ubisoft, gameId, name,
                     programsToScan is not null && programsToScan.Any(p => p.platform is Platform.Ubisoft && p.id == gameId)));
             if (gameChoices.Any())
@@ -562,7 +559,7 @@ internal sealed partial class SelectForm : CustomForm
             int curProgress = 0;
             Progress<int> progress = new();
             IProgress<int> iProgress = progress;
-            progress.ProgressChanged += (sender, _progress) =>
+            progress.ProgressChanged += (_, _progress) =>
             {
                 if (Program.Canceled)
                     return;
@@ -761,16 +758,16 @@ internal sealed partial class SelectForm : CustomForm
                         : selection.Platform is Platform.Epic
                             ? "Epic GraphQL "
                             : "";
-                    queries.Add(new($"Open {platformString}Query", "Notepad", (sender, e) => Diagnostics.OpenFileInNotepad(appInfoJSON)));
+                    queries.Add(new($"Open {platformString}Query", "Notepad", (_, _) => Diagnostics.OpenFileInNotepad(appInfoJSON)));
                 }
                 if (File.Exists(appInfoVDF))
-                    queries.Add(new("Open SteamCMD Query", "Notepad", (sender, e) => Diagnostics.OpenFileInNotepad(appInfoVDF)));
+                    queries.Add(new("Open SteamCMD Query", "Notepad", (_, _) => Diagnostics.OpenFileInNotepad(appInfoVDF)));
                 if (queries.Any())
                 {
                     items.Add(new ToolStripSeparator());
                     foreach (ContextMenuItem query in queries)
                         items.Add(query);
-                    items.Add(new ContextMenuItem("Refresh Queries", "Command Prompt", (sender, e) =>
+                    items.Add(new ContextMenuItem("Refresh Queries", "Command Prompt", (_, _) =>
                     {
                         try
                         {
@@ -810,11 +807,11 @@ internal sealed partial class SelectForm : CustomForm
                 }
                 items.Add(new ToolStripSeparator());
                 items.Add(new ContextMenuItem("Open Root Directory", "File Explorer",
-                    (sender, e) => Diagnostics.OpenDirectoryInFileExplorer(selection.RootDirectory)));
+                    (_, _) => Diagnostics.OpenDirectoryInFileExplorer(selection.RootDirectory)));
                 int executables = 0;
                 foreach ((string directory, BinaryType binaryType) in selection.ExecutableDirectories.ToList())
                     items.Add(new ContextMenuItem($"Open Executable Directory #{++executables} ({(binaryType == BinaryType.BIT32 ? "32" : "64")}-bit)",
-                        "File Explorer", (sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory)));
+                        "File Explorer", (_, _) => Diagnostics.OpenDirectoryInFileExplorer(directory)));
                 List<string> directories = selection.DllDirectories.ToList();
                 int steam = 0, epic = 0, r1 = 0, r2 = 0;
                 if (selection.Platform is Platform.Steam or Platform.Paradox)
@@ -825,7 +822,7 @@ internal sealed partial class SelectForm : CustomForm
                         if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(old_config)
                          || File.Exists(config) || File.Exists(cache))
                             items.Add(new ContextMenuItem($"Open Steamworks Directory #{++steam}", "File Explorer",
-                                (sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory)));
+                                (_, _) => Diagnostics.OpenDirectoryInFileExplorer(directory)));
                     }
                 if (selection.Platform is Platform.Epic or Platform.Paradox)
                     foreach (string directory in directories)
@@ -833,7 +830,7 @@ internal sealed partial class SelectForm : CustomForm
                         directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
                         if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config))
                             items.Add(new ContextMenuItem($"Open EOS Directory #{++epic}", "File Explorer",
-                                (sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory)));
+                                (_, _) => Diagnostics.OpenDirectoryInFileExplorer(directory)));
                     }
                 if (selection.Platform is Platform.Ubisoft)
                     foreach (string directory in directories)
@@ -841,12 +838,12 @@ internal sealed partial class SelectForm : CustomForm
                         directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
                         if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config))
                             items.Add(new ContextMenuItem($"Open Uplay R1 Directory #{++r1}", "File Explorer",
-                                (sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory)));
+                                (_, _) => Diagnostics.OpenDirectoryInFileExplorer(directory)));
                         directory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config);
                         if (File.Exists(old_api32) || File.Exists(old_api64) || File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64)
                          || File.Exists(api64_o) || File.Exists(config))
                             items.Add(new ContextMenuItem($"Open Uplay R2 Directory #{++r2}", "File Explorer",
-                                (sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory)));
+                                (_, _) => Diagnostics.OpenDirectoryInFileExplorer(directory)));
                     }
             }
             if (id != "PL")
@@ -854,36 +851,35 @@ internal sealed partial class SelectForm : CustomForm
                 if (selection?.Platform is Platform.Steam || dlcParentSelection?.Platform is Platform.Steam)
                 {
                     items.Add(new ToolStripSeparator());
-                    items.Add(new ContextMenuItem("Open SteamDB", "SteamDB",
-                        (sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamdb.info/app/" + id)));
+                    items.Add(new ContextMenuItem("Open SteamDB", "SteamDB", (_, _) => Diagnostics.OpenUrlInInternetBrowser("https://steamdb.info/app/" + id)));
                 }
                 if (selection is not null)
                     switch (selection.Platform)
                     {
                         case Platform.Steam:
                             items.Add(new ContextMenuItem("Open Steam Store", "Steam Store",
-                                (sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl)));
+                                (_, _) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl)));
                             items.Add(new ContextMenuItem("Open Steam Community", ("Sub_" + id, selection.SubIconUrl), "Steam Community",
-                                (sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + id)));
+                                (_, _) => Diagnostics.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + id)));
                             break;
                         case Platform.Epic:
                             items.Add(new ToolStripSeparator());
                             items.Add(new ContextMenuItem("Open ScreamDB", "ScreamDB",
-                                (sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://scream-db.web.app/offers/" + id)));
+                                (_, _) => Diagnostics.OpenUrlInInternetBrowser("https://scream-db.web.app/offers/" + id)));
                             items.Add(new ContextMenuItem("Open Epic Games Store", "Epic Games",
-                                (sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl)));
+                                (_, _) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl)));
                             break;
                         case Platform.Ubisoft:
                             items.Add(new ToolStripSeparator());
                             items.Add(new ContextMenuItem("Open Ubisoft Store", "Ubisoft Store",
-                                (sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://store.ubi.com/us/"
-                                                                                  + selection.Name.Replace(" ", "-").ToLowerInvariant())));
+                                (_, _) => Diagnostics.OpenUrlInInternetBrowser(
+                                    "https://store.ubi.com/us/" + selection.Name.Replace(" ", "-").ToLowerInvariant())));
                             break;
                     }
             }
             if (selection?.WebsiteUrl != null)
                 items.Add(new ContextMenuItem("Open Official Website", ("Web_" + id, IconGrabber.GetDomainFaviconUrl(selection.WebsiteUrl)),
-                    (sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.WebsiteUrl)));
+                    (_, _) => Diagnostics.OpenUrlInInternetBrowser(selection.WebsiteUrl)));
             contextMenuStrip.Show(selectionTreeView, location);
             contextMenuStrip.Refresh();
             ContextMenuStrip.Tag = null;
@@ -917,7 +913,7 @@ internal sealed partial class SelectForm : CustomForm
         Hide();
         InstallForm form = new(uninstall);
         form.InheritLocation(this);
-        form.FormClosing += (s, e) =>
+        form.FormClosing += (_, _) =>
         {
             if (form.Reselecting)
             {

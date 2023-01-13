@@ -100,8 +100,7 @@ internal static class ParadoxLauncher
         {
             bool koaloaderInstalled = Koaloader.AutoLoadDLLs.Select(pair => (pair.unlocker, path: directory + @"\" + pair.dll))
                                                .Any(pair => File.Exists(pair.path) && pair.path.IsResourceFile());
-            directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string old_config,
-                out string config, out _);
+            directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string _, out string config, out _);
             smokeInstalled = smokeInstalled || File.Exists(api32_o) || File.Exists(api64_o)
                           || (File.Exists(config) || File.Exists(config)) && !koaloaderInstalled
                           || File.Exists(api32) && api32.IsResourceFile(ResourceIdentifier.Steamworks32)
