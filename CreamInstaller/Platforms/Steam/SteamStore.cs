@@ -15,8 +15,8 @@ namespace CreamInstaller.Platforms.Steam;
 
 internal static class SteamStore
 {
-    private const int COOLDOWN_GAME = 600;
-    private const int COOLDOWN_DLC = 1200;
+    private const int CooldownGame = 600;
+    private const int CooldownDlc = 1200;
 
     internal static async Task<List<string>> ParseDlcAppIds(AppData appData)
         => await Task.Run(() =>
@@ -30,98 +30,111 @@ internal static class SteamStore
 
     internal static async Task<AppData> QueryStoreAPI(string appId, bool isDlc = false, int attempts = 0)
     {
-        if (Program.Canceled)
-            return null;
-        string cacheFile = ProgramData.AppInfoPath + @$"\{appId}.json";
-        bool cachedExists = File.Exists(cacheFile);
-        if (!cachedExists || ProgramData.CheckCooldown(appId, isDlc ? COOLDOWN_DLC : COOLDOWN_GAME))
+        while (true)
         {
-            string response = await HttpClientManager.EnsureGet($"https://store.steampowered.com/api/appdetails?appids={appId}");
-            if (response is not null)
+            if (Program.Canceled)
+                return null;
+            string cacheFile = ProgramData.AppInfoPath + @$"\{appId}.json";
+            bool cachedExists = File.Exists(cacheFile);
+            if (!cachedExists || ProgramData.CheckCooldown(appId, isDlc ? CooldownDlc : CooldownGame))
             {
-                IDictionary<string, JToken> apps = (IDictionary<string, JToken>)JsonConvert.DeserializeObject(response);
-                if (apps is not null)
-                    foreach (KeyValuePair<string, JToken> app in apps)
-                        try
-                        {
-                            AppDetails appDetails = JsonConvert.DeserializeObject<AppDetails>(app.Value.ToString());
-                            if (appDetails is not null)
+                string response = await HttpClientManager.EnsureGet($"https://store.steampowered.com/api/appdetails?appids={appId}");
+                if (response is not null)
+                {
+                    IDictionary<string, JToken> apps = (IDictionary<string, JToken>)JsonConvert.DeserializeObject(response);
+                    if (apps is not null)
+                        foreach (KeyValuePair<string, JToken> app in apps)
+                            try
                             {
-                                AppData data = appDetails.data;
-                                if (!appDetails.success)
+                                AppDetails appDetails = JsonConvert.DeserializeObject<AppDetails>(app.Value.ToString());
+                                if (appDetails is not null)
                                 {
+                                    AppData data = appDetails.data;
+                                    if (!appDetails.success)
+                                    {
+#if DEBUG
+                                        DebugForm.Current.Log(
+                                            $"Query unsuccessful for appid {appId}{(isDlc ? " (DLC)" : "")}: {app.Value.ToString(Formatting.None)}",
+                                            LogTextBox.Warning);
+#endif
+                                        if (data is null)
+                                            return null;
+                                    }
+                                    if (data is not null)
+                                    {
+                                        try
+                                        {
+                                            await File.WriteAllTextAsync(cacheFile, JsonConvert.SerializeObject(data, Formatting.Indented));
+                                        }
+                                        catch
+#if DEBUG
+                                            (Exception e)
+                                        {
+                                            DebugForm.Current.Log(
+                                                $"Unsuccessful serialization of query for appid {appId}{(isDlc ? " (DLC)" : "")}: {e.GetType()} ({e.Message})");
+                                        }
+#else
+                                        {
+                                            // ignored
+                                        }
+#endif
+                                        return data;
+                                    }
 #if DEBUG
                                     DebugForm.Current.Log(
-                                        $"Query unsuccessful for appid {appId}{(isDlc ? " (DLC)" : "")}: {app.Value.ToString(Formatting.None)}",
-                                        LogTextBox.Warning);
+                                        $"Response data null for appid {appId}{(isDlc ? " (DLC)" : "")}: {app.Value.ToString(Formatting.None)}");
 #endif
-                                    if (data is null)
-                                        return null;
-                                }
-                                if (data is not null)
-                                {
-                                    try
-                                    {
-                                        await File.WriteAllTextAsync(cacheFile, JsonConvert.SerializeObject(data, Formatting.Indented));
-                                    }
-                                    catch
-#if DEBUG
-                                        (Exception e)
-                                    {
-                                        DebugForm.Current.Log(
-                                            $"Unsuccessful serialization of query for appid {appId}{(isDlc ? " (DLC)" : "")}: {e.GetType()} ({e.Message})");
-                                    }
-#else
-                                    { }
-#endif
-                                    return data;
                                 }
 #if DEBUG
-                                DebugForm.Current.Log($"Response data null for appid {appId}{(isDlc ? " (DLC)" : "")}: {app.Value.ToString(Formatting.None)}");
+                                else
+                                    DebugForm.Current.Log(
+                                        $"Response details null for appid {appId}{(isDlc ? " (DLC)" : "")}: {app.Value.ToString(Formatting.None)}");
 #endif
                             }
+                            catch
 #if DEBUG
-                            else
+                                (Exception e)
+                            {
                                 DebugForm.Current.Log(
-                                    $"Response details null for appid {appId}{(isDlc ? " (DLC)" : "")}: {app.Value.ToString(Formatting.None)}");
-#endif
-                        }
-                        catch
-#if DEBUG
-                            (Exception e)
-                        {
-                            DebugForm.Current.Log(
-                                $"Unsuccessful deserialization of query for appid {appId}{(isDlc ? " (DLC)" : "")}: {e.GetType()} ({e.Message})");
-                        }
+                                    $"Unsuccessful deserialization of query for appid {appId}{(isDlc ? " (DLC)" : "")}: {e.GetType()} ({e.Message})");
+                            }
 #else
-                        { }
+                            {
+                                // ignored
+                            }
 #endif
 #if DEBUG
+                    else
+                        DebugForm.Current.Log("Response deserialization null for appid " + appId);
+#endif
+                }
                 else
-                    DebugForm.Current.Log("Response deserialization null for appid " + appId);
-#endif
-            }
-            else
-            {
+                {
 #if DEBUG
-                DebugForm.Current.Log("Response null for appid " + appId, LogTextBox.Warning);
+                    DebugForm.Current.Log("Response null for appid " + appId, LogTextBox.Warning);
 #endif
+                }
             }
-        }
-        if (cachedExists)
-            try
-            {
-                return JsonConvert.DeserializeObject<AppData>(await File.ReadAllTextAsync(cacheFile));
-            }
-            catch
-            {
-                File.Delete(cacheFile);
-            }
-        if (!isDlc && attempts < 10)
-        {
+            if (cachedExists)
+                try
+                {
+                    return JsonConvert.DeserializeObject<AppData>(await File.ReadAllTextAsync(cacheFile));
+                }
+                catch
+                {
+                    try
+                    {
+                        File.Delete(cacheFile);
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+                }
+            if (isDlc || attempts >= 10)
+                return null;
             Thread.Sleep(1000);
-            return await QueryStoreAPI(appId, isDlc, ++attempts);
+            attempts = ++attempts;
         }
-        return null;
     }
 }
