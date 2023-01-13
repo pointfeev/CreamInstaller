@@ -1,6 +1,4 @@
-﻿#pragma warning disable IDE0058
-
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
@@ -22,15 +20,15 @@ using static CreamInstaller.Resources.Resources;
 
 namespace CreamInstaller.Forms;
 
-internal partial class SelectForm : CustomForm
+internal sealed partial class SelectForm : CustomForm
 {
-    private readonly string helpButtonListPrefix = "\n    •  ";
+    private const string HelpButtonListPrefix = "\n    •  ";
 
-    private readonly SynchronizedCollection<string> RemainingDLCs = new();
+    private readonly SynchronizedCollection<string> remainingDLCs = new();
 
-    private readonly SynchronizedCollection<string> RemainingGames = new();
+    private readonly SynchronizedCollection<string> remainingGames = new();
 
-    private List<(Platform platform, string id, string name)> ProgramsToScan;
+    private List<(Platform platform, string id, string name)> programsToScan;
 
     internal SelectForm()
     {
@@ -40,12 +38,12 @@ internal partial class SelectForm : CustomForm
 
     public override ContextMenuStrip ContextMenuStrip => base.ContextMenuStrip ??= new();
 
-    internal List<TreeNode> TreeNodes => GatherTreeNodes(selectionTreeView.Nodes);
+    private List<TreeNode> TreeNodes => GatherTreeNodes(selectionTreeView.Nodes);
 
     private static void UpdateRemaining(Label label, SynchronizedCollection<string> list, string descriptor)
         => label.Text = list.Any() ? $"Remaining {descriptor} ({list.Count}): " + string.Join(", ", list).Replace("&", "&&") : "";
 
-    private void UpdateRemainingGames() => UpdateRemaining(progressLabelGames, RemainingGames, "games");
+    private void UpdateRemainingGames() => UpdateRemaining(progressLabelGames, remainingGames, "games");
 
     private void AddToRemainingGames(string gameName)
     {
@@ -55,8 +53,8 @@ internal partial class SelectForm : CustomForm
         {
             if (Program.Canceled)
                 return;
-            if (!RemainingGames.Contains(gameName))
-                RemainingGames.Add(gameName);
+            if (!remainingGames.Contains(gameName))
+                remainingGames.Add(gameName);
             UpdateRemainingGames();
         });
     }
@@ -69,12 +67,12 @@ internal partial class SelectForm : CustomForm
         {
             if (Program.Canceled)
                 return;
-            RemainingGames.Remove(gameName);
+            remainingGames.Remove(gameName);
             UpdateRemainingGames();
         });
     }
 
-    private void UpdateRemainingDLCs() => UpdateRemaining(progressLabelDLCs, RemainingDLCs, "DLCs");
+    private void UpdateRemainingDLCs() => UpdateRemaining(progressLabelDLCs, remainingDLCs, "DLCs");
 
     private void AddToRemainingDLCs(string dlcId)
     {
@@ -84,8 +82,8 @@ internal partial class SelectForm : CustomForm
         {
             if (Program.Canceled)
                 return;
-            if (!RemainingDLCs.Contains(dlcId))
-                RemainingDLCs.Add(dlcId);
+            if (!remainingDLCs.Contains(dlcId))
+                remainingDLCs.Add(dlcId);
             UpdateRemainingDLCs();
         });
     }
@@ -98,35 +96,35 @@ internal partial class SelectForm : CustomForm
         {
             if (Program.Canceled)
                 return;
-            RemainingDLCs.Remove(dlcId);
+            remainingDLCs.Remove(dlcId);
             UpdateRemainingDLCs();
         });
     }
 
     private async Task GetApplicablePrograms(IProgress<int> progress)
     {
-        if (ProgramsToScan is null || !ProgramsToScan.Any())
+        if (programsToScan is null || !programsToScan.Any())
             return;
-        int TotalGameCount = 0;
-        int CompleteGameCount = 0;
+        int totalGameCount = 0;
+        int completeGameCount = 0;
         void AddToRemainingGames(string gameName)
         {
             this.AddToRemainingGames(gameName);
-            progress.Report(-Interlocked.Increment(ref TotalGameCount));
-            progress.Report(CompleteGameCount);
+            progress.Report(-Interlocked.Increment(ref totalGameCount));
+            progress.Report(completeGameCount);
         }
         void RemoveFromRemainingGames(string gameName)
         {
             this.RemoveFromRemainingGames(gameName);
-            progress.Report(Interlocked.Increment(ref CompleteGameCount));
+            progress.Report(Interlocked.Increment(ref completeGameCount));
         }
         if (Program.Canceled)
             return;
         List<TreeNode> treeNodes = TreeNodes;
-        RemainingGames.Clear(); // for display purposes only, otherwise ignorable
-        RemainingDLCs.Clear(); // for display purposes only, otherwise ignorable
+        remainingGames.Clear(); // for display purposes only, otherwise ignorable
+        remainingDLCs.Clear(); // for display purposes only, otherwise ignorable
         List<Task> appTasks = new();
-        if (ProgramsToScan.Any(c => c.platform is Platform.Paradox))
+        if (programsToScan.Any(c => c.platform is Platform.Paradox))
         {
             List<string> dllDirectories = await ParadoxLauncher.InstallPath.GetDllDirectoriesFromGameDirectory(Platform.Paradox);
             if (dllDirectories is not null)
@@ -153,7 +151,7 @@ internal partial class SelectForm : CustomForm
             }
         }
         int steamGamesToCheck;
-        if (ProgramsToScan.Any(c => c.platform is Platform.Steam))
+        if (programsToScan.Any(c => c.platform is Platform.Steam))
         {
             List<(string appId, string name, string branch, int buildId, string gameDirectory)> steamGames = await SteamLibrary.GetGames();
             steamGamesToCheck = steamGames.Count;
@@ -161,7 +159,7 @@ internal partial class SelectForm : CustomForm
             {
                 if (Program.Canceled)
                     return;
-                if (Program.IsGameBlocked(name, gameDirectory) || !ProgramsToScan.Any(c => c.platform is Platform.Steam && c.id == appId))
+                if (Program.IsGameBlocked(name, gameDirectory) || !programsToScan.Any(c => c.platform is Platform.Steam && c.id == appId))
                 {
                     Interlocked.Decrement(ref steamGamesToCheck);
                     continue;
@@ -287,7 +285,7 @@ internal partial class SelectForm : CustomForm
                             _ = selectionTreeView.Nodes.Add(programNode);
                         foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in dlc)
                         {
-                            if (Program.Canceled || programNode is null)
+                            if (Program.Canceled)
                                 return;
                             string appId = pair.Key;
                             (DlcType type, string name, string icon) dlcApp = pair.Value;
@@ -310,7 +308,7 @@ internal partial class SelectForm : CustomForm
                 appTasks.Add(task);
             }
         }
-        if (ProgramsToScan.Any(c => c.platform is Platform.Epic))
+        if (programsToScan.Any(c => c.platform is Platform.Epic))
         {
             List<Manifest> epicGames = await EpicLibrary.GetGames();
             foreach (Manifest manifest in epicGames)
@@ -320,7 +318,7 @@ internal partial class SelectForm : CustomForm
                 string directory = manifest.InstallLocation;
                 if (Program.Canceled)
                     return;
-                if (Program.IsGameBlocked(name, directory) || !ProgramsToScan.Any(c => c.platform is Platform.Epic && c.id == @namespace))
+                if (Program.IsGameBlocked(name, directory) || !programsToScan.Any(c => c.platform is Platform.Epic && c.id == @namespace))
                     continue;
                 AddToRemainingGames(name);
                 Task task = Task.Run(async () =>
@@ -437,14 +435,14 @@ internal partial class SelectForm : CustomForm
                 appTasks.Add(task);
             }
         }
-        if (ProgramsToScan.Any(c => c.platform is Platform.Ubisoft))
+        if (programsToScan.Any(c => c.platform is Platform.Ubisoft))
         {
             List<(string gameId, string name, string gameDirectory)> ubisoftGames = await UbisoftLibrary.GetGames();
             foreach ((string gameId, string name, string gameDirectory) in ubisoftGames)
             {
                 if (Program.Canceled)
                     return;
-                if (Program.IsGameBlocked(name, gameDirectory) || !ProgramsToScan.Any(c => c.platform is Platform.Ubisoft && c.id == gameId))
+                if (Program.IsGameBlocked(name, gameDirectory) || !programsToScan.Any(c => c.platform is Platform.Ubisoft && c.id == gameId))
                     continue;
                 AddToRemainingGames(name);
                 Task task = Task.Run(async () =>
@@ -521,34 +519,34 @@ internal partial class SelectForm : CustomForm
         ShowProgressBar();
         await ProgramData.Setup();
         bool scan = forceScan;
-        if (!scan && (ProgramsToScan is null || !ProgramsToScan.Any() || forceProvideChoices))
+        if (!scan && (programsToScan is null || !programsToScan.Any() || forceProvideChoices))
         {
             List<(Platform platform, string id, string name, bool alreadySelected)> gameChoices = new();
             if (Directory.Exists(ParadoxLauncher.InstallPath))
                 gameChoices.Add((Platform.Paradox, "PL", "Paradox Launcher",
-                    ProgramsToScan is not null && ProgramsToScan.Any(p => p.platform is Platform.Paradox && p.id == "PL")));
+                    programsToScan is not null && programsToScan.Any(p => p.platform is Platform.Paradox && p.id == "PL")));
             if (Directory.Exists(SteamLibrary.InstallPath))
                 foreach ((string appId, string name, string branch, int buildId, string gameDirectory) in (await SteamLibrary.GetGames()).Where(g
                              => !Program.IsGameBlocked(g.name, g.gameDirectory)))
                     gameChoices.Add((Platform.Steam, appId, name,
-                        ProgramsToScan is not null && ProgramsToScan.Any(p => p.platform is Platform.Steam && p.id == appId)));
+                        programsToScan is not null && programsToScan.Any(p => p.platform is Platform.Steam && p.id == appId)));
             if (Directory.Exists(EpicLibrary.EpicManifestsPath))
                 foreach (Manifest manifest in (await EpicLibrary.GetGames()).Where(m => !Program.IsGameBlocked(m.DisplayName, m.InstallLocation)))
                     gameChoices.Add((Platform.Epic, manifest.CatalogNamespace, manifest.DisplayName,
-                        ProgramsToScan is not null && ProgramsToScan.Any(p => p.platform is Platform.Epic && p.id == manifest.CatalogNamespace)));
+                        programsToScan is not null && programsToScan.Any(p => p.platform is Platform.Epic && p.id == manifest.CatalogNamespace)));
             foreach ((string gameId, string name, string gameDirectory) in (await UbisoftLibrary.GetGames()).Where(g
                          => !Program.IsGameBlocked(g.name, g.gameDirectory)))
                 gameChoices.Add((Platform.Ubisoft, gameId, name,
-                    ProgramsToScan is not null && ProgramsToScan.Any(p => p.platform is Platform.Ubisoft && p.id == gameId)));
+                    programsToScan is not null && programsToScan.Any(p => p.platform is Platform.Ubisoft && p.id == gameId)));
             if (gameChoices.Any())
             {
                 using SelectDialogForm form = new(this);
                 List<(Platform platform, string id, string name)> choices = form.QueryUser("Choose which programs and/or games to scan for DLC:", gameChoices);
                 scan = choices is not null && choices.Any();
-                string retry = "\n\nPress the \"Rescan Programs / Games\" button to re-choose.";
+                const string retry = "\n\nPress the \"Rescan Programs / Games\" button to re-choose.";
                 if (scan)
                 {
-                    ProgramsToScan = choices;
+                    programsToScan = choices;
                     noneFoundLabel.Text = "None of the chosen programs nor games were applicable!" + retry;
                 }
                 else
@@ -576,14 +574,14 @@ internal partial class SelectForm : CustomForm
                 progressLabel.Text = setup ? $"Setting up SteamCMD . . . {p}%" : $"Gathering and caching your applicable games and their DLCs . . . {p}%";
                 progressBar.Value = p;
             };
-            if (Directory.Exists(SteamLibrary.InstallPath) && ProgramsToScan is not null && ProgramsToScan.Any(c => c.platform is Platform.Steam))
+            if (Directory.Exists(SteamLibrary.InstallPath) && programsToScan is not null && programsToScan.Any(c => c.platform is Platform.Steam))
             {
                 progressLabel.Text = "Setting up SteamCMD . . . ";
                 await SteamCMD.Setup(iProgress);
             }
             setup = false;
             progressLabel.Text = "Gathering and caching your applicable games and their DLCs . . . ";
-            ProgramSelection.ValidateAll(ProgramsToScan);
+            ProgramSelection.ValidateAll(programsToScan);
             /*TreeNodes.ForEach(node =>
             {
                 if (node.Tag is not Platform platform
@@ -638,11 +636,16 @@ internal partial class SelectForm : CustomForm
 
     private static void SyncNodeAncestors(TreeNode node)
     {
-        TreeNode parentNode = node.Parent;
-        if (parentNode is not null)
+        while (true)
         {
-            parentNode.Checked = parentNode.Nodes.Cast<TreeNode>().Any(childNode => childNode.Checked);
-            SyncNodeAncestors(parentNode);
+            TreeNode parentNode = node.Parent;
+            if (parentNode is not null)
+            {
+                parentNode.Checked = parentNode.Nodes.Cast<TreeNode>().Any(childNode => childNode.Checked);
+                node = parentNode;
+                continue;
+            }
+            break;
         }
     }
 
@@ -721,7 +724,7 @@ internal partial class SelectForm : CustomForm
         => Invoke(() =>
         {
             ContextMenuStrip contextMenuStrip = ContextMenuStrip;
-            while (ContextMenuStrip.Tag is bool used && used)
+            while (ContextMenuStrip.Tag is true)
                 Thread.Sleep(100);
             ContextMenuStrip.Tag = true;
             ToolStripItemCollection items = contextMenuStrip.Items;
@@ -737,18 +740,18 @@ internal partial class SelectForm : CustomForm
                 dlcParentSelection = ProgramSelection.FromPlatformId(platform, dlc.Value.gameAppId);
             if (selection is null && dlcParentSelection is null)
                 return;
-            ContextMenuItem header = null;
+            ContextMenuItem header;
             if (id == "PL")
                 header = new(node.Text, "Paradox Launcher");
             else if (selection is not null)
                 header = new(node.Text, (id, selection.IconUrl));
-            else if (dlc is not null && dlcParentSelection is not null)
+            else
                 header = new(node.Text, (id, dlc.Value.app.icon), (id, dlcParentSelection.IconUrl));
-            items.Add(header ?? new ContextMenuItem(node.Text));
+            items.Add(header);
             string appInfoVDF = $@"{SteamCMD.AppInfoPath}\{id}.vdf";
             string appInfoJSON = $@"{SteamCMD.AppInfoPath}\{id}.json";
             string cooldown = $@"{ProgramData.CooldownPath}\{id}.txt";
-            if ((File.Exists(appInfoVDF) || File.Exists(appInfoJSON)) && (selection is not null || dlc is not null))
+            if (File.Exists(appInfoVDF) || File.Exists(appInfoJSON))
             {
                 List<ContextMenuItem> queries = new();
                 if (File.Exists(appInfoJSON))
@@ -773,17 +776,26 @@ internal partial class SelectForm : CustomForm
                         {
                             File.Delete(appInfoVDF);
                         }
-                        catch { }
+                        catch
+                        {
+                            // ignored
+                        }
                         try
                         {
                             File.Delete(appInfoJSON);
                         }
-                        catch { }
+                        catch
+                        {
+                            // ignored
+                        }
                         try
                         {
                             File.Delete(cooldown);
                         }
-                        catch { }
+                        catch
+                        {
+                            // ignored
+                        }
                         OnLoad(true);
                     }));
                 }
@@ -793,7 +805,8 @@ internal partial class SelectForm : CustomForm
                 if (id == "PL")
                 {
                     items.Add(new ToolStripSeparator());
-                    items.Add(new ContextMenuItem("Repair", "Command Prompt", async (sender, e) => await ParadoxLauncher.Repair(this, selection)));
+                    async void EventHandler(object sender, EventArgs e) => await ParadoxLauncher.Repair(this, selection);
+                    items.Add(new ContextMenuItem("Repair", "Command Prompt", EventHandler));
                 }
                 items.Add(new ToolStripSeparator());
                 items.Add(new ContextMenuItem("Open Root Directory", "File Explorer",
@@ -807,10 +820,10 @@ internal partial class SelectForm : CustomForm
                 if (selection.Platform is Platform.Steam or Platform.Paradox)
                     foreach (string directory in directories)
                     {
-                        directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config,
-                            out string cache);
-                        if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config)
-                         || File.Exists(cache))
+                        directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string old_config,
+                            out string config, out string cache);
+                        if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(old_config)
+                         || File.Exists(config) || File.Exists(cache))
                             items.Add(new ContextMenuItem($"Open Steamworks Directory #{++steam}", "File Explorer",
                                 (sender, e) => Diagnostics.OpenDirectoryInFileExplorer(directory)));
                     }
@@ -838,42 +851,37 @@ internal partial class SelectForm : CustomForm
             }
             if (id != "PL")
             {
-                if (selection is not null && selection.Platform is Platform.Steam
-                 || dlcParentSelection is not null && dlcParentSelection.Platform is Platform.Steam)
+                if (selection?.Platform is Platform.Steam || dlcParentSelection?.Platform is Platform.Steam)
                 {
                     items.Add(new ToolStripSeparator());
                     items.Add(new ContextMenuItem("Open SteamDB", "SteamDB",
                         (sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamdb.info/app/" + id)));
                 }
                 if (selection is not null)
-                {
-                    if (selection.Platform is Platform.Steam)
+                    switch (selection.Platform)
                     {
-                        items.Add(new ContextMenuItem("Open Steam Store", "Steam Store",
-                            (sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl)));
-                        items.Add(new ContextMenuItem("Open Steam Community", ("Sub_" + id, selection.SubIconUrl), "Steam Community",
-                            (sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + id)));
+                        case Platform.Steam:
+                            items.Add(new ContextMenuItem("Open Steam Store", "Steam Store",
+                                (sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl)));
+                            items.Add(new ContextMenuItem("Open Steam Community", ("Sub_" + id, selection.SubIconUrl), "Steam Community",
+                                (sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://steamcommunity.com/app/" + id)));
+                            break;
+                        case Platform.Epic:
+                            items.Add(new ToolStripSeparator());
+                            items.Add(new ContextMenuItem("Open ScreamDB", "ScreamDB",
+                                (sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://scream-db.web.app/offers/" + id)));
+                            items.Add(new ContextMenuItem("Open Epic Games Store", "Epic Games",
+                                (sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl)));
+                            break;
+                        case Platform.Ubisoft:
+                            items.Add(new ToolStripSeparator());
+                            items.Add(new ContextMenuItem("Open Ubisoft Store", "Ubisoft Store",
+                                (sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://store.ubi.com/us/"
+                                                                                  + selection.Name.Replace(" ", "-").ToLowerInvariant())));
+                            break;
                     }
-                    if (selection.Platform is Platform.Epic)
-                    {
-                        items.Add(new ToolStripSeparator());
-                        items.Add(new ContextMenuItem("Open ScreamDB", "ScreamDB",
-                            (sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://scream-db.web.app/offers/" + id)));
-                        items.Add(new ContextMenuItem("Open Epic Games Store", "Epic Games",
-                            (sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.ProductUrl)));
-                    }
-                    if (selection.Platform is Platform.Ubisoft)
-                    {
-                        items.Add(new ToolStripSeparator());
-#pragma warning disable CA1308 // Normalize strings to uppercase
-                        items.Add(new ContextMenuItem("Open Ubisoft Store", "Ubisoft Store",
-                            (sender, e) => Diagnostics.OpenUrlInInternetBrowser("https://store.ubi.com/us/"
-                                                                              + selection.Name.Replace(" ", "-").ToLowerInvariant())));
-#pragma warning restore CA1308 // Normalize strings to uppercase
-                    }
-                }
             }
-            if (selection is not null && selection.WebsiteUrl is not null)
+            if (selection?.WebsiteUrl != null)
                 items.Add(new ContextMenuItem("Open Official Website", ("Web_" + id, IconGrabber.GetDomainFaviconUrl(selection.WebsiteUrl)),
                     (sender, e) => Diagnostics.OpenUrlInInternetBrowser(selection.WebsiteUrl)));
             contextMenuStrip.Show(selectionTreeView, location);
@@ -900,38 +908,34 @@ internal partial class SelectForm : CustomForm
 
     private void OnAccept(bool uninstall = false)
     {
-        if (ProgramSelection.All.Any())
+        if (!ProgramSelection.All.Any())
+            return;
+        if (ProgramSelection.AllEnabled.Any(selection => !Program.IsProgramRunningDialog(this, selection)))
+            return;
+        if (!uninstall && ParadoxLauncher.DlcDialog(this))
+            return;
+        Hide();
+        InstallForm form = new(uninstall);
+        form.InheritLocation(this);
+        form.FormClosing += (s, e) =>
         {
-            foreach (ProgramSelection selection in ProgramSelection.AllEnabled)
-                if (!Program.IsProgramRunningDialog(this, selection))
-                    return;
-            if (!uninstall && ParadoxLauncher.DlcDialog(this))
-                return;
-            Hide();
-#pragma warning disable CA2000 // Dispose objects before losing scope
-            InstallForm form = new(uninstall);
-#pragma warning restore CA2000 // Dispose objects before losing scope
-            form.InheritLocation(this);
-            form.FormClosing += (s, e) =>
+            if (form.Reselecting)
             {
-                if (form.Reselecting)
-                {
-                    InheritLocation(form);
-                    Show();
+                InheritLocation(form);
+                Show();
 #if DEBUG
-                    DebugForm.Current.Attach(this);
+                DebugForm.Current.Attach(this);
 #endif
-                    OnLoad();
-                }
-                else
-                    Close();
-            };
-            form.Show();
-            Hide();
+                OnLoad();
+            }
+            else
+                Close();
+        };
+        form.Show();
+        Hide();
 #if DEBUG
-            DebugForm.Current.Attach(form);
+        DebugForm.Current.Attach(form);
 #endif
-        }
     }
 
     private void OnInstall(object sender, EventArgs e) => OnAccept();
@@ -948,33 +952,20 @@ internal partial class SelectForm : CustomForm
 
     private void OnAllCheckBoxChanged(object sender, EventArgs e)
     {
-        bool shouldCheck = false;
-        foreach (TreeNode node in TreeNodes)
-            if (node.Parent is null && !node.Checked)
-            {
-                shouldCheck = true;
-                break;
-            }
-        foreach (TreeNode node in TreeNodes)
-            if (node.Parent is null && node.Checked != shouldCheck)
-            {
-                node.Checked = shouldCheck;
-                OnTreeViewNodeCheckedChanged(null, new(node, TreeViewAction.ByMouse));
-            }
+        bool shouldCheck = TreeNodes.Any(node => node.Parent is null && !node.Checked);
+        foreach (TreeNode node in TreeNodes.Where(node => node.Parent is null && node.Checked != shouldCheck))
+        {
+            node.Checked = shouldCheck;
+            OnTreeViewNodeCheckedChanged(null, new(node, TreeViewAction.ByMouse));
+        }
         allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
         allCheckBox.Checked = shouldCheck;
         allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
     }
 
-    internal void OnKoaloaderAllCheckBoxChanged(object sender, EventArgs e)
+    private void OnKoaloaderAllCheckBoxChanged(object sender, EventArgs e)
     {
-        bool shouldCheck = false;
-        foreach (ProgramSelection selection in ProgramSelection.AllSafe)
-            if (!selection.Koaloader)
-            {
-                shouldCheck = true;
-                break;
-            }
+        bool shouldCheck = ProgramSelection.AllSafe.Any(selection => !selection.Koaloader);
         foreach (ProgramSelection selection in ProgramSelection.AllSafe)
             selection.Koaloader = shouldCheck;
         selectionTreeView.Invalidate();
@@ -984,21 +975,15 @@ internal partial class SelectForm : CustomForm
     }
 
     private bool AreSelectionsDefault()
-    {
-        foreach (TreeNode node in TreeNodes)
-            if (node.Parent is not null && node.Tag is Platform && (node.Text == "Unknown" ? node.Checked : !node.Checked))
-                return false;
-        return true;
-    }
+        => TreeNodes.All(node => node.Parent is null || node.Tag is not Platform || (node.Text == "Unknown" ? !node.Checked : node.Checked));
 
-    private bool CanSaveDlc() => installButton.Enabled && (ProgramData.ReadDlcChoices() is not null || !AreSelectionsDefault());
+    private bool CanSaveDlc() => installButton.Enabled && (ProgramData.ReadDlcChoices().Any() || !AreSelectionsDefault());
 
     private void OnSaveDlc(object sender, EventArgs e)
     {
-        List<(Platform platform, string gameId, string dlcId)> choices = ProgramData.ReadDlcChoices()
-                                                                      ?? new List<(Platform platform, string gameId, string dlcId)>();
+        List<(Platform platform, string gameId, string dlcId)> choices = ProgramData.ReadDlcChoices().ToList();
         foreach (TreeNode node in TreeNodes)
-            if (node.Parent is TreeNode parent && node.Tag is Platform platform)
+            if (node.Parent is { } parent && node.Tag is Platform platform)
             {
                 if (node.Text == "Unknown" ? node.Checked : !node.Checked)
                     choices.Add((platform, node.Parent.Name, node.Name));
@@ -1011,15 +996,13 @@ internal partial class SelectForm : CustomForm
         saveButton.Enabled = CanSaveDlc();
     }
 
-    private static bool CanLoadDlc() => ProgramData.ReadDlcChoices() is not null;
+    private static bool CanLoadDlc() => ProgramData.ReadDlcChoices().Any();
 
     private void OnLoadDlc(object sender, EventArgs e)
     {
-        List<(Platform platform, string gameId, string dlcId)> choices = ProgramData.ReadDlcChoices();
-        if (choices is null)
-            return;
+        List<(Platform platform, string gameId, string dlcId)> choices = ProgramData.ReadDlcChoices().ToList();
         foreach (TreeNode node in TreeNodes)
-            if (node.Parent is TreeNode parent && node.Tag is Platform platform)
+            if (node.Parent is { } parent && node.Tag is Platform platform)
             {
                 node.Checked = choices.Any(c => c.platform == platform && c.gameId == parent.Name && c.dlcId == node.Name)
                     ? node.Text == "Unknown"
@@ -1032,29 +1015,21 @@ internal partial class SelectForm : CustomForm
 
     private void OnResetDlc(object sender, EventArgs e)
     {
-        foreach (TreeNode node in TreeNodes)
-            if (node.Parent is not null && node.Tag is Platform)
-            {
-                node.Checked = node.Text != "Unknown";
-                OnTreeViewNodeCheckedChanged(null, new(node, TreeViewAction.ByMouse));
-            }
+        foreach (TreeNode node in TreeNodes.Where(node => node.Parent is not null && node.Tag is Platform))
+        {
+            node.Checked = node.Text != "Unknown";
+            OnTreeViewNodeCheckedChanged(null, new(node, TreeViewAction.ByMouse));
+        }
         resetButton.Enabled = CanResetDlc();
     }
 
-    private static bool AreKoaloaderSelectionsDefault()
-    {
-        foreach (ProgramSelection selection in ProgramSelection.AllSafe)
-            if (!selection.Koaloader || selection.KoaloaderProxy is not null)
-                return false;
-        return true;
-    }
+    private static bool AreKoaloaderSelectionsDefault() => ProgramSelection.AllSafe.All(selection => selection.Koaloader && selection.KoaloaderProxy is null);
 
-    private static bool CanSaveKoaloader() => ProgramData.ReadKoaloaderChoices() is not null || !AreKoaloaderSelectionsDefault();
+    private static bool CanSaveKoaloader() => ProgramData.ReadKoaloaderChoices().Any() || !AreKoaloaderSelectionsDefault();
 
     private void OnSaveKoaloader(object sender, EventArgs e)
     {
-        List<(Platform platform, string id, string proxy, bool enabled)> choices = ProgramData.ReadKoaloaderChoices()
-                                                                                ?? new List<(Platform platform, string id, string proxy, bool enabled)>();
+        List<(Platform platform, string id, string proxy, bool enabled)> choices = ProgramData.ReadKoaloaderChoices().ToList();
         foreach (ProgramSelection selection in ProgramSelection.AllSafe)
         {
             _ = choices.RemoveAll(c => c.platform == selection.Platform && c.id == selection.Id);
@@ -1067,13 +1042,11 @@ internal partial class SelectForm : CustomForm
         loadKoaloaderButton.Enabled = CanLoadKoaloader();
     }
 
-    private static bool CanLoadKoaloader() => ProgramData.ReadKoaloaderChoices() is not null;
+    private static bool CanLoadKoaloader() => ProgramData.ReadKoaloaderChoices().Any();
 
     private void OnLoadKoaloader(object sender, EventArgs e)
     {
-        List<(Platform platform, string id, string proxy, bool enabled)> choices = ProgramData.ReadKoaloaderChoices();
-        if (choices is null)
-            return;
+        List<(Platform platform, string id, string proxy, bool enabled)> choices = ProgramData.ReadKoaloaderChoices().ToList();
         foreach (ProgramSelection selection in ProgramSelection.AllSafe)
             if (choices.Any(c => c.platform == selection.Platform && c.id == selection.Id))
             {
@@ -1135,25 +1108,23 @@ internal partial class SelectForm : CustomForm
     {
         StringBuilder blockedGames = new();
         foreach (string name in Program.ProtectedGames)
-            _ = blockedGames.Append(helpButtonListPrefix + name);
+            _ = blockedGames.Append(HelpButtonListPrefix + name);
         StringBuilder blockedDirectories = new();
         foreach (string path in Program.ProtectedGameDirectories)
-            _ = blockedDirectories.Append(helpButtonListPrefix + path);
+            _ = blockedDirectories.Append(HelpButtonListPrefix + path);
         StringBuilder blockedDirectoryExceptions = new();
         foreach (string name in Program.ProtectedGameDirectoryExceptions)
-            _ = blockedDirectoryExceptions.Append(helpButtonListPrefix + name);
+            _ = blockedDirectoryExceptions.Append(HelpButtonListPrefix + name);
         using DialogForm form = new(this);
         _ = form.Show(SystemIcons.Information,
             "Blocks the program from caching and displaying games protected by anti-cheats."
           + "\nYou disable this option and install DLC unlockers to protected games at your own risk!" + "\n\nBlocked games: "
           + (string.IsNullOrWhiteSpace(blockedGames.ToString()) ? "(none)" : blockedGames) + "\n\nBlocked game sub-directories: "
           + (string.IsNullOrWhiteSpace(blockedDirectories.ToString()) ? "(none)" : blockedDirectories) + "\n\nBlocked game sub-directory exceptions: "
-          + (string.IsNullOrWhiteSpace(blockedDirectoryExceptions.ToString()) ? "(none)" : blockedDirectoryExceptions), "OK",
+          + (string.IsNullOrWhiteSpace(blockedDirectoryExceptions.ToString()) ? "(none)" : blockedDirectoryExceptions),
             customFormText: "Block Protected Games");
     }
 
     private void OnSortCheckBoxChanged(object sender, EventArgs e)
         => selectionTreeView.TreeViewNodeSorter = sortCheckBox.Checked ? PlatformIdComparer.NodeText : PlatformIdComparer.NodeName;
 }
-
-#pragma warning restore IDE0058

@@ -6,13 +6,13 @@ using CreamInstaller.Utility;
 
 namespace CreamInstaller.Forms;
 
-internal partial class DebugForm : CustomForm
+internal sealed partial class DebugForm : CustomForm
 {
-    internal static DebugForm current;
+    private static DebugForm current;
 
     private Form attachedForm;
 
-    internal DebugForm()
+    private DebugForm()
     {
         InitializeComponent();
         debugTextBox.BackColor = LogTextBox.Background;
@@ -26,7 +26,6 @@ internal partial class DebugForm : CustomForm
                 current = null;
             return current ??= new();
         }
-        set => current = value;
     }
 
     protected override void WndProc(ref Message message) // make form immovable by user
@@ -57,16 +56,15 @@ internal partial class DebugForm : CustomForm
         UpdateAttachment();
     }
 
-    internal void OnChange(object sender, EventArgs args) => UpdateAttachment();
+    private void OnChange(object sender, EventArgs args) => UpdateAttachment();
 
-    internal void UpdateAttachment()
+    private void UpdateAttachment()
     {
-        if (attachedForm is not null && attachedForm.Visible)
-        {
-            //Size = new(Size.Width, attachedForm.Size.Height);
-            Location = new(attachedForm.Right, attachedForm.Top);
-            BringToFrontWithoutActivation();
-        }
+        if (attachedForm is null || !attachedForm.Visible)
+            return;
+        //Size = new(Size.Width, attachedForm.Size.Height);
+        Location = new(attachedForm.Right, attachedForm.Top);
+        BringToFrontWithoutActivation();
     }
 
     internal void Log(string text) => Log(text, LogTextBox.Error);

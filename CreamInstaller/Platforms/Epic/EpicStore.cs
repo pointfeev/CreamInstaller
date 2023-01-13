@@ -13,14 +13,14 @@ namespace CreamInstaller.Platforms.Epic;
 
 internal static class EpicStore
 {
-    //private const int COOLDOWN_CATALOG_ITEM = 600;
+    //private const int CooldownCatalogItem = 600;
 
     /* need a method to query catalog items
     internal static async Task QueryCatalogItems(Manifest manifest)
     {
     }*/
 
-    private const int COOLDOWN_ENTITLEMENT = 600;
+    private const int CooldownEntitlement = 600;
 
     internal static async Task<List<(string id, string name, string product, string icon, string developer)>> QueryEntitlements(string categoryNamespace)
     {
@@ -28,16 +28,19 @@ internal static class EpicStore
         string cacheFile = ProgramData.AppInfoPath + @$"\{categoryNamespace}.json";
         bool cachedExists = File.Exists(cacheFile);
         Response response = null;
-        if (!cachedExists || ProgramData.CheckCooldown(categoryNamespace, COOLDOWN_ENTITLEMENT))
+        if (!cachedExists || ProgramData.CheckCooldown(categoryNamespace, CooldownEntitlement))
         {
             response = await QueryGraphQL(categoryNamespace);
             try
             {
                 await File.WriteAllTextAsync(cacheFile, JsonConvert.SerializeObject(response, Formatting.Indented));
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
         }
-        else if (cachedExists)
+        else
             try
             {
                 response = JsonConvert.DeserializeObject<Response>(await File.ReadAllTextAsync(cacheFile));
@@ -57,11 +60,10 @@ internal static class EpicStore
             for (int i = 0; i < element.KeyImages?.Length; i++)
             {
                 KeyImage keyImage = element.KeyImages[i];
-                if (keyImage.Type == "DieselStoreFront")
-                {
-                    icon = keyImage.Url.ToString();
-                    break;
-                }
+                if (keyImage.Type != "DieselStoreFront")
+                    continue;
+                icon = keyImage.Url.ToString();
+                break;
             }
             foreach (Item item in element.Items)
                 dlcIds.Populate(item.Id, title, product, icon, null, element.Items.Length == 1);
@@ -75,11 +77,10 @@ internal static class EpicStore
             for (int i = 0; i < element.KeyImages?.Length; i++)
             {
                 KeyImage keyImage = element.KeyImages[i];
-                if (keyImage.Type == "Thumbnail")
-                {
-                    icon = keyImage.Url.ToString();
-                    break;
-                }
+                if (keyImage.Type != "Thumbnail")
+                    continue;
+                icon = keyImage.Url.ToString();
+                break;
             }
             foreach (Item item in element.Items)
                 dlcIds.Populate(item.Id, title, product, icon, item.Developer, element.Items.Length == 1);
@@ -96,14 +97,13 @@ internal static class EpicStore
         for (int i = 0; i < dlcIds.Count; i++)
         {
             (string id, string name, string product, string icon, string developer) app = dlcIds[i];
-            if (app.id == id)
-            {
-                found = true;
-                dlcIds[i] = canOverwrite
-                    ? (app.id, title ?? app.name, product ?? app.product, icon ?? app.icon, developer ?? app.developer)
-                    : (app.id, app.name ?? title, app.product ?? product, app.icon ?? icon, app.developer ?? developer);
-                break;
-            }
+            if (app.id != id)
+                continue;
+            found = true;
+            dlcIds[i] = canOverwrite
+                ? (app.id, title ?? app.name, product ?? app.product, icon ?? app.icon, developer ?? app.developer)
+                : (app.id, app.name ?? title, app.product ?? product, app.icon ?? icon, app.developer ?? developer);
+            break;
         }
         if (!found)
             dlcIds.Add((id, title, product, icon, developer));

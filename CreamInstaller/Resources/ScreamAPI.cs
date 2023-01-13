@@ -50,7 +50,7 @@ internal static class ScreamAPI
         }
     }
 
-    internal static void WriteConfig(StreamWriter writer, SortedList<string, (DlcType type, string name, string icon)> overrideCatalogItems,
+    private static void WriteConfig(StreamWriter writer, SortedList<string, (DlcType type, string name, string icon)> overrideCatalogItems,
         SortedList<string, (DlcType type, string name, string icon)> entitlements, InstallForm installForm = null)
     {
         writer.WriteLine("{");

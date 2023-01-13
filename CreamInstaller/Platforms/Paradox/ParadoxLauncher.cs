@@ -98,10 +98,12 @@ internal static class ParadoxLauncher
         byte[] epicOriginalSdk64 = null;
         foreach (string directory in selection.DllDirectories)
         {
-            bool koaloaderInstalled = Koaloader.AutoLoadDlls.Select(pair => (pair.unlocker, path: directory + @"\" + pair.dll))
+            bool koaloaderInstalled = Koaloader.AutoLoadDLLs.Select(pair => (pair.unlocker, path: directory + @"\" + pair.dll))
                                                .Any(pair => File.Exists(pair.path) && pair.path.IsResourceFile());
-            directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out _);
-            smokeInstalled = smokeInstalled || File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config) && !koaloaderInstalled
+            directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string old_config,
+                out string config, out _);
+            smokeInstalled = smokeInstalled || File.Exists(api32_o) || File.Exists(api64_o)
+                          || (File.Exists(config) || File.Exists(config)) && !koaloaderInstalled
                           || File.Exists(api32) && api32.IsResourceFile(ResourceIdentifier.Steamworks32)
                           || File.Exists(api64) && api64.IsResourceFile(ResourceIdentifier.Steamworks64);
             await SmokeAPI.Uninstall(directory, deleteConfig: false);
@@ -125,7 +127,7 @@ internal static class ParadoxLauncher
             bool neededRepair = false;
             foreach (string directory in selection.DllDirectories)
             {
-                directory.GetSmokeApiComponents(out string api32, out _, out string api64, out _, out _, out _);
+                directory.GetSmokeApiComponents(out string api32, out _, out string api64, out _, out _, out _, out _);
                 if (steamOriginalSdk32 is not null && api32.IsResourceFile(ResourceIdentifier.Steamworks32))
                 {
                     steamOriginalSdk32.Write(api32);
@@ -161,13 +163,13 @@ internal static class ParadoxLauncher
                 if (installForm is not null)
                     installForm.UpdateUser("Paradox Launcher successfully repaired!", LogTextBox.Success);
                 else
-                    _ = dialogForm.Show(form.Icon, "Paradox Launcher successfully repaired!", "OK", customFormText: "Paradox Launcher");
+                    _ = dialogForm.Show(form.Icon, "Paradox Launcher successfully repaired!", customFormText: "Paradox Launcher");
                 return RepairResult.Success;
             }
             if (installForm is not null)
                 installForm.UpdateUser("Paradox Launcher did not need to be repaired.", LogTextBox.Success);
             else
-                _ = dialogForm.Show(SystemIcons.Information, "Paradox Launcher does not need to be repaired.", "OK", customFormText: "Paradox Launcher");
+                _ = dialogForm.Show(SystemIcons.Information, "Paradox Launcher does not need to be repaired.", customFormText: "Paradox Launcher");
             return RepairResult.Unnecessary;
         }
         _ = form is InstallForm
@@ -175,7 +177,7 @@ internal static class ParadoxLauncher
                                                                  + "You will likely have to reinstall Paradox Launcher to fix this issue.")
             : dialogForm.Show(SystemIcons.Error,
                 "Paradox Launcher repair failed!" + "\n\nAn original Steamworks and/or Epic Online Services file could not be found."
-                                                  + "\nYou will likely have to reinstall Paradox Launcher to fix this issue.", "OK",
+                                                  + "\nYou will likely have to reinstall Paradox Launcher to fix this issue.",
                 customFormText: "Paradox Launcher");
         return RepairResult.Failure;
     }

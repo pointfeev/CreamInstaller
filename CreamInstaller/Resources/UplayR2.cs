@@ -46,7 +46,7 @@ internal static class UplayR2
         }
     }
 
-    internal static void WriteConfig(StreamWriter writer, SortedList<string, (DlcType type, string name, string icon)> blacklistDlc,
+    private static void WriteConfig(StreamWriter writer, SortedList<string, (DlcType type, string name, string icon)> blacklistDlc,
         InstallForm installForm = null)
     {
         writer.WriteLine("{");

@@ -19,7 +19,7 @@ public enum DlcType
     EpicEntitlement
 }
 
-internal class ProgramSelection
+internal sealed class ProgramSelection
 {
     internal const string DefaultKoaloaderProxy = "version";
 
@@ -68,9 +68,9 @@ internal class ProgramSelection
                     if (api32.IsFilePathLocked() || api32_o.IsFilePathLocked() || api64.IsFilePathLocked() || api64_o.IsFilePathLocked()
                      || config.IsFilePathLocked())
                         return true;
-                    directory.GetSmokeApiComponents(out api32, out api32_o, out api64, out api64_o, out config, out string cache);
+                    directory.GetSmokeApiComponents(out api32, out api32_o, out api64, out api64_o, out string old_config, out config, out string cache);
                     if (api32.IsFilePathLocked() || api32_o.IsFilePathLocked() || api64.IsFilePathLocked() || api64_o.IsFilePathLocked()
-                     || config.IsFilePathLocked() || cache.IsFilePathLocked())
+                     || old_config.IsFilePathLocked() || config.IsFilePathLocked() || cache.IsFilePathLocked())
                         return true;
                 }
                 if (Platform is Platform.Epic or Platform.Paradox)
@@ -114,16 +114,15 @@ internal class ProgramSelection
         {
             string appId = pair.Key;
             (DlcType type, string name, string icon) dlcApp = pair.Value;
-            if (appId == dlcId)
-            {
-                Toggle(appId, dlcApp, enabled);
-                break;
-            }
+            if (appId != dlcId)
+                continue;
+            Toggle(appId, dlcApp, enabled);
+            break;
         }
         Enabled = SelectedDlc.Any() || ExtraSelectedDlc.Any();
     }
 
-    internal void Validate()
+    private void Validate()
     {
         if (Program.IsGameBlocked(Name, RootDirectory))
         {
@@ -140,7 +139,7 @@ internal class ProgramSelection
             _ = All.Remove(this);
     }
 
-    internal void Validate(List<(Platform platform, string id, string name)> programsToScan)
+    private void Validate(List<(Platform platform, string id, string name)> programsToScan)
     {
         if (programsToScan is null || !programsToScan.Any(p => p.platform == Platform && p.id == Id))
         {

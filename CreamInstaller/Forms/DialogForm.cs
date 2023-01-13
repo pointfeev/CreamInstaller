@@ -8,7 +8,7 @@ using CreamInstaller.Components;
 
 namespace CreamInstaller.Forms;
 
-internal partial class DialogForm : CustomForm
+internal sealed partial class DialogForm : CustomForm
 {
     internal DialogForm(IWin32Window owner) : base(owner) => InitializeComponent();
 
@@ -16,7 +16,7 @@ internal partial class DialogForm : CustomForm
         string customFormText = null, Icon customFormIcon = null)
     {
         descriptionIcon ??= Icon;
-        icon.Image = descriptionIcon.ToBitmap();
+        icon.Image = descriptionIcon?.ToBitmap();
         List<LinkLabel.Link> links = new();
         for (int i = 0; i < descriptionText.Length; i++)
             if (descriptionText[i] == '[')
@@ -25,15 +25,14 @@ internal partial class DialogForm : CustomForm
                 int textRight = descriptionText.IndexOf("]", textLeft == -1 ? i : textLeft, StringComparison.Ordinal);
                 int linkLeft = descriptionText.IndexOf("(", textRight == -1 ? i : textRight, StringComparison.Ordinal);
                 int linkRight = descriptionText.IndexOf(")", linkLeft == -1 ? i : linkLeft, StringComparison.Ordinal);
-                if (textLeft != -1 && textRight == linkLeft - 1 && linkRight != -1)
-                {
-                    string text = descriptionText[(textLeft + 1)..textRight];
-                    string link = descriptionText[(linkLeft + 1)..linkRight];
-                    if (string.IsNullOrWhiteSpace(link))
-                        link = text;
-                    descriptionText = descriptionText.Remove(i, linkRight + 1 - i).Insert(i, text);
-                    links.Add(new(i, text.Length, link));
-                }
+                if (textLeft == -1 || textRight != linkLeft - 1 || linkRight == -1)
+                    continue;
+                string text = descriptionText[(textLeft + 1)..textRight];
+                string link = descriptionText[(linkLeft + 1)..linkRight];
+                if (string.IsNullOrWhiteSpace(link))
+                    link = text;
+                descriptionText = descriptionText.Remove(i, linkRight + 1 - i).Insert(i, text);
+                links.Add(new(i, text.Length, link));
             }
         descriptionLabel.Text = descriptionText;
         acceptButton.Text = acceptButtonText;
@@ -53,12 +52,11 @@ internal partial class DialogForm : CustomForm
         }
         if (customFormIcon is not null)
             Icon = customFormIcon;
-        if (links.Any())
-        {
-            foreach (LinkLabel.Link link in links)
-                _ = descriptionLabel.Links.Add(link);
-            descriptionLabel.LinkClicked += (s, e) => Process.Start(new ProcessStartInfo((string)e.Link.LinkData) { UseShellExecute = true });
-        }
+        if (!links.Any())
+            return ShowDialog();
+        foreach (LinkLabel.Link link in links)
+            _ = descriptionLabel.Links.Add(link);
+        descriptionLabel.LinkClicked += (s, e) => Process.Start(new ProcessStartInfo((string)e.Link.LinkData) { UseShellExecute = true });
         return ShowDialog();
     }
 

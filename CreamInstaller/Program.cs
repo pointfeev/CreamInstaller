@@ -15,7 +15,7 @@ namespace CreamInstaller;
 internal static class Program
 {
     internal static readonly string Name = Application.CompanyName;
-    internal static readonly string Description = Application.ProductName;
+    private static readonly string Description = Application.ProductName;
     internal static readonly string Version = Application.ProductVersion;
 
     internal const string RepositoryOwner = "pointfeev";
@@ -32,8 +32,8 @@ internal static class Program
 #endif
 
     internal static readonly Assembly EntryAssembly = Assembly.GetEntryAssembly();
-    internal static readonly Process CurrentProcess = Process.GetCurrentProcess();
-    internal static readonly string CurrentProcessFilePath = CurrentProcess.MainModule.FileName;
+    private static readonly Process CurrentProcess = Process.GetCurrentProcess();
+    internal static readonly string CurrentProcessFilePath = CurrentProcess.MainModule?.FileName;
 
     internal static bool BlockProtectedGames = true;
     internal static readonly string[] ProtectedGames = { "PAYDAY 2" };
@@ -46,25 +46,27 @@ internal static class Program
             return false;
         if (ProtectedGames.Contains(name))
             return true;
-        if (directory is not null && !ProtectedGameDirectoryExceptions.Contains(name))
-            foreach (string path in ProtectedGameDirectories)
-                if (Directory.Exists(directory + path))
-                    return true;
-        return false;
+        if (directory is null || ProtectedGameDirectoryExceptions.Contains(name))
+            return false;
+        return ProtectedGameDirectories.Any(path => Directory.Exists(directory + path));
     }
 
     internal static bool IsProgramRunningDialog(Form form, ProgramSelection selection)
     {
-        if (selection.AreDllsLocked)
+        while (true)
         {
-            using DialogForm dialogForm = new(form);
-            if (dialogForm.Show(SystemIcons.Error, $"ERROR: {selection.Name} is currently running!" + "\n\nPlease close the program/game to continue . . . ",
-                    "Retry", "Cancel") == DialogResult.OK)
-                return IsProgramRunningDialog(form, selection);
+            if (selection.AreDllsLocked)
+            {
+                using DialogForm dialogForm = new(form);
+                if (dialogForm.Show(SystemIcons.Error,
+                        $"ERROR: {selection.Name} is currently running!" + "\n\nPlease close the program/game to continue . . . ", "Retry", "Cancel")
+                 == DialogResult.OK)
+                    continue;
+            }
+            else
+                return true;
+            return false;
         }
-        else
-            return true;
-        return false;
     }
 
     [STAThread]

@@ -12,19 +12,20 @@ namespace CreamInstaller.Resources;
 internal static class SmokeAPI
 {
     internal static void GetSmokeApiComponents(this string directory, out string api32, out string api32_o, out string api64, out string api64_o,
-        out string config, out string cache)
+        out string old_config, out string config, out string cache)
     {
         api32 = directory + @"\steam_api.dll";
         api32_o = directory + @"\steam_api_o.dll";
         api64 = directory + @"\steam_api64.dll";
         api64_o = directory + @"\steam_api64_o.dll";
-        config = directory + @"\SmokeAPI.json";
+        old_config = directory + @"\SmokeAPI.json";
+        config = directory + @"\SmokeAPI.config.json";
         cache = directory + @"\SmokeAPI.cache.json";
     }
 
     internal static void CheckConfig(string directory, ProgramSelection selection, InstallForm installForm = null)
     {
-        directory.GetSmokeApiComponents(out _, out _, out _, out _, out string config, out _);
+        directory.GetSmokeApiComponents(out _, out _, out _, out _, out string old_config, out _, out _);
         IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> overrideDlc = selection.AllDlc.Except(selection.SelectedDlc);
         foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
             overrideDlc = overrideDlc.Except(extraDlc);
@@ -34,28 +35,28 @@ internal static class SmokeAPI
         {
             injectDlc = injectDlc.Concat(selection.SelectedDlc.Where(pair => pair.Value.type is DlcType.SteamHidden));
             foreach ((string id, string name, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
-                if (selection.ExtraDlc.Where(e => e.id == id).Single().dlc.Count > 64)
+                if (selection.ExtraDlc.Single(e => e.id == id).dlc.Count > 64)
                     injectDlc = injectDlc.Concat(extraDlc.Where(pair => pair.Value.type is DlcType.SteamHidden));
         }
         if (overrideDlc.Any() || injectDlc.Any())
         {
             /*if (installForm is not null)
                 installForm.UpdateUser("Generating SmokeAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);*/
-            File.Create(config).Close();
-            StreamWriter writer = new(config, true, Encoding.UTF8);
+            File.Create(old_config).Close();
+            StreamWriter writer = new(old_config, true, Encoding.UTF8);
             WriteConfig(writer, new(overrideDlc.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String),
                 new(injectDlc.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String), installForm);
             writer.Flush();
             writer.Close();
         }
-        else if (File.Exists(config))
+        else if (File.Exists(old_config))
         {
-            File.Delete(config);
-            installForm?.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", LogTextBox.Action, false);
+            File.Delete(old_config);
+            installForm?.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(old_config)}", LogTextBox.Action, false);
         }
     }
 
-    internal static void WriteConfig(StreamWriter writer, SortedList<string, (DlcType type, string name, string icon)> overrideDlc,
+    private static void WriteConfig(StreamWriter writer, SortedList<string, (DlcType type, string name, string icon)> overrideDlc,
         SortedList<string, (DlcType type, string name, string icon)> injectDlc, InstallForm installForm = null)
     {
         writer.WriteLine("{");
@@ -107,7 +108,8 @@ internal static class SmokeAPI
                 File.Delete(oldConfig);
                 installForm?.UpdateUser($"Deleted old CreamAPI configuration: {Path.GetFileName(oldConfig)}", LogTextBox.Action, false);
             }
-            directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out string cache);
+            directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string old_config,
+                out string config, out string cache);
             if (File.Exists(api32_o))
             {
                 if (File.Exists(api32))
@@ -127,6 +129,11 @@ internal static class SmokeAPI
                 }
                 File.Move(api64_o, api64);
                 installForm?.UpdateUser($"Restored Steamworks: {Path.GetFileName(api64_o)} -> {Path.GetFileName(api64)}", LogTextBox.Action, false);
+            }
+            if (deleteConfig && File.Exists(old_config))
+            {
+                File.Delete(old_config);
+                installForm?.UpdateUser($"Deleted configuration: {Path.GetFileName(old_config)}", LogTextBox.Action, false);
             }
             if (deleteConfig && File.Exists(config))
             {
@@ -149,7 +156,7 @@ internal static class SmokeAPI
                 File.Delete(oldConfig);
                 installForm?.UpdateUser($"Deleted old CreamAPI configuration: {Path.GetFileName(oldConfig)}", LogTextBox.Action, false);
             }
-            directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out _);
+            directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out _, out _, out _);
             if (File.Exists(api32) && !File.Exists(api32_o))
             {
                 File.Move(api32, api32_o);

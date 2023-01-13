@@ -13,9 +13,9 @@ namespace CreamInstaller.Resources;
 
 internal static class Resources
 {
-    internal static List<string> embeddedResources;
+    private static List<string> embeddedResources;
 
-    internal static readonly Dictionary<ResourceIdentifier, IReadOnlyList<string>> ResourceMD5s = new()
+    private static readonly Dictionary<ResourceIdentifier, IReadOnlyList<string>> ResourceMD5s = new()
     {
         {
             ResourceIdentifier.Koaloader, new List<string>
@@ -263,7 +263,51 @@ internal static class Resources
                 "76CAB00C7DD33FC19F7CDD1849FF9CA2", // Koaloader v2.4.0
                 "DA4D6A7C0872757A74DDAE05A2C1D160", // Koaloader v2.4.0
                 "1F46DE8747C0A157841AFFE6185CE4C9", // Koaloader v2.4.0
-                "BE16B588D018D8EFF1F3B6A600F26BED" // Koaloader v2.4.0
+                "BE16B588D018D8EFF1F3B6A600F26BED", // Koaloader v2.4.0
+                "4633C8CD34B05138C5FE4B8950D18A4F", // Koaloader v3.0.1
+                "B8FDA04A5C46AAE8701A332275FA1D79", // Koaloader v3.0.1
+                "1C82C832029D12FA8AF25931C0B30A51", // Koaloader v3.0.1
+                "2AD8B1B70AB1763F612DFFE6BA95C786", // Koaloader v3.0.1
+                "7D05AE4D30C175BA1579C141DDC8A6EA", // Koaloader v3.0.1
+                "BF2BD33D755E7D5BE7262F528F7D2892", // Koaloader v3.0.1
+                "DB00C89FF7ED4E3EF7A3222BDF339A8F", // Koaloader v3.0.1
+                "27EFBABFACA05C95F548AA1BCA2C35D8", // Koaloader v3.0.1
+                "CF676B825204D41B5A1461990146C0AA", // Koaloader v3.0.1
+                "9D4BFD2814B62AB466B11B6740A8C003", // Koaloader v3.0.1
+                "54F4593C319223AFEB1A3ECAC3EB5FD2", // Koaloader v3.0.1
+                "158425881AE6A4DC398579E7589EFCF8", // Koaloader v3.0.1
+                "78E94DF180F264044C07EA7D279058A3", // Koaloader v3.0.1
+                "94FB4AF523BB8D553D926590FA8C4F0A", // Koaloader v3.0.1
+                "63AAAA347EB9D4699CA745A539647356", // Koaloader v3.0.1
+                "1B660B7CC1EB4318B7FC5C2B9D1DF6AD", // Koaloader v3.0.1
+                "805AFEEE7DF85B3019ACD0C4329AAADD", // Koaloader v3.0.1
+                "421567BD7E44A6A3CD8CBE529AED6BB9", // Koaloader v3.0.1
+                "A4769BB227D64337E097FE176CB3DA78", // Koaloader v3.0.1
+                "F03C50515A9FA6B35CF4608577B77D5E", // Koaloader v3.0.1
+                "E606329ED2593839BA479E948640E515", // Koaloader v3.0.1
+                "2A0ABCDC9CF3AC598893D823A188A2AE", // Koaloader v3.0.1
+                "FC8F96E934B7275077B92C1EA59186AC", // Koaloader v3.0.1
+                "06F41AB13C803D0680BBDA231A696795", // Koaloader v3.0.1
+                "D1106C578EE1AA7870CEFD1A06DD57C4", // Koaloader v3.0.1
+                "64C7F3CE83EC5558B3DA2A749122D711", // Koaloader v3.0.1
+                "90556EF98B420EFE3DA97A4BB1141095", // Koaloader v3.0.1
+                "5CEA22F2E663C53ACC6EA80B40789619", // Koaloader v3.0.1
+                "414528403EC318912B424E1984BA4D48", // Koaloader v3.0.1
+                "28CA4DA6C30E69A255234BD3C78E2AD1", // Koaloader v3.0.1
+                "CBE2786E9A493ACDEB4E3276D355EBEC", // Koaloader v3.0.1
+                "2E1E0FAD1EC473DC750636D4C565BD62", // Koaloader v3.0.1
+                "D35E4F7BCE7F909F75B5C6CADF962F54", // Koaloader v3.0.1
+                "184323CD159F9C1883F5276977B543BF", // Koaloader v3.0.1
+                "328258F4E16803BD5FE4100B716A3968", // Koaloader v3.0.1
+                "9F250DEEC8AE1CE49CC91176B5BA3EAC", // Koaloader v3.0.1
+                "F39C05830A7E405990619191A2881C87", // Koaloader v3.0.1
+                "2EED18EC00C83E3756F8A6154BB44817", // Koaloader v3.0.1
+                "F63362E4B1CAABAEC0255BEC78E9EE66", // Koaloader v3.0.1
+                "F77C655EB7A7892DBF0A3591E07E7A00", // Koaloader v3.0.1
+                "4AF5004DDBBD93C21440430255EAF9F3", // Koaloader v3.0.1
+                "E68CFB48E827A0BA486CB900B0A6B24F", // Koaloader v3.0.1
+                "F395ADCA7D27C28121D1AE2C19DDBD6B", // Koaloader v3.0.1
+                "CBB805C763AF199AF2DB35B265A4FF15" // Koaloader v3.0.1
             }
         },
         {
@@ -287,7 +331,8 @@ internal static class Resources
                 "B2434578957CBE38BDCE0A671C1262FC", // SmokeAPI v1.0.0
                 "973AB1632B747D4BF3B2666F32E34327", // SmokeAPI v1.0.1
                 "C7E41F569FC6A347D67D2BFB2BD10F25", // SmokeAPI v1.0.2
-                "F9E7D5B248B86D1C2F2F2905A9F37755" // SmokeAPI v1.0.3
+                "F9E7D5B248B86D1C2F2F2905A9F37755", // SmokeAPI v1.0.3
+                "FD9032CCF73E3A4D7E187F35388BD569" // SmokeAPI v2.0.0-rc01
             }
         },
         {
@@ -297,7 +342,8 @@ internal static class Resources
                 "08713035CAD6F52548FF324D0487B88D", // SmokeAPI v1.0.0
                 "D077737B9979D32458AC938A2978FA3C", // SmokeAPI v1.0.1
                 "49122A2E2E51CBB0AE5E1D59B280E4CD", // SmokeAPI v1.0.2
-                "13F3E9476116F7670E21365A400357AC" // SmokeAPI v1.0.3
+                "13F3E9476116F7670E21365A400357AC", // SmokeAPI v1.0.3
+                "151D09637E54A6DF281EAC5A9C484616" // SmokeAPI v2.0.0-rc01
             }
         },
         {
@@ -332,13 +378,12 @@ internal static class Resources
     {
         get
         {
-            if (embeddedResources is null)
-            {
-                string[] names = Assembly.GetExecutingAssembly().GetManifestResourceNames();
-                embeddedResources = new();
-                foreach (string resourceName in names.Where(n => n.StartsWith("CreamInstaller.Resources.")))
-                    embeddedResources.Add(resourceName[25..]);
-            }
+            if (embeddedResources is not null)
+                return embeddedResources;
+            string[] names = Assembly.GetExecutingAssembly().GetManifestResourceNames();
+            embeddedResources = new();
+            foreach (string resourceName in names.Where(n => n.StartsWith("CreamInstaller.Resources.")))
+                embeddedResources.Add(resourceName[25..]);
             return embeddedResources;
         }
     }
@@ -347,7 +392,7 @@ internal static class Resources
     {
         using Stream resource = Assembly.GetExecutingAssembly().GetManifestResourceStream("CreamInstaller.Resources." + resourceIdentifier);
         using FileStream file = new(filePath, FileMode.Create, FileAccess.Write);
-        resource.CopyTo(file);
+        resource?.CopyTo(file);
     }
 
     internal static void Write(this byte[] resource, string filePath)
@@ -419,7 +464,7 @@ internal static class Resources
             return !executables.Any() ? null : executables;
         });
 
-    internal static bool IsCommonIncorrectExecutable(this string rootDirectory, string path)
+    private static bool IsCommonIncorrectExecutable(this string rootDirectory, string path)
     {
         string subPath = path[rootDirectory.Length..].ToUpperInvariant().BeautifyPath();
         return subPath.Contains("SETUP") || subPath.Contains("REDIST") || subPath.Contains("SUPPORT")
@@ -441,37 +486,33 @@ internal static class Resources
                 if (Program.Canceled)
                     return null;
                 string subDirectory = directory.BeautifyPath();
-                if (!dllDirectories.Contains(subDirectory))
+                if (dllDirectories.Contains(subDirectory))
+                    continue;
+                bool koaloaderInstalled = Koaloader.AutoLoadDLLs.Select(pair => (pair.unlocker, path: directory + @"\" + pair.dll))
+                                                   .Any(pair => File.Exists(pair.path) && pair.path.IsResourceFile());
+                if (platform is Platform.Steam or Platform.Paradox)
                 {
-                    bool koaloaderInstalled = Koaloader.AutoLoadDlls.Select(pair => (pair.unlocker, path: directory + @"\" + pair.dll))
-                                                       .Any(pair => File.Exists(pair.path) && pair.path.IsResourceFile());
-                    if (platform is Platform.Steam or Platform.Paradox)
-                    {
-                        subDirectory.GetSmokeApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string config,
-                            out string cache);
-                        if (File.Exists(api) || File.Exists(api_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config) && !koaloaderInstalled
-                         || File.Exists(cache) && !koaloaderInstalled)
-                            dllDirectories.Add(subDirectory);
-                    }
-                    if (platform is Platform.Epic or Platform.Paradox)
-                    {
-                        subDirectory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
-                        if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o)
-                         || File.Exists(config) && !koaloaderInstalled)
-                            dllDirectories.Add(subDirectory);
-                    }
-                    if (platform is Platform.Ubisoft)
-                    {
-                        subDirectory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
-                        if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o)
-                         || File.Exists(config) && !koaloaderInstalled)
-                            dllDirectories.Add(subDirectory);
-                        subDirectory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o,
-                            out config);
-                        if (File.Exists(old_api32) || File.Exists(old_api64) || File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64)
-                         || File.Exists(api64_o) || File.Exists(config) && !koaloaderInstalled)
-                            dllDirectories.Add(subDirectory);
-                    }
+                    subDirectory.GetSmokeApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string old_config,
+                        out string config, out string cache);
+                    if (File.Exists(api) || File.Exists(api_o) || File.Exists(api64) || File.Exists(api64_o)
+                     || (File.Exists(old_config) || File.Exists(config)) && !koaloaderInstalled || File.Exists(cache) && !koaloaderInstalled)
+                        dllDirectories.Add(subDirectory);
+                }
+                if (platform is Platform.Epic or Platform.Paradox)
+                {
+                    subDirectory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+                    if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config) && !koaloaderInstalled)
+                        dllDirectories.Add(subDirectory);
+                }
+                if (platform is Platform.Ubisoft)
+                {
+                    subDirectory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+                    if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config) && !koaloaderInstalled)
+                        dllDirectories.Add(subDirectory);
+                    subDirectory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config);
+                    if (File.Exists(old_api32) || File.Exists(old_api64) || File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64)
+                     || File.Exists(api64_o) || File.Exists(config) && !koaloaderInstalled)
+                        dllDirectories.Add(subDirectory);
                 }
             }
             return !dllDirectories.Any() ? null : dllDirectories;
@@ -487,7 +528,7 @@ internal static class Resources
         config = directory + @"\cream_api.ini";
     }
 
-    internal static string ComputeMD5(this string filePath)
+    private static string ComputeMD5(this string filePath)
     {
         if (!File.Exists(filePath))
             return null;
@@ -500,10 +541,9 @@ internal static class Resources
     }
 
     internal static bool IsResourceFile(this string filePath, ResourceIdentifier identifier)
-        => filePath.ComputeMD5() is string hash && ResourceMD5s[identifier].Contains(hash);
+        => filePath.ComputeMD5() is { } hash && ResourceMD5s[identifier].Contains(hash);
 
-    internal static bool IsResourceFile(this string filePath)
-        => filePath.ComputeMD5() is string hash && ResourceMD5s.Values.Any(hashes => hashes.Contains(hash));
+    internal static bool IsResourceFile(this string filePath) => filePath.ComputeMD5() is { } hash && ResourceMD5s.Values.Any(hashes => hashes.Contains(hash));
 
     internal enum BinaryType
     {

@@ -17,24 +17,24 @@ namespace CreamInstaller.Platforms.Steam;
 
 internal static class SteamCMD
 {
-    internal const int ProcessLimit = 20;
+    private const int ProcessLimit = 20;
 
-    internal static readonly string FilePath = DirectoryPath + @"\steamcmd.exe";
+    private static readonly string FilePath = DirectoryPath + @"\steamcmd.exe";
 
     private static readonly ConcurrentDictionary<string, int> AttemptCount = new(); // the more app_updates, the longer SteamCMD should wait for app_info_print
 
-    private static readonly int[] locks = new int[ProcessLimit];
+    private static readonly int[] Locks = new int[ProcessLimit];
 
-    internal static readonly string ArchivePath = DirectoryPath + @"\steamcmd.zip";
-    internal static readonly string DllPath = DirectoryPath + @"\steamclient.dll";
+    private static readonly string ArchivePath = DirectoryPath + @"\steamcmd.zip";
+    private static readonly string DllPath = DirectoryPath + @"\steamclient.dll";
 
-    internal static readonly string AppCachePath = DirectoryPath + @"\appcache";
-    internal static readonly string ConfigPath = DirectoryPath + @"\config";
-    internal static readonly string DumpsPath = DirectoryPath + @"\dumps";
-    internal static readonly string LogsPath = DirectoryPath + @"\logs";
-    internal static readonly string SteamAppsPath = DirectoryPath + @"\steamapps";
+    private static readonly string AppCachePath = DirectoryPath + @"\appcache";
+    private static readonly string ConfigPath = DirectoryPath + @"\config";
+    private static readonly string DumpsPath = DirectoryPath + @"\dumps";
+    private static readonly string LogsPath = DirectoryPath + @"\logs";
+    private static readonly string SteamAppsPath = DirectoryPath + @"\steamapps";
 
-    internal static string DirectoryPath => ProgramData.DirectoryPath;
+    private static string DirectoryPath => ProgramData.DirectoryPath;
     internal static string AppInfoPath => ProgramData.AppInfoPath;
 
     private static string GetArguments(string appId)
@@ -43,19 +43,19 @@ internal static class SteamCMD
             + string.Concat(Enumerable.Repeat("+app_update 4 ", attempts)) + "+quit"
             : $"+login anonymous +app_info_print {appId} +quit";
 
-    internal static async Task<string> Run(string appId)
+    private static async Task<string> Run(string appId)
         => await Task.Run(() =>
         {
         wait_for_lock:
             if (Program.Canceled)
                 return "";
-            for (int i = 0; i < locks.Length; i++)
+            for (int i = 0; i < Locks.Length; i++)
             {
                 if (Program.Canceled)
                     return "";
-                if (Interlocked.CompareExchange(ref locks[i], 1, 0) == 0)
+                if (Interlocked.CompareExchange(ref Locks[i], 1, 0) == 0)
                 {
-                    if (appId is not null)
+                    if (appId != null)
                     {
                         AttemptCount.TryGetValue(appId, out int count);
                         AttemptCount[appId] = ++count;
@@ -69,11 +69,13 @@ internal static class SteamCMD
                         StandardInputEncoding = Encoding.UTF8, StandardOutputEncoding = Encoding.UTF8, StandardErrorEncoding = Encoding.UTF8
                     };
                     Process process = Process.Start(processStartInfo);
+                    if (appId == null)
+                        return "";
                     StringBuilder output = new();
                     StringBuilder appInfo = new();
                     bool appInfoStarted = false;
                     DateTime lastOutput = DateTime.UtcNow;
-                    while (true)
+                    while (process != null)
                     {
                         if (Program.Canceled)
                         {
@@ -92,24 +94,23 @@ internal static class SteamCMD
                         }
                         DateTime now = DateTime.UtcNow;
                         TimeSpan timeDiff = now - lastOutput;
-                        if (timeDiff.TotalSeconds > 0.1)
+                        if (!(timeDiff.TotalSeconds > 0.1))
+                            continue;
+                        process.Kill(true);
+                        process.Close();
+                        if (output.ToString().Contains($"No app info for AppID {appId} found, requesting..."))
                         {
-                            process.Kill(true);
-                            process.Close();
-                            if (output.ToString().Contains($"No app info for AppID {appId} found, requesting..."))
-                            {
-                                AttemptCount[appId]++;
-                                processStartInfo.Arguments = GetArguments(appId);
-                                process = Process.Start(processStartInfo);
-                                appInfoStarted = false;
-                                _ = output.Clear();
-                                _ = appInfo.Clear();
-                            }
-                            else
-                                break;
+                            AttemptCount[appId]++;
+                            processStartInfo.Arguments = GetArguments(appId);
+                            process = Process.Start(processStartInfo);
+                            appInfoStarted = false;
+                            _ = output.Clear();
+                            _ = appInfo.Clear();
                         }
+                        else
+                            break;
                     }
-                    _ = Interlocked.Decrement(ref locks[i]);
+                    _ = Interlocked.Decrement(ref Locks[i]);
                     return appInfo.ToString();
                 }
                 Thread.Sleep(200);
@@ -174,7 +175,10 @@ internal static class SteamCMD
                 if (Directory.Exists(SteamAppsPath))
                     Directory.Delete(SteamAppsPath, true); // this is just a useless folder created from +app_update 4
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
         });
 
     internal static async Task<VProperty> GetAppInfo(string appId, string branch = "public", int buildId = 0)
@@ -223,12 +227,12 @@ internal static class SteamCMD
             File.Delete(appUpdateFile);
             goto restart;
         }
-        if (appInfo is null || appInfo.Value?.Children()?.ToList()?.Count == 0)
+        if (appInfo.Value.Children().ToList().Count == 0)
             return appInfo;
-        VToken type = appInfo.Value?.GetChild("common")?.GetChild("type");
+        VToken type = appInfo.Value.GetChild("common")?.GetChild("type");
         if (type is not null && type.ToString() != "Game")
             return appInfo;
-        string buildid = appInfo.Value?.GetChild("depots")?.GetChild("branches")?.GetChild(branch)?.GetChild("buildid")?.ToString();
+        string buildid = appInfo.Value.GetChild("depots")?.GetChild("branches")?.GetChild(branch)?.GetChild("buildid")?.ToString();
         if (buildid is null && type is not null)
             return appInfo;
         if (type is not null && (!int.TryParse(buildid, out int gamebuildId) || gamebuildId >= buildId))
@@ -279,7 +283,10 @@ internal static class SteamCMD
                 process.WaitForExit();
                 process.Close();
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
         })).ToList();
         foreach (Task task in tasks)
             await task;

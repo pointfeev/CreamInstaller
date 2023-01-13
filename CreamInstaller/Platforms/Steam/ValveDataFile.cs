@@ -13,7 +13,10 @@ internal static class ValveDataFile
             result = VdfConvert.Deserialize(value);
             return true;
         }
-        catch { }
+        catch
+        {
+            // ignored
+        }
         return false;
     }
 
@@ -23,7 +26,10 @@ internal static class ValveDataFile
         {
             return token[index];
         }
-        catch { }
+        catch
+        {
+            // ignored
+        }
         return null;
     }
 }

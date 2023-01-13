@@ -16,7 +16,7 @@ using Onova.Services;
 
 namespace CreamInstaller.Forms;
 
-internal partial class MainForm : CustomForm
+internal sealed partial class MainForm : CustomForm
 {
     private CancellationTokenSource cancellationTokenSource;
     private Version latestVersion;
@@ -68,11 +68,10 @@ internal partial class MainForm : CustomForm
         updateManager = new(AssemblyMetadata.FromAssembly(Program.EntryAssembly, Program.CurrentProcessFilePath), resolver, extractor);
         if (latestVersion is null)
         {
-            CheckForUpdatesResult checkForUpdatesResult = null;
             cancellationTokenSource = new();
             try
             {
-                checkForUpdatesResult = await updateManager.CheckForUpdatesAsync(cancellationTokenSource.Token);
+                CheckForUpdatesResult checkForUpdatesResult = await updateManager.CheckForUpdatesAsync(cancellationTokenSource.Token);
 #if !DEBUG
                 if (checkForUpdatesResult.CanUpdate)
                 {
@@ -133,7 +132,7 @@ internal partial class MainForm : CustomForm
                         foreach (HtmlNode node in nodes)
                             changelogTreeView.Invoke(delegate
                             {
-                                TreeNode change = new() { Text = HttpUtility.HtmlDecode(node.InnerText) };
+                                TreeNode change = new() { Text = HttpUtility.HtmlDecode(node.InnerText) ?? string.Empty };
                                 root.Nodes.Add(change);
                                 root.Expand();
                                 if (changelogTreeView.Nodes.Count > 0)
@@ -149,8 +148,8 @@ internal partial class MainForm : CustomForm
     retry:
         try
         {
-            string FileName = Path.GetFileName(Program.CurrentProcessFilePath);
-            if (FileName != Program.ApplicationExecutable)
+            string fileName = Path.GetFileName(Program.CurrentProcessFilePath);
+            if (fileName != Program.ApplicationExecutable)
             {
                 using DialogForm form = new(this);
                 if (form.Show(SystemIcons.Warning,

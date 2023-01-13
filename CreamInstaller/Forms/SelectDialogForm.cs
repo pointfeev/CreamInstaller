@@ -7,7 +7,7 @@ using CreamInstaller.Utility;
 
 namespace CreamInstaller.Forms;
 
-internal partial class SelectDialogForm : CustomForm
+internal sealed partial class SelectDialogForm : CustomForm
 {
     private readonly List<(Platform platform, string id, string name)> selected = new();
     internal SelectDialogForm(IWin32Window owner) : base(owner) => InitializeComponent();
@@ -69,9 +69,7 @@ internal partial class SelectDialogForm : CustomForm
 
     private void OnAllCheckBoxChanged(object sender, EventArgs e)
     {
-        bool shouldCheck = false;
-        if (selectionTreeView.Nodes.Cast<TreeNode>().Any(n => !n.Checked))
-            shouldCheck = true;
+        bool shouldCheck = selectionTreeView.Nodes.Cast<TreeNode>().Any(n => !n.Checked);
         foreach (TreeNode node in selectionTreeView.Nodes)
         {
             node.Checked = shouldCheck;
@@ -84,8 +82,8 @@ internal partial class SelectDialogForm : CustomForm
 
     private void OnLoad(object sender, EventArgs e)
     {
-        List<(Platform platform, string id)> choices = ProgramData.ReadProgramChoices();
-        if (choices is null)
+        List<(Platform platform, string id)> choices = ProgramData.ReadProgramChoices().ToList();
+        if (!choices.Any())
             return;
         foreach (TreeNode node in selectionTreeView.Nodes)
         {
@@ -96,10 +94,7 @@ internal partial class SelectDialogForm : CustomForm
 
     private void OnSave(object sender, EventArgs e)
     {
-        List<(Platform platform, string id)> choices = new();
-        foreach (TreeNode node in selectionTreeView.Nodes.Cast<TreeNode>().Where(n => n.Checked))
-            choices.Add(((Platform)node.Tag, node.Name));
-        ProgramData.WriteProgramChoices(choices);
+        ProgramData.WriteProgramChoices(selectionTreeView.Nodes.Cast<TreeNode>().Where(n => n.Checked).Select(node => ((Platform)node.Tag, node.Name)));
         loadButton.Enabled = ProgramData.ReadProgramChoices() is not null;
     }
 }

@@ -20,7 +20,7 @@ internal static class PlatformIdComparer
     internal static NodeTextComparer NodeText => nodeTextComparer ??= new();
 }
 
-internal class StringComparer : IComparer<string>
+internal sealed class StringComparer : IComparer<string>
 {
     public int Compare(string a, string b)
         => !int.TryParse(a, out _) && !int.TryParse(b, out _)
@@ -36,7 +36,7 @@ internal class StringComparer : IComparer<string>
                             : 0;
 }
 
-internal class NodeComparer : IComparer<TreeNode>
+internal sealed class NodeComparer : IComparer<TreeNode>
 {
     public int Compare(TreeNode a, TreeNode b)
         => a.Tag is not Platform A
@@ -50,7 +50,7 @@ internal class NodeComparer : IComparer<TreeNode>
                         : 0;
 }
 
-internal class NodeNameComparer : IComparer
+internal sealed class NodeNameComparer : IComparer
 {
     public int Compare(object a, object b)
         => a is not TreeNode A
@@ -62,7 +62,7 @@ internal class NodeNameComparer : IComparer
                     : PlatformIdComparer.String.Compare(A.Name, B.Name);
 }
 
-internal class NodeTextComparer : IComparer
+internal sealed class NodeTextComparer : IComparer
 {
     public int Compare(object a, object b)
         => a is not TreeNode A

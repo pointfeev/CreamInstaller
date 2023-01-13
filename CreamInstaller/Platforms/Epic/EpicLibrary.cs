@@ -49,8 +49,10 @@ internal static class EpicLibrary
                             => g.CatalogItemId == manifest.CatalogItemId && g.InstallLocation == manifest.InstallLocation))
                         games.Add(manifest);
                 }
-                catch { }
-                ;
+                catch
+                {
+                    // ignored
+                }
             }
             return games;
         });

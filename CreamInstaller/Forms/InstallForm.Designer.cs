@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace CreamInstaller.Forms
 {
-    partial class InstallForm
+    sealed partial class InstallForm
     {
         private IContainer components = null;
         protected override void Dispose(bool disposing)

@@ -9,16 +9,16 @@ using CreamInstaller.Utility;
 
 namespace CreamInstaller.Components;
 
-internal class ContextMenuItem : ToolStripMenuItem
+internal sealed class ContextMenuItem : ToolStripMenuItem
 {
-    private static readonly ConcurrentDictionary<string, Image> images = new();
+    private static readonly ConcurrentDictionary<string, Image> Images = new();
 
-    private readonly EventHandler OnClickEvent;
+    private readonly EventHandler onClickEvent;
 
     internal ContextMenuItem(string text, EventHandler onClick = null)
     {
         Text = text;
-        OnClickEvent = onClick;
+        onClickEvent = onClick;
     }
 
     internal ContextMenuItem(string text, string imageIdentifier, EventHandler onClick = null) : this(text, onClick)
@@ -29,16 +29,22 @@ internal class ContextMenuItem : ToolStripMenuItem
 
     internal ContextMenuItem(string text, (string id, string iconUrl) imageIdentifierInfo, string imageIdentifierFallback, EventHandler onClick = null) :
         this(text, onClick)
-        => _ = TryImageIdentifierInfo(this, imageIdentifierInfo, async () => await TryImageIdentifier(this, imageIdentifierFallback));
+    {
+        async void OnFail() => await TryImageIdentifier(this, imageIdentifierFallback);
+        _ = TryImageIdentifierInfo(this, imageIdentifierInfo, OnFail);
+    }
 
     internal ContextMenuItem(string text, (string id, string iconUrl) imageIdentifierInfo, (string id, string iconUrl) imageIdentifierInfoFallback,
         EventHandler onClick = null) : this(text, onClick)
-        => _ = TryImageIdentifierInfo(this, imageIdentifierInfo, async () => await TryImageIdentifierInfo(this, imageIdentifierInfoFallback));
+    {
+        async void OnFail() => await TryImageIdentifierInfo(this, imageIdentifierInfoFallback);
+        _ = TryImageIdentifierInfo(this, imageIdentifierInfo, OnFail);
+    }
 
     private static async Task TryImageIdentifier(ContextMenuItem item, string imageIdentifier)
         => await Task.Run(async () =>
         {
-            if (images.TryGetValue(imageIdentifier, out Image image) && image is not null)
+            if (Images.TryGetValue(imageIdentifier, out Image image) && image is not null)
                 item.Image = image;
             else
             {
@@ -84,7 +90,7 @@ internal class ContextMenuItem : ToolStripMenuItem
                 }
                 if (image is not null)
                 {
-                    images[imageIdentifier] = image;
+                    Images[imageIdentifier] = image;
                     item.Image = image;
                 }
             }
@@ -95,26 +101,24 @@ internal class ContextMenuItem : ToolStripMenuItem
         {
             (string id, string iconUrl) = imageIdentifierInfo;
             string imageIdentifier = "Icon_" + id;
-            if (images.TryGetValue(imageIdentifier, out Image image) && image is not null)
+            if (Images.TryGetValue(imageIdentifier, out Image image) && image is not null)
                 item.Image = image;
             else
             {
                 image = await HttpClientManager.GetImageFromUrl(iconUrl);
                 if (image is not null)
                 {
-                    images[imageIdentifier] = image;
+                    Images[imageIdentifier] = image;
                     item.Image = image;
                 }
-                else if (onFail is not null)
-                    onFail();
+                else
+                    onFail?.Invoke();
             }
         });
 
     protected override void OnClick(EventArgs e)
     {
         base.OnClick(e);
-        if (OnClickEvent is null)
-            return;
-        OnClickEvent.Invoke(this, e);
+        onClickEvent?.Invoke(this, e);
     }
 }

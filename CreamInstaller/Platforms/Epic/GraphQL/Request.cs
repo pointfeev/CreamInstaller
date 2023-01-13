@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace CreamInstaller.Platforms.Epic.GraphQL;
 
-internal class Request
+internal sealed class Request
 {
     internal Request(string @namespace) => Vars = new(@namespace);
 
@@ -61,13 +61,13 @@ internal class Request
     [JsonProperty(PropertyName = "variables")]
     private Variables Vars { get; set; }
 
-    private class Headers
+    private sealed class Headers
     {
         [JsonProperty(PropertyName = "Content-Type")]
         private string ContentType => "application/graphql";
     }
 
-    private class Variables
+    private sealed class Variables
     {
         internal Variables(string @namespace) => Namespace = @namespace;
 
