@@ -159,7 +159,7 @@ internal static class ProgramData
     internal static IEnumerable<(Platform platform, string id, string proxy, bool enabled)> ReadKoaloaderChoices()
     {
         if (!File.Exists(KoaloaderProxyChoicesPath))
-            return null;
+            return Enumerable.Empty<(Platform platform, string id, string proxy, bool enabled)>();
         try
         {
             return JsonConvert.DeserializeObject(File.ReadAllText(KoaloaderProxyChoicesPath),
