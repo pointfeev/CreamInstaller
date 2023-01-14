@@ -307,7 +307,51 @@ internal static class Resources
                 "4AF5004DDBBD93C21440430255EAF9F3", // Koaloader v3.0.1
                 "E68CFB48E827A0BA486CB900B0A6B24F", // Koaloader v3.0.1
                 "F395ADCA7D27C28121D1AE2C19DDBD6B", // Koaloader v3.0.1
-                "CBB805C763AF199AF2DB35B265A4FF15" // Koaloader v3.0.1
+                "CBB805C763AF199AF2DB35B265A4FF15", // Koaloader v3.0.1
+                "2D02EF2C835B33242FB9E13802E428F9", // Koaloader v3.0.2
+                "5E865BACE0C5E6590CF791366A41F893", // Koaloader v3.0.2
+                "6F1E309458B0491D0E2D40E36932F2DC", // Koaloader v3.0.2
+                "87453FEF40D2134AEA57B5EB30AC42FC", // Koaloader v3.0.2
+                "385C7D2CCA80B372641CEFD0B22BAA74", // Koaloader v3.0.2
+                "FF5F5352B8BE98DEA4308367E95A7A17", // Koaloader v3.0.2
+                "A3AC5B51F26D8ED9C872A34F1A12FC3B", // Koaloader v3.0.2
+                "D97809FEF42CF24B6CD28E4EF11454B1", // Koaloader v3.0.2
+                "8F918F1201D4907CB4E7A17A5A8487A0", // Koaloader v3.0.2
+                "4DB4002F24AB195A8F7B1DC2861F0024", // Koaloader v3.0.2
+                "856CA5136C066BA16EFE57E5B577083B", // Koaloader v3.0.2
+                "92C0CA22B5DD11FC238074D1EBBDD98D", // Koaloader v3.0.2
+                "E1E5A70AFA57173E34A5795BB0ED22FE", // Koaloader v3.0.2
+                "362F19319C856E2766939082A0EDA110", // Koaloader v3.0.2
+                "E571B0901326960086209A3881573A0F", // Koaloader v3.0.2
+                "703BD527E792F25B9B042BCECCD3D498", // Koaloader v3.0.2
+                "F53B180E27ED7DEE697DE4319A4C5860", // Koaloader v3.0.2
+                "0AE35FB774967B52CB2133C04A8D8235", // Koaloader v3.0.2
+                "592C90E9CC9AFCF3B74E6C378EE75BB0", // Koaloader v3.0.2
+                "F544E2E0CC7038A8D58EE571108CEFA5", // Koaloader v3.0.2
+                "54906EE036B43262D8B6BF2F83E80D86", // Koaloader v3.0.2
+                "DC432E1ADBE0120D49B45B4B7BFE5D47", // Koaloader v3.0.2
+                "C8C9B59B0FE73A8B3F9421565D4AEAB4", // Koaloader v3.0.2
+                "312F6F63735CDF67987BCD790EF6F750", // Koaloader v3.0.2
+                "92A4101359354D32CCC5DB70E2191346", // Koaloader v3.0.2
+                "062A75EEC282786E9F0903A648C2DCE0", // Koaloader v3.0.2
+                "39E23E4D128E5CB3FD8E3CFFAFBCFF47", // Koaloader v3.0.2
+                "8CCF15A5201A44EA6987C2E31279D7D7", // Koaloader v3.0.2
+                "EB5F804C0920A6C2E33DFA0370F9D00C", // Koaloader v3.0.2
+                "1FF56CDD4C04D777F40DFBFBFAEE44FF", // Koaloader v3.0.2
+                "9CF1B695503B2BC76B5819A0966666F0", // Koaloader v3.0.2
+                "78812C7692C88ED00DCF75EF17383FDF", // Koaloader v3.0.2
+                "C9A3C0C06C17D509122EA1F7CFB1A73C", // Koaloader v3.0.2
+                "17C4888EA4A06EF65D8A9C5F355B4E2D", // Koaloader v3.0.2
+                "7E92B09EE4FE34C50415140A0C1130AB", // Koaloader v3.0.2
+                "17169EBC41A54A7A138B24EDF7EBDC59", // Koaloader v3.0.2
+                "8530052F7AA3F19DC6CD057E74A2BB1D", // Koaloader v3.0.2
+                "50985D67FB5FCF023FA090E93E30A2D3", // Koaloader v3.0.2
+                "96293D5FD690D2C18F0E3F99F5D2B693", // Koaloader v3.0.2
+                "BEDCFA367D9905C8C3FD4A4122972F32", // Koaloader v3.0.2
+                "85AD3B263735871F4606EF4AB98B9BBC", // Koaloader v3.0.2
+                "4207947D0452C1E33428ED098DC23D26", // Koaloader v3.0.2
+                "BDD0DCAE7A5FBBBA0D8B857AC34BD43C", // Koaloader v3.0.2
+                "A0933D21552CC5C835416DFD7604548D" // Koaloader v3.0.2
             }
         },
         {
