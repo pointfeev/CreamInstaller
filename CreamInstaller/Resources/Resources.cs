@@ -537,25 +537,31 @@ internal static class Resources
                 if (platform is Platform.Steam or Platform.Paradox)
                 {
                     subDirectory.GetSmokeApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string old_config,
-                        out string config, out string cache);
+                        out string config, out string old_log, out string log, out string cache);
                     if (File.Exists(api) || File.Exists(api_o) || File.Exists(api64) || File.Exists(api64_o)
-                     || (File.Exists(old_config) || File.Exists(config)) && !koaloaderInstalled || File.Exists(cache) && !koaloaderInstalled)
+                     || (File.Exists(old_config) || File.Exists(config) || File.Exists(old_log) || File.Exists(log) || File.Exists(cache))
+                     && !koaloaderInstalled)
                         dllDirectories.Add(subDirectory);
                 }
                 if (platform is Platform.Epic or Platform.Paradox)
                 {
-                    subDirectory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
-                    if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config) && !koaloaderInstalled)
+                    subDirectory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config,
+                        out string log);
+                    if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o)
+                     || (File.Exists(config) || File.Exists(log)) && !koaloaderInstalled)
                         dllDirectories.Add(subDirectory);
                 }
                 if (platform is Platform.Ubisoft)
                 {
-                    subDirectory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
-                    if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config) && !koaloaderInstalled)
+                    subDirectory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config,
+                        out string log);
+                    if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o)
+                     || (File.Exists(config) || File.Exists(log)) && !koaloaderInstalled)
                         dllDirectories.Add(subDirectory);
-                    subDirectory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config);
+                    subDirectory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config,
+                        out log);
                     if (File.Exists(old_api32) || File.Exists(old_api64) || File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64)
-                     || File.Exists(api64_o) || File.Exists(config) && !koaloaderInstalled)
+                     || File.Exists(api64_o) || (File.Exists(config) || File.Exists(log)) && !koaloaderInstalled)
                         dllDirectories.Add(subDirectory);
                 }
             }
@@ -576,9 +582,9 @@ internal static class Resources
     {
         if (!File.Exists(filePath))
             return null;
-#pragma warning disable CA5351 // Do Not Use Broken Cryptographic Algorithms
+#pragma warning disable CA5351
         using MD5 md5 = MD5.Create();
-#pragma warning restore CA5351 // Do Not Use Broken Cryptographic Algorithms
+#pragma warning restore CA5351
         using FileStream stream = File.OpenRead(filePath);
         byte[] hash = md5.ComputeHash(stream);
         return BitConverter.ToString(hash).Replace("-", "").ToUpperInvariant();
@@ -589,12 +595,7 @@ internal static class Resources
 
     internal static bool IsResourceFile(this string filePath) => filePath.ComputeMD5() is { } hash && ResourceMD5s.Values.Any(hashes => hashes.Contains(hash));
 
-    internal enum BinaryType
-    {
-        Unknown = -1, BIT32 = 0, DOS = 1,
-        WOW = 2, PIF = 3, POSIX = 4,
-        OS216 = 5, BIT64 = 6
-    }
+    internal enum BinaryType { Unknown = -1, BIT32 = 0, BIT64 = 6 }
 
     internal enum ResourceIdentifier
     {

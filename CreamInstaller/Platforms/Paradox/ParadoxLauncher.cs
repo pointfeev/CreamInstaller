@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -47,22 +46,14 @@ internal static class ParadoxLauncher
             paradoxLauncher.ExtraSelectedDlc.Clear();
             foreach (ProgramSelection selection in ProgramSelection.AllEnabled.Where(s => s != paradoxLauncher && s.Publisher == "Paradox Interactive"))
             {
-                paradoxLauncher.ExtraDlc.Add(
-                    new ValueTuple<string, string, SortedList<string, (DlcType type, string name, string icon)>>(selection.Id, selection.Name,
-                        selection.AllDlc));
-                paradoxLauncher.ExtraSelectedDlc.Add(
-                    new ValueTuple<string, string, SortedList<string, (DlcType type, string name, string icon)>>(selection.Id, selection.Name,
-                        selection.SelectedDlc));
+                paradoxLauncher.ExtraDlc.Add(selection.Id, (selection.Name, selection.AllDlc));
+                paradoxLauncher.ExtraSelectedDlc.Add(selection.Id, (selection.Name, selection.SelectedDlc));
             }
             if (!paradoxLauncher.ExtraDlc.Any())
                 foreach (ProgramSelection selection in ProgramSelection.AllSafe.Where(s => s != paradoxLauncher && s.Publisher == "Paradox Interactive"))
                 {
-                    paradoxLauncher.ExtraDlc.Add(
-                        new ValueTuple<string, string, SortedList<string, (DlcType type, string name, string icon)>>(selection.Id, selection.Name,
-                            selection.AllDlc));
-                    paradoxLauncher.ExtraSelectedDlc.Add(
-                        new ValueTuple<string, string, SortedList<string, (DlcType type, string name, string icon)>>(selection.Id, selection.Name,
-                            selection.AllDlc));
+                    paradoxLauncher.ExtraDlc.Add(selection.Id, (selection.Name, selection.AllDlc));
+                    paradoxLauncher.ExtraSelectedDlc.Add(selection.Id, (selection.Name, selection.AllDlc));
                 }
         }
     }
@@ -100,21 +91,23 @@ internal static class ParadoxLauncher
         {
             bool koaloaderInstalled = Koaloader.AutoLoadDLLs.Select(pair => (pair.unlocker, path: directory + @"\" + pair.dll))
                                                .Any(pair => File.Exists(pair.path) && pair.path.IsResourceFile());
-            directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string _, out string config, out _);
+            directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string old_config,
+                out string config, out _, out _, out _);
             smokeInstalled = smokeInstalled || File.Exists(api32_o) || File.Exists(api64_o)
-                          || (File.Exists(config) || File.Exists(config)) && !koaloaderInstalled
+                          || (File.Exists(old_config) || File.Exists(config)) && !koaloaderInstalled
                           || File.Exists(api32) && api32.IsResourceFile(ResourceIdentifier.Steamworks32)
                           || File.Exists(api64) && api64.IsResourceFile(ResourceIdentifier.Steamworks64);
-            await SmokeAPI.Uninstall(directory, deleteConfig: false);
+            await SmokeAPI.Uninstall(directory, deleteOthers: false);
             if (steamOriginalSdk32 is null && File.Exists(api32) && !api32.IsResourceFile(ResourceIdentifier.Steamworks32))
                 steamOriginalSdk32 = await File.ReadAllBytesAsync(api32);
             if (steamOriginalSdk64 is null && File.Exists(api64) && !api64.IsResourceFile(ResourceIdentifier.Steamworks64))
                 steamOriginalSdk64 = await File.ReadAllBytesAsync(api64);
-            directory.GetScreamApiComponents(out api32, out api32_o, out api64, out api64_o, out config);
-            screamInstalled = screamInstalled || File.Exists(api32_o) || File.Exists(api64_o) || File.Exists(config) && !koaloaderInstalled
+            directory.GetScreamApiComponents(out api32, out api32_o, out api64, out api64_o, out config, out string log);
+            screamInstalled = screamInstalled || File.Exists(api32_o) || File.Exists(api64_o)
+                           || (File.Exists(config) || File.Exists(log)) && !koaloaderInstalled
                            || File.Exists(api32) && api32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32)
                            || File.Exists(api64) && api64.IsResourceFile(ResourceIdentifier.EpicOnlineServices64);
-            await ScreamAPI.Uninstall(directory, deleteConfig: false);
+            await ScreamAPI.Uninstall(directory, deleteOthers: false);
             if (epicOriginalSdk32 is null && File.Exists(api32) && !api32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32))
                 epicOriginalSdk32 = await File.ReadAllBytesAsync(api32);
             if (epicOriginalSdk64 is null && File.Exists(api64) && !api64.IsResourceFile(ResourceIdentifier.EpicOnlineServices64))
@@ -126,7 +119,7 @@ internal static class ParadoxLauncher
             bool neededRepair = false;
             foreach (string directory in selection.DllDirectories)
             {
-                directory.GetSmokeApiComponents(out string api32, out _, out string api64, out _, out _, out _, out _);
+                directory.GetSmokeApiComponents(out string api32, out _, out string api64, out _, out _, out _, out _, out _, out _);
                 if (steamOriginalSdk32 is not null && api32.IsResourceFile(ResourceIdentifier.Steamworks32))
                 {
                     steamOriginalSdk32.Write(api32);
@@ -141,7 +134,7 @@ internal static class ParadoxLauncher
                 }
                 if (smokeInstalled)
                     await SmokeAPI.Install(directory, selection, generateConfig: false);
-                directory.GetScreamApiComponents(out api32, out _, out api64, out _, out _);
+                directory.GetScreamApiComponents(out api32, out _, out api64, out _, out _, out _);
                 if (epicOriginalSdk32 is not null && api32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32))
                 {
                     epicOriginalSdk32.Write(api32);

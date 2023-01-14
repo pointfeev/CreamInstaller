@@ -21,13 +21,16 @@ internal static class Koaloader
         ("Uplay R2 Unlocker", "UplayR2Unlocker.dll"), ("Uplay R2 Unlocker", "UplayR2Unlocker32.dll"), ("Uplay R2 Unlocker", "UplayR2Unlocker64.dll")
     };
 
-    internal static void GetKoaloaderComponents(this string directory, out List<string> proxies, out string old_config, out string config)
+    internal static IEnumerable<string> GetKoaloaderProxies(this string directory)
+        => from resource in EmbeddedResources
+           select resource[(resource.IndexOf('.') + 1)..]
+           into resource
+           select resource[(resource.IndexOf('.') + 1)..]
+           into resource
+           select directory + @"\" + resource;
+
+    internal static void GetKoaloaderComponents(this string directory, out string old_config, out string config)
     {
-        proxies = EmbeddedResources.Select(proxy =>
-        {
-            proxy = proxy[(proxy.IndexOf('.') + 1)..];
-            return proxy[(proxy.IndexOf('.') + 1)..];
-        }).Select(proxy => directory + @"\" + proxy).ToList();
         old_config = directory + @"\Koaloader.json";
         config = directory + @"\Koaloader.config.json";
     }
@@ -55,11 +58,19 @@ internal static class Koaloader
 
     private static void CheckConfig(string directory, InstallForm installForm = null)
     {
-        directory.GetKoaloaderComponents(out _, out string old_config, out string config);
+        directory.GetKoaloaderComponents(out string old_config, out string config);
         if (File.Exists(old_config))
         {
-            File.Delete(old_config);
-            installForm?.UpdateUser($"Deleted old configuration: {Path.GetFileName(old_config)}", LogTextBox.Action, false);
+            if (!File.Exists(config))
+            {
+                File.Move(old_config, config!);
+                installForm?.UpdateUser($"Converted old configuration: {Path.GetFileName(old_config)} -> {Path.GetFileName(config)}", LogTextBox.Action, false);
+            }
+            else
+            {
+                File.Delete(old_config);
+                installForm?.UpdateUser($"Deleted old configuration: {Path.GetFileName(old_config)}", LogTextBox.Action, false);
+            }
         }
         SortedList<string, string> targets = new(PlatformIdComparer.String);
         SortedList<string, string> modules = new(PlatformIdComparer.String);
@@ -123,8 +134,9 @@ internal static class Koaloader
     internal static async Task Uninstall(string directory, string rootDirectory = null, InstallForm installForm = null, bool deleteConfig = true)
         => await Task.Run(async () =>
         {
-            directory.GetKoaloaderComponents(out List<string> proxies, out string old_config, out string config);
-            foreach (string proxyPath in proxies.Where(proxyPath => File.Exists(proxyPath) && proxyPath.IsResourceFile(ResourceIdentifier.Koaloader)))
+            directory.GetKoaloaderComponents(out string old_config, out string config);
+            foreach (string proxyPath in directory.GetKoaloaderProxies()
+                                                  .Where(proxyPath => File.Exists(proxyPath) && proxyPath.IsResourceFile(ResourceIdentifier.Koaloader)))
             {
                 File.Delete(proxyPath);
                 installForm?.UpdateUser($"Deleted Koaloader: {Path.GetFileName(proxyPath)}", LogTextBox.Action, false);
@@ -157,10 +169,9 @@ internal static class Koaloader
         InstallForm installForm = null, bool generateConfig = true)
         => await Task.Run(() =>
         {
-            directory.GetKoaloaderComponents(out List<string> proxies, out _, out _);
             string proxy = selection.KoaloaderProxy ?? ProgramSelection.DefaultKoaloaderProxy;
             string path = directory + @"\" + proxy + ".dll";
-            foreach (string _path in proxies.Where(p => p != path && File.Exists(p) && p.IsResourceFile(ResourceIdentifier.Koaloader)))
+            foreach (string _path in directory.GetKoaloaderProxies().Where(p => p != path && File.Exists(p) && p.IsResourceFile(ResourceIdentifier.Koaloader)))
             {
                 File.Delete(_path);
                 installForm?.UpdateUser($"Deleted Koaloader: {Path.GetFileName(_path)}", LogTextBox.Action, false);

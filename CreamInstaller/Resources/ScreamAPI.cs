@@ -12,26 +12,27 @@ namespace CreamInstaller.Resources;
 internal static class ScreamAPI
 {
     internal static void GetScreamApiComponents(this string directory, out string api32, out string api32_o, out string api64, out string api64_o,
-        out string config)
+        out string config, out string log)
     {
         api32 = directory + @"\EOSSDK-Win32-Shipping.dll";
         api32_o = directory + @"\EOSSDK-Win32-Shipping_o.dll";
         api64 = directory + @"\EOSSDK-Win64-Shipping.dll";
         api64_o = directory + @"\EOSSDK-Win64-Shipping_o.dll";
         config = directory + @"\ScreamAPI.json";
+        log = directory + @"\ScreamAPI.log";
     }
 
     internal static void CheckConfig(string directory, ProgramSelection selection, InstallForm installForm = null)
     {
-        directory.GetScreamApiComponents(out _, out _, out _, out _, out string config);
+        directory.GetScreamApiComponents(out _, out _, out _, out _, out string config, out _);
         IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> overrideCatalogItems
             = selection.AllDlc.Where(pair => pair.Value.type is DlcType.EpicCatalogItem).Except(selection.SelectedDlc);
-        foreach ((string _, string _, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
-            overrideCatalogItems = overrideCatalogItems.Except(extraDlc);
+        foreach (KeyValuePair<string, (string _, SortedList<string, (DlcType type, string name, string icon)> extraDlc)> pair in selection.ExtraSelectedDlc)
+            overrideCatalogItems = overrideCatalogItems.Except(pair.Value.extraDlc);
         IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> entitlements
             = selection.SelectedDlc.Where(pair => pair.Value.type == DlcType.EpicEntitlement);
-        foreach ((string _, string _, SortedList<string, (DlcType type, string name, string icon)> _dlc) in selection.ExtraSelectedDlc)
-            entitlements = entitlements.Concat(_dlc.Where(pair => pair.Value.type == DlcType.EpicEntitlement));
+        foreach (KeyValuePair<string, (string _, SortedList<string, (DlcType type, string name, string icon)> dlc)> pair in selection.ExtraSelectedDlc)
+            entitlements = entitlements.Concat(pair.Value.dlc.Where(pair => pair.Value.type == DlcType.EpicEntitlement));
         overrideCatalogItems = overrideCatalogItems.ToList();
         entitlements = entitlements.ToList();
         if (overrideCatalogItems.Any() || entitlements.Any())
@@ -100,10 +101,10 @@ internal static class ScreamAPI
         writer.WriteLine("}");
     }
 
-    internal static async Task Uninstall(string directory, InstallForm installForm = null, bool deleteConfig = true)
+    internal static async Task Uninstall(string directory, InstallForm installForm = null, bool deleteOthers = true)
         => await Task.Run(() =>
         {
-            directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+            directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out string log);
             if (File.Exists(api32_o))
             {
                 if (File.Exists(api32))
@@ -124,17 +125,24 @@ internal static class ScreamAPI
                 File.Move(api64_o, api64!);
                 installForm?.UpdateUser($"Restored EOS: {Path.GetFileName(api64_o)} -> {Path.GetFileName(api64)}", LogTextBox.Action, false);
             }
-            if (deleteConfig && File.Exists(config))
+            if (!deleteOthers)
+                return;
+            if (File.Exists(config))
             {
                 File.Delete(config);
                 installForm?.UpdateUser($"Deleted configuration: {Path.GetFileName(config)}", LogTextBox.Action, false);
+            }
+            if (File.Exists(log))
+            {
+                File.Delete(log);
+                installForm?.UpdateUser($"Deleted log: {Path.GetFileName(log)}", LogTextBox.Action, false);
             }
         });
 
     internal static async Task Install(string directory, ProgramSelection selection, InstallForm installForm = null, bool generateConfig = true)
         => await Task.Run(() =>
         {
-            directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string _);
+            directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out _, out _);
             if (File.Exists(api32) && !File.Exists(api32_o))
             {
                 File.Move(api32, api32_o!);

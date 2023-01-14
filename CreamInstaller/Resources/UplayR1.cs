@@ -12,21 +12,22 @@ namespace CreamInstaller.Resources;
 internal static class UplayR1
 {
     internal static void GetUplayR1Components(this string directory, out string api32, out string api32_o, out string api64, out string api64_o,
-        out string config)
+        out string config, out string log)
     {
         api32 = directory + @"\uplay_r1_loader.dll";
         api32_o = directory + @"\uplay_r1_loader_o.dll";
         api64 = directory + @"\uplay_r1_loader64.dll";
         api64_o = directory + @"\uplay_r1_loader64_o.dll";
         config = directory + @"\UplayR1Unlocker.jsonc";
+        log = directory + @"\UplayR1Unlocker.log";
     }
 
     internal static void CheckConfig(string directory, ProgramSelection selection, InstallForm installForm = null)
     {
-        directory.GetUplayR1Components(out _, out _, out _, out _, out string config);
+        directory.GetUplayR1Components(out _, out _, out _, out _, out string config, out _);
         IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> blacklistDlc = selection.AllDlc.Except(selection.SelectedDlc);
-        foreach ((string _, string _, SortedList<string, (DlcType type, string name, string icon)> extraDlc) in selection.ExtraSelectedDlc)
-            blacklistDlc = blacklistDlc.Except(extraDlc);
+        foreach (KeyValuePair<string, (string _, SortedList<string, (DlcType type, string name, string icon)> extraDlc)> pair in selection.ExtraSelectedDlc)
+            blacklistDlc = blacklistDlc.Except(pair.Value.extraDlc);
         blacklistDlc = blacklistDlc.ToList();
         if (blacklistDlc.Any())
         {
@@ -70,10 +71,10 @@ internal static class UplayR1
         writer.WriteLine("}");
     }
 
-    internal static async Task Uninstall(string directory, InstallForm installForm = null, bool deleteConfig = true)
+    internal static async Task Uninstall(string directory, InstallForm installForm = null, bool deleteOthers = true)
         => await Task.Run(() =>
         {
-            directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+            directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out string log);
             if (File.Exists(api32_o))
             {
                 if (File.Exists(api32))
@@ -94,17 +95,24 @@ internal static class UplayR1
                 File.Move(api64_o, api64!);
                 installForm?.UpdateUser($"Restored Uplay R1: {Path.GetFileName(api64_o)} -> {Path.GetFileName(api64)}", LogTextBox.Action, false);
             }
-            if (deleteConfig && File.Exists(config))
+            if (!deleteOthers)
+                return;
+            if (File.Exists(config))
             {
                 File.Delete(config);
                 installForm?.UpdateUser($"Deleted configuration: {Path.GetFileName(config)}", LogTextBox.Action, false);
+            }
+            if (File.Exists(log))
+            {
+                File.Delete(log);
+                installForm?.UpdateUser($"Deleted log: {Path.GetFileName(log)}", LogTextBox.Action, false);
             }
         });
 
     internal static async Task Install(string directory, ProgramSelection selection, InstallForm installForm = null, bool generateConfig = true)
         => await Task.Run(() =>
         {
-            directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string _);
+            directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out _, out _);
             if (File.Exists(api32) && !File.Exists(api32_o))
             {
                 File.Move(api32, api32_o!);

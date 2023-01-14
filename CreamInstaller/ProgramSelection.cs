@@ -27,10 +27,9 @@ internal sealed class ProgramSelection
 
     internal readonly SortedList<string, (DlcType type, string name, string icon)> AllDlc = new(PlatformIdComparer.String);
 
-    internal readonly List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> ExtraDlc = new(); // for Paradox Launcher
+    internal readonly SortedList<string, (string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> ExtraDlc = new();
 
-    internal readonly List<(string id, string name, SortedList<string, (DlcType type, string name, string icon)> dlc)>
-        ExtraSelectedDlc = new(); // for Paradox Launcher
+    internal readonly SortedList<string, (string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> ExtraSelectedDlc = new();
 
     internal readonly SortedList<string, (DlcType type, string name, string icon)> SelectedDlc = new(PlatformIdComparer.String);
 
@@ -68,27 +67,32 @@ internal sealed class ProgramSelection
                     if (api32.IsFilePathLocked() || api32_o.IsFilePathLocked() || api64.IsFilePathLocked() || api64_o.IsFilePathLocked()
                      || config.IsFilePathLocked())
                         return true;
-                    directory.GetSmokeApiComponents(out api32, out api32_o, out api64, out api64_o, out string old_config, out config, out string cache);
+                    directory.GetSmokeApiComponents(out api32, out api32_o, out api64, out api64_o, out string old_config, out config, out string old_log,
+                        out string log, out string cache);
                     if (api32.IsFilePathLocked() || api32_o.IsFilePathLocked() || api64.IsFilePathLocked() || api64_o.IsFilePathLocked()
-                     || old_config.IsFilePathLocked() || config.IsFilePathLocked() || cache.IsFilePathLocked())
+                     || old_config.IsFilePathLocked() || config.IsFilePathLocked() || old_log.IsFilePathLocked() || log.IsFilePathLocked()
+                     || cache.IsFilePathLocked())
                         return true;
                 }
                 if (Platform is Platform.Epic or Platform.Paradox)
                 {
-                    directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+                    directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config,
+                        out string log);
                     if (api32.IsFilePathLocked() || api32_o.IsFilePathLocked() || api64.IsFilePathLocked() || api64_o.IsFilePathLocked()
-                     || config.IsFilePathLocked())
+                     || config.IsFilePathLocked() || log.IsFilePathLocked())
                         return true;
                 }
                 if (Platform is Platform.Ubisoft)
                 {
-                    directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
+                    directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config,
+                        out string log);
                     if (api32.IsFilePathLocked() || api32_o.IsFilePathLocked() || api64.IsFilePathLocked() || api64_o.IsFilePathLocked()
-                     || config.IsFilePathLocked())
+                     || config.IsFilePathLocked() || log.IsFilePathLocked())
                         return true;
-                    directory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config);
+                    directory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config,
+                        out log);
                     if (old_api32.IsFilePathLocked() || old_api64.IsFilePathLocked() || api32.IsFilePathLocked() || api32_o.IsFilePathLocked()
-                     || api64.IsFilePathLocked() || api64_o.IsFilePathLocked() || config.IsFilePathLocked())
+                     || api64.IsFilePathLocked() || api64_o.IsFilePathLocked() || config.IsFilePathLocked() || log.IsFilePathLocked())
                         return true;
                 }
             }

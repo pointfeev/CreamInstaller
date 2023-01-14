@@ -818,30 +818,33 @@ internal sealed partial class SelectForm : CustomForm
                     foreach (string directory in directories)
                     {
                         directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string old_config,
-                            out string config, out string cache);
+                            out string config, out string old_log, out string log, out string cache);
                         if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(old_config)
-                         || File.Exists(config) || File.Exists(cache))
+                         || File.Exists(config) || File.Exists(old_log) || File.Exists(log) || File.Exists(cache))
                             items.Add(new ContextMenuItem($"Open Steamworks Directory #{++steam}", "File Explorer",
                                 (_, _) => Diagnostics.OpenDirectoryInFileExplorer(directory)));
                     }
                 if (selection.Platform is Platform.Epic or Platform.Paradox)
                     foreach (string directory in directories)
                     {
-                        directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
-                        if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config))
+                        directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config,
+                            out string log);
+                        if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config) || File.Exists(log))
                             items.Add(new ContextMenuItem($"Open EOS Directory #{++epic}", "File Explorer",
                                 (_, _) => Diagnostics.OpenDirectoryInFileExplorer(directory)));
                     }
                 if (selection.Platform is Platform.Ubisoft)
                     foreach (string directory in directories)
                     {
-                        directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config);
-                        if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config))
+                        directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config,
+                            out string log);
+                        if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config) || File.Exists(log))
                             items.Add(new ContextMenuItem($"Open Uplay R1 Directory #{++r1}", "File Explorer",
                                 (_, _) => Diagnostics.OpenDirectoryInFileExplorer(directory)));
-                        directory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config);
+                        directory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config,
+                            out log);
                         if (File.Exists(old_api32) || File.Exists(old_api64) || File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64)
-                         || File.Exists(api64_o) || File.Exists(config))
+                         || File.Exists(api64_o) || File.Exists(config) || File.Exists(log))
                             items.Add(new ContextMenuItem($"Open Uplay R2 Directory #{++r2}", "File Explorer",
                                 (_, _) => Diagnostics.OpenDirectoryInFileExplorer(directory)));
                     }
