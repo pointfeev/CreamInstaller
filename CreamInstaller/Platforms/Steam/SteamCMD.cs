@@ -69,8 +69,6 @@ internal static class SteamCMD
                         StandardInputEncoding = Encoding.UTF8, StandardOutputEncoding = Encoding.UTF8, StandardErrorEncoding = Encoding.UTF8
                     };
                     Process process = Process.Start(processStartInfo);
-                    if (appId == null)
-                        return "";
                     StringBuilder output = new();
                     StringBuilder appInfo = new();
                     bool appInfoStarted = false;
@@ -98,7 +96,7 @@ internal static class SteamCMD
                             continue;
                         process.Kill(true);
                         process.Close();
-                        if (output.ToString().Contains($"No app info for AppID {appId} found, requesting..."))
+                        if (appId != null && output.ToString().Contains($"No app info for AppID {appId} found, requesting..."))
                         {
                             AttemptCount[appId]++;
                             processStartInfo.Arguments = GetArguments(appId);
