@@ -76,8 +76,8 @@ internal sealed partial class MainForm : CustomForm
                 if (checkForUpdatesResult.CanUpdate)
                 {
 #endif
-                latestVersion = checkForUpdatesResult.LastVersion;
-                versions = checkForUpdatesResult.Versions;
+                    latestVersion = checkForUpdatesResult.LastVersion;
+                    versions = checkForUpdatesResult.Versions;
 #if !DEBUG
                 }
 #endif
