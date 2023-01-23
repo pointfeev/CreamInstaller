@@ -102,7 +102,7 @@ internal static class SmokeAPI
         else
             writer.WriteLine("  \"override_dlc_status\": {},");
         writer.WriteLine("  \"auto_inject_inventory\": true,");
-        writer.WriteLine("  \"extra_inventory_items\": {},");
+        writer.WriteLine("  \"extra_inventory_items\": [],");
         if (injectDlc.Count > 0 || extraApps.Count > 0)
         {
             writer.WriteLine("  \"extra_dlcs\": {");
