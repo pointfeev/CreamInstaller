@@ -13,7 +13,7 @@ internal static class SafeIO
         while (!Program.Canceled)
         {
             bool exists = File.Exists(filePath);
-            if (exists || !crucial || filePath.Warn("Failed to find a crucial file", form) is not DialogResult.OK)
+            if (exists || !crucial || filePath.IOWarn("Failed to find a crucial file", form) is not DialogResult.OK)
                 return exists;
         }
         return false;
@@ -29,7 +29,7 @@ internal static class SafeIO
             }
             catch
             {
-                if (!crucial || filePath.Warn("Failed to create a crucial file", form) is not DialogResult.OK)
+                if (!crucial || filePath.IOWarn("Failed to create a crucial file", form) is not DialogResult.OK)
                     break;
             }
     }
@@ -44,7 +44,7 @@ internal static class SafeIO
             }
             catch
             {
-                if (!crucial || !filePath.Exists(true) || filePath.Warn("Failed to move a crucial file", form) is not DialogResult.OK)
+                if (!crucial || !filePath.Exists(true) || filePath.IOWarn("Failed to move a crucial file", form) is not DialogResult.OK)
                     break;
             }
     }
@@ -61,7 +61,7 @@ internal static class SafeIO
             }
             catch
             {
-                if (!crucial || filePath.Warn("Failed to delete a crucial file", form) is not DialogResult.OK)
+                if (!crucial || filePath.IOWarn("Failed to delete a crucial file", form) is not DialogResult.OK)
                     break;
             }
     }
@@ -75,7 +75,7 @@ internal static class SafeIO
             }
             catch
             {
-                if (!crucial || !filePath.Exists(true) || filePath.Warn("Failed to read a crucial file", form) is not DialogResult.OK)
+                if (!crucial || !filePath.Exists(true) || filePath.IOWarn("Failed to read a crucial file", form) is not DialogResult.OK)
                     break;
             }
         return null;
@@ -90,7 +90,7 @@ internal static class SafeIO
             }
             catch
             {
-                if (!crucial || !filePath.Exists(true) || filePath.Warn("Failed to read a crucial file", form) is not DialogResult.OK)
+                if (!crucial || !filePath.Exists(true) || filePath.IOWarn("Failed to read a crucial file", form) is not DialogResult.OK)
                     break;
             }
         return null;
@@ -106,12 +106,12 @@ internal static class SafeIO
             }
             catch
             {
-                if (!crucial || filePath.Warn("Failed to write a crucial file", form) is not DialogResult.OK)
+                if (!crucial || filePath.IOWarn("Failed to write a crucial file", form) is not DialogResult.OK)
                     break;
             }
     }
 
-    private static DialogResult Warn(this string filePath, string message, Form form = null)
+    internal static DialogResult IOWarn(this string filePath, string message, Form form = null)
     {
         using DialogForm dialogForm = new(form ?? Form.ActiveForm);
         return dialogForm.Show(SystemIcons.Warning, message + ": " + filePath.BeautifyPath(), "Retry", "OK");

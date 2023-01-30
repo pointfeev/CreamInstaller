@@ -45,7 +45,7 @@ internal static class ExceptionHandler
         if (string.IsNullOrWhiteSpace(outputString))
             outputString = e?.ToString() ?? "Unknown exception";
         using DialogForm dialogForm = new(form ?? Form.ActiveForm);
-        return dialogForm.Show(SystemIcons.Error, outputString, acceptButtonText, cancelButtonText, caption) == DialogResult.OK;
+        return dialogForm.Show(SystemIcons.Error, outputString, acceptButtonText, cancelButtonText, caption) is DialogResult.OK;
     }
 
     internal static void HandleFatalException(this Exception e)
