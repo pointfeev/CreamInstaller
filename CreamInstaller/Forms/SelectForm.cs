@@ -172,6 +172,7 @@ internal sealed partial class SelectForm : CustomForm
                     if (dllDirectories is null)
                     {
                         Interlocked.Decrement(ref steamGamesToCheck);
+                        DebugForm.Current.Log("no dll " + appId + " - " + name);
                         RemoveFromRemainingGames(name);
                         return;
                     }
@@ -192,6 +193,7 @@ internal sealed partial class SelectForm : CustomForm
                         dlcIds.AddRange(await SteamStore.ParseDlcAppIds(appData));
                     if (appInfo is not null)
                         dlcIds.AddRange(await SteamCMD.ParseDlcAppIds(appInfo));
+                    dlcIds = dlcIds.Distinct().ToList();
                     if (dlcIds.Count > 0)
                         foreach (string dlcAppId in dlcIds)
                         {
@@ -528,9 +530,9 @@ internal sealed partial class SelectForm : CustomForm
                     gameChoices.Add((Platform.Steam, appId, name,
                         programsToScan is not null && programsToScan.Any(p => p.platform is Platform.Steam && p.id == appId)));
             if (EpicLibrary.EpicManifestsPath.DirectoryExists())
-                foreach (Manifest manifest in (await EpicLibrary.GetGames()).Where(m => !Program.IsGameBlocked(m.DisplayName, m.InstallLocation)))
-                    gameChoices.Add((Platform.Epic, manifest.CatalogNamespace, manifest.DisplayName,
-                        programsToScan is not null && programsToScan.Any(p => p.platform is Platform.Epic && p.id == manifest.CatalogNamespace)));
+                gameChoices.AddRange((await EpicLibrary.GetGames()).Where(m => !Program.IsGameBlocked(m.DisplayName, m.InstallLocation)).Select(manifest
+                    => (Platform.Epic, manifest.CatalogNamespace, manifest.DisplayName,
+                        programsToScan is not null && programsToScan.Any(p => p.platform is Platform.Epic && p.id == manifest.CatalogNamespace))));
             foreach ((string gameId, string name, string _) in (await UbisoftLibrary.GetGames()).Where(g => !Program.IsGameBlocked(g.name, g.gameDirectory)))
                 gameChoices.Add((Platform.Ubisoft, gameId, name,
                     programsToScan is not null && programsToScan.Any(p => p.platform is Platform.Ubisoft && p.id == gameId)));
@@ -678,7 +680,7 @@ internal sealed partial class SelectForm : CustomForm
         }
     }
 
-    private List<TreeNode> GatherTreeNodes(TreeNodeCollection nodeCollection)
+    private static List<TreeNode> GatherTreeNodes(TreeNodeCollection nodeCollection)
     {
         List<TreeNode> treeNodes = new();
         foreach (TreeNode rootNode in nodeCollection)

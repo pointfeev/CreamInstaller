@@ -89,12 +89,15 @@ internal static class SafeIO
         return Enumerable.Empty<string>();
     }
 
-    internal static IEnumerable<string> EnumerateSubdirectories(this string directoryPath, string directoryPattern, bool crucial = false, Form form = null)
+    internal static IEnumerable<string> EnumerateSubdirectories(this string directoryPath, string directoryPattern, bool subdirectories = false,
+        bool crucial = false, Form form = null)
     {
         while (!Program.Canceled)
             try
             {
-                return Directory.EnumerateDirectories(directoryPath, directoryPattern);
+                return subdirectories
+                    ? Directory.EnumerateDirectories(directoryPath, directoryPattern, new EnumerationOptions { RecurseSubdirectories = true })
+                    : Directory.EnumerateDirectories(directoryPath, directoryPattern);
             }
             catch
             {
