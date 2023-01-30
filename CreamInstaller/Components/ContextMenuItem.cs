@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Drawing;
-using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using CreamInstaller.Platforms.Paradox;
@@ -51,8 +50,8 @@ internal sealed class ContextMenuItem : ToolStripMenuItem
                 switch (imageIdentifier)
                 {
                     case "Paradox Launcher":
-                        if (Directory.Exists(ParadoxLauncher.InstallPath))
-                            foreach (string file in Directory.EnumerateFiles(ParadoxLauncher.InstallPath, "*.exe"))
+                        if (ParadoxLauncher.InstallPath.DirectoryExists())
+                            foreach (string file in ParadoxLauncher.InstallPath.EnumerateDirectory("*.exe"))
                             {
                                 image = file.GetFileIconImage();
                                 break;

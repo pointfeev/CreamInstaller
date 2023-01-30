@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -48,7 +47,7 @@ internal static class Program
             return true;
         if (directory is null || ProtectedGameDirectoryExceptions.Contains(name))
             return false;
-        return ProtectedGameDirectories.Any(path => Directory.Exists(directory + path));
+        return ProtectedGameDirectories.Any(path => (directory + path).DirectoryExists());
     }
 
     internal static bool IsProgramRunningDialog(Form form, ProgramSelection selection)

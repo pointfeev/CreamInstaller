@@ -209,7 +209,7 @@ internal sealed class CustomTreeView : TreeView
                         foreach ((string directory, BinaryType _) in pair.Key.ExecutableDirectories)
                         {
                             string path = directory + @"\" + proxy + ".dll";
-                            if (!path.Exists(form: form) || path.IsResourceFile(ResourceIdentifier.Koaloader))
+                            if (!path.FileExists(form: form) || path.IsResourceFile(ResourceIdentifier.Koaloader))
                                 continue;
                             canUse = false;
                             break;

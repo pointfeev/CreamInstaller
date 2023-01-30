@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CreamInstaller.Utility;
@@ -48,13 +47,13 @@ internal static class SteamLibrary
         => await Task.Run(() =>
         {
             List<(string appId, string name, string branch, int buildId, string gameDirectory)> games = new();
-            if (Program.Canceled || !Directory.Exists(libraryDirectory))
+            if (Program.Canceled || !libraryDirectory.DirectoryExists())
                 return games;
-            foreach (string file in Directory.EnumerateFiles(libraryDirectory, "*.acf"))
+            foreach (string file in libraryDirectory.EnumerateDirectory("*.acf"))
             {
                 if (Program.Canceled)
                     return games;
-                if (!ValveDataFile.TryDeserialize(file.Read(), out VProperty result))
+                if (!ValveDataFile.TryDeserialize(file.ReadFile(), out VProperty result))
                     continue;
                 string appId = result.Value.GetChild("appid")?.ToString();
                 string installdir = result.Value.GetChild("installdir")?.ToString();
@@ -85,14 +84,14 @@ internal static class SteamLibrary
             if (Program.Canceled)
                 return gameDirectories;
             string steamInstallPath = InstallPath;
-            if (steamInstallPath == null || !Directory.Exists(steamInstallPath))
+            if (steamInstallPath == null || !steamInstallPath.DirectoryExists())
                 return gameDirectories;
             string libraryFolder = steamInstallPath + @"\steamapps";
-            if (!Directory.Exists(libraryFolder))
+            if (!libraryFolder.DirectoryExists())
                 return gameDirectories;
             gameDirectories.Add(libraryFolder);
             string libraryFolders = libraryFolder + @"\libraryfolders.vdf";
-            if (!libraryFolders.Exists() || !ValveDataFile.TryDeserialize(libraryFolders.Read(), out VProperty result))
+            if (!libraryFolders.FileExists() || !ValveDataFile.TryDeserialize(libraryFolders.ReadFile(), out VProperty result))
                 return gameDirectories;
             foreach (VToken vToken in result.Value.Where(p => p is VProperty property && int.TryParse(property.Key, out int _)))
             {
@@ -101,7 +100,7 @@ internal static class SteamLibrary
                 if (string.IsNullOrWhiteSpace(path))
                     continue;
                 path += @"\steamapps";
-                if (Directory.Exists(path) && !gameDirectories.Contains(path))
+                if (path.DirectoryExists() && !gameDirectories.Contains(path))
                     gameDirectories.Add(path);
             }
             return gameDirectories;

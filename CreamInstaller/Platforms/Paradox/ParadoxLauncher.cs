@@ -90,28 +90,28 @@ internal static class ParadoxLauncher
         foreach (string directory in selection.DllDirectories)
         {
             bool koaloaderInstalled = Koaloader.AutoLoadDLLs.Select(pair => (pair.unlocker, path: directory + @"\" + pair.dll))
-               .Any(pair => pair.path.Exists(form: form) && pair.path.IsResourceFile());
+               .Any(pair => pair.path.FileExists(form: form) && pair.path.IsResourceFile());
             directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string old_config,
                 out string config, out _, out _, out _);
-            smokeInstalled = smokeInstalled || api32_o.Exists(form: form) || api64_o.Exists(form: form)
-                          || (old_config.Exists(form: form) || config.Exists(form: form)) && !koaloaderInstalled
-                          || api32.Exists(form: form) && api32.IsResourceFile(ResourceIdentifier.Steamworks32)
-                          || api64.Exists(form: form) && api64.IsResourceFile(ResourceIdentifier.Steamworks64);
+            smokeInstalled = smokeInstalled || api32_o.FileExists(form: form) || api64_o.FileExists(form: form)
+                          || (old_config.FileExists(form: form) || config.FileExists(form: form)) && !koaloaderInstalled
+                          || api32.FileExists(form: form) && api32.IsResourceFile(ResourceIdentifier.Steamworks32)
+                          || api64.FileExists(form: form) && api64.IsResourceFile(ResourceIdentifier.Steamworks64);
             await SmokeAPI.Uninstall(directory, deleteOthers: false);
-            if (steamOriginalSdk32 is null && api32.Exists(form: form) && !api32.IsResourceFile(ResourceIdentifier.Steamworks32))
-                steamOriginalSdk32 = api32.ReadBytes(true);
-            if (steamOriginalSdk64 is null && api64.Exists(form: form) && !api64.IsResourceFile(ResourceIdentifier.Steamworks64))
-                steamOriginalSdk64 = api64.ReadBytes(true);
+            if (steamOriginalSdk32 is null && api32.FileExists(form: form) && !api32.IsResourceFile(ResourceIdentifier.Steamworks32))
+                steamOriginalSdk32 = api32.ReadFileBytes(true);
+            if (steamOriginalSdk64 is null && api64.FileExists(form: form) && !api64.IsResourceFile(ResourceIdentifier.Steamworks64))
+                steamOriginalSdk64 = api64.ReadFileBytes(true);
             directory.GetScreamApiComponents(out api32, out api32_o, out api64, out api64_o, out config, out string log);
-            screamInstalled = screamInstalled || api32_o.Exists(form: form) || api64_o.Exists(form: form)
-                           || (config.Exists(form: form) || log.Exists(form: form)) && !koaloaderInstalled
-                           || api32.Exists(form: form) && api32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32)
-                           || api64.Exists(form: form) && api64.IsResourceFile(ResourceIdentifier.EpicOnlineServices64);
+            screamInstalled = screamInstalled || api32_o.FileExists(form: form) || api64_o.FileExists(form: form)
+                           || (config.FileExists(form: form) || log.FileExists(form: form)) && !koaloaderInstalled
+                           || api32.FileExists(form: form) && api32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32)
+                           || api64.FileExists(form: form) && api64.IsResourceFile(ResourceIdentifier.EpicOnlineServices64);
             await ScreamAPI.Uninstall(directory, deleteOthers: false);
-            if (epicOriginalSdk32 is null && api32.Exists(form: form) && !api32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32))
-                epicOriginalSdk32 = api32.ReadBytes(true);
-            if (epicOriginalSdk64 is null && api64.Exists(form: form) && !api64.IsResourceFile(ResourceIdentifier.EpicOnlineServices64))
-                epicOriginalSdk64 = api64.ReadBytes(true);
+            if (epicOriginalSdk32 is null && api32.FileExists(form: form) && !api32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32))
+                epicOriginalSdk32 = api32.ReadFileBytes(true);
+            if (epicOriginalSdk64 is null && api64.FileExists(form: form) && !api64.IsResourceFile(ResourceIdentifier.EpicOnlineServices64))
+                epicOriginalSdk64 = api64.ReadFileBytes(true);
         }
         using DialogForm dialogForm = new(form);
         if (steamOriginalSdk32 is not null || steamOriginalSdk64 is not null || epicOriginalSdk32 is not null || epicOriginalSdk64 is not null)

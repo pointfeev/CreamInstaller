@@ -507,9 +507,9 @@ internal static class Resources
         => await Task.Run(() =>
         {
             List<(string path, BinaryType binaryType)> executables = new();
-            if (Program.Canceled || !Directory.Exists(rootDirectory))
+            if (Program.Canceled || !rootDirectory.DirectoryExists())
                 return null;
-            foreach (string path in Directory.EnumerateFiles(rootDirectory, "*.exe", new EnumerationOptions { RecurseSubdirectories = true }))
+            foreach (string path in rootDirectory.EnumerateDirectory("*.exe", true))
             {
                 if (Program.Canceled)
                     return null;
@@ -519,7 +519,7 @@ internal static class Resources
                     executables.Add((path, binaryType));
                 Thread.Sleep(1);
             }
-            foreach (string path in Directory.EnumerateFiles(rootDirectory, "*.exe", new EnumerationOptions { RecurseSubdirectories = true }))
+            foreach (string path in rootDirectory.EnumerateDirectory("*.exe", true))
             {
                 if (Program.Canceled)
                     return null;
@@ -546,10 +546,9 @@ internal static class Resources
         => await Task.Run(() =>
         {
             List<string> dllDirectories = new();
-            if (Program.Canceled || !Directory.Exists(gameDirectory))
+            if (Program.Canceled || !gameDirectory.DirectoryExists())
                 return null;
-            foreach (string directory in Directory.EnumerateDirectories(gameDirectory, "*", new EnumerationOptions { RecurseSubdirectories = true })
-                        .Append(gameDirectory))
+            foreach (string directory in gameDirectory.EnumerateSubdirectories("*", true).Append(gameDirectory))
             {
                 if (Program.Canceled)
                     return null;
@@ -557,35 +556,36 @@ internal static class Resources
                 if (dllDirectories.Contains(subDirectory))
                     continue;
                 bool koaloaderInstalled = Koaloader.AutoLoadDLLs.Select(pair => (pair.unlocker, path: directory + @"\" + pair.dll))
-                   .Any(pair => pair.path.Exists(form: form) && pair.path.IsResourceFile());
+                   .Any(pair => pair.path.FileExists(form: form) && pair.path.IsResourceFile());
                 if (platform is Platform.Steam or Platform.Paradox)
                 {
                     subDirectory.GetSmokeApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string old_config,
                         out string config, out string old_log, out string log, out string cache);
-                    if (api.Exists(form: form) || api_o.Exists(form: form) || api64.Exists(form: form) || api64_o.Exists(form: form)
-                     || (old_config.Exists(form: form) || config.Exists(form: form) || old_log.Exists(form: form) || log.Exists(form: form)
-                      || cache.Exists(form: form)) && !koaloaderInstalled)
+                    if (api.FileExists(form: form) || api_o.FileExists(form: form) || api64.FileExists(form: form) || api64_o.FileExists(form: form)
+                     || (old_config.FileExists(form: form) || config.FileExists(form: form) || old_log.FileExists(form: form) || log.FileExists(form: form)
+                      || cache.FileExists(form: form)) && !koaloaderInstalled)
                         dllDirectories.Add(subDirectory);
                 }
                 if (platform is Platform.Epic or Platform.Paradox)
                 {
                     subDirectory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config,
                         out string log);
-                    if (api32.Exists(form: form) || api32_o.Exists(form: form) || api64.Exists(form: form) || api64_o.Exists(form: form)
-                     || (config.Exists(form: form) || log.Exists(form: form)) && !koaloaderInstalled)
+                    if (api32.FileExists(form: form) || api32_o.FileExists(form: form) || api64.FileExists(form: form) || api64_o.FileExists(form: form)
+                     || (config.FileExists(form: form) || log.FileExists(form: form)) && !koaloaderInstalled)
                         dllDirectories.Add(subDirectory);
                 }
                 if (platform is Platform.Ubisoft)
                 {
                     subDirectory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config,
                         out string log);
-                    if (api32.Exists(form: form) || api32_o.Exists(form: form) || api64.Exists(form: form) || api64_o.Exists(form: form)
-                     || (config.Exists(form: form) || log.Exists(form: form)) && !koaloaderInstalled)
+                    if (api32.FileExists(form: form) || api32_o.FileExists(form: form) || api64.FileExists(form: form) || api64_o.FileExists(form: form)
+                     || (config.FileExists(form: form) || log.FileExists(form: form)) && !koaloaderInstalled)
                         dllDirectories.Add(subDirectory);
                     subDirectory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config,
                         out log);
-                    if (old_api32.Exists(form: form) || old_api64.Exists(form: form) || api32.Exists(form: form) || api32_o.Exists(form: form)
-                     || api64.Exists(form: form) || api64_o.Exists(form: form) || (config.Exists(form: form) || log.Exists(form: form)) && !koaloaderInstalled)
+                    if (old_api32.FileExists(form: form) || old_api64.FileExists(form: form) || api32.FileExists(form: form) || api32_o.FileExists(form: form)
+                     || api64.FileExists(form: form) || api64_o.FileExists(form: form)
+                     || (config.FileExists(form: form) || log.FileExists(form: form)) && !koaloaderInstalled)
                         dllDirectories.Add(subDirectory);
                 }
             }
@@ -604,7 +604,7 @@ internal static class Resources
 
     private static string ComputeMD5(this string filePath)
     {
-        if (!filePath.Exists())
+        if (!filePath.FileExists())
             return null;
 #pragma warning disable CA5351
         using MD5 md5 = MD5.Create();

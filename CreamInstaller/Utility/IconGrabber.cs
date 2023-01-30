@@ -17,7 +17,7 @@ internal static class IconGrabber
 
     internal static string GetDomainFaviconUrl(string domain, int size = 16) => GoogleFaviconsApiUrl + $"?domain={domain}&sz={size}";
 
-    internal static Image GetFileIconImage(this string path) => path.Exists() ? Icon.ExtractAssociatedIcon(path)?.ToBitmap() : null;
+    internal static Image GetFileIconImage(this string path) => path.FileExists() ? Icon.ExtractAssociatedIcon(path)?.ToBitmap() : null;
 
     internal static Image GetNotepadImage() => GetFileIconImage(Diagnostics.GetNotepadPath());
 

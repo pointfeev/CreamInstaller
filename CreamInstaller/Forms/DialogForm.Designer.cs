@@ -91,7 +91,6 @@ namespace CreamInstaller.Forms
             this.descriptionPanel.Controls.Add(this.icon);
             this.descriptionPanel.Controls.Add(this.descriptionLabel);
             this.descriptionPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.descriptionPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.descriptionPanel.Location = new System.Drawing.Point(0, 0);
             this.descriptionPanel.Margin = new System.Windows.Forms.Padding(0);
             this.descriptionPanel.Name = "descriptionPanel";

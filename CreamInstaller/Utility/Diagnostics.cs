@@ -22,13 +22,13 @@ internal static class Diagnostics
     internal static string GetNotepadPath()
     {
         string npp = NppPath + @"\notepad++.exe";
-        return npp.Exists() ? npp : Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\notepad.exe";
+        return npp.FileExists() ? npp : Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\notepad.exe";
     }
 
     internal static void OpenFileInNotepad(string path)
     {
         string npp = NppPath + @"\notepad++.exe";
-        if (npp.Exists())
+        if (npp.FileExists())
             OpenFileInNotepadPlusPlus(npp, path);
         else
             OpenFileInWindowsNotepad(path);

@@ -25,14 +25,14 @@ internal static class EpicStore
     {
         List<(string id, string name, string product, string icon, string developer)> dlcIds = new();
         string cacheFile = ProgramData.AppInfoPath + @$"\{categoryNamespace}.json";
-        bool cachedExists = cacheFile.Exists();
+        bool cachedExists = cacheFile.FileExists();
         Response response = null;
         if (!cachedExists || ProgramData.CheckCooldown(categoryNamespace, CooldownEntitlement))
         {
             response = await QueryGraphQL(categoryNamespace);
             try
             {
-                cacheFile.Write(JsonConvert.SerializeObject(response, Formatting.Indented));
+                cacheFile.WriteFile(JsonConvert.SerializeObject(response, Formatting.Indented));
             }
             catch
             {
@@ -42,11 +42,11 @@ internal static class EpicStore
         else
             try
             {
-                response = JsonConvert.DeserializeObject<Response>(cacheFile.Read());
+                response = JsonConvert.DeserializeObject<Response>(cacheFile.ReadFile());
             }
             catch
             {
-                cacheFile.Delete();
+                cacheFile.DeleteFile();
             }
         if (response is null)
             return dlcIds;

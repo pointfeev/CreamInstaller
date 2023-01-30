@@ -3,6 +3,9 @@ using System.Drawing;
 using System.Net.Http;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
+#if DEBUG
+using CreamInstaller.Forms;
+#endif
 
 namespace CreamInstaller.Utility;
 
@@ -25,13 +28,21 @@ internal static class HttpClientManager
             _ = response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
         }
+#if DEBUG
+        catch (Exception e)
+        {
+            DebugForm.Current.Log("Get request failed to " + url + ": " + e, LogTextBox.Warning);
+            return null;
+        }
+#else
         catch
         {
             return null;
         }
+#endif
     }
 
-    internal static HtmlDocument ToHtmlDocument(this string html)
+    private static HtmlDocument ToHtmlDocument(this string html)
     {
         HtmlDocument document = new();
         document.LoadHtml(html);
@@ -39,9 +50,9 @@ internal static class HttpClientManager
     }
 
     internal static async Task<HtmlNodeCollection> GetDocumentNodes(string url, string xpath)
-        => (await EnsureGet(url))?.ToHtmlDocument()?.DocumentNode?.SelectNodes(xpath);
+        => (await EnsureGet(url))?.ToHtmlDocument()?.GetDocumentNodes(xpath);
 
-    internal static HtmlNodeCollection GetDocumentNodes(this HtmlDocument htmlDocument, string xpath) => htmlDocument.DocumentNode?.SelectNodes(xpath);
+    private static HtmlNodeCollection GetDocumentNodes(this HtmlDocument htmlDocument, string xpath) => htmlDocument.DocumentNode?.SelectNodes(xpath);
 
     internal static async Task<Image> GetImageFromUrl(string url)
     {

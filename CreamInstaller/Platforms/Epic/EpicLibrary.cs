@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -36,13 +35,13 @@ internal static class EpicLibrary
         {
             List<Manifest> games = new();
             string manifests = EpicManifestsPath;
-            if (!Directory.Exists(manifests))
+            if (!manifests.DirectoryExists())
                 return games;
-            foreach (string file in Directory.EnumerateFiles(manifests, "*.item"))
+            foreach (string file in manifests.EnumerateDirectory("*.item"))
             {
                 if (Program.Canceled)
                     return games;
-                string json = file.Read();
+                string json = file.ReadFile();
                 try
                 {
                     Manifest manifest = JsonSerializer.Deserialize<Manifest>(json);

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using CreamInstaller.Components;
 using CreamInstaller.Resources;
+using CreamInstaller.Utility;
 using static CreamInstaller.Resources.Resources;
 
 namespace CreamInstaller;
@@ -133,12 +133,12 @@ internal sealed class ProgramSelection
             _ = All.Remove(this);
             return;
         }
-        if (!Directory.Exists(RootDirectory))
+        if (!RootDirectory.DirectoryExists())
         {
             _ = All.Remove(this);
             return;
         }
-        _ = DllDirectories.RemoveAll(directory => !Directory.Exists(directory));
+        _ = DllDirectories.RemoveAll(directory => !directory.DirectoryExists());
         if (!DllDirectories.Any())
             _ = All.Remove(this);
     }
