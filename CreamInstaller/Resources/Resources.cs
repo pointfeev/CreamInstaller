@@ -439,16 +439,17 @@ internal static class Resources
 
     internal static void WriteManifestResource(this string resourceIdentifier, string filePath)
     {
-        using Stream resource = Assembly.GetExecutingAssembly().GetManifestResourceStream("CreamInstaller.Resources." + resourceIdentifier);
         while (!Program.Canceled)
             try
             {
+                using Stream resource = Assembly.GetExecutingAssembly().GetManifestResourceStream("CreamInstaller.Resources." + resourceIdentifier);
                 using FileStream file = new(filePath, FileMode.Create, FileAccess.Write);
                 resource?.CopyTo(file);
+                break;
             }
             catch
             {
-                if (filePath.IOWarn("Failed to write a crucial manifest resource") is not DialogResult.OK)
+                if (filePath.IOWarn("Failed to write a crucial manifest resource (" + resourceIdentifier + ")") is not DialogResult.OK)
                     break;
             }
     }
@@ -460,6 +461,7 @@ internal static class Resources
             {
                 using FileStream fileStream = new(filePath, FileMode.Create, FileAccess.Write);
                 fileStream.Write(resource);
+                break;
             }
             catch
             {
