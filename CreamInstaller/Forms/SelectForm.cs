@@ -172,7 +172,6 @@ internal sealed partial class SelectForm : CustomForm
                     if (dllDirectories is null)
                     {
                         Interlocked.Decrement(ref steamGamesToCheck);
-                        DebugForm.Current.Log("no dll " + appId + " - " + name);
                         RemoveFromRemainingGames(name);
                         return;
                     }
