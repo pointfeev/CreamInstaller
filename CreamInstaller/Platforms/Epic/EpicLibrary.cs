@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -21,7 +22,7 @@ internal static class EpicLibrary
             epicManifestsPath ??= Registry.GetValue(@"HKEY_CURRENT_USER\Software\Wow6432Node\Epic Games\EOS", "ModSdkMetadataDir", null) as string;
             epicManifestsPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Epic Games\EpicGamesLauncher", "AppDataPath", null) as string;
             epicManifestsPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Epic Games\EpicGamesLauncher", "AppDataPath", null) as string;
-            if (epicManifestsPath is not null && epicManifestsPath.EndsWith(@"\Data"))
+            if (epicManifestsPath is not null && epicManifestsPath.EndsWith(@"\Data", StringComparison.Ordinal))
                 epicManifestsPath += @"\Manifests";
             return epicManifestsPath.BeautifyPath();
         }

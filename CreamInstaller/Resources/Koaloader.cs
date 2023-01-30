@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -37,7 +38,7 @@ internal static class Koaloader
 
     private static void WriteProxy(this string path, string proxyName, BinaryType binaryType)
     {
-        foreach (string resourceIdentifier in EmbeddedResources.FindAll(r => r.StartsWith("Koaloader")))
+        foreach (string resourceIdentifier in EmbeddedResources.FindAll(r => r.StartsWith("Koaloader", StringComparison.Ordinal)))
         {
             resourceIdentifier.GetProxyInfoFromIdentifier(out string _proxyName, out BinaryType _binaryType);
             if (_proxyName != proxyName || _binaryType != binaryType)

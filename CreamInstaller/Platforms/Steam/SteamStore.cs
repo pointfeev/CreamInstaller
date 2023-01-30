@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,7 +24,7 @@ internal static class SteamStore
             List<string> dlcIds = new();
             if (appData.dlc is null)
                 return dlcIds;
-            dlcIds.AddRange(from appId in appData.dlc where appId > 0 select appId.ToString());
+            dlcIds.AddRange(from appId in appData.dlc where appId > 0 select appId.ToString(CultureInfo.InvariantCulture));
             return dlcIds;
         });
 

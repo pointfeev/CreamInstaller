@@ -769,30 +769,9 @@ internal sealed partial class SelectForm : CustomForm
                         items.Add(query);
                     items.Add(new ContextMenuItem("Refresh Queries", "Command Prompt", (_, _) =>
                     {
-                        try
-                        {
-                            appInfoVDF.Delete();
-                        }
-                        catch
-                        {
-                            // ignored
-                        }
-                        try
-                        {
-                            appInfoJSON.Delete();
-                        }
-                        catch
-                        {
-                            // ignored
-                        }
-                        try
-                        {
-                            cooldown.Delete();
-                        }
-                        catch
-                        {
-                            // ignored
-                        }
+                        appInfoVDF.Delete();
+                        appInfoJSON.Delete();
+                        cooldown.Delete();
                         OnLoad(true);
                     }));
                 }

@@ -431,7 +431,7 @@ internal static class Resources
                 return embeddedResources;
             string[] names = Assembly.GetExecutingAssembly().GetManifestResourceNames();
             embeddedResources = new();
-            foreach (string resourceName in names.Where(n => n.StartsWith("CreamInstaller.Resources.")))
+            foreach (string resourceName in names.Where(n => n.StartsWith("CreamInstaller.Resources.", StringComparison.Ordinal)))
                 embeddedResources.Add(resourceName[25..]);
             return embeddedResources;
         }

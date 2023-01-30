@@ -195,7 +195,7 @@ internal sealed class CustomTreeView : TreeView
                     _ = comboBoxBounds.Remove(pair.Key);
                 else if (pair.Value.Contains(clickPoint))
                 {
-                    List<string> proxies = EmbeddedResources.FindAll(r => r.StartsWith("Koaloader")).Select(p =>
+                    List<string> proxies = EmbeddedResources.FindAll(r => r.StartsWith("Koaloader", StringComparison.Ordinal)).Select(p =>
                     {
                         p.GetProxyInfoFromIdentifier(out string proxyName, out _);
                         return proxyName;
