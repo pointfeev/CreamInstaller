@@ -126,7 +126,7 @@ internal static class SteamCMD
             if (httpClient is null)
                 return;
             byte[] file = await httpClient.GetByteArrayAsync(new Uri("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip"));
-            file.Write(ArchivePath);
+            file.WriteResource(ArchivePath);
             ZipFile.ExtractToDirectory(ArchivePath, DirectoryPath);
             ArchivePath.Delete();
         }

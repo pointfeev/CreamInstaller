@@ -129,7 +129,7 @@ internal static class UplayR2
             }
             if (api32_o.Exists(form: installForm))
             {
-                "UplayR2.upc_r2_loader.dll".Write(api);
+                "UplayR2.upc_r2_loader.dll".WriteManifestResource(api);
                 installForm?.UpdateUser($"Wrote Uplay R2 Unlocker: {Path.GetFileName(api)}", LogTextBox.Action, false);
             }
             api = old_api64.Exists(form: installForm) ? old_api64 : api64;
@@ -140,7 +140,7 @@ internal static class UplayR2
             }
             if (api64_o.Exists(form: installForm))
             {
-                "UplayR2.upc_r2_loader64.dll".Write(api);
+                "UplayR2.upc_r2_loader64.dll".WriteManifestResource(api);
                 installForm?.UpdateUser($"Wrote Uplay R2 Unlocker: {Path.GetFileName(api)}", LogTextBox.Action, false);
             }
             if (generateConfig)

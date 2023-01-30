@@ -43,7 +43,7 @@ internal static class Koaloader
             resourceIdentifier.GetProxyInfoFromIdentifier(out string _proxyName, out BinaryType _binaryType);
             if (_proxyName != proxyName || _binaryType != binaryType)
                 continue;
-            resourceIdentifier.Write(path);
+            resourceIdentifier.WriteManifestResource(path);
             break;
         }
     }
@@ -213,7 +213,7 @@ internal static class Koaloader
                         }
                         path = rootDirectory + @"\SmokeAPI32.dll";
                     }
-                    "SmokeAPI.steam_api.dll".Write(path);
+                    "SmokeAPI.steam_api.dll".WriteManifestResource(path);
                     installForm?.UpdateUser(
                         $"Wrote SmokeAPI{(rootDirectory is not null && directory != rootDirectory ? " to root directory" : "")}: {Path.GetFileName(path)}",
                         LogTextBox.Action, false);
@@ -230,7 +230,7 @@ internal static class Koaloader
                         }
                         path = rootDirectory + @"\SmokeAPI64.dll";
                     }
-                    "SmokeAPI.steam_api64.dll".Write(path);
+                    "SmokeAPI.steam_api64.dll".WriteManifestResource(path);
                     installForm?.UpdateUser(
                         $"Wrote SmokeAPI{(rootDirectory is not null && directory != rootDirectory ? " to root directory" : "")}: {Path.GetFileName(path)}",
                         LogTextBox.Action, false);
@@ -253,7 +253,7 @@ internal static class Koaloader
                             }
                             path = rootDirectory + @"\ScreamAPI32.dll";
                         }
-                        "ScreamAPI.EOSSDK-Win32-Shipping.dll".Write(path);
+                        "ScreamAPI.EOSSDK-Win32-Shipping.dll".WriteManifestResource(path);
                         installForm?.UpdateUser(
                             $"Wrote ScreamAPI{(rootDirectory is not null && directory != rootDirectory ? " to root directory" : "")}: {Path.GetFileName(path)}",
                             LogTextBox.Action, false);
@@ -270,7 +270,7 @@ internal static class Koaloader
                             }
                             path = rootDirectory + @"\ScreamAPI64.dll";
                         }
-                        "ScreamAPI.EOSSDK-Win64-Shipping.dll".Write(path);
+                        "ScreamAPI.EOSSDK-Win64-Shipping.dll".WriteManifestResource(path);
                         installForm?.UpdateUser(
                             $"Wrote ScreamAPI{(rootDirectory is not null && directory != rootDirectory ? " to root directory" : "")}: {Path.GetFileName(path)}",
                             LogTextBox.Action, false);
@@ -293,7 +293,7 @@ internal static class Koaloader
                             }
                             path = rootDirectory + @"\UplayR1Unlocker32.dll";
                         }
-                        "UplayR1.uplay_r1_loader.dll".Write(path);
+                        "UplayR1.uplay_r1_loader.dll".WriteManifestResource(path);
                         installForm?.UpdateUser(
                             $"Wrote Uplay R1 Unlocker{(rootDirectory is not null && directory != rootDirectory ? " to root directory" : "")}: {Path.GetFileName(path)}",
                             LogTextBox.Action, false);
@@ -311,7 +311,7 @@ internal static class Koaloader
                             }
                             path = rootDirectory + @"\UplayR1Unlocker64.dll";
                         }
-                        "UplayR1.uplay_r1_loader64.dll".Write(path);
+                        "UplayR1.uplay_r1_loader64.dll".WriteManifestResource(path);
                         installForm?.UpdateUser(
                             $"Wrote Uplay R1 Unlocker{(rootDirectory is not null && directory != rootDirectory ? " to root directory" : "")}: {Path.GetFileName(path)}",
                             LogTextBox.Action, false);
@@ -330,7 +330,7 @@ internal static class Koaloader
                             }
                             path = rootDirectory + @"\UplayR2Unlocker32.dll";
                         }
-                        "UplayR2.upc_r2_loader.dll".Write(path);
+                        "UplayR2.upc_r2_loader.dll".WriteManifestResource(path);
                         installForm?.UpdateUser(
                             $"Wrote Uplay R2 Unlocker{(rootDirectory is not null && directory != rootDirectory ? " to root directory" : "")}: {Path.GetFileName(path)}",
                             LogTextBox.Action, false);
@@ -348,7 +348,7 @@ internal static class Koaloader
                             }
                             path = rootDirectory + @"\UplayR2Unlocker64.dll";
                         }
-                        "UplayR2.upc_r2_loader64.dll".Write(path);
+                        "UplayR2.upc_r2_loader64.dll".WriteManifestResource(path);
                         installForm?.UpdateUser(
                             $"Wrote Uplay R2 Unlocker{(rootDirectory is not null && directory != rootDirectory ? " to root directory" : "")}: {Path.GetFileName(path)}",
                             LogTextBox.Action, false);

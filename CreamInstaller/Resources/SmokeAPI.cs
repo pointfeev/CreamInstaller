@@ -228,7 +228,7 @@ internal static class SmokeAPI
             }
             if (api32_o.Exists(form: installForm))
             {
-                "SmokeAPI.steam_api.dll".Write(api32);
+                "SmokeAPI.steam_api.dll".WriteManifestResource(api32);
                 installForm?.UpdateUser($"Wrote SmokeAPI: {Path.GetFileName(api32)}", LogTextBox.Action, false);
             }
             if (api64.Exists(form: installForm) && !api64_o.Exists(form: installForm))
@@ -238,7 +238,7 @@ internal static class SmokeAPI
             }
             if (api64_o.Exists(form: installForm))
             {
-                "SmokeAPI.steam_api64.dll".Write(api64);
+                "SmokeAPI.steam_api64.dll".WriteManifestResource(api64);
                 installForm?.UpdateUser($"Wrote SmokeAPI: {Path.GetFileName(api64)}", LogTextBox.Action, false);
             }
             if (generateConfig)

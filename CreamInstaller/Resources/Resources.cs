@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using CreamInstaller.Forms;
 using CreamInstaller.Utility;
 
 namespace CreamInstaller.Resources;
@@ -437,14 +438,28 @@ internal static class Resources
         }
     }
 
-    internal static void Write(this string resourceIdentifier, string filePath)
+    internal static void WriteManifestResource(this string resourceIdentifier, string filePath)
     {
         using Stream resource = Assembly.GetExecutingAssembly().GetManifestResourceStream("CreamInstaller.Resources." + resourceIdentifier);
-        using FileStream file = new(filePath, FileMode.Create, FileAccess.Write);
-        resource?.CopyTo(file);
+        try
+        {
+            using FileStream file = new(filePath, FileMode.Create, FileAccess.Write);
+            resource?.CopyTo(file);
+        }
+#if DEBUG
+        catch (Exception e)
+        {
+            DebugForm.Current.Log("resource write exception for '" + resourceIdentifier + "' to '" + filePath + "': " + e);
+        }
+#else
+        catch
+        {
+            //ignored
+        }
+#endif
     }
 
-    internal static void Write(this byte[] resource, string filePath)
+    internal static void WriteResource(this byte[] resource, string filePath)
     {
         using FileStream fileStream = new(filePath, FileMode.Create, FileAccess.Write);
         fileStream.Write(resource);

@@ -122,13 +122,13 @@ internal static class ParadoxLauncher
                 directory.GetSmokeApiComponents(out string api32, out _, out string api64, out _, out _, out _, out _, out _, out _);
                 if (steamOriginalSdk32 is not null && api32.IsResourceFile(ResourceIdentifier.Steamworks32))
                 {
-                    steamOriginalSdk32.Write(api32);
+                    steamOriginalSdk32.WriteResource(api32);
                     installForm?.UpdateUser("Corrected Steamworks: " + api32, LogTextBox.Action);
                     neededRepair = true;
                 }
                 if (steamOriginalSdk64 is not null && api64.IsResourceFile(ResourceIdentifier.Steamworks64))
                 {
-                    steamOriginalSdk64.Write(api64);
+                    steamOriginalSdk64.WriteResource(api64);
                     installForm?.UpdateUser("Corrected Steamworks: " + api64, LogTextBox.Action);
                     neededRepair = true;
                 }
@@ -137,13 +137,13 @@ internal static class ParadoxLauncher
                 directory.GetScreamApiComponents(out api32, out _, out api64, out _, out _, out _);
                 if (epicOriginalSdk32 is not null && api32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32))
                 {
-                    epicOriginalSdk32.Write(api32);
+                    epicOriginalSdk32.WriteResource(api32);
                     installForm?.UpdateUser("Corrected Epic Online Services: " + api32, LogTextBox.Action);
                     neededRepair = true;
                 }
                 if (epicOriginalSdk64 is not null && api64.IsResourceFile(ResourceIdentifier.EpicOnlineServices64))
                 {
-                    epicOriginalSdk64.Write(api64);
+                    epicOriginalSdk64.WriteResource(api64);
                     installForm?.UpdateUser("Corrected Epic Online Services: " + api64, LogTextBox.Action);
                     neededRepair = true;
                 }

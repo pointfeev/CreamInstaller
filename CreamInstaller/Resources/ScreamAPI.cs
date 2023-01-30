@@ -150,7 +150,7 @@ internal static class ScreamAPI
             }
             if (api32_o.Exists(form: installForm))
             {
-                "ScreamAPI.EOSSDK-Win32-Shipping.dll".Write(api32);
+                "ScreamAPI.EOSSDK-Win32-Shipping.dll".WriteManifestResource(api32);
                 installForm?.UpdateUser($"Wrote ScreamAPI: {Path.GetFileName(api32)}", LogTextBox.Action, false);
             }
             if (api64.Exists(form: installForm) && !api64_o.Exists(form: installForm))
@@ -160,7 +160,7 @@ internal static class ScreamAPI
             }
             if (api64_o.Exists(form: installForm))
             {
-                "ScreamAPI.EOSSDK-Win64-Shipping.dll".Write(api64);
+                "ScreamAPI.EOSSDK-Win64-Shipping.dll".WriteManifestResource(api64);
                 installForm?.UpdateUser($"Wrote ScreamAPI: {Path.GetFileName(api64)}", LogTextBox.Action, false);
             }
             if (generateConfig)
