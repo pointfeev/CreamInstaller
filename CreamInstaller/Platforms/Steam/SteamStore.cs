@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,7 +34,7 @@ internal static class SteamStore
             if (Program.Canceled)
                 return null;
             string cacheFile = ProgramData.AppInfoPath + @$"\{appId}.json";
-            bool cachedExists = File.Exists(cacheFile);
+            bool cachedExists = cacheFile.Exists();
             if (!cachedExists || ProgramData.CheckCooldown(appId, isDlc ? CooldownDlc : CooldownGame))
             {
                 string response = await HttpClientManager.EnsureGet($"https://store.steampowered.com/api/appdetails?appids={appId}");
@@ -64,7 +63,7 @@ internal static class SteamStore
                                     {
                                         try
                                         {
-                                            await File.WriteAllTextAsync(cacheFile, JsonConvert.SerializeObject(data, Formatting.Indented));
+                                            cacheFile.Write(JsonConvert.SerializeObject(data, Formatting.Indented));
                                         }
                                         catch
 #if DEBUG
@@ -118,18 +117,11 @@ internal static class SteamStore
             if (cachedExists)
                 try
                 {
-                    return JsonConvert.DeserializeObject<AppData>(await File.ReadAllTextAsync(cacheFile));
+                    return JsonConvert.DeserializeObject<AppData>(cacheFile.Read());
                 }
                 catch
                 {
-                    try
-                    {
-                        File.Delete(cacheFile);
-                    }
-                    catch
-                    {
-                        // ignored
-                    }
+                    cacheFile.Delete();
                 }
             if (isDlc || attempts >= 10)
                 return null;

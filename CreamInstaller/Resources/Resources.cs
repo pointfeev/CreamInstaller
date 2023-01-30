@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using CreamInstaller.Utility;
 
 namespace CreamInstaller.Resources;
@@ -466,8 +467,7 @@ internal static class Resources
         return false;
     }
 
-    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static extern bool GetBinaryType(string lpApplicationName, out BinaryType lpBinaryType);
 
     internal static bool TryGetFileBinaryType(this string path, out BinaryType binaryType) => GetBinaryType(path, out binaryType);
@@ -522,14 +522,14 @@ internal static class Resources
             || subPath.Contains("ANTICHEAT");
     }
 
-    internal static async Task<List<string>> GetDllDirectoriesFromGameDirectory(this string gameDirectory, Platform platform)
+    internal static async Task<List<string>> GetDllDirectoriesFromGameDirectory(this string gameDirectory, Platform platform, Form form = null)
         => await Task.Run(() =>
         {
             List<string> dllDirectories = new();
             if (Program.Canceled || !Directory.Exists(gameDirectory))
                 return null;
             foreach (string directory in Directory.EnumerateDirectories(gameDirectory, "*", new EnumerationOptions { RecurseSubdirectories = true })
-                                                  .Append(gameDirectory))
+                        .Append(gameDirectory))
             {
                 if (Program.Canceled)
                     return null;
@@ -537,35 +537,35 @@ internal static class Resources
                 if (dllDirectories.Contains(subDirectory))
                     continue;
                 bool koaloaderInstalled = Koaloader.AutoLoadDLLs.Select(pair => (pair.unlocker, path: directory + @"\" + pair.dll))
-                                                   .Any(pair => File.Exists(pair.path) && pair.path.IsResourceFile());
+                   .Any(pair => pair.path.Exists(form: form) && pair.path.IsResourceFile());
                 if (platform is Platform.Steam or Platform.Paradox)
                 {
                     subDirectory.GetSmokeApiComponents(out string api, out string api_o, out string api64, out string api64_o, out string old_config,
                         out string config, out string old_log, out string log, out string cache);
-                    if (File.Exists(api) || File.Exists(api_o) || File.Exists(api64) || File.Exists(api64_o)
-                     || (File.Exists(old_config) || File.Exists(config) || File.Exists(old_log) || File.Exists(log) || File.Exists(cache))
-                     && !koaloaderInstalled)
+                    if (api.Exists(form: form) || api_o.Exists(form: form) || api64.Exists(form: form) || api64_o.Exists(form: form)
+                     || (old_config.Exists(form: form) || config.Exists(form: form) || old_log.Exists(form: form) || log.Exists(form: form)
+                      || cache.Exists(form: form)) && !koaloaderInstalled)
                         dllDirectories.Add(subDirectory);
                 }
                 if (platform is Platform.Epic or Platform.Paradox)
                 {
                     subDirectory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config,
                         out string log);
-                    if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o)
-                     || (File.Exists(config) || File.Exists(log)) && !koaloaderInstalled)
+                    if (api32.Exists(form: form) || api32_o.Exists(form: form) || api64.Exists(form: form) || api64_o.Exists(form: form)
+                     || (config.Exists(form: form) || log.Exists(form: form)) && !koaloaderInstalled)
                         dllDirectories.Add(subDirectory);
                 }
                 if (platform is Platform.Ubisoft)
                 {
                     subDirectory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config,
                         out string log);
-                    if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o)
-                     || (File.Exists(config) || File.Exists(log)) && !koaloaderInstalled)
+                    if (api32.Exists(form: form) || api32_o.Exists(form: form) || api64.Exists(form: form) || api64_o.Exists(form: form)
+                     || (config.Exists(form: form) || log.Exists(form: form)) && !koaloaderInstalled)
                         dllDirectories.Add(subDirectory);
                     subDirectory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config,
                         out log);
-                    if (File.Exists(old_api32) || File.Exists(old_api64) || File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64)
-                     || File.Exists(api64_o) || (File.Exists(config) || File.Exists(log)) && !koaloaderInstalled)
+                    if (old_api32.Exists(form: form) || old_api64.Exists(form: form) || api32.Exists(form: form) || api32_o.Exists(form: form)
+                     || api64.Exists(form: form) || api64_o.Exists(form: form) || (config.Exists(form: form) || log.Exists(form: form)) && !koaloaderInstalled)
                         dllDirectories.Add(subDirectory);
                 }
             }
@@ -584,7 +584,7 @@ internal static class Resources
 
     private static string ComputeMD5(this string filePath)
     {
-        if (!File.Exists(filePath))
+        if (!filePath.Exists())
             return null;
 #pragma warning disable CA5351
         using MD5 md5 = MD5.Create();

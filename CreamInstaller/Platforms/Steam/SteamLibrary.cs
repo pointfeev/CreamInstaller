@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using CreamInstaller.Utility;
 using Gameloop.Vdf.Linq;
@@ -55,7 +54,7 @@ internal static class SteamLibrary
             {
                 if (Program.Canceled)
                     return games;
-                if (!ValveDataFile.TryDeserialize(File.ReadAllText(file, Encoding.UTF8), out VProperty result))
+                if (!ValveDataFile.TryDeserialize(file.Read(), out VProperty result))
                     continue;
                 string appId = result.Value.GetChild("appid")?.ToString();
                 string installdir = result.Value.GetChild("installdir")?.ToString();
@@ -93,7 +92,7 @@ internal static class SteamLibrary
                 return gameDirectories;
             gameDirectories.Add(libraryFolder);
             string libraryFolders = libraryFolder + @"\libraryfolders.vdf";
-            if (!File.Exists(libraryFolders) || !ValveDataFile.TryDeserialize(File.ReadAllText(libraryFolders, Encoding.UTF8), out VProperty result))
+            if (!libraryFolders.Exists() || !ValveDataFile.TryDeserialize(libraryFolders.Read(), out VProperty result))
                 return gameDirectories;
             foreach (VToken vToken in result.Value.Where(p => p is VProperty property && int.TryParse(property.Key, out int _)))
             {

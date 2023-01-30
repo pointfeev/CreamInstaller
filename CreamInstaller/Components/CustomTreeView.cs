@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using CreamInstaller.Forms;
 using CreamInstaller.Resources;
+using CreamInstaller.Utility;
 using static CreamInstaller.Resources.Resources;
 
 namespace CreamInstaller.Components;
@@ -209,7 +209,7 @@ internal sealed class CustomTreeView : TreeView
                         foreach ((string directory, BinaryType _) in pair.Key.ExecutableDirectories)
                         {
                             string path = directory + @"\" + proxy + ".dll";
-                            if (!File.Exists(path) || path.IsResourceFile(ResourceIdentifier.Koaloader))
+                            if (!path.Exists(form: form) || path.IsResourceFile(ResourceIdentifier.Koaloader))
                                 continue;
                             canUse = false;
                             break;

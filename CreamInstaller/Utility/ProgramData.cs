@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Newtonsoft.Json;
 
 namespace CreamInstaller.Utility;
@@ -27,7 +27,7 @@ internal static class ProgramData
     private static readonly string DlcChoicesPath = DirectoryPath + @"\dlc.json";
     private static readonly string KoaloaderProxyChoicesPath = DirectoryPath + @"\proxies.json";
 
-    internal static async Task Setup()
+    internal static async Task Setup(Form form = null)
         => await Task.Run(() =>
         {
             if (Directory.Exists(DirectoryPathOld))
@@ -38,18 +38,17 @@ internal static class ProgramData
             }
             if (!Directory.Exists(DirectoryPath))
                 _ = Directory.CreateDirectory(DirectoryPath);
-            if (!File.Exists(AppInfoVersionPath) || !Version.TryParse(File.ReadAllText(AppInfoVersionPath, Encoding.UTF8), out Version version)
-                                                 || version < MinimumAppInfoVersion)
+            if (!AppInfoVersionPath.Exists(form: form) || !Version.TryParse(AppInfoVersionPath.Read(), out Version version) || version < MinimumAppInfoVersion)
             {
                 if (Directory.Exists(AppInfoPath))
                     Directory.Delete(AppInfoPath, true);
                 _ = Directory.CreateDirectory(AppInfoPath);
-                File.WriteAllText(AppInfoVersionPath, Program.Version, Encoding.UTF8);
+                AppInfoVersionPath.Write(Program.Version);
             }
             if (!Directory.Exists(CooldownPath))
                 _ = Directory.CreateDirectory(CooldownPath);
-            if (File.Exists(OldProgramChoicesPath))
-                File.Delete(OldProgramChoicesPath);
+            if (OldProgramChoicesPath.Exists(form: form))
+                OldProgramChoicesPath.Delete();
         });
 
     internal static bool CheckCooldown(string identifier, int cooldown)
@@ -67,11 +66,11 @@ internal static class ProgramData
         if (!Directory.Exists(CooldownPath))
             return null;
         string cooldownFile = CooldownPath + @$"\{identifier}.txt";
-        if (!File.Exists(cooldownFile))
+        if (!cooldownFile.Exists())
             return null;
         try
         {
-            if (DateTime.TryParse(File.ReadAllText(cooldownFile), out DateTime cooldown))
+            if (DateTime.TryParse(cooldownFile.Read(), out DateTime cooldown))
                 return cooldown;
         }
         catch
@@ -88,7 +87,7 @@ internal static class ProgramData
         string cooldownFile = CooldownPath + @$"\{identifier}.txt";
         try
         {
-            File.WriteAllText(cooldownFile, time.ToString(CultureInfo.InvariantCulture));
+            cooldownFile.Write(time.ToString(CultureInfo.InvariantCulture));
         }
         catch
         {
@@ -98,17 +97,18 @@ internal static class ProgramData
 
     internal static IEnumerable<(Platform platform, string id)> ReadProgramChoices()
     {
-        if (!File.Exists(ProgramChoicesPath))
-            return Enumerable.Empty<(Platform platform, string id)>();
-        try
-        {
-            return JsonConvert.DeserializeObject(File.ReadAllText(ProgramChoicesPath), typeof(List<(Platform platform, string id)>)) as
-                List<(Platform platform, string id)>;
-        }
-        catch
-        {
-            return Enumerable.Empty<(Platform platform, string id)>();
-        }
+        if (ProgramChoicesPath.Exists())
+            try
+            {
+                if (JsonConvert.DeserializeObject(ProgramChoicesPath.Read(), typeof(List<(Platform platform, string id)>)) is
+                    List<(Platform platform, string id)> choices)
+                    return choices;
+            }
+            catch
+            {
+                // ignored
+            }
+        return Enumerable.Empty<(Platform platform, string id)>();
     }
 
     internal static void WriteProgramChoices(IEnumerable<(Platform platform, string id)> choices)
@@ -116,9 +116,9 @@ internal static class ProgramData
         try
         {
             if (choices is null || !choices.Any())
-                File.Delete(ProgramChoicesPath);
+                ProgramChoicesPath.Delete();
             else
-                File.WriteAllText(ProgramChoicesPath, JsonConvert.SerializeObject(choices));
+                ProgramChoicesPath.Write(JsonConvert.SerializeObject(choices));
         }
         catch
         {
@@ -128,17 +128,18 @@ internal static class ProgramData
 
     internal static IEnumerable<(Platform platform, string gameId, string dlcId)> ReadDlcChoices()
     {
-        if (!File.Exists(DlcChoicesPath))
-            return Enumerable.Empty<(Platform platform, string gameId, string dlcId)>();
-        try
-        {
-            return JsonConvert.DeserializeObject(File.ReadAllText(DlcChoicesPath), typeof(IEnumerable<(Platform platform, string gameId, string dlcId)>)) as
-                IEnumerable<(Platform platform, string gameId, string dlcId)>;
-        }
-        catch
-        {
-            return Enumerable.Empty<(Platform platform, string gameId, string dlcId)>();
-        }
+        if (DlcChoicesPath.Exists())
+            try
+            {
+                if (JsonConvert.DeserializeObject(DlcChoicesPath.Read(), typeof(IEnumerable<(Platform platform, string gameId, string dlcId)>)) is
+                    IEnumerable<(Platform platform, string gameId, string dlcId)> choices)
+                    return choices;
+            }
+            catch
+            {
+                // ignored
+            }
+        return Enumerable.Empty<(Platform platform, string gameId, string dlcId)>();
     }
 
     internal static void WriteDlcChoices(List<(Platform platform, string gameId, string dlcId)> choices)
@@ -146,9 +147,9 @@ internal static class ProgramData
         try
         {
             if (choices is null || !choices.Any())
-                File.Delete(DlcChoicesPath);
+                DlcChoicesPath.Delete();
             else
-                File.WriteAllText(DlcChoicesPath, JsonConvert.SerializeObject(choices));
+                DlcChoicesPath.Write(JsonConvert.SerializeObject(choices));
         }
         catch
         {
@@ -158,18 +159,19 @@ internal static class ProgramData
 
     internal static IEnumerable<(Platform platform, string id, string proxy, bool enabled)> ReadKoaloaderChoices()
     {
-        if (!File.Exists(KoaloaderProxyChoicesPath))
-            return Enumerable.Empty<(Platform platform, string id, string proxy, bool enabled)>();
-        try
-        {
-            return JsonConvert.DeserializeObject(File.ReadAllText(KoaloaderProxyChoicesPath),
-                    typeof(IEnumerable<(Platform platform, string id, string proxy, bool enabled)>)) as
-                IEnumerable<(Platform platform, string id, string proxy, bool enabled)>;
-        }
-        catch
-        {
-            return Enumerable.Empty<(Platform platform, string id, string proxy, bool enabled)>();
-        }
+        if (KoaloaderProxyChoicesPath.Exists())
+            try
+            {
+                if (JsonConvert.DeserializeObject(KoaloaderProxyChoicesPath.Read(),
+                        typeof(IEnumerable<(Platform platform, string id, string proxy, bool enabled)>)) is
+                    IEnumerable<(Platform platform, string id, string proxy, bool enabled)> choices)
+                    return choices;
+            }
+            catch
+            {
+                // ignored
+            }
+        return Enumerable.Empty<(Platform platform, string id, string proxy, bool enabled)>();
     }
 
     internal static void WriteKoaloaderProxyChoices(IEnumerable<(Platform platform, string id, string proxy, bool enabled)> choices)
@@ -177,9 +179,9 @@ internal static class ProgramData
         try
         {
             if (choices is null || !choices.Any())
-                File.Delete(KoaloaderProxyChoicesPath);
+                KoaloaderProxyChoicesPath.Delete();
             else
-                File.WriteAllText(KoaloaderProxyChoicesPath, JsonConvert.SerializeObject(choices));
+                KoaloaderProxyChoicesPath.Write(JsonConvert.SerializeObject(choices));
         }
         catch
         {

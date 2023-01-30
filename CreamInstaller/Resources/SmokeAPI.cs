@@ -51,16 +51,16 @@ internal static class SmokeAPI
                     extraApps.Add(newExtraPair);
                 }
         injectDlc = injectDlc.ToList();
-        if (File.Exists(old_config))
+        if (old_config.Exists(form: installForm))
         {
-            File.Delete(old_config);
+            old_config.Delete();
             installForm?.UpdateUser($"Deleted old configuration: {Path.GetFileName(old_config)}", LogTextBox.Action, false);
         }
         if (selection.ExtraSelectedDlc.Any(p => p.Value.dlc.Any()) || overrideDlc.Any() || injectDlc.Any())
         {
             /*if (installForm is not null)
                 installForm.UpdateUser("Generating SmokeAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);*/
-            File.Create(config).Close();
+            config.Create(true, installForm);
             StreamWriter writer = new(config, true, Encoding.UTF8);
             WriteConfig(writer, selection.Id, new(extraApps.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String),
                 new(overrideDlc.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String),
@@ -68,9 +68,9 @@ internal static class SmokeAPI
             writer.Flush();
             writer.Close();
         }
-        else if (File.Exists(config))
+        else if (config.Exists(form: installForm))
         {
-            File.Delete(config);
+            config.Delete();
             installForm?.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", LogTextBox.Action, false);
         }
     }
@@ -155,58 +155,58 @@ internal static class SmokeAPI
         => await Task.Run(() =>
         {
             directory.GetCreamApiComponents(out _, out _, out _, out _, out string oldConfig);
-            if (File.Exists(oldConfig))
+            if (oldConfig.Exists(form: installForm))
             {
-                File.Delete(oldConfig);
+                oldConfig.Delete();
                 installForm?.UpdateUser($"Deleted old CreamAPI configuration: {Path.GetFileName(oldConfig)}", LogTextBox.Action, false);
             }
             directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string old_config,
                 out string config, out string old_log, out string log, out string cache);
-            if (File.Exists(api32_o))
+            if (api32_o.Exists(form: installForm))
             {
-                if (File.Exists(api32))
+                if (api32.Exists(form: installForm))
                 {
-                    File.Delete(api32);
+                    api32.Delete();
                     installForm?.UpdateUser($"Deleted SmokeAPI: {Path.GetFileName(api32)}", LogTextBox.Action, false);
                 }
-                File.Move(api32_o, api32!);
+                api32_o.Move(api32!);
                 installForm?.UpdateUser($"Restored Steamworks: {Path.GetFileName(api32_o)} -> {Path.GetFileName(api32)}", LogTextBox.Action, false);
             }
-            if (File.Exists(api64_o))
+            if (api64_o.Exists(form: installForm))
             {
-                if (File.Exists(api64))
+                if (api64.Exists(form: installForm))
                 {
-                    File.Delete(api64);
+                    api64.Delete();
                     installForm?.UpdateUser($"Deleted SmokeAPI: {Path.GetFileName(api64)}", LogTextBox.Action, false);
                 }
-                File.Move(api64_o, api64!);
+                api64_o.Move(api64!);
                 installForm?.UpdateUser($"Restored Steamworks: {Path.GetFileName(api64_o)} -> {Path.GetFileName(api64)}", LogTextBox.Action, false);
             }
             if (!deleteOthers)
                 return;
-            if (File.Exists(old_config))
+            if (old_config.Exists(form: installForm))
             {
-                File.Delete(old_config);
+                old_config.Delete();
                 installForm?.UpdateUser($"Deleted configuration: {Path.GetFileName(old_config)}", LogTextBox.Action, false);
             }
-            if (File.Exists(config))
+            if (config.Exists(form: installForm))
             {
-                File.Delete(config);
+                config.Delete();
                 installForm?.UpdateUser($"Deleted configuration: {Path.GetFileName(config)}", LogTextBox.Action, false);
             }
-            if (File.Exists(cache))
+            if (cache.Exists(form: installForm))
             {
-                File.Delete(cache);
+                cache.Delete();
                 installForm?.UpdateUser($"Deleted cache: {Path.GetFileName(cache)}", LogTextBox.Action, false);
             }
-            if (File.Exists(old_log))
+            if (old_log.Exists(form: installForm))
             {
-                File.Delete(old_log);
+                old_log.Delete();
                 installForm?.UpdateUser($"Deleted log: {Path.GetFileName(old_log)}", LogTextBox.Action, false);
             }
-            if (File.Exists(log))
+            if (log.Exists(form: installForm))
             {
-                File.Delete(log);
+                log.Delete();
                 installForm?.UpdateUser($"Deleted log: {Path.GetFileName(log)}", LogTextBox.Action, false);
             }
         });
@@ -215,28 +215,28 @@ internal static class SmokeAPI
         => await Task.Run(() =>
         {
             directory.GetCreamApiComponents(out _, out _, out _, out _, out string oldConfig);
-            if (File.Exists(oldConfig))
+            if (oldConfig.Exists(form: installForm))
             {
-                File.Delete(oldConfig);
+                oldConfig.Delete();
                 installForm?.UpdateUser($"Deleted old CreamAPI configuration: {Path.GetFileName(oldConfig)}", LogTextBox.Action, false);
             }
             directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out _, out _, out _, out _, out _);
-            if (File.Exists(api32) && !File.Exists(api32_o))
+            if (api32.Exists(form: installForm) && !api32_o.Exists(form: installForm))
             {
-                File.Move(api32, api32_o!);
+                api32.Move(api32_o!);
                 installForm?.UpdateUser($"Renamed Steamworks: {Path.GetFileName(api32)} -> {Path.GetFileName(api32_o)}", LogTextBox.Action, false);
             }
-            if (File.Exists(api32_o))
+            if (api32_o.Exists(form: installForm))
             {
                 "SmokeAPI.steam_api.dll".Write(api32);
                 installForm?.UpdateUser($"Wrote SmokeAPI: {Path.GetFileName(api32)}", LogTextBox.Action, false);
             }
-            if (File.Exists(api64) && !File.Exists(api64_o))
+            if (api64.Exists(form: installForm) && !api64_o.Exists(form: installForm))
             {
-                File.Move(api64, api64_o!);
+                api64.Move(api64_o!);
                 installForm?.UpdateUser($"Renamed Steamworks: {Path.GetFileName(api64)} -> {Path.GetFileName(api64_o)}", LogTextBox.Action, false);
             }
-            if (File.Exists(api64_o))
+            if (api64_o.Exists(form: installForm))
             {
                 "SmokeAPI.steam_api64.dll".Write(api64);
                 installForm?.UpdateUser($"Wrote SmokeAPI: {Path.GetFileName(api64)}", LogTextBox.Action, false);

@@ -41,7 +41,7 @@ internal static class EpicLibrary
             {
                 if (Program.Canceled)
                     return games;
-                string json = File.ReadAllText(file);
+                string json = file.Read();
                 try
                 {
                     Manifest manifest = JsonSerializer.Deserialize<Manifest>(json);

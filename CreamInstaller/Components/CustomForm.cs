@@ -86,8 +86,7 @@ internal class CustomForm : Form
 
     private void OnActivation(object sender, EventArgs args) => Activate();
 
-    [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static extern void SetWindowPos(nint hWnd, nint hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
 
     internal void BringToFrontWithoutActivation()

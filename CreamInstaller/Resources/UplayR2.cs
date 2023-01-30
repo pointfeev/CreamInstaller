@@ -35,15 +35,15 @@ internal static class UplayR2
         {
             /*if (installForm is not null)
                 installForm.UpdateUser("Generating Uplay R2 Unlocker configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);*/
-            File.Create(config).Close();
+            config.Create(true, installForm);
             StreamWriter writer = new(config, true, Encoding.UTF8);
             WriteConfig(writer, new(blacklistDlc.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String), installForm);
             writer.Flush();
             writer.Close();
         }
-        else if (File.Exists(config))
+        else if (config.Exists(form: installForm))
         {
-            File.Delete(config);
+            config.Delete();
             installForm?.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", LogTextBox.Action, false);
         }
     }
@@ -80,38 +80,38 @@ internal static class UplayR2
         {
             directory.GetUplayR2Components(out string old_api32, out string old_api64, out string api32, out string api32_o, out string api64,
                 out string api64_o, out string config, out string log);
-            if (File.Exists(api32_o))
+            if (api32_o.Exists(form: installForm))
             {
-                string api = File.Exists(old_api32) ? old_api32 : api32;
-                if (File.Exists(api))
+                string api = old_api32.Exists(form: installForm) ? old_api32 : api32;
+                if (api.Exists(form: installForm))
                 {
-                    File.Delete(api);
+                    api.Delete();
                     installForm?.UpdateUser($"Deleted Uplay R2 Unlocker: {Path.GetFileName(api)}", LogTextBox.Action, false);
                 }
-                File.Move(api32_o, api!);
+                api32_o.Move(api!);
                 installForm?.UpdateUser($"Restored Uplay R2: {Path.GetFileName(api32_o)} -> {Path.GetFileName(api)}", LogTextBox.Action, false);
             }
-            if (File.Exists(api64_o))
+            if (api64_o.Exists(form: installForm))
             {
-                string api = File.Exists(old_api64) ? old_api64 : api64;
-                if (File.Exists(api))
+                string api = old_api64.Exists(form: installForm) ? old_api64 : api64;
+                if (api.Exists(form: installForm))
                 {
-                    File.Delete(api);
+                    api.Delete();
                     installForm?.UpdateUser($"Deleted Uplay R2 Unlocker: {Path.GetFileName(api)}", LogTextBox.Action, false);
                 }
-                File.Move(api64_o, api!);
+                api64_o.Move(api!);
                 installForm?.UpdateUser($"Restored Uplay R2: {Path.GetFileName(api64_o)} -> {Path.GetFileName(api)}", LogTextBox.Action, false);
             }
             if (!deleteOthers)
                 return;
-            if (File.Exists(config))
+            if (config.Exists(form: installForm))
             {
-                File.Delete(config);
+                config.Delete();
                 installForm?.UpdateUser($"Deleted configuration: {Path.GetFileName(config)}", LogTextBox.Action, false);
             }
-            if (File.Exists(log))
+            if (log.Exists(form: installForm))
             {
-                File.Delete(log);
+                log.Delete();
                 installForm?.UpdateUser($"Deleted log: {Path.GetFileName(log)}", LogTextBox.Action, false);
             }
         });
@@ -121,24 +121,24 @@ internal static class UplayR2
         {
             directory.GetUplayR2Components(out string old_api32, out string old_api64, out string api32, out string api32_o, out string api64,
                 out string api64_o, out _, out _);
-            string api = File.Exists(old_api32) ? old_api32 : api32;
-            if (File.Exists(api) && !File.Exists(api32_o))
+            string api = old_api32.Exists(form: installForm) ? old_api32 : api32;
+            if (api.Exists(form: installForm) && !api32_o.Exists(form: installForm))
             {
-                File.Move(api, api32_o!);
+                api.Move(api32_o!);
                 installForm?.UpdateUser($"Renamed Uplay R2: {Path.GetFileName(api)} -> {Path.GetFileName(api32_o)}", LogTextBox.Action, false);
             }
-            if (File.Exists(api32_o))
+            if (api32_o.Exists(form: installForm))
             {
                 "UplayR2.upc_r2_loader.dll".Write(api);
                 installForm?.UpdateUser($"Wrote Uplay R2 Unlocker: {Path.GetFileName(api)}", LogTextBox.Action, false);
             }
-            api = File.Exists(old_api64) ? old_api64 : api64;
-            if (File.Exists(api) && !File.Exists(api64_o))
+            api = old_api64.Exists(form: installForm) ? old_api64 : api64;
+            if (api.Exists(form: installForm) && !api64_o.Exists(form: installForm))
             {
-                File.Move(api, api64_o!);
+                api.Move(api64_o!);
                 installForm?.UpdateUser($"Renamed Uplay R2: {Path.GetFileName(api)} -> {Path.GetFileName(api64_o)}", LogTextBox.Action, false);
             }
-            if (File.Exists(api64_o))
+            if (api64_o.Exists(form: installForm))
             {
                 "UplayR2.upc_r2_loader64.dll".Write(api);
                 installForm?.UpdateUser($"Wrote Uplay R2 Unlocker: {Path.GetFileName(api)}", LogTextBox.Action, false);

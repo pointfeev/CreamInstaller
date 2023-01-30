@@ -120,7 +120,7 @@ internal static class SteamCMD
     internal static async Task Setup(IProgress<int> progress)
     {
         await Cleanup();
-        if (!File.Exists(FilePath))
+        if (!FilePath.Exists())
         {
             HttpClient httpClient = HttpClientManager.HttpClient;
             if (httpClient is null)
@@ -128,12 +128,12 @@ internal static class SteamCMD
             byte[] file = await httpClient.GetByteArrayAsync(new Uri("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip"));
             file.Write(ArchivePath);
             ZipFile.ExtractToDirectory(ArchivePath, DirectoryPath);
-            File.Delete(ArchivePath);
+            ArchivePath.Delete();
         }
-        if (!File.Exists(DllPath))
+        if (!DllPath.Exists())
         {
             FileSystemWatcher watcher = new(DirectoryPath) { Filter = "*", IncludeSubdirectories = true, EnableRaisingEvents = true };
-            if (File.Exists(DllPath))
+            if (DllPath.Exists())
                 progress.Report(-15); // update (not used at the moment)
             else
                 progress.Report(-1660); // install
@@ -155,15 +155,15 @@ internal static class SteamCMD
             {
                 if (Directory.Exists(ConfigPath))
                     foreach (string file in Directory.EnumerateFiles(ConfigPath, "*.tmp"))
-                        File.Delete(file);
+                        file.Delete();
                 foreach (string file in Directory.EnumerateFiles(DirectoryPath, "*.old"))
-                    File.Delete(file);
+                    file.Delete();
                 foreach (string file in Directory.EnumerateFiles(DirectoryPath, "*.delete"))
-                    File.Delete(file);
+                    file.Delete();
                 foreach (string file in Directory.EnumerateFiles(DirectoryPath, "*.crash"))
-                    File.Delete(file);
+                    file.Delete();
                 foreach (string file in Directory.EnumerateFiles(DirectoryPath, "*.ntfs_transaction_failed"))
-                    File.Delete(file);
+                    file.Delete();
                 if (Directory.Exists(AppCachePath))
                     Directory.Delete(AppCachePath, true); // this is definitely needed, so SteamCMD gets the latest information for us
                 if (Directory.Exists(DumpsPath))
@@ -183,21 +183,12 @@ internal static class SteamCMD
     {
         if (Program.Canceled)
             return null;
-        string output;
         string appUpdateFile = $@"{AppInfoPath}\{appId}.vdf";
     restart:
         if (Program.Canceled)
             return null;
-        if (File.Exists(appUpdateFile))
-            try
-            {
-                output = await File.ReadAllTextAsync(appUpdateFile, Encoding.UTF8);
-            }
-            catch
-            {
-                goto restart;
-            }
-        else
+        string output = appUpdateFile.Read();
+        if (output is null)
         {
             output = await Run(appId) ?? "";
             int openBracket = output.IndexOf("{", StringComparison.Ordinal);
@@ -206,14 +197,7 @@ internal static class SteamCMD
             {
                 output = $"\"{appId}\"\n" + output[openBracket..(1 + closeBracket)];
                 output = output.Replace("ERROR! Failed to install app '4' (Invalid platform)", "");
-                try
-                {
-                    await File.WriteAllTextAsync(appUpdateFile, output, Encoding.UTF8);
-                }
-                catch
-                {
-                    goto restart;
-                }
+                appUpdateFile.Write(output);
             }
             else
                 goto restart;
@@ -222,7 +206,7 @@ internal static class SteamCMD
             return null;
         if (!ValveDataFile.TryDeserialize(output, out VProperty appInfo) || appInfo.Value is VValue)
         {
-            File.Delete(appUpdateFile);
+            appUpdateFile.Delete();
             goto restart;
         }
         if (appInfo.Value.Children().ToList().Count == 0)
@@ -237,10 +221,8 @@ internal static class SteamCMD
             return appInfo;
         List<string> dlcAppIds = await ParseDlcAppIds(appInfo);
         foreach (string dlcAppUpdateFile in dlcAppIds.Select(id => $@"{AppInfoPath}\{id}.vdf"))
-            if (File.Exists(dlcAppUpdateFile))
-                File.Delete(dlcAppUpdateFile);
-        if (File.Exists(appUpdateFile))
-            File.Delete(appUpdateFile);
+            dlcAppUpdateFile.Delete();
+        appUpdateFile.Delete();
         goto restart;
     }
 

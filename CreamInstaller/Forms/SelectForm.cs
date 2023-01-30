@@ -126,7 +126,7 @@ internal sealed partial class SelectForm : CustomForm
         List<Task> appTasks = new();
         if (programsToScan.Any(c => c.platform is Platform.Paradox))
         {
-            List<string> dllDirectories = await ParadoxLauncher.InstallPath.GetDllDirectoriesFromGameDirectory(Platform.Paradox);
+            List<string> dllDirectories = await ParadoxLauncher.InstallPath.GetDllDirectoriesFromGameDirectory(Platform.Paradox, this);
             if (dllDirectories is not null)
             {
                 ProgramSelection selection = ProgramSelection.FromPlatformId(Platform.Paradox, "PL");
@@ -169,7 +169,7 @@ internal sealed partial class SelectForm : CustomForm
                 {
                     if (Program.Canceled)
                         return;
-                    List<string> dllDirectories = await gameDirectory.GetDllDirectoriesFromGameDirectory(Platform.Steam);
+                    List<string> dllDirectories = await gameDirectory.GetDllDirectoriesFromGameDirectory(Platform.Steam, this);
                     if (dllDirectories is null)
                     {
                         Interlocked.Decrement(ref steamGamesToCheck);
@@ -325,7 +325,7 @@ internal sealed partial class SelectForm : CustomForm
                 {
                     if (Program.Canceled)
                         return;
-                    List<string> dllDirectories = await directory.GetDllDirectoriesFromGameDirectory(Platform.Epic);
+                    List<string> dllDirectories = await directory.GetDllDirectoriesFromGameDirectory(Platform.Epic, this);
                     if (dllDirectories is null)
                     {
                         RemoveFromRemainingGames(name);
@@ -447,7 +447,7 @@ internal sealed partial class SelectForm : CustomForm
                 {
                     if (Program.Canceled)
                         return;
-                    List<string> dllDirectories = await gameDirectory.GetDllDirectoriesFromGameDirectory(Platform.Ubisoft);
+                    List<string> dllDirectories = await gameDirectory.GetDllDirectoriesFromGameDirectory(Platform.Ubisoft, this);
                     if (dllDirectories is null)
                     {
                         RemoveFromRemainingGames(name);
@@ -515,7 +515,7 @@ internal sealed partial class SelectForm : CustomForm
         resetKoaloaderButton.Enabled = false;
         progressLabel.Text = "Waiting for user to select which programs/games to scan . . .";
         ShowProgressBar();
-        await ProgramData.Setup();
+        await ProgramData.Setup(this);
         bool scan = forceScan;
         if (!scan && (programsToScan is null || !programsToScan.Any() || forceProvideChoices))
         {
@@ -748,10 +748,10 @@ internal sealed partial class SelectForm : CustomForm
             string appInfoVDF = $@"{SteamCMD.AppInfoPath}\{id}.vdf";
             string appInfoJSON = $@"{SteamCMD.AppInfoPath}\{id}.json";
             string cooldown = $@"{ProgramData.CooldownPath}\{id}.txt";
-            if (File.Exists(appInfoVDF) || File.Exists(appInfoJSON))
+            if (appInfoVDF.Exists(form: this) || appInfoJSON.Exists(form: this))
             {
                 List<ContextMenuItem> queries = new();
-                if (File.Exists(appInfoJSON))
+                if (appInfoJSON.Exists(form: this))
                 {
                     string platformString = selection is null || selection.Platform is Platform.Steam
                         ? "Steam Store "
@@ -760,7 +760,7 @@ internal sealed partial class SelectForm : CustomForm
                             : "";
                     queries.Add(new($"Open {platformString}Query", "Notepad", (_, _) => Diagnostics.OpenFileInNotepad(appInfoJSON)));
                 }
-                if (File.Exists(appInfoVDF))
+                if (appInfoVDF.Exists(form: this))
                     queries.Add(new("Open SteamCMD Query", "Notepad", (_, _) => Diagnostics.OpenFileInNotepad(appInfoVDF)));
                 if (queries.Any())
                 {
@@ -771,7 +771,7 @@ internal sealed partial class SelectForm : CustomForm
                     {
                         try
                         {
-                            File.Delete(appInfoVDF);
+                            appInfoVDF.Delete();
                         }
                         catch
                         {
@@ -779,7 +779,7 @@ internal sealed partial class SelectForm : CustomForm
                         }
                         try
                         {
-                            File.Delete(appInfoJSON);
+                            appInfoJSON.Delete();
                         }
                         catch
                         {
@@ -787,7 +787,7 @@ internal sealed partial class SelectForm : CustomForm
                         }
                         try
                         {
-                            File.Delete(cooldown);
+                            cooldown.Delete();
                         }
                         catch
                         {
@@ -819,8 +819,9 @@ internal sealed partial class SelectForm : CustomForm
                     {
                         directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string old_config,
                             out string config, out string old_log, out string log, out string cache);
-                        if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(old_config)
-                         || File.Exists(config) || File.Exists(old_log) || File.Exists(log) || File.Exists(cache))
+                        if (api32.Exists(form: this) || api32_o.Exists(form: this) || api64.Exists(form: this) || api64_o.Exists(form: this)
+                         || old_config.Exists(form: this) || config.Exists(form: this) || old_log.Exists(form: this) || log.Exists(form: this)
+                         || cache.Exists(form: this))
                             items.Add(new ContextMenuItem($"Open Steamworks Directory #{++steam}", "File Explorer",
                                 (_, _) => Diagnostics.OpenDirectoryInFileExplorer(directory)));
                     }
@@ -829,7 +830,8 @@ internal sealed partial class SelectForm : CustomForm
                     {
                         directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config,
                             out string log);
-                        if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config) || File.Exists(log))
+                        if (api32.Exists(form: this) || api32_o.Exists(form: this) || api64.Exists(form: this) || api64_o.Exists(form: this)
+                         || config.Exists(form: this) || log.Exists(form: this))
                             items.Add(new ContextMenuItem($"Open EOS Directory #{++epic}", "File Explorer",
                                 (_, _) => Diagnostics.OpenDirectoryInFileExplorer(directory)));
                     }
@@ -838,13 +840,14 @@ internal sealed partial class SelectForm : CustomForm
                     {
                         directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config,
                             out string log);
-                        if (File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64) || File.Exists(api64_o) || File.Exists(config) || File.Exists(log))
+                        if (api32.Exists(form: this) || api32_o.Exists(form: this) || api64.Exists(form: this) || api64_o.Exists(form: this)
+                         || config.Exists(form: this) || log.Exists(form: this))
                             items.Add(new ContextMenuItem($"Open Uplay R1 Directory #{++r1}", "File Explorer",
                                 (_, _) => Diagnostics.OpenDirectoryInFileExplorer(directory)));
                         directory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config,
                             out log);
-                        if (File.Exists(old_api32) || File.Exists(old_api64) || File.Exists(api32) || File.Exists(api32_o) || File.Exists(api64)
-                         || File.Exists(api64_o) || File.Exists(config) || File.Exists(log))
+                        if (old_api32.Exists(form: this) || old_api64.Exists(form: this) || api32.Exists(form: this) || api32_o.Exists(form: this)
+                         || api64.Exists(form: this) || api64_o.Exists(form: this) || config.Exists(form: this) || log.Exists(form: this))
                             items.Add(new ContextMenuItem($"Open Uplay R2 Directory #{++r2}", "File Explorer",
                                 (_, _) => Diagnostics.OpenDirectoryInFileExplorer(directory)));
                     }

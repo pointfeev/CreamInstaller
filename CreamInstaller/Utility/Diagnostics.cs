@@ -7,28 +7,28 @@ namespace CreamInstaller.Utility;
 
 internal static class Diagnostics
 {
-    private static string notepadPlusPlusPath;
+    private static string nppPath;
 
-    internal static string NotepadPlusPlusPath
+    private static string NppPath
     {
         get
         {
-            notepadPlusPlusPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Notepad++", "", null) as string;
-            notepadPlusPlusPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432NODE\Notepad++", "", null) as string;
-            return notepadPlusPlusPath;
+            nppPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Notepad++", "", null) as string;
+            nppPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432NODE\Notepad++", "", null) as string;
+            return nppPath;
         }
     }
 
     internal static string GetNotepadPath()
     {
-        string npp = NotepadPlusPlusPath + @"\notepad++.exe";
-        return File.Exists(npp) ? npp : Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\notepad.exe";
+        string npp = NppPath + @"\notepad++.exe";
+        return npp.Exists() ? npp : Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\notepad.exe";
     }
 
     internal static void OpenFileInNotepad(string path)
     {
-        string npp = NotepadPlusPlusPath + @"\notepad++.exe";
-        if (File.Exists(npp))
+        string npp = NppPath + @"\notepad++.exe";
+        if (npp.Exists())
             OpenFileInNotepadPlusPlus(npp, path);
         else
             OpenFileInWindowsNotepad(path);

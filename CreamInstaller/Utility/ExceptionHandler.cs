@@ -24,9 +24,8 @@ internal static class ExceptionHandler
             if (stackTrace is not null && stackTrace.Length > 0)
             {
                 _ = output.Append(e.GetType() + (": " + e.Message));
-                for (int i = 0; i < stackTrace.Length; i++)
+                foreach (string line in stackTrace)
                 {
-                    string line = stackTrace[i];
                     int atNum = line.IndexOf("at ", StringComparison.Ordinal);
                     int inNum = line.IndexOf("in ", StringComparison.Ordinal);
                     int ciNum = line.LastIndexOf(@"CreamInstaller\", StringComparison.Ordinal);
@@ -42,26 +41,24 @@ internal static class ExceptionHandler
             e = e.InnerException;
             stackDepth++;
         }
+        string outputString = output.ToString();
+        if (string.IsNullOrWhiteSpace(outputString))
+            outputString = e?.ToString() ?? "Unknown exception";
         using DialogForm dialogForm = new(form ?? Form.ActiveForm);
-        return dialogForm.Show(SystemIcons.Error, output.ToString(), acceptButtonText, cancelButtonText, caption) == DialogResult.OK;
+        return dialogForm.Show(SystemIcons.Error, outputString, acceptButtonText, cancelButtonText, caption) == DialogResult.OK;
     }
 
     internal static void HandleFatalException(this Exception e)
     {
-        bool? restart = e?.HandleException(caption: Program.Name + " encountered a fatal exception", acceptButtonText: "Restart");
-        if (restart.HasValue && restart.Value)
-            Application.Restart();
+        e.HandleException(caption: Program.Name + " encountered a fatal exception", acceptButtonText: "OK", cancelButtonText: null);
         Application.Exit();
     }
 }
 
 public class CustomMessageException : Exception
 {
-    public CustomMessageException() => Message = "CustomMessageException";
-
     public CustomMessageException(string message) : base(message) => Message = message;
 
-    public CustomMessageException(string message, Exception e) : base(message, e) => Message = message;
     public override string Message { get; }
 
     public override string ToString() => Message;
