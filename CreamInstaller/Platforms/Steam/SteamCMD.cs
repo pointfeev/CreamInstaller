@@ -190,49 +190,67 @@ internal static class SteamCMD
 
     internal static async Task<VProperty> GetAppInfo(string appId, string branch = "public", int buildId = 0)
     {
-        if (Program.Canceled)
-            return null;
-        string appUpdateFile = $@"{AppInfoPath}\{appId}.vdf";
-    restart:
-        if (Program.Canceled)
-            return null;
-        string output = appUpdateFile.ReadFile();
-        if (output is null)
+        int attempts = 0;
+        while (!Program.Canceled)
         {
-            output = await Run(appId) ?? "";
-            int openBracket = output.IndexOf("{", StringComparison.Ordinal);
-            int closeBracket = output.LastIndexOf("}", StringComparison.Ordinal);
-            if (openBracket != -1 && closeBracket != -1 && closeBracket > openBracket)
+            attempts++;
+            if (attempts > 10)
             {
-                output = $"\"{appId}\"\n" + output[openBracket..(1 + closeBracket)];
-                output = output.Replace("ERROR! Failed to install app '4' (Invalid platform)", "");
-                appUpdateFile.WriteFile(output);
+#if DEBUG
+                DebugForm.Current.Log("Failed to query SteamCMD after 10 tries: " + appId + " (" + branch + ")", LogTextBox.Warning);
+#endif
+                break;
             }
-            else
-                goto restart;
-        }
-        if (Program.Canceled)
-            return null;
-        if (!ValveDataFile.TryDeserialize(output, out VProperty appInfo) || appInfo.Value is VValue)
-        {
+            string appUpdateFile = $@"{AppInfoPath}\{appId}.vdf";
+            string output = appUpdateFile.ReadFile();
+            if (output is null)
+            {
+                output = await Run(appId) ?? "";
+                int openBracket = output.IndexOf("{", StringComparison.Ordinal);
+                int closeBracket = output.LastIndexOf("}", StringComparison.Ordinal);
+                if (openBracket != -1 && closeBracket != -1 && closeBracket > openBracket)
+                {
+                    output = $"\"{appId}\"\n" + output[openBracket..(1 + closeBracket)];
+                    output = output.Replace("ERROR! Failed to install app '4' (Invalid platform)", "");
+                    appUpdateFile.WriteFile(output);
+                }
+                else
+                {
+#if DEBUG
+                    DebugForm.Current.Log("SteamCMD query failed on attempt #" + attempts + " for " + appId + " (" + branch + "): Bad output",
+                        LogTextBox.Warning);
+#endif
+                    continue;
+                }
+            }
+            if (!ValveDataFile.TryDeserialize(output, out VProperty appInfo) || appInfo.Value is VValue)
+            {
+                appUpdateFile.DeleteFile();
+#if DEBUG
+                DebugForm.Current.Log("SteamCMD query failed on attempt #" + attempts + " for " + appId + " (" + branch + "): Deserialization failed",
+                    LogTextBox.Warning);
+#endif
+                continue;
+            }
+            if (appInfo.Value.Children().ToList().Count == 0)
+                return appInfo;
+            VToken type = appInfo.Value.GetChild("common")?.GetChild("type");
+            if (type is not null && type.ToString() != "Game")
+                return appInfo;
+            string buildid = appInfo.Value.GetChild("depots")?.GetChild("branches")?.GetChild(branch)?.GetChild("buildid")?.ToString();
+            if (buildid is null && type is not null)
+                return appInfo;
+            if (type is not null && (!int.TryParse(buildid, out int gamebuildId) || gamebuildId >= buildId))
+                return appInfo;
+            List<string> dlcAppIds = await ParseDlcAppIds(appInfo);
+            foreach (string dlcAppUpdateFile in dlcAppIds.Select(id => $@"{AppInfoPath}\{id}.vdf"))
+                dlcAppUpdateFile.DeleteFile();
             appUpdateFile.DeleteFile();
-            goto restart;
+#if DEBUG
+            DebugForm.Current.Log("SteamCMD query skipped on attempt #" + attempts + " for " + appId + " (" + branch + "): Outdated cache", LogTextBox.Warning);
+#endif
         }
-        if (appInfo.Value.Children().ToList().Count == 0)
-            return appInfo;
-        VToken type = appInfo.Value.GetChild("common")?.GetChild("type");
-        if (type is not null && type.ToString() != "Game")
-            return appInfo;
-        string buildid = appInfo.Value.GetChild("depots")?.GetChild("branches")?.GetChild(branch)?.GetChild("buildid")?.ToString();
-        if (buildid is null && type is not null)
-            return appInfo;
-        if (type is not null && (!int.TryParse(buildid, out int gamebuildId) || gamebuildId >= buildId))
-            return appInfo;
-        List<string> dlcAppIds = await ParseDlcAppIds(appInfo);
-        foreach (string dlcAppUpdateFile in dlcAppIds.Select(id => $@"{AppInfoPath}\{id}.vdf"))
-            dlcAppUpdateFile.DeleteFile();
-        appUpdateFile.DeleteFile();
-        goto restart;
+        return null;
     }
 
     internal static async Task<List<string>> ParseDlcAppIds(VProperty appInfo)

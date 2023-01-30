@@ -69,7 +69,15 @@ internal static class SteamLibrary
                     continue;
                 if (!int.TryParse(buildId, out int buildIdInt))
                     continue;
-                string branch = result.Value.GetChild("UserConfig")?.GetChild("betakey")?.ToString();
+                VToken userConfig = result.Value.GetChild("UserConfig");
+                string branch = userConfig?.GetChild("BetaKey")?.ToString();
+                branch ??= userConfig?.GetChild("betakey")?.ToString();
+                if (branch is null)
+                {
+                    VToken mountedConfig = result.Value.GetChild("MountedConfig");
+                    branch = mountedConfig?.GetChild("BetaKey")?.ToString();
+                    branch ??= mountedConfig?.GetChild("betakey")?.ToString();
+                }
                 if (string.IsNullOrWhiteSpace(branch))
                     branch = "public";
                 games.Add((appId, name, branch, buildIdInt, gameDirectory));
