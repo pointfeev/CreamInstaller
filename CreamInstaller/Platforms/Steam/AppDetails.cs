@@ -1,36 +1,49 @@
-﻿#pragma warning disable IDE1006 // Naming Styles
-#pragma warning disable CA1002 // Do not expose generic lists
-#pragma warning disable CA1707 // Identifiers should not contain underscores
-#pragma warning disable CA2227 // Collection properties should be read only
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace CreamInstaller.Platforms.Steam;
 
+public class AppFullGame
+{
+    [JsonProperty(PropertyName = "appid")] public string AppId { get; set; }
+
+    [JsonProperty(PropertyName = "name")] public string Name { get; set; }
+}
+
 public class AppData
 {
-    public string type { get; set; }
+    [JsonProperty(PropertyName = "type")] public string Type { get; set; }
 
-    public string name { get; set; }
+    [JsonProperty(PropertyName = "name")] public string Name { get; set; }
 
-    public int steam_appid { get; set; }
+    [JsonProperty(PropertyName = "steam_appid")]
+    public int SteamAppId { get; set; }
 
-    public List<int> dlc { get; set; }
+    [JsonProperty(PropertyName = "fullgame")]
+    public AppFullGame FullGame { get; set; }
 
-    public string header_image { get; set; }
+    [JsonProperty(PropertyName = "dlc")] public List<int> DLC { get; set; }
 
-    public string website { get; set; }
+    [JsonProperty(PropertyName = "header_image")]
+    public string HeaderImage { get; set; }
 
-    public List<string> developers { get; set; }
+    [JsonProperty(PropertyName = "website")]
+    public string Website { get; set; }
 
-    public List<string> publishers { get; set; }
+    [JsonProperty(PropertyName = "developers")]
+    public List<string> Developers { get; set; }
 
-    public List<int> packages { get; set; }
+    [JsonProperty(PropertyName = "publishers")]
+    public List<string> Publishers { get; set; }
+
+    [JsonProperty(PropertyName = "packages")]
+    public List<int> Packages { get; set; }
 }
 
 public class AppDetails
 {
-    public bool success { get; set; }
+    [JsonProperty(PropertyName = "success")]
+    public bool Success { get; set; }
 
-    public AppData data { get; set; }
+    [JsonProperty(PropertyName = "data")] public AppData Data { get; set; }
 }

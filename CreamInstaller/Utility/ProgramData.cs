@@ -17,7 +17,7 @@ internal static class ProgramData
     internal static readonly string AppInfoPath = DirectoryPath + @"\appinfo";
     private static readonly string AppInfoVersionPath = AppInfoPath + @"\version.txt";
 
-    private static readonly Version MinimumAppInfoVersion = Version.Parse("3.2.0.0");
+    private static readonly Version MinimumAppInfoVersion = Version.Parse("4.7.0.0");
 
     internal static readonly string CooldownPath = DirectoryPath + @"\cooldown";
 

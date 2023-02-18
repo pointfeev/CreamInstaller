@@ -22,9 +22,9 @@ internal static class SteamStore
         => await Task.Run(() =>
         {
             List<string> dlcIds = new();
-            if (appData.dlc is null)
+            if (appData.DLC is null)
                 return dlcIds;
-            dlcIds.AddRange(from appId in appData.dlc where appId > 0 select appId.ToString(CultureInfo.InvariantCulture));
+            dlcIds.AddRange(from appId in appData.DLC where appId > 0 select appId.ToString(CultureInfo.InvariantCulture));
             return dlcIds;
         });
 
@@ -48,8 +48,8 @@ internal static class SteamStore
                                 AppDetails appDetails = JsonConvert.DeserializeObject<AppDetails>(app.Value.ToString());
                                 if (appDetails is not null)
                                 {
-                                    AppData data = appDetails.data;
-                                    if (!appDetails.success)
+                                    AppData data = appDetails.Data;
+                                    if (!appDetails.Success)
                                     {
 #if DEBUG
                                         DebugForm.Current.Log(

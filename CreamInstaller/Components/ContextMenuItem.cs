@@ -98,20 +98,27 @@ internal sealed class ContextMenuItem : ToolStripMenuItem
     private static async Task TryImageIdentifierInfo(ContextMenuItem item, (string id, string iconUrl) imageIdentifierInfo, Action onFail = null)
         => await Task.Run(async () =>
         {
-            (string id, string iconUrl) = imageIdentifierInfo;
-            string imageIdentifier = "Icon_" + id;
-            if (Images.TryGetValue(imageIdentifier, out Image image) && image is not null)
-                item.Image = image;
-            else
+            try
             {
-                image = await HttpClientManager.GetImageFromUrl(iconUrl);
-                if (image is not null)
-                {
-                    Images[imageIdentifier] = image;
+                (string id, string iconUrl) = imageIdentifierInfo;
+                string imageIdentifier = "Icon_" + id;
+                if (Images.TryGetValue(imageIdentifier, out Image image) && image is not null)
                     item.Image = image;
-                }
                 else
-                    onFail?.Invoke();
+                {
+                    image = await HttpClientManager.GetImageFromUrl(iconUrl);
+                    if (image is not null)
+                    {
+                        Images[imageIdentifier] = image;
+                        item.Image = image;
+                    }
+                    else
+                        onFail?.Invoke();
+                }
+            }
+            catch
+            {
+                // ignored
             }
         });
 

@@ -208,15 +208,17 @@ internal sealed partial class SelectForm : CustomForm
                                 while (!Program.Canceled && steamGamesToCheck > 0);
                                 if (Program.Canceled)
                                     return;
+                                string fullGameAppId = null;
                                 string dlcName = null;
                                 string dlcIcon = null;
                                 bool onSteamStore = false;
                                 AppData dlcAppData = await SteamStore.QueryStoreAPI(dlcAppId, true);
                                 if (dlcAppData is not null)
                                 {
-                                    dlcName = dlcAppData.name;
-                                    dlcIcon = dlcAppData.header_image;
+                                    dlcName = dlcAppData.Name;
+                                    dlcIcon = dlcAppData.HeaderImage;
                                     onSteamStore = true;
+                                    fullGameAppId = dlcAppData.FullGame?.AppId;
                                 }
                                 else
                                 {
@@ -229,7 +231,38 @@ internal sealed partial class SelectForm : CustomForm
                                         dlcIconStaticId ??= dlcAppInfo.Value.GetChild("common")?.GetChild("logo")?.ToString();
                                         if (dlcIconStaticId is not null)
                                             dlcIcon = IconGrabber.SteamAppImagesPath + @$"\{dlcAppId}\{dlcIconStaticId}.jpg";
+                                        fullGameAppId = dlcAppInfo.Value.GetChild("common")?.GetChild("parent")?.ToString();
                                     }
+                                }
+                                if (fullGameAppId != null && fullGameAppId != appId)
+                                {
+                                    string fullGameName = null;
+                                    string fullGameIcon = null;
+                                    bool fullGameOnSteamStore = false;
+                                    AppData fullGameAppData = await SteamStore.QueryStoreAPI(fullGameAppId, true);
+                                    if (fullGameAppData is not null)
+                                    {
+                                        fullGameName = fullGameAppData.Name;
+                                        fullGameIcon = fullGameAppData.HeaderImage;
+                                        fullGameOnSteamStore = true;
+                                    }
+                                    else
+                                    {
+                                        VProperty fullGameAppInfo = await SteamCMD.GetAppInfo(fullGameAppId);
+                                        if (fullGameAppInfo is not null)
+                                        {
+                                            fullGameName = fullGameAppInfo.Value.GetChild("common")?.GetChild("name")?.ToString();
+                                            string fullGameIconStaticId = fullGameAppInfo.Value.GetChild("common")?.GetChild("icon")?.ToString();
+                                            fullGameIconStaticId ??= fullGameAppInfo.Value.GetChild("common")?.GetChild("logo_small")?.ToString();
+                                            fullGameIconStaticId ??= fullGameAppInfo.Value.GetChild("common")?.GetChild("logo")?.ToString();
+                                            if (fullGameIconStaticId is not null)
+                                                dlcIcon = IconGrabber.SteamAppImagesPath + @$"\{fullGameAppId}\{fullGameIconStaticId}.jpg";
+                                        }
+                                    }
+                                    if (Program.Canceled)
+                                        return;
+                                    if (!string.IsNullOrWhiteSpace(fullGameName))
+                                        dlc[fullGameAppId] = (fullGameOnSteamStore ? DlcType.Steam : DlcType.SteamHidden, fullGameName, fullGameIcon);
                                 }
                                 if (Program.Canceled)
                                     return;
@@ -259,17 +292,17 @@ internal sealed partial class SelectForm : CustomForm
                     if (koaloaderAllCheckBox.Checked)
                         selection.Koaloader = true;
                     selection.Id = appId;
-                    selection.Name = appData?.name ?? name;
+                    selection.Name = appData?.Name ?? name;
                     selection.RootDirectory = gameDirectory;
                     selection.ExecutableDirectories = await SteamLibrary.GetExecutableDirectories(selection.RootDirectory);
                     selection.DllDirectories = dllDirectories;
                     selection.Platform = Platform.Steam;
                     selection.ProductUrl = "https://store.steampowered.com/app/" + appId;
                     selection.IconUrl = IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value.GetChild("common")?.GetChild("icon")}.jpg";
-                    selection.SubIconUrl = appData?.header_image ?? IconGrabber.SteamAppImagesPath
+                    selection.SubIconUrl = appData?.HeaderImage ?? IconGrabber.SteamAppImagesPath
                       + @$"\{appId}\{appInfo?.Value.GetChild("common")?.GetChild("clienticon")}.ico";
-                    selection.Publisher = appData?.publishers[0] ?? appInfo?.Value.GetChild("extended")?.GetChild("publisher")?.ToString();
-                    selection.WebsiteUrl = appData?.website;
+                    selection.Publisher = appData?.Publishers[0] ?? appInfo?.Value.GetChild("extended")?.GetChild("publisher")?.ToString();
+                    selection.WebsiteUrl = appData?.Website;
                     if (Program.Canceled)
                         return;
                     selectionTreeView.Invoke(delegate
@@ -279,7 +312,7 @@ internal sealed partial class SelectForm : CustomForm
                         TreeNode programNode = treeNodes.Find(s => s.Tag is Platform.Steam && s.Name == appId) ?? new TreeNode();
                         programNode.Tag = selection.Platform;
                         programNode.Name = appId;
-                        programNode.Text = appData?.name ?? name;
+                        programNode.Text = appData?.Name ?? name;
                         programNode.Checked = selection.Enabled;
                         if (programNode.TreeView is null)
                             _ = selectionTreeView.Nodes.Add(programNode);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
@@ -27,6 +28,19 @@ internal static class HttpClientManager
             using HttpResponseMessage response = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             _ = response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
+        }
+        catch (HttpRequestException e)
+        {
+            if (e.StatusCode != HttpStatusCode.TooManyRequests)
+            {
+                DebugForm.Current.Log("Get request failed to " + url + ": " + e, LogTextBox.Warning);
+                return null;
+            }
+#if DEBUG
+            DebugForm.Current.Log("Too many requests to " + url, LogTextBox.Error);
+#endif
+            // do something special?
+            return null;
         }
 #if DEBUG
         catch (Exception e)
