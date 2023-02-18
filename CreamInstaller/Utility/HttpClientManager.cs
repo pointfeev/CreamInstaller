@@ -33,7 +33,9 @@ internal static class HttpClientManager
         {
             if (e.StatusCode != HttpStatusCode.TooManyRequests)
             {
+#if DEBUG
                 DebugForm.Current.Log("Get request failed to " + url + ": " + e, LogTextBox.Warning);
+#endif
                 return null;
             }
 #if DEBUG
