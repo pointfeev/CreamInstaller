@@ -12,16 +12,17 @@ internal sealed partial class SelectDialogForm : CustomForm
     private readonly List<(Platform platform, string id, string name)> selected = new();
     internal SelectDialogForm(IWin32Window owner) : base(owner) => InitializeComponent();
 
-    internal List<(Platform platform, string id, string name)> QueryUser(string groupBoxText,
-        List<(Platform platform, string id, string name, bool alreadySelected)> choices)
+    internal DialogResult QueryUser(string groupBoxText, List<(Platform platform, string id, string name, bool alreadySelected)> potentialChoices,
+        out List<(Platform platform, string id, string name)> choices)
     {
-        if (!choices.Any())
-            return null;
+        choices = null;
+        if (!potentialChoices.Any())
+            return DialogResult.Cancel;
         groupBox.Text = groupBoxText;
         allCheckBox.Enabled = false;
         acceptButton.Enabled = false;
         selectionTreeView.AfterCheck += OnTreeNodeChecked;
-        foreach ((Platform platform, string id, string name, bool alreadySelected) in choices)
+        foreach ((Platform platform, string id, string name, bool alreadySelected) in potentialChoices)
         {
             TreeNode node = new() { Tag = platform, Name = id, Text = name, Checked = alreadySelected };
             OnTreeNodeChecked(node);
@@ -38,7 +39,8 @@ internal sealed partial class SelectDialogForm : CustomForm
         loadButton.Enabled = ProgramData.ReadProgramChoices() is not null;
         OnResize(null, null);
         Resize += OnResize;
-        return ShowDialog() == DialogResult.OK ? selected : null;
+        choices = selected;
+        return ShowDialog();
     }
 
     private void OnTreeNodeChecked(object sender, TreeViewEventArgs e)

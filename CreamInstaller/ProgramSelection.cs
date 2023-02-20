@@ -114,10 +114,8 @@ internal sealed class ProgramSelection
 
     internal void ToggleDlc(string dlcId, bool enabled)
     {
-        foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in AllDlc)
+        foreach ((string appId, (DlcType type, string name, string icon) dlcApp) in AllDlc)
         {
-            string appId = pair.Key;
-            (DlcType type, string name, string icon) dlcApp = pair.Value;
             if (appId != dlcId)
                 continue;
             Toggle(appId, dlcApp, enabled);
