@@ -26,9 +26,11 @@ namespace CreamInstaller.Forms
             this.descriptionLabel = new System.Windows.Forms.LinkLabel();
             this.icon = new System.Windows.Forms.PictureBox();
             this.descriptionPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.descriptionLabelPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.buttonPanel = new System.Windows.Forms.FlowLayoutPanel();
             ((System.ComponentModel.ISupportInitialize)(this.icon)).BeginInit();
             this.descriptionPanel.SuspendLayout();
+            this.descriptionLabelPanel.SuspendLayout();
             this.buttonPanel.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -67,7 +69,7 @@ namespace CreamInstaller.Forms
             this.descriptionLabel.AutoSize = true;
             this.descriptionLabel.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.descriptionLabel.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
-            this.descriptionLabel.Location = new System.Drawing.Point(75, 12);
+            this.descriptionLabel.Location = new System.Drawing.Point(9, 0);
             this.descriptionLabel.Margin = new System.Windows.Forms.Padding(9, 0, 3, 0);
             this.descriptionLabel.Name = "descriptionLabel";
             this.descriptionLabel.Size = new System.Drawing.Size(94, 15);
@@ -85,11 +87,10 @@ namespace CreamInstaller.Forms
             // 
             // descriptionPanel
             // 
-            this.descriptionPanel.AutoScroll = true;
             this.descriptionPanel.AutoSize = true;
             this.descriptionPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.descriptionPanel.Controls.Add(this.icon);
-            this.descriptionPanel.Controls.Add(this.descriptionLabel);
+            this.descriptionPanel.Controls.Add(this.descriptionLabelPanel);
             this.descriptionPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.descriptionPanel.Location = new System.Drawing.Point(0, 0);
             this.descriptionPanel.Margin = new System.Windows.Forms.Padding(0);
@@ -97,6 +98,19 @@ namespace CreamInstaller.Forms
             this.descriptionPanel.Padding = new System.Windows.Forms.Padding(12, 12, 12, 6);
             this.descriptionPanel.Size = new System.Drawing.Size(384, 73);
             this.descriptionPanel.TabIndex = 5;
+            // 
+            // descriptionLabelPanel
+            // 
+            this.descriptionLabelPanel.AutoScroll = true;
+            this.descriptionLabelPanel.AutoSize = true;
+            this.descriptionLabelPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.descriptionLabelPanel.Controls.Add(this.descriptionLabel);
+            this.descriptionLabelPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.descriptionLabelPanel.Location = new System.Drawing.Point(66, 12);
+            this.descriptionLabelPanel.Margin = new System.Windows.Forms.Padding(0);
+            this.descriptionLabelPanel.Name = "descriptionLabelPanel";
+            this.descriptionLabelPanel.Size = new System.Drawing.Size(106, 54);
+            this.descriptionLabelPanel.TabIndex = 6;
             // 
             // buttonPanel
             // 
@@ -135,6 +149,8 @@ namespace CreamInstaller.Forms
             ((System.ComponentModel.ISupportInitialize)(this.icon)).EndInit();
             this.descriptionPanel.ResumeLayout(false);
             this.descriptionPanel.PerformLayout();
+            this.descriptionLabelPanel.ResumeLayout(false);
+            this.descriptionLabelPanel.PerformLayout();
             this.buttonPanel.ResumeLayout(false);
             this.buttonPanel.PerformLayout();
             this.ResumeLayout(false);
@@ -150,5 +166,6 @@ namespace CreamInstaller.Forms
         private FlowLayoutPanel descriptionPanel;
         private FlowLayoutPanel buttonPanel;
         private LinkLabel descriptionLabel;
+        private FlowLayoutPanel descriptionLabelPanel;
     }
 }
