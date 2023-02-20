@@ -573,7 +573,7 @@ internal sealed partial class SelectForm : CustomForm
                 using SelectDialogForm form = new(this);
                 List<(Platform platform, string id, string name)> choices = form.QueryUser("Choose which programs and/or games to scan for DLC:", gameChoices);
                 scan = choices is not null && choices.Any();
-                const string retry = "\n\nPress the \"Rescan Programs / Games\" button to re-choose.";
+                const string retry = "\n\nPress the \"Rescan\" button to re-choose.";
                 if (scan)
                 {
                     programsToScan = choices;
