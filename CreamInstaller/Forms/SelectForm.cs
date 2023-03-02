@@ -650,6 +650,7 @@ internal sealed partial class SelectForm : CustomForm
                     if (!Program.Canceled)
                         OnUninstall(null, null);
                     ProgramSelection.All.Clear();
+                    programsToScan = null;
                 }
                 else
                     scan = selectResult == DialogResult.OK && choices is not null && choices.Any();
