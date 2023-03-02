@@ -645,23 +645,22 @@ internal sealed partial class SelectForm : CustomForm
                         progressBar.Value = p;
                     };
                     progressLabel.Text = "Quickly gathering games for uninstallation . . . ";
-                    if (!Program.Canceled)
-                        await GetApplicablePrograms(iProgress, true);
+                    TreeNodes.ForEach(node => node.Remove());
+                    await GetApplicablePrograms(iProgress, true);
                     if (!Program.Canceled)
                         OnUninstall(null, null);
+                    ProgramSelection.All.Clear();
                 }
                 else
-                {
                     scan = selectResult == DialogResult.OK && choices is not null && choices.Any();
-                    const string retry = "\n\nPress the \"Rescan\" button to re-choose.";
-                    if (scan)
-                    {
-                        programsToScan = choices;
-                        noneFoundLabel.Text = "None of the chosen programs nor games were applicable!" + retry;
-                    }
-                    else
-                        noneFoundLabel.Text = "You didn't choose any programs nor games!" + retry;
+                const string retry = "\n\nPress the \"Rescan\" button to re-choose.";
+                if (scan)
+                {
+                    programsToScan = choices;
+                    noneFoundLabel.Text = "None of the chosen programs nor games were applicable!" + retry;
                 }
+                else
+                    noneFoundLabel.Text = "You didn't choose any programs nor games!" + retry;
             }
             else
                 noneFoundLabel.Text = "No applicable programs nor games were found on your computer!";
@@ -697,15 +696,7 @@ internal sealed partial class SelectForm : CustomForm
             setup = false;
             progressLabel.Text = "Gathering and caching your applicable games and their DLCs . . . ";
             ProgramSelection.ValidateAll(programsToScan);
-            /*TreeNodes.ForEach(node =>
-            {
-                if (node.Tag is not Platform platform
-                || node.Name is not string platformId
-                || ProgramSelection.FromPlatformId(platform, platformId) is null
-                && ProgramSelection.GetDlcFromPlatformId(platform, platformId) is null)
-                    node.Remove();
-            });*/
-            TreeNodes.ForEach(node => node.Remove()); // nodes cause lots of lag during rescan for now
+            TreeNodes.ForEach(node => node.Remove());
             await GetApplicablePrograms(iProgress);
             await SteamCMD.Cleanup();
         }
