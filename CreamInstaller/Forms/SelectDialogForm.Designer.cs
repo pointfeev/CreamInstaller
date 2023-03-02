@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Windows.Forms;
+
 using CreamInstaller.Components;
 
 namespace CreamInstaller.Forms
@@ -22,176 +23,190 @@ namespace CreamInstaller.Forms
         /// </summary>
         private void InitializeComponent()
         {
-            this.acceptButton = new System.Windows.Forms.Button();
-            this.groupBox = new System.Windows.Forms.GroupBox();
-            this.allCheckBoxFlowPanel = new System.Windows.Forms.FlowLayoutPanel();
-            this.allCheckBox = new System.Windows.Forms.CheckBox();
-            this.sortCheckBox = new System.Windows.Forms.CheckBox();
-            this.cancelButton = new System.Windows.Forms.Button();
-            this.loadButton = new System.Windows.Forms.Button();
-            this.saveButton = new System.Windows.Forms.Button();
-            this.selectionTreeView = new Components.CustomTreeView();
-            this.groupBox.SuspendLayout();
-            this.allCheckBoxFlowPanel.SuspendLayout();
-            this.SuspendLayout();
+            acceptButton = new Button();
+            groupBox = new GroupBox();
+            allCheckBoxFlowPanel = new FlowLayoutPanel();
+            allCheckBox = new CheckBox();
+            sortCheckBox = new CheckBox();
+            cancelButton = new Button();
+            loadButton = new Button();
+            saveButton = new Button();
+            selectionTreeView = new CustomTreeView();
+            uninstallAllButton = new Button();
+            groupBox.SuspendLayout();
+            allCheckBoxFlowPanel.SuspendLayout();
+            SuspendLayout();
             // 
             // acceptButton
             // 
-            this.acceptButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.acceptButton.AutoSize = true;
-            this.acceptButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.acceptButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.acceptButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.acceptButton.Location = new System.Drawing.Point(360, 243);
-            this.acceptButton.Name = "acceptButton";
-            this.acceptButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.acceptButton.Size = new System.Drawing.Size(61, 24);
-            this.acceptButton.TabIndex = 6;
-            this.acceptButton.Text = "OK";
-            this.acceptButton.UseVisualStyleBackColor = true;
+            acceptButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            acceptButton.AutoSize = true;
+            acceptButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            acceptButton.DialogResult = DialogResult.OK;
+            acceptButton.FlatStyle = FlatStyle.System;
+            acceptButton.Location = new System.Drawing.Point(475, 243);
+            acceptButton.Name = "acceptButton";
+            acceptButton.Padding = new Padding(12, 0, 12, 0);
+            acceptButton.Size = new System.Drawing.Size(61, 24);
+            acceptButton.TabIndex = 6;
+            acceptButton.Text = "OK";
+            acceptButton.UseVisualStyleBackColor = true;
             // 
             // groupBox
             // 
-            this.groupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox.Controls.Add(this.selectionTreeView);
-            this.groupBox.Controls.Add(this.allCheckBoxFlowPanel);
-            this.groupBox.Location = new System.Drawing.Point(12, 12);
-            this.groupBox.MinimumSize = new System.Drawing.Size(240, 40);
-            this.groupBox.Name = "groupBox";
-            this.groupBox.Size = new System.Drawing.Size(409, 225);
-            this.groupBox.TabIndex = 3;
-            this.groupBox.TabStop = false;
-            this.groupBox.Text = "Choices";
+            groupBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox.Controls.Add(selectionTreeView);
+            groupBox.Controls.Add(allCheckBoxFlowPanel);
+            groupBox.Location = new System.Drawing.Point(12, 12);
+            groupBox.MinimumSize = new System.Drawing.Size(240, 40);
+            groupBox.Name = "groupBox";
+            groupBox.Size = new System.Drawing.Size(524, 225);
+            groupBox.TabIndex = 3;
+            groupBox.TabStop = false;
+            groupBox.Text = "Choices";
             // 
             // selectionTreeView
             // 
-            this.selectionTreeView.BackColor = System.Drawing.SystemColors.Control;
-            this.selectionTreeView.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.selectionTreeView.CheckBoxes = true;
-            this.selectionTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.selectionTreeView.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawAll;
-            this.selectionTreeView.Location = new System.Drawing.Point(3, 19);
-            this.selectionTreeView.Name = "selectionTreeView";
-            this.selectionTreeView.ShowLines = false;
-            this.selectionTreeView.ShowPlusMinus = false;
-            this.selectionTreeView.ShowRootLines = false;
-            this.selectionTreeView.Size = new System.Drawing.Size(403, 203);
-            this.selectionTreeView.Sorted = true;
-            this.selectionTreeView.TabIndex = 0;
+            selectionTreeView.BackColor = System.Drawing.SystemColors.Control;
+            selectionTreeView.BorderStyle = BorderStyle.None;
+            selectionTreeView.CheckBoxes = true;
+            selectionTreeView.Dock = DockStyle.Fill;
+            selectionTreeView.DrawMode = TreeViewDrawMode.OwnerDrawAll;
+            selectionTreeView.Location = new System.Drawing.Point(3, 19);
+            selectionTreeView.Name = "selectionTreeView";
+            selectionTreeView.ShowLines = false;
+            selectionTreeView.ShowPlusMinus = false;
+            selectionTreeView.ShowRootLines = false;
+            selectionTreeView.Size = new System.Drawing.Size(518, 203);
+            selectionTreeView.Sorted = true;
+            selectionTreeView.TabIndex = 0;
             // 
             // allCheckBoxFlowPanel
             // 
-            this.allCheckBoxFlowPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.allCheckBoxFlowPanel.AutoSize = true;
-            this.allCheckBoxFlowPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.allCheckBoxFlowPanel.Controls.Add(this.allCheckBox);
-            this.allCheckBoxFlowPanel.Location = new System.Drawing.Point(370, -1);
-            this.allCheckBoxFlowPanel.Margin = new System.Windows.Forms.Padding(0);
-            this.allCheckBoxFlowPanel.Name = "allCheckBoxFlowPanel";
-            this.allCheckBoxFlowPanel.Size = new System.Drawing.Size(34, 19);
-            this.allCheckBoxFlowPanel.TabIndex = 1007;
+            allCheckBoxFlowPanel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            allCheckBoxFlowPanel.AutoSize = true;
+            allCheckBoxFlowPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            allCheckBoxFlowPanel.Controls.Add(allCheckBox);
+            allCheckBoxFlowPanel.Location = new System.Drawing.Point(485, -1);
+            allCheckBoxFlowPanel.Margin = new Padding(0);
+            allCheckBoxFlowPanel.Name = "allCheckBoxFlowPanel";
+            allCheckBoxFlowPanel.Size = new System.Drawing.Size(34, 19);
+            allCheckBoxFlowPanel.TabIndex = 1007;
             // 
             // allCheckBox
             // 
-            this.allCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.allCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.allCheckBox.Location = new System.Drawing.Point(2, 0);
-            this.allCheckBox.Margin = new System.Windows.Forms.Padding(2, 0, 0, 0);
-            this.allCheckBox.Name = "allCheckBox";
-            this.allCheckBox.Size = new System.Drawing.Size(32, 19);
-            this.allCheckBox.TabIndex = 1;
-            this.allCheckBox.Text = "All";
-            this.allCheckBox.CheckedChanged += new System.EventHandler(this.OnAllCheckBoxChanged);
+            allCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            allCheckBox.FlatStyle = FlatStyle.System;
+            allCheckBox.Location = new System.Drawing.Point(2, 0);
+            allCheckBox.Margin = new Padding(2, 0, 0, 0);
+            allCheckBox.Name = "allCheckBox";
+            allCheckBox.Size = new System.Drawing.Size(32, 19);
+            allCheckBox.TabIndex = 1;
+            allCheckBox.Text = "All";
+            allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
             // 
             // sortCheckBox
             // 
-            this.sortCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.sortCheckBox.AutoSize = true;
-            this.sortCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.sortCheckBox.Location = new System.Drawing.Point(105, 245);
-            this.sortCheckBox.Margin = new System.Windows.Forms.Padding(3, 0, 0, 0);
-            this.sortCheckBox.Name = "sortCheckBox";
-            this.sortCheckBox.Size = new System.Drawing.Size(104, 20);
-            this.sortCheckBox.TabIndex = 3;
-            this.sortCheckBox.Text = "Sort By Name";
-            this.sortCheckBox.CheckedChanged += new System.EventHandler(this.OnSortCheckBoxChanged);
+            sortCheckBox.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            sortCheckBox.AutoSize = true;
+            sortCheckBox.FlatStyle = FlatStyle.System;
+            sortCheckBox.Location = new System.Drawing.Point(220, 245);
+            sortCheckBox.Margin = new Padding(3, 0, 0, 0);
+            sortCheckBox.Name = "sortCheckBox";
+            sortCheckBox.Size = new System.Drawing.Size(104, 20);
+            sortCheckBox.TabIndex = 3;
+            sortCheckBox.Text = "Sort By Name";
+            sortCheckBox.CheckedChanged += OnSortCheckBoxChanged;
             // 
             // cancelButton
             // 
-            this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.cancelButton.AutoSize = true;
-            this.cancelButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cancelButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.cancelButton.Location = new System.Drawing.Point(12, 243);
-            this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.cancelButton.Size = new System.Drawing.Size(81, 24);
-            this.cancelButton.TabIndex = 2;
-            this.cancelButton.Text = "Cancel";
-            this.cancelButton.UseVisualStyleBackColor = true;
+            cancelButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            cancelButton.AutoSize = true;
+            cancelButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            cancelButton.DialogResult = DialogResult.Cancel;
+            cancelButton.FlatStyle = FlatStyle.System;
+            cancelButton.Location = new System.Drawing.Point(12, 243);
+            cancelButton.Name = "cancelButton";
+            cancelButton.Padding = new Padding(12, 0, 12, 0);
+            cancelButton.Size = new System.Drawing.Size(81, 24);
+            cancelButton.TabIndex = 2;
+            cancelButton.Text = "Cancel";
+            cancelButton.UseVisualStyleBackColor = true;
             // 
             // loadButton
             // 
-            this.loadButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.loadButton.AutoSize = true;
-            this.loadButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.loadButton.Enabled = false;
-            this.loadButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.loadButton.Location = new System.Drawing.Point(283, 243);
-            this.loadButton.Name = "loadButton";
-            this.loadButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.loadButton.Size = new System.Drawing.Size(71, 24);
-            this.loadButton.TabIndex = 5;
-            this.loadButton.Text = "Load";
-            this.loadButton.UseVisualStyleBackColor = true;
-            this.loadButton.Click += new System.EventHandler(this.OnLoad);
+            loadButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            loadButton.AutoSize = true;
+            loadButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            loadButton.Enabled = false;
+            loadButton.FlatStyle = FlatStyle.System;
+            loadButton.Location = new System.Drawing.Point(398, 243);
+            loadButton.Name = "loadButton";
+            loadButton.Padding = new Padding(12, 0, 12, 0);
+            loadButton.Size = new System.Drawing.Size(71, 24);
+            loadButton.TabIndex = 5;
+            loadButton.Text = "Load";
+            loadButton.UseVisualStyleBackColor = true;
+            loadButton.Click += OnLoad;
             // 
             // saveButton
             // 
-            this.saveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.saveButton.AutoSize = true;
-            this.saveButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.saveButton.Enabled = false;
-            this.saveButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.saveButton.Location = new System.Drawing.Point(208, 243);
-            this.saveButton.Name = "saveButton";
-            this.saveButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.saveButton.Size = new System.Drawing.Size(69, 24);
-            this.saveButton.TabIndex = 4;
-            this.saveButton.Text = "Save";
-            this.saveButton.UseVisualStyleBackColor = true;
-            this.saveButton.Click += new System.EventHandler(this.OnSave);
+            saveButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            saveButton.AutoSize = true;
+            saveButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            saveButton.Enabled = false;
+            saveButton.FlatStyle = FlatStyle.System;
+            saveButton.Location = new System.Drawing.Point(323, 243);
+            saveButton.Name = "saveButton";
+            saveButton.Padding = new Padding(12, 0, 12, 0);
+            saveButton.Size = new System.Drawing.Size(69, 24);
+            saveButton.TabIndex = 4;
+            saveButton.Text = "Save";
+            saveButton.UseVisualStyleBackColor = true;
+            saveButton.Click += OnSave;
+            // 
+            // uninstallAllButton
+            // 
+            uninstallAllButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            uninstallAllButton.AutoSize = true;
+            uninstallAllButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            uninstallAllButton.DialogResult = DialogResult.Abort;
+            uninstallAllButton.FlatStyle = FlatStyle.System;
+            uninstallAllButton.Location = new System.Drawing.Point(99, 242);
+            uninstallAllButton.Name = "uninstallAllButton";
+            uninstallAllButton.Padding = new Padding(12, 0, 12, 0);
+            uninstallAllButton.Size = new System.Drawing.Size(108, 24);
+            uninstallAllButton.TabIndex = 7;
+            uninstallAllButton.Text = "Uninstall All";
+            uninstallAllButton.UseVisualStyleBackColor = true;
             // 
             // SelectDialogForm
             // 
-            this.AcceptButton = this.acceptButton;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSize = true;
-            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(433, 279);
-            this.Controls.Add(this.sortCheckBox);
-            this.Controls.Add(this.saveButton);
-            this.Controls.Add(this.loadButton);
-            this.Controls.Add(this.cancelButton);
-            this.Controls.Add(this.acceptButton);
-            this.Controls.Add(this.groupBox);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "SelectDialogForm";
-            this.ShowInTaskbar = false;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
-            this.Text = "SelectDialogForm";
-            this.groupBox.ResumeLayout(false);
-            this.groupBox.PerformLayout();
-            this.allCheckBoxFlowPanel.ResumeLayout(false);
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AcceptButton = acceptButton;
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            AutoSize = true;
+            AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            ClientSize = new System.Drawing.Size(548, 279);
+            Controls.Add(uninstallAllButton);
+            Controls.Add(sortCheckBox);
+            Controls.Add(saveButton);
+            Controls.Add(loadButton);
+            Controls.Add(cancelButton);
+            Controls.Add(acceptButton);
+            Controls.Add(groupBox);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "SelectDialogForm";
+            ShowInTaskbar = false;
+            StartPosition = FormStartPosition.Manual;
+            Text = "SelectDialogForm";
+            groupBox.ResumeLayout(false);
+            groupBox.PerformLayout();
+            allCheckBoxFlowPanel.ResumeLayout(false);
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -205,5 +220,6 @@ namespace CreamInstaller.Forms
         private Button loadButton;
         private Button saveButton;
         private CheckBox sortCheckBox;
+        private Button uninstallAllButton;
     }
 }

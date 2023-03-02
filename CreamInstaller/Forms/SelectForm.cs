@@ -102,7 +102,7 @@ internal sealed partial class SelectForm : CustomForm
 
     private async Task GetApplicablePrograms(IProgress<int> progress, bool uninstallAll = false)
     {
-        if (programsToScan is null || !programsToScan.Any())
+        if (!uninstallAll && (programsToScan is null || !programsToScan.Any()))
             return;
         int totalGameCount = 0;
         int completeGameCount = 0;
@@ -123,14 +123,16 @@ internal sealed partial class SelectForm : CustomForm
         remainingGames.Clear(); // for display purposes only, otherwise ignorable
         remainingDLCs.Clear(); // for display purposes only, otherwise ignorable
         List<Task> appTasks = new();
-        if (programsToScan.Any(c => c.platform is Platform.Paradox))
+        if (uninstallAll || programsToScan.Any(c => c.platform is Platform.Paradox))
         {
+            AddToRemainingGames("Paradox Launcher");
             List<string> dllDirectories = await ParadoxLauncher.InstallPath.GetDllDirectoriesFromGameDirectory(Platform.Paradox, this);
             if (dllDirectories is not null)
             {
                 if (uninstallAll)
                 {
                     ProgramSelection bareSelection = ProgramSelection.FromPlatformId(Platform.Paradox, "PL") ?? new();
+                    bareSelection.Enabled = true;
                     bareSelection.Id = "PL";
                     bareSelection.Name = "Paradox Launcher";
                     bareSelection.RootDirectory = ParadoxLauncher.InstallPath;
@@ -159,10 +161,11 @@ internal sealed partial class SelectForm : CustomForm
                     if (programNode.TreeView is null)
                         _ = selectionTreeView.Nodes.Add(programNode);
                 }
+                RemoveFromRemainingGames("Paradox Launcher");
             }
         }
         int steamGamesToCheck;
-        if (programsToScan.Any(c => c.platform is Platform.Steam))
+        if (uninstallAll || programsToScan.Any(c => c.platform is Platform.Steam))
         {
             List<(string appId, string name, string branch, int buildId, string gameDirectory)> steamGames = await SteamLibrary.GetGames();
             steamGamesToCheck = steamGames.Count;
@@ -197,6 +200,7 @@ internal sealed partial class SelectForm : CustomForm
                         bareSelection.ExecutableDirectories = await SteamLibrary.GetExecutableDirectories(bareSelection.RootDirectory);
                         bareSelection.DllDirectories = dllDirectories;
                         bareSelection.Platform = Platform.Steam;
+                        RemoveFromRemainingGames(name);
                         return;
                     }
                     if (Program.Canceled)
@@ -365,7 +369,7 @@ internal sealed partial class SelectForm : CustomForm
                 appTasks.Add(task);
             }
         }
-        if (programsToScan.Any(c => c.platform is Platform.Epic))
+        if (uninstallAll || programsToScan.Any(c => c.platform is Platform.Epic))
         {
             List<Manifest> epicGames = await EpicLibrary.GetGames();
             foreach (Manifest manifest in epicGames)
@@ -398,6 +402,7 @@ internal sealed partial class SelectForm : CustomForm
                         bareSelection.ExecutableDirectories = await EpicLibrary.GetExecutableDirectories(bareSelection.RootDirectory);
                         bareSelection.DllDirectories = dllDirectories;
                         bareSelection.Platform = Platform.Epic;
+                        RemoveFromRemainingGames(name);
                         return;
                     }
                     if (Program.Canceled)
@@ -501,7 +506,7 @@ internal sealed partial class SelectForm : CustomForm
                 appTasks.Add(task);
             }
         }
-        if (programsToScan.Any(c => c.platform is Platform.Ubisoft))
+        if (uninstallAll || programsToScan.Any(c => c.platform is Platform.Ubisoft))
         {
             List<(string gameId, string name, string gameDirectory)> ubisoftGames = await UbisoftLibrary.GetGames();
             foreach ((string gameId, string name, string gameDirectory) in ubisoftGames)
@@ -531,6 +536,7 @@ internal sealed partial class SelectForm : CustomForm
                         bareSelection.ExecutableDirectories = await UbisoftLibrary.GetExecutableDirectories(bareSelection.RootDirectory);
                         bareSelection.DllDirectories = dllDirectories;
                         bareSelection.Platform = Platform.Ubisoft;
+                        RemoveFromRemainingGames(name);
                         return;
                     }
                     if (Program.Canceled)
@@ -622,12 +628,27 @@ internal sealed partial class SelectForm : CustomForm
                     out List<(Platform platform, string id, string name)> choices);
                 if (selectResult == DialogResult.Abort) // will be an uninstall all button
                 {
-                    choices = new();
-                    foreach ((Platform platform, string id, string name, bool alreadySelected) in gameChoices)
-                        choices.Add((platform, id, name));
-                    programsToScan = choices;
-                    await GetApplicablePrograms(new Progress<int>(), true);
-                    OnUninstall(null, null);
+                    int maxProgress = 0;
+                    int curProgress = 0;
+                    Progress<int> progress = new();
+                    IProgress<int> iProgress = progress;
+                    progress.ProgressChanged += (_, _progress) =>
+                    {
+                        if (Program.Canceled)
+                            return;
+                        if (_progress < 0 || _progress > maxProgress)
+                            maxProgress = -_progress;
+                        else
+                            curProgress = _progress;
+                        int p = Math.Max(Math.Min((int)((float)curProgress / maxProgress * 100), 100), 0);
+                        progressLabel.Text = $"Quickly gathering games for uninstallation . . . {p}%";
+                        progressBar.Value = p;
+                    };
+                    progressLabel.Text = "Quickly gathering games for uninstallation . . . ";
+                    if (!Program.Canceled)
+                        await GetApplicablePrograms(iProgress, true);
+                    if (!Program.Canceled)
+                        OnUninstall(null, null);
                 }
                 else
                 {
