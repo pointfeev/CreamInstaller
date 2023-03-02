@@ -474,23 +474,6 @@ internal static class Resources
             }
     }
 
-    internal static bool IsFilePathLocked(this string filePath)
-    {
-        try
-        {
-            File.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None).Close();
-        }
-        catch (FileNotFoundException)
-        {
-            return false;
-        }
-        catch (IOException)
-        {
-            return true;
-        }
-        return false;
-    }
-
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static extern bool GetBinaryType(string lpApplicationName, out BinaryType lpBinaryType);
 

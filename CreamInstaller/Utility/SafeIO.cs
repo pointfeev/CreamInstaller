@@ -11,6 +11,21 @@ namespace CreamInstaller.Utility;
 
 internal static class SafeIO
 {
+    internal static bool FileLocked(this string filePath)
+    {
+        if (!FileExists(filePath))
+            return false;
+        try
+        {
+            File.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None).Close();
+        }
+        catch
+        {
+            return true;
+        }
+        return false;
+    }
+
     internal static bool DirectoryExists(this string directoryPath, bool crucial = false, Form form = null)
     {
         while (!Program.Canceled)
