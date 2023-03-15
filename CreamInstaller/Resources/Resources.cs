@@ -381,7 +381,10 @@ internal static class Resources
                 "129B68318E0F8F34588F390928DE644E", // SmokeAPI v2.0.0-rc02
                 "2A8E5E167BC46B9977BFA77403DDD27F", // SmokeAPI v2.0.0
                 "DBD3D6DE020E581BF76A700394D23E6A", // SmokeAPI v2.0.1
-                "C8E796DDD74F2C28996EE3F41938565C" // SmokeAPI v2.0.2
+                "C8E796DDD74F2C28996EE3F41938565C", // SmokeAPI v2.0.2
+                "8B075C6B272A172A014D5C9E60F13DF2", // SmokeAPI v2.0.3
+                "A3873569DECAD08962C46E88352E6DB1", // SmokeAPI v2.0.4
+                "4A1A823E5CF4FB861DD6BA94539D29C4" // SmokeAPI v2.0.5
             }
         },
         {
@@ -396,7 +399,10 @@ internal static class Resources
                 "5AF1282DD4EE194F40944424984BAE8D", // SmokeAPI v2.0.0-rc02
                 "88A8CE5F9EB181335BEEF658D73A04B4", // SmokeAPI v2.0.0
                 "6C813588FC7E0E3185F2A191615327AF", // SmokeAPI v2.0.1
-                "CF9DF2E2EBA002DB98FE37FB1FB08FA8" // SmokeAPI v2.0.2
+                "CF9DF2E2EBA002DB98FE37FB1FB08FA8", // SmokeAPI v2.0.2
+                "E4DC2AF2B8B77A0C9BF9BFBBAEA11CF7", // SmokeAPI v2.0.3
+                "C0DDB49C9BFD3E05CBC1C61D117E93F9", // SmokeAPI v2.0.4
+                "F7C3064D5E3C892B168F504C21AC4923" // SmokeAPI v2.0.5
             }
         },
         {
