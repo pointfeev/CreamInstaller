@@ -595,17 +595,12 @@ internal static class Resources
         config = directory + @"\cream_api.ini";
     }
 
-    private static string ComputeMD5(this string filePath)
-    {
-        if (!filePath.FileExists())
-            return null;
 #pragma warning disable CA5351
-        using MD5 md5 = MD5.Create();
+    private static string ComputeMD5(this string filePath)
+        => filePath.FileExists() && filePath.ReadFileBytes() is { } bytes
+            ? BitConverter.ToString(MD5.HashData(bytes)).Replace("-", "").ToUpperInvariant()
+            : null;
 #pragma warning restore CA5351
-        using FileStream stream = File.OpenRead(filePath);
-        byte[] hash = md5.ComputeHash(stream);
-        return BitConverter.ToString(hash).Replace("-", "").ToUpperInvariant();
-    }
 
     internal static bool IsResourceFile(this string filePath, ResourceIdentifier identifier)
         => filePath.ComputeMD5() is { } hash && ResourceMD5s[identifier].Contains(hash);

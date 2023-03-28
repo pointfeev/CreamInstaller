@@ -58,8 +58,9 @@ internal static class Program
             {
                 using DialogForm dialogForm = new(form);
                 if (dialogForm.Show(SystemIcons.Error,
-                        $"ERROR: {selection.Name} is currently running!" + "\n\nPlease close the program/game to continue . . . ", "Retry", "Cancel")
-                 == DialogResult.OK)
+                        $"ERROR: One or more DLLs crucial to unlocker installation are locked for {selection.Name}!"
+                      + "\n\nThis is commonly caused by the program/game being active or an anti-virus blocking access."
+                      + "\n\nPlease close the program/game or resolve your anti-virus to continue . . . ", "Retry", "Cancel") == DialogResult.OK)
                     continue;
             }
             else
