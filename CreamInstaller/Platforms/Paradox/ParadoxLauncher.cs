@@ -79,8 +79,8 @@ internal static class ParadoxLauncher
     internal static async Task<RepairResult> Repair(Form form, ProgramSelection selection)
     {
         InstallForm installForm = form as InstallForm;
-        if (!Program.IsProgramRunningDialog(form, selection))
-            return form is InstallForm ? throw new CustomMessageException("Repair failed! The launcher is currently running!") : RepairResult.ProgramRunning;
+        if (!Program.AreDllsLockedDialog(form, selection))
+            return form is InstallForm ? throw new CustomMessageException("Repair failed! One or more DLLs crucial to unlocker installation are locked!") : RepairResult.ProgramRunning;
         bool smokeInstalled = false;
         byte[] steamOriginalSdk32 = null;
         byte[] steamOriginalSdk64 = null;

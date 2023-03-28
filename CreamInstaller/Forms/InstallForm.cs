@@ -195,7 +195,7 @@ internal sealed partial class InstallForm : CustomForm
         completeOperationsCount = 0;
         foreach (ProgramSelection selection in programSelections)
         {
-            if (Program.Canceled || !Program.IsProgramRunningDialog(this, selection))
+            if (Program.Canceled || !Program.AreDllsLockedDialog(this, selection))
                 throw new CustomMessageException("The operation was canceled.");
             try
             {

@@ -1002,7 +1002,7 @@ internal sealed partial class SelectForm : CustomForm
     {
         if (!ProgramSelection.All.Any())
             return;
-        if (ProgramSelection.AllEnabled.Any(selection => !Program.IsProgramRunningDialog(this, selection)))
+        if (ProgramSelection.AllEnabled.Any(selection => !Program.AreDllsLockedDialog(this, selection)))
             return;
         if (!uninstall && ParadoxLauncher.DlcDialog(this))
             return;
