@@ -80,9 +80,9 @@ internal sealed partial class InstallForm : CustomForm
                 if (Program.Canceled)
                     throw new CustomMessageException("The operation was canceled.");
                 directory.GetKoaloaderComponents(out string old_config, out string config);
-                if (directory.GetKoaloaderProxies().Any(proxy => proxy.FileExists(form: this) && proxy.IsResourceFile(ResourceIdentifier.Koaloader))
-                 || directory != selection.RootDirectory && Koaloader.AutoLoadDLLs.Any(pair => (directory + @"\" + pair.dll).FileExists(form: this))
-                 || old_config.FileExists(form: this) || config.FileExists(form: this))
+                if (directory.GetKoaloaderProxies().Any(proxy => proxy.FileExists() && proxy.IsResourceFile(ResourceIdentifier.Koaloader))
+                 || directory != selection.RootDirectory && Koaloader.AutoLoadDLLs.Any(pair => (directory + @"\" + pair.dll).FileExists())
+                 || old_config.FileExists() || config.FileExists())
                 {
                     UpdateUser("Uninstalling Koaloader from " + selection.Name + $" in incorrect directory \"{directory}\" . . . ", LogTextBox.Operation);
                     await Koaloader.Uninstall(directory, selection.RootDirectory, this);
@@ -95,9 +95,8 @@ internal sealed partial class InstallForm : CustomForm
                 if (Program.Canceled)
                     throw new CustomMessageException("The operation was canceled.");
                 directory.GetKoaloaderComponents(out string old_config, out string config);
-                if (directory.GetKoaloaderProxies().Any(proxy => proxy.FileExists(form: this) && proxy.IsResourceFile(ResourceIdentifier.Koaloader))
-                 || Koaloader.AutoLoadDLLs.Any(pair => (directory + @"\" + pair.dll).FileExists(form: this)) || old_config.FileExists(form: this)
-                 || config.FileExists(form: this))
+                if (directory.GetKoaloaderProxies().Any(proxy => proxy.FileExists() && proxy.IsResourceFile(ResourceIdentifier.Koaloader))
+                 || Koaloader.AutoLoadDLLs.Any(pair => (directory + @"\" + pair.dll).FileExists()) || old_config.FileExists() || config.FileExists())
                 {
                     UpdateUser("Uninstalling Koaloader from " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
                     await Koaloader.Uninstall(directory, selection.RootDirectory, this);
@@ -115,9 +114,9 @@ internal sealed partial class InstallForm : CustomForm
                 directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string old_config,
                     out string config, out string old_log, out string log, out string cache);
                 if (uninstallProxy
-                        ? api32_o.FileExists(form: this) || api64_o.FileExists(form: this) || old_config.FileExists(form: this) || config.FileExists(form: this)
-                       || old_log.FileExists(form: this) || log.FileExists(form: this) || cache.FileExists(form: this)
-                        : api32.FileExists(form: this) || api64.FileExists(form: this))
+                        ? api32_o.FileExists() || api64_o.FileExists() || old_config.FileExists() || config.FileExists() || old_log.FileExists()
+                       || log.FileExists() || cache.FileExists()
+                        : api32.FileExists() || api64.FileExists())
                 {
                     UpdateUser(
                         $"{(uninstallProxy ? "Uninstalling" : "Installing")} SmokeAPI" + $" {(uninstallProxy ? "from" : "for")} " + selection.Name
@@ -132,8 +131,8 @@ internal sealed partial class InstallForm : CustomForm
             {
                 directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out string log);
                 if (uninstallProxy
-                        ? api32_o.FileExists(form: this) || api64_o.FileExists(form: this) || config.FileExists(form: this) || log.FileExists(form: this)
-                        : api32.FileExists(form: this) || api64.FileExists(form: this))
+                        ? api32_o.FileExists() || api64_o.FileExists() || config.FileExists() || log.FileExists()
+                        : api32.FileExists() || api64.FileExists())
                 {
                     UpdateUser(
                         $"{(uninstallProxy ? "Uninstalling" : "Installing")} ScreamAPI" + $" {(uninstallProxy ? "from" : "for")} " + selection.Name
@@ -148,8 +147,8 @@ internal sealed partial class InstallForm : CustomForm
             {
                 directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out string log);
                 if (uninstallProxy
-                        ? api32_o.FileExists(form: this) || api64_o.FileExists(form: this) || config.FileExists(form: this) || log.FileExists(form: this)
-                        : api32.FileExists(form: this) || api64.FileExists(form: this))
+                        ? api32_o.FileExists() || api64_o.FileExists() || config.FileExists() || log.FileExists()
+                        : api32.FileExists() || api64.FileExists())
                 {
                     UpdateUser(
                         $"{(uninstallProxy ? "Uninstalling" : "Installing")} Uplay R1 Unlocker" + $" {(uninstallProxy ? "from" : "for")} " + selection.Name
@@ -161,8 +160,8 @@ internal sealed partial class InstallForm : CustomForm
                 }
                 directory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config, out log);
                 if (uninstallProxy
-                        ? api32_o.FileExists(form: this) || api64_o.FileExists(form: this) || config.FileExists(form: this) || log.FileExists(form: this)
-                        : old_api32.FileExists(form: this) || old_api64.FileExists(form: this) || api32.FileExists(form: this) || api64.FileExists(form: this))
+                        ? api32_o.FileExists() || api64_o.FileExists() || config.FileExists() || log.FileExists()
+                        : old_api32.FileExists() || old_api64.FileExists() || api32.FileExists() || api64.FileExists())
                 {
                     UpdateUser(
                         $"{(uninstallProxy ? "Uninstalling" : "Installing")} Uplay R2 Unlocker" + $" {(uninstallProxy ? "from" : "for")} " + selection.Name

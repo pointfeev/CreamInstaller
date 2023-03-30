@@ -39,7 +39,7 @@ internal static class UplayR1
             writer.Flush();
             writer.Close();
         }
-        else if (config.FileExists(form: installForm))
+        else if (config.FileExists())
         {
             config.DeleteFile();
             installForm?.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", LogTextBox.Action, false);
@@ -75,9 +75,9 @@ internal static class UplayR1
         => await Task.Run(() =>
         {
             directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out string log);
-            if (api32_o.FileExists(form: installForm))
+            if (api32_o.FileExists())
             {
-                if (api32.FileExists(form: installForm))
+                if (api32.FileExists())
                 {
                     api32.DeleteFile();
                     installForm?.UpdateUser($"Deleted Uplay R1 Unlocker: {Path.GetFileName(api32)}", LogTextBox.Action, false);
@@ -85,9 +85,9 @@ internal static class UplayR1
                 api32_o.MoveFile(api32!);
                 installForm?.UpdateUser($"Restored Uplay R1: {Path.GetFileName(api32_o)} -> {Path.GetFileName(api32)}", LogTextBox.Action, false);
             }
-            if (api64_o.FileExists(form: installForm))
+            if (api64_o.FileExists())
             {
-                if (api64.FileExists(form: installForm))
+                if (api64.FileExists())
                 {
                     api64.DeleteFile();
                     installForm?.UpdateUser($"Deleted Uplay R1 Unlocker: {Path.GetFileName(api64)}", LogTextBox.Action, false);
@@ -97,12 +97,12 @@ internal static class UplayR1
             }
             if (!deleteOthers)
                 return;
-            if (config.FileExists(form: installForm))
+            if (config.FileExists())
             {
                 config.DeleteFile();
                 installForm?.UpdateUser($"Deleted configuration: {Path.GetFileName(config)}", LogTextBox.Action, false);
             }
-            if (log.FileExists(form: installForm))
+            if (log.FileExists())
             {
                 log.DeleteFile();
                 installForm?.UpdateUser($"Deleted log: {Path.GetFileName(log)}", LogTextBox.Action, false);
@@ -113,22 +113,22 @@ internal static class UplayR1
         => await Task.Run(() =>
         {
             directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out _, out _);
-            if (api32.FileExists(form: installForm) && !api32_o.FileExists(form: installForm))
+            if (api32.FileExists() && !api32_o.FileExists())
             {
                 api32.MoveFile(api32_o!);
                 installForm?.UpdateUser($"Renamed Uplay R1: {Path.GetFileName(api32)} -> {Path.GetFileName(api32_o)}", LogTextBox.Action, false);
             }
-            if (api32_o.FileExists(form: installForm))
+            if (api32_o.FileExists())
             {
                 "UplayR1.uplay_r1_loader.dll".WriteManifestResource(api32);
                 installForm?.UpdateUser($"Wrote Uplay R1 Unlocker: {Path.GetFileName(api32)}", LogTextBox.Action, false);
             }
-            if (api64.FileExists(form: installForm) && !api64_o.FileExists(form: installForm))
+            if (api64.FileExists() && !api64_o.FileExists())
             {
                 api64.MoveFile(api64_o!);
                 installForm?.UpdateUser($"Renamed Uplay R1: {Path.GetFileName(api64)} -> {Path.GetFileName(api64_o)}", LogTextBox.Action, false);
             }
-            if (api64_o.FileExists(form: installForm))
+            if (api64_o.FileExists())
             {
                 "UplayR1.uplay_r1_loader64.dll".WriteManifestResource(api64);
                 installForm?.UpdateUser($"Wrote Uplay R1 Unlocker: {Path.GetFileName(api64)}", LogTextBox.Action, false);

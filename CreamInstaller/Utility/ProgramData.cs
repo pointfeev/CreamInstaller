@@ -35,15 +35,14 @@ internal static class ProgramData
                 DirectoryPathOld.MoveDirectory(DirectoryPath, true, form);
             }
             DirectoryPath.CreateDirectory();
-            if (!AppInfoVersionPath.FileExists(form: form) || !Version.TryParse(AppInfoVersionPath.ReadFile(), out Version version)
-                                                           || version < MinimumAppInfoVersion)
+            if (!AppInfoVersionPath.FileExists() || !Version.TryParse(AppInfoVersionPath.ReadFile(), out Version version) || version < MinimumAppInfoVersion)
             {
                 AppInfoPath.DeleteDirectory();
                 AppInfoPath.CreateDirectory();
                 AppInfoVersionPath.WriteFile(Program.Version);
             }
             CooldownPath.CreateDirectory();
-            if (OldProgramChoicesPath.FileExists(form: form))
+            if (OldProgramChoicesPath.FileExists())
                 OldProgramChoicesPath.DeleteFile();
         });
 
