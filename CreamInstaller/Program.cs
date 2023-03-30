@@ -86,7 +86,7 @@ internal static class Program
             try
             {
                 HttpClientManager.Setup();
-                using MainForm form = new();
+                using UpdateForm form = new();
 #if DEBUG
                 DebugForm.Current.Attach(form);
 #endif

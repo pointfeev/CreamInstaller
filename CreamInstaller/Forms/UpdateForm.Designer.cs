@@ -4,7 +4,7 @@ using CreamInstaller.Components;
 
 namespace CreamInstaller.Forms
 {
-    partial class MainForm
+    partial class UpdateForm
     {
         private IContainer components = null;
 
@@ -78,7 +78,7 @@ namespace CreamInstaller.Forms
             this.changelogTreeView.Sorted = true;
             this.changelogTreeView.TabIndex = 5;
             // 
-            // MainForm
+            // UpdateForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -94,9 +94,9 @@ namespace CreamInstaller.Forms
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "MainForm";
+            this.Name = "UpdateForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "MainForm";
+            this.Text = "UpdateForm";
             this.Load += new System.EventHandler(this.OnLoad);
             this.ResumeLayout(false);
 

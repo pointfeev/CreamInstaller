@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Net;
 using System.Net.Http;
@@ -14,6 +15,8 @@ internal static class HttpClientManager
 {
     internal static HttpClient HttpClient;
 
+    private static readonly Dictionary<string, string> HttpContentCache = new();
+
     internal static void Setup()
     {
         HttpClient = new();
@@ -26,8 +29,12 @@ internal static class HttpClientManager
         {
             using HttpRequestMessage request = new(HttpMethod.Get, url);
             using HttpResponseMessage response = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            if (response.StatusCode is HttpStatusCode.NotModified && HttpContentCache.TryGetValue(url, out string content))
+                return content;
             _ = response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsStringAsync();
+            content = await response.Content.ReadAsStringAsync();
+            HttpContentCache[url] = content;
+            return content;
         }
         catch (HttpRequestException e)
         {
