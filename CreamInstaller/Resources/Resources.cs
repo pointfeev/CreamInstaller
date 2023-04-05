@@ -358,14 +358,16 @@ internal static class Resources
             ResourceIdentifier.EpicOnlineServices32, new List<string>
             {
                 "069A57B1834A960193D2AD6B96926D70", // ScreamAPI v3.0.0
-                "E2FB3A4A9583FDC215832E5F935E4440" // ScreamAPI v3.0.1
+                "E2FB3A4A9583FDC215832E5F935E4440", // ScreamAPI v3.0.1
+                "8B4B30AFAE8D7B06413EE2F2266B20DB" // ScreamAPI v4.0.0-rc01
             }
         },
         {
             ResourceIdentifier.EpicOnlineServices64, new List<string>
             {
                 "0D62E57139F1A64F807A9934946A9474", // ScreamAPI v3.0.0
-                "3875C7B735EE80C23239CC4749FDCBE6" // ScreamAPI v3.0.1
+                "3875C7B735EE80C23239CC4749FDCBE6", // ScreamAPI v3.0.1
+                "CBC89E2221713B0D4482F91282030A88" // ScreamAPI v4.0.0-rc01
             }
         },
         {
