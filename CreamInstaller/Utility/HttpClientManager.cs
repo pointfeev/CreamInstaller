@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using HtmlAgilityPack;
 #if DEBUG
 using CreamInstaller.Forms;
 #endif
@@ -64,18 +63,6 @@ internal static class HttpClientManager
         }
 #endif
     }
-
-    private static HtmlDocument ToHtmlDocument(this string html)
-    {
-        HtmlDocument document = new();
-        document.LoadHtml(html);
-        return document;
-    }
-
-    internal static async Task<HtmlNodeCollection> GetDocumentNodes(string url, string xpath)
-        => (await EnsureGet(url))?.ToHtmlDocument()?.GetDocumentNodes(xpath);
-
-    private static HtmlNodeCollection GetDocumentNodes(this HtmlDocument htmlDocument, string xpath) => htmlDocument.DocumentNode?.SelectNodes(xpath);
 
     internal static async Task<Image> GetImageFromUrl(string url)
     {
