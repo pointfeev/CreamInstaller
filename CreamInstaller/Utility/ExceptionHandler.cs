@@ -8,10 +8,8 @@ namespace CreamInstaller.Utility;
 
 internal static class ExceptionHandler
 {
-    internal static bool HandleException(this Exception e, Form form = null, string caption = null, string acceptButtonText = "Retry",
-        string cancelButtonText = "Cancel")
+    internal static string FormatException(this Exception e)
     {
-        caption ??= Program.Name + " encountered an exception";
         StringBuilder output = new();
         int stackDepth = 0;
         while (e is not null)
@@ -41,7 +39,14 @@ internal static class ExceptionHandler
             e = e.InnerException;
             stackDepth++;
         }
-        string outputString = output.ToString();
+        return output.ToString();
+    }
+
+    internal static bool HandleException(this Exception e, Form form = null, string caption = null, string acceptButtonText = "Retry",
+        string cancelButtonText = "Cancel")
+    {
+        caption ??= Program.Name + " encountered an exception";
+        string outputString = e.FormatException();
         if (string.IsNullOrWhiteSpace(outputString))
             outputString = e?.ToString() ?? "Unknown exception";
         using DialogForm dialogForm = new(form ?? Form.ActiveForm);

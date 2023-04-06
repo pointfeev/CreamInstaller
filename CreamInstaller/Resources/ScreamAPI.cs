@@ -39,7 +39,7 @@ internal static class ScreamAPI
         {
             /*if (installForm is not null)
                 installForm.UpdateUser("Generating ScreamAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);*/
-            config.CreateFile(true, installForm);
+            config.CreateFile(true, installForm).Close();
             StreamWriter writer = new(config, true, Encoding.UTF8);
             WriteConfig(writer, new(overrideCatalogItems.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String),
                 new(entitlements.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String), installForm);

@@ -458,9 +458,9 @@ internal static class Resources
                 resource?.CopyTo(file);
                 break;
             }
-            catch
+            catch (Exception e)
             {
-                if (filePath.IOWarn("Failed to write a crucial manifest resource (" + resourceIdentifier + ")") is not DialogResult.OK)
+                if (filePath.IOWarn("Failed to write a crucial manifest resource (" + resourceIdentifier + ")", e) is not DialogResult.OK)
                     break;
             }
     }
@@ -474,9 +474,9 @@ internal static class Resources
                 fileStream.Write(resource);
                 break;
             }
-            catch
+            catch (Exception e)
             {
-                if (filePath.IOWarn("Failed to write a crucial resource") is not DialogResult.OK)
+                if (filePath.IOWarn("Failed to write a crucial resource", e) is not DialogResult.OK)
                     break;
             }
     }

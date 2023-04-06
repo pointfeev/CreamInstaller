@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using CreamInstaller.Forms;
@@ -20,19 +19,18 @@ internal static class Program
     internal const string RepositoryOwner = "pointfeev";
     internal static readonly string RepositoryName = Name;
     internal static readonly string RepositoryPackage = Name + ".zip";
+    internal static readonly string RepositoryExecutable = Name + ".exe";
 #if DEBUG
     internal static readonly string ApplicationName = Name + " v" + Version + "-debug: " + Description;
     internal static readonly string ApplicationNameShort = Name + " v" + Version + "-debug";
-    internal static readonly string ApplicationExecutable = Name + "-debug.exe"; // should be the same as in .csproj
 #else
     internal static readonly string ApplicationName = Name + " v" + Version + ": " + Description;
     internal static readonly string ApplicationNameShort = Name + " v" + Version;
-    internal static readonly string ApplicationExecutable = Name + ".exe"; // should be the same as in .csproj
 #endif
 
-    internal static readonly Assembly EntryAssembly = Assembly.GetEntryAssembly();
     private static readonly Process CurrentProcess = Process.GetCurrentProcess();
     internal static readonly string CurrentProcessFilePath = CurrentProcess.MainModule?.FileName;
+    internal static readonly int CurrentProcessId = CurrentProcess.Id;
 
     internal static bool BlockProtectedGames = true;
     internal static readonly string[] ProtectedGames = { "PAYDAY 2" };

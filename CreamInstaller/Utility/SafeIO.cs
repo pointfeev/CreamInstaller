@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.IO.Compression;
@@ -38,9 +39,9 @@ internal static class SafeIO
                 Directory.CreateDirectory(directoryPath);
                 break;
             }
-            catch
+            catch (Exception e)
             {
-                if (!crucial || directoryPath.DirectoryExists() || directoryPath.IOWarn("Failed to create a crucial directory", form) is not DialogResult.OK)
+                if (!crucial || directoryPath.DirectoryExists() || directoryPath.IOWarn("Failed to create a crucial directory", e, form) is not DialogResult.OK)
                     break;
             }
     }
@@ -55,9 +56,9 @@ internal static class SafeIO
                 Directory.Move(directoryPath, newDirectoryPath);
                 break;
             }
-            catch
+            catch (Exception e)
             {
-                if (!crucial || !directoryPath.DirectoryExists() || directoryPath.IOWarn("Failed to move a crucial directory", form) is not DialogResult.OK)
+                if (!crucial || !directoryPath.DirectoryExists() || directoryPath.IOWarn("Failed to move a crucial directory", e, form) is not DialogResult.OK)
                     break;
             }
     }
@@ -72,9 +73,10 @@ internal static class SafeIO
                 Directory.Delete(directoryPath, true);
                 break;
             }
-            catch
+            catch (Exception e)
             {
-                if (!crucial || !directoryPath.DirectoryExists() || directoryPath.IOWarn("Failed to delete a crucial directory", form) is not DialogResult.OK)
+                if (!crucial || !directoryPath.DirectoryExists()
+                             || directoryPath.IOWarn("Failed to delete a crucial directory", e, form) is not DialogResult.OK)
                     break;
             }
     }
@@ -91,10 +93,10 @@ internal static class SafeIO
                     ? Directory.EnumerateFiles(directoryPath, filePattern, new EnumerationOptions { RecurseSubdirectories = true })
                     : Directory.EnumerateFiles(directoryPath, filePattern);
             }
-            catch
+            catch (Exception e)
             {
                 if (!crucial || !directoryPath.DirectoryExists()
-                             || directoryPath.IOWarn("Failed to enumerate a crucial directory's files", form) is not DialogResult.OK)
+                             || directoryPath.IOWarn("Failed to enumerate a crucial directory's files", e, form) is not DialogResult.OK)
                     break;
             }
         return Enumerable.Empty<string>();
@@ -112,10 +114,10 @@ internal static class SafeIO
                     ? Directory.EnumerateDirectories(directoryPath, directoryPattern, new EnumerationOptions { RecurseSubdirectories = true })
                     : Directory.EnumerateDirectories(directoryPath, directoryPattern);
             }
-            catch
+            catch (Exception e)
             {
                 if (!crucial || !directoryPath.DirectoryExists()
-                             || directoryPath.IOWarn("Failed to enumerate a crucial directory's subdirectories", form) is not DialogResult.OK)
+                             || directoryPath.IOWarn("Failed to enumerate a crucial directory's subdirectories", e, form) is not DialogResult.OK)
                     break;
             }
         return Enumerable.Empty<string>();
@@ -123,19 +125,19 @@ internal static class SafeIO
 
     internal static bool FileExists(this string filePath) => File.Exists(filePath);
 
-    internal static void CreateFile(this string filePath, bool crucial = false, Form form = null)
+    internal static FileStream CreateFile(this string filePath, bool crucial = false, Form form = null)
     {
         while (!Program.Canceled)
             try
             {
-                File.Create(filePath).Close();
-                break;
+                return File.Create(filePath);
             }
-            catch
+            catch (Exception e)
             {
-                if (!crucial || filePath.IOWarn("Failed to create a crucial file", form) is not DialogResult.OK)
+                if (!crucial || filePath.IOWarn("Failed to create a crucial file", e, form) is not DialogResult.OK)
                     break;
             }
+        return null;
     }
 
     internal static void MoveFile(this string filePath, string newFilePath, bool crucial = false, Form form = null)
@@ -148,9 +150,9 @@ internal static class SafeIO
                 File.Move(filePath, newFilePath);
                 break;
             }
-            catch
+            catch (Exception e)
             {
-                if (!crucial || !filePath.FileExists() || filePath.IOWarn("Failed to move a crucial file", form) is not DialogResult.OK)
+                if (!crucial || !filePath.FileExists() || filePath.IOWarn("Failed to move a crucial file", e, form) is not DialogResult.OK)
                     break;
             }
     }
@@ -165,9 +167,9 @@ internal static class SafeIO
                 File.Delete(filePath);
                 break;
             }
-            catch
+            catch (Exception e)
             {
-                if (!crucial || !filePath.FileExists() || filePath.IOWarn("Failed to delete a crucial file", form) is not DialogResult.OK)
+                if (!crucial || !filePath.FileExists() || filePath.IOWarn("Failed to delete a crucial file", e, form) is not DialogResult.OK)
                     break;
             }
     }
@@ -181,9 +183,9 @@ internal static class SafeIO
             {
                 return File.ReadAllText(filePath, Encoding.UTF8);
             }
-            catch
+            catch (Exception e)
             {
-                if (!crucial || !filePath.FileExists() || filePath.IOWarn("Failed to read a crucial file", form) is not DialogResult.OK)
+                if (!crucial || !filePath.FileExists() || filePath.IOWarn("Failed to read a crucial file", e, form) is not DialogResult.OK)
                     break;
             }
         return null;
@@ -198,9 +200,9 @@ internal static class SafeIO
             {
                 return File.ReadAllBytes(filePath);
             }
-            catch
+            catch (Exception e)
             {
-                if (!crucial || !filePath.FileExists() || filePath.IOWarn("Failed to read a crucial file", form) is not DialogResult.OK)
+                if (!crucial || !filePath.FileExists() || filePath.IOWarn("Failed to read a crucial file", e, form) is not DialogResult.OK)
                     break;
             }
         return null;
@@ -214,9 +216,9 @@ internal static class SafeIO
                 File.WriteAllText(filePath, text, Encoding.UTF8);
                 break;
             }
-            catch
+            catch (Exception e)
             {
-                if (!crucial || filePath.IOWarn("Failed to write a crucial file", form) is not DialogResult.OK)
+                if (!crucial || filePath.IOWarn("Failed to write a crucial file", e, form) is not DialogResult.OK)
                     break;
             }
     }
@@ -231,16 +233,24 @@ internal static class SafeIO
                 ZipFile.ExtractToDirectory(archivePath, destinationPath);
                 break;
             }
-            catch
+            catch (Exception e)
             {
-                if (!crucial || !archivePath.FileExists() || archivePath.IOWarn("Failed to extract a crucial zip file", form) is not DialogResult.OK)
+                if (!crucial || !archivePath.FileExists() || archivePath.IOWarn("Failed to extract a crucial zip file", e, form) is not DialogResult.OK)
                     break;
             }
     }
 
-    internal static DialogResult IOWarn(this string filePath, string message, Form form = null)
+    internal static DialogResult IOWarn(this string filePath, string message, Exception e, Form form = null)
     {
-        using DialogForm dialogForm = new(form ?? Form.ActiveForm);
-        return dialogForm.Show(SystemIcons.Warning, message + ": " + filePath.BeautifyPath(), "Retry", "OK");
+        form ??= Form.ActiveForm;
+        if (form is null || !form.InvokeRequired)
+            return filePath.IOWarnInternal(message, e, form);
+        return form.Invoke(() => filePath.IOWarnInternal(message, e, form));
+    }
+
+    private static DialogResult IOWarnInternal(this string filePath, string message, Exception e, Form form = null)
+    {
+        using DialogForm dialogForm = new(form);
+        return dialogForm.Show(SystemIcons.Warning, message + ": " + filePath.BeautifyPath() + "\n\n" + e.FormatException(), "Retry", "OK");
     }
 }

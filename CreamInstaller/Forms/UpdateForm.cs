@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using CreamInstaller.Components;
 using CreamInstaller.Utility;
@@ -12,7 +17,12 @@ namespace CreamInstaller.Forms;
 
 internal sealed partial class UpdateForm : CustomForm
 {
-    private Release latestRelease;
+    private static readonly string PackagePath = ProgramData.DirectoryPath + @"\" + Program.RepositoryPackage;
+    private static readonly string ExecutablePath = ProgramData.DirectoryPath + @"\" + Program.RepositoryExecutable;
+    private static readonly string UpdaterPath = ProgramData.DirectoryPath + @"\updater.cmd";
+
+    private CancellationTokenSource cancellation;
+    private ProgramRelease latestRelease;
 
     internal UpdateForm()
     {
@@ -45,11 +55,11 @@ internal sealed partial class UpdateForm : CustomForm
 #if !DEBUG
         Version currentVersion = new(Program.Version);
 #endif
-        List<Release> releases = null;
+        List<ProgramRelease> releases = null;
         string response = await HttpClientManager.EnsureGet($"https://api.github.com/repos/{Program.RepositoryOwner}/{Program.RepositoryName}/releases");
         if (response is not null)
-            releases = JsonConvert.DeserializeObject<List<Release>>(response)
-              ?.Where(release => !release.Draft && !release.Prerelease && release.Assets.Count > 0).ToList();
+            releases = JsonConvert.DeserializeObject<List<ProgramRelease>>(response)
+              ?.Where(release => !release.Draft && !release.Prerelease && release.Asset is not null).ToList();
         latestRelease = releases?.FirstOrDefault();
 #if DEBUG
         if (latestRelease?.Version is not { } latestVersion)
@@ -66,7 +76,7 @@ internal sealed partial class UpdateForm : CustomForm
             changelogTreeView.Visible = true;
             for (int r = releases!.Count - 1; r >= 0; r--)
             {
-                Release release = releases[r];
+                ProgramRelease release = releases[r];
 #if !DEBUG
                 if (release.Version <= currentVersion)
                     continue;
@@ -94,18 +104,7 @@ internal sealed partial class UpdateForm : CustomForm
     retry:
         try
         {
-            string fileName = Path.GetFileName(Program.CurrentProcessFilePath);
-            if (fileName != Program.ApplicationExecutable)
-            {
-                using DialogForm form = new(this);
-                if (form.Show(SystemIcons.Warning,
-                        "WARNING: " + Program.ApplicationExecutable + " was renamed!" + "\n\nThis will cause undesirable behavior when updating the program!",
-                        "Ignore", "Abort") == DialogResult.Cancel)
-                {
-                    Application.Exit();
-                    return;
-                }
-            }
+            UpdaterPath.DeleteFile();
             OnLoad();
         }
         catch (Exception e)
@@ -118,8 +117,9 @@ internal sealed partial class UpdateForm : CustomForm
 
     private void OnIgnore(object sender, EventArgs e) => StartProgram();
 
-    private void OnUpdate(object sender, EventArgs e)
+    private async void OnUpdate(object sender, EventArgs e)
     {
+        progressBar.Value = 0;
         progressBar.Visible = true;
         ignoreButton.Visible = false;
         updateButton.Text = "Cancel";
@@ -127,20 +127,109 @@ internal sealed partial class UpdateForm : CustomForm
         updateButton.Click += OnUpdateCancel;
         changelogTreeView.Location = progressBar.Location with { Y = progressBar.Location.Y + progressBar.Size.Height + 6 };
         Refresh();
-        Progress<double> progress = new();
-        progress.ProgressChanged += delegate(object _, double _progress)
+        Progress<int> progress = new();
+        IProgress<int> iProgress = progress;
+        progress.ProgressChanged += delegate(object _, int _progress)
         {
-            progressLabel.Text = $"Updating . . . {(int)_progress}%";
-            progressBar.Value = (int)_progress;
+            progressLabel.Text = $"Updating . . . {_progress}%";
+            progressBar.Value = _progress;
         };
         progressLabel.Text = "Updating . . . ";
-        // do update
-        OnLoad();
+        cancellation = new();
+        bool success = true;
+        PackagePath.DeleteFile(true);
+        await using Stream update = PackagePath.CreateFile(true);
+        bool retry = true;
+        try
+        {
+            if (cancellation is null || Program.Canceled)
+                throw new TaskCanceledException();
+            using HttpResponseMessage response = await HttpClientManager.HttpClient.GetAsync(latestRelease.Asset.BrowserDownloadUrl,
+                HttpCompletionOption.ResponseHeadersRead, cancellation.Token);
+            response.EnsureSuccessStatusCode();
+            if (cancellation is null || Program.Canceled)
+                throw new TaskCanceledException();
+            await using Stream download = await response.Content.ReadAsStreamAsync(cancellation.Token);
+            double bytes = latestRelease.Asset.Size;
+            byte[] buffer = new byte[16384];
+            long bytesRead = 0;
+            int newBytes;
+            while (cancellation is not null && !Program.Canceled
+                                            && (newBytes = await download.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellation.Token)) != 0)
+            {
+                if (cancellation is null || Program.Canceled)
+                    throw new TaskCanceledException();
+                await update.WriteAsync(buffer.AsMemory(0, newBytes), cancellation.Token);
+                bytesRead += newBytes;
+                int report = (int)(bytesRead / bytes * 100);
+                if (report <= progressBar.Value)
+                    continue;
+                iProgress.Report(report);
+            }
+            iProgress.Report((int)(bytesRead / bytes * 100));
+            if (cancellation is null || Program.Canceled)
+                throw new TaskCanceledException();
+        }
+        catch (TaskCanceledException)
+        {
+            success = false;
+        }
+        catch (Exception ex)
+        {
+            retry = ex.HandleException(this, Program.Name + " encountered an exception while updating");
+            success = false;
+        }
+        cancellation?.Dispose();
+        cancellation = null;
+        await update.DisposeAsync();
+        bool canContinue = success && !Program.Canceled;
+        if (canContinue)
+            updateButton.Enabled = false;
+        ExecutablePath.DeleteFile(canContinue);
+        if (canContinue)
+            await Task.Run(() => PackagePath.ExtractZip(ProgramData.DirectoryPath, true, this));
+        PackagePath.DeleteFile(canContinue);
+        if (canContinue)
+        {
+            string currentPath = Program.CurrentProcessFilePath;
+            string currentDirectory = Path.GetDirectoryName(currentPath);
+            string properExecutable = Path.GetFileName(ExecutablePath);
+            string properExecutablePath = Path.Combine(currentDirectory!, properExecutable!);
+            StringBuilder commands = new();
+            commands.AppendLine(CultureInfo.InvariantCulture, $"\nTASKKILL /F /T /PID {Program.CurrentProcessId}");
+            commands.AppendLine(CultureInfo.InvariantCulture, $":LOOP");
+            commands.AppendLine(CultureInfo.InvariantCulture, $"TASKLIST | FIND \"{Program.CurrentProcessId}\"");
+            commands.AppendLine(CultureInfo.InvariantCulture, $"IF NOT ERRORLEVEL 1 (");
+            commands.AppendLine(CultureInfo.InvariantCulture, $"   TIMEOUT /T 1");
+            commands.AppendLine(CultureInfo.InvariantCulture, $"   GOTO LOOP");
+            commands.AppendLine(CultureInfo.InvariantCulture, $")");
+            commands.AppendLine(CultureInfo.InvariantCulture, $"DEL /F /Q \"{currentPath}\"");
+            commands.AppendLine(CultureInfo.InvariantCulture, $"DEL /F /Q \"{properExecutablePath}\"");
+            commands.AppendLine(CultureInfo.InvariantCulture, $"MOVE /Y \"{ExecutablePath}\" \"{properExecutablePath}\"");
+            commands.AppendLine(CultureInfo.InvariantCulture, $"START \"\" /D \"{currentDirectory}\" \"{properExecutable}\"");
+            commands.AppendLine(CultureInfo.InvariantCulture, $"EXIT");
+            UpdaterPath.WriteFile(commands.ToString(), true, this);
+            Process process = new();
+            ProcessStartInfo startInfo = new()
+            {
+                WorkingDirectory = ProgramData.DirectoryPath, FileName = "cmd.exe", Arguments = $"/C START \"UPDATER\" /B {Path.GetFileName(UpdaterPath)}",
+                CreateNoWindow = true
+            };
+            process.StartInfo = startInfo;
+            process.Start();
+            return;
+        }
+        if (!retry)
+            StartProgram();
+        else
+            OnLoad();
     }
 
     private void OnUpdateCancel(object sender, EventArgs e)
     {
-        // cancel update
+        cancellation?.Cancel();
+        cancellation?.Dispose();
+        cancellation = null;
     }
 
     protected override void Dispose(bool disposing)
@@ -148,5 +237,6 @@ internal sealed partial class UpdateForm : CustomForm
         if (disposing)
             components?.Dispose();
         base.Dispose(disposing);
+        OnUpdateCancel(null, null);
     }
 }
