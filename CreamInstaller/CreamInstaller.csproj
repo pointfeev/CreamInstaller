@@ -4,7 +4,7 @@
 		<TargetFramework>net7.0-windows</TargetFramework>
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Resources\ini.ico</ApplicationIcon>
-		<Version>4.8.1.0</Version>
+		<Version>4.8.1</Version>
 		<Copyright>2021, pointfeev (https://github.com/pointfeev)</Copyright>
 		<Company>CreamInstaller</Company>
 		<Product>Automatic DLC Unlocker Installer &amp; Configuration Generator</Product>
@@ -145,8 +145,8 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Gameloop.Vdf" Version="0.6.2" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
-		<PackageReference Include="System.ServiceModel.Primitives" Version="4.10.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="System.ServiceModel.Primitives" Version="4.10.2" />
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Update="Forms\SelectDialogForm.cs">

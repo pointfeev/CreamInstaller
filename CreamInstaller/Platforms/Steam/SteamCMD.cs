@@ -298,10 +298,4 @@ internal static class SteamCMD
         foreach (Task task in tasks)
             await task;
     }
-
-    internal static void Dispose()
-    {
-        Kill().Wait();
-        DirectoryPath.DeleteDirectory();
-    }
 }

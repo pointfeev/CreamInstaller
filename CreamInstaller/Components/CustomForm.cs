@@ -2,22 +2,14 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using CreamInstaller.Forms;
+using CreamInstaller.Utility;
 
 namespace CreamInstaller.Components;
 
 internal class CustomForm : Form
 {
-    internal const short SWP_NOACTIVATE = 0x0010;
-    internal const short SWP_SHOWWINDOW = 0x0040;
-    internal const short SWP_NOMOVE = 0x0002;
-    internal const short SWP_NOSIZE = 0x0001;
-
-    internal static readonly nint HWND_NOTOPMOST = new(-2);
-    internal static readonly nint HWND_TOPMOST = new(-1);
-
     internal CustomForm()
     {
         Icon = Properties.Resources.Icon;
@@ -54,7 +46,7 @@ internal class CustomForm : Form
     {
         using DialogForm helpDialog = new(this);
         helpDialog.HelpButton = false;
-        string acidicoala = "https://github.com/acidicoala";
+        const string acidicoala = "https://github.com/acidicoala";
         string repository = $"https://github.com/{Program.RepositoryOwner}/{Program.RepositoryName}";
         _ = helpDialog.Show(SystemIcons.Information,
             "Automatically finds all installed Steam, Epic and Ubisoft games with their respective DLC-related DLL locations on the user's computer,\n"
@@ -86,15 +78,14 @@ internal class CustomForm : Form
 
     private void OnActivation(object sender, EventArgs args) => Activate();
 
-    [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    private static extern void SetWindowPos(nint hWnd, nint hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
-
     internal void BringToFrontWithoutActivation()
     {
         bool topMost = TopMost;
-        SetWindowPos(Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
+        NativeImports.SetWindowPos(Handle, NativeImports.HWND_TOPMOST, 0, 0, 0, 0,
+            NativeImports.SWP_NOACTIVATE | NativeImports.SWP_SHOWWINDOW | NativeImports.SWP_NOMOVE | NativeImports.SWP_NOSIZE);
         if (!topMost)
-            SetWindowPos(Handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
+            NativeImports.SetWindowPos(Handle, NativeImports.HWND_NOTOPMOST, 0, 0, 0, 0,
+                NativeImports.SWP_NOACTIVATE | NativeImports.SWP_SHOWWINDOW | NativeImports.SWP_NOMOVE | NativeImports.SWP_NOSIZE);
     }
 
     internal void InheritLocation(Form fromForm)

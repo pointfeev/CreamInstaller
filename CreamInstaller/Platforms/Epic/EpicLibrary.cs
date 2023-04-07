@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using CreamInstaller.Utility;
 using Microsoft.Win32;
+using Newtonsoft.Json;
 using static CreamInstaller.Resources.Resources;
 
 namespace CreamInstaller.Platforms.Epic;
@@ -44,7 +44,7 @@ internal static class EpicLibrary
                 string json = file.ReadFile();
                 try
                 {
-                    Manifest manifest = JsonSerializer.Deserialize<Manifest>(json);
+                    Manifest manifest = JsonConvert.DeserializeObject<Manifest>(json);
                     if (manifest is not null && manifest.CatalogItemId == manifest.MainGameCatalogItemId && !games.Any(g
                             => g.CatalogItemId == manifest.CatalogItemId && g.InstallLocation == manifest.InstallLocation))
                         games.Add(manifest);

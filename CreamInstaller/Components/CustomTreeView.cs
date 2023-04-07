@@ -145,7 +145,7 @@ internal sealed class CustomTreeView : TreeView
                 {
                     comboBoxFont ??= new(font.FontFamily, 6, font.Style, font.Unit, font.GdiCharSet, font.GdiVerticalFont);
                     ComboBoxState comboBoxState = Enabled ? ComboBoxState.Normal : ComboBoxState.Disabled;
-                    text = selection.KoaloaderProxy ?? ProgramSelection.DefaultKoaloaderProxy + ".dll";
+                    text = (selection.KoaloaderProxy ?? ProgramSelection.DefaultKoaloaderProxy) + ".dll";
                     size = TextRenderer.MeasureText(graphics, text, comboBoxFont) + new Size(6, 0);
                     const int padding = 2;
                     bounds = new(bounds.X + bounds.Width, bounds.Y + padding / 2, size.Width, bounds.Height - padding);

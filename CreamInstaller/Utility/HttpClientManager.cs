@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -19,7 +20,8 @@ internal static class HttpClientManager
     internal static void Setup()
     {
         HttpClient = new();
-        HttpClient.DefaultRequestHeaders.Add("User-Agent", $"CI{Program.Version.Replace(".", "")}");
+        HttpClient.DefaultRequestHeaders.UserAgent.Add(new(Program.Name, Program.Version));
+        HttpClient.DefaultRequestHeaders.AcceptLanguage.Add(new(CultureInfo.CurrentCulture.ToString()));
     }
 
     internal static async Task<string> EnsureGet(string url)
