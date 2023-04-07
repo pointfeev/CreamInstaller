@@ -198,7 +198,7 @@ internal sealed partial class UpdateForm : CustomForm
             StringBuilder commands = new();
             commands.AppendLine(CultureInfo.InvariantCulture, $"\nTASKKILL /F /T /PID {Program.CurrentProcessId}");
             commands.AppendLine(CultureInfo.InvariantCulture, $":LOOP");
-            commands.AppendLine(CultureInfo.InvariantCulture, $"TASKLIST | FIND \"{Program.CurrentProcessId}\"");
+            commands.AppendLine(CultureInfo.InvariantCulture, $"TASKLIST | FIND \" {Program.CurrentProcessId}\" ");
             commands.AppendLine(CultureInfo.InvariantCulture, $"IF NOT ERRORLEVEL 1 (");
             commands.AppendLine(CultureInfo.InvariantCulture, $"   TIMEOUT /T 1");
             commands.AppendLine(CultureInfo.InvariantCulture, $"   GOTO LOOP");
