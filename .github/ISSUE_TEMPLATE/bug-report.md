@@ -1,6 +1,7 @@
 ---
 name: Bug Report
-about: Report a program exception or general bug.
+about: Report a program exception or general bug, not including game-specific unlocking
+  issues.
 title: ''
 labels: Bug
 assignees: pointfeev

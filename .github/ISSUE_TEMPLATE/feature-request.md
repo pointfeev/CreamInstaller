@@ -1,6 +1,6 @@
 ---
-name: Enhancement Request
-about: Request a new feature or to enhance an existing feature.
+name: Feature Request
+about: Request a new program feature or an enhancement to an existing feature.
 title: ''
 labels: Enhancement
 assignees: pointfeev
