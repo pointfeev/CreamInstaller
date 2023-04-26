@@ -33,7 +33,9 @@ games and DLCs the user selects; however, through the use of **right-click conte
 If the program doesn't seem to launch, try downloading and installing [.NET Desktop Runtime 7.0.5](https://download.visualstudio.microsoft.com/download/pr/dffb1939-cef1-4db3-a579-5475a3061cdd/578b208733c914c7b7357f6baa4ecfd6/windowsdesktop-runtime-7.0.5-win-x64.exe).
 
 ---
-#### **NOTE:** This program does not automatically download nor install actual DLC files for you. As the title of the program says, it's only a DLC Unlocker installer. Should the game you wish to unlock DLC for not already come with the DLCs installed (very many do not), you have to find, download, and install those yourself. Preferably, you should be referring to the proper cs.rin.ru post for the game(s) you're tinkering with; you'll usually find any answer to your problems there.
+#### **NOTE:** This program does not automatically download nor install actual DLC files for you; as the title of the program states, this program is only a *DLC Unlocker* installer. Should the game you wish to unlock DLC for not already come with the DLCs installed, as is the case with a good majority of games, you must find, download and install those to the game yourself.
+
+#### Preferably, should you encounter any issue outside of the program itself, you should be referring said issues to the proper [cs.rin.ru](https://cs.rin.ru/forum/ucp.php?mode=login) post for the game you're tinkering with; 99% of the time you will find the answers to your problems there (you will probably also find the DLC files you're looking for there *wink wink*).
 
 ---
 #### Usage:
