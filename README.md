@@ -35,7 +35,7 @@ If the program doesn't seem to launch, try downloading and installing [.NET Desk
 ---
 #### **NOTE:** This program does not automatically download nor install actual DLC files for you; as the title of the program states, this program is only a *DLC Unlocker* installer. Should the game you wish to unlock DLC for not already come with the DLCs installed, as is the case with a good majority of games, you must find, download and install those to the game yourself.
 
-#### Preferably, should you encounter any issue outside of the program itself, you should be referring said issues to the proper [cs.rin.ru](https://cs.rin.ru/forum/ucp.php?mode=login) post for the game you're tinkering with; 99% of the time you will find the answers to your problems there (you will probably also find the DLC files you're looking for there *wink wink*).
+#### Preferably, should you encounter any issue outside of the program itself, you should be referring said issues to the proper [cs.rin.ru](https://cs.rin.ru/forum/viewforum.php?f=10) post for the game you're tinkering with; 99% of the time you will find the answers to your problems there (you will probably also find the DLC files you're looking for there *wink wink*).
 
 ---
 #### Usage:
