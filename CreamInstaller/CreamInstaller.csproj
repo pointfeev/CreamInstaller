@@ -146,10 +146,25 @@
 	<ItemGroup>
 		<PackageReference Include="Gameloop.Vdf" Version="0.6.2" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="System.ServiceModel.Primitives" Version="4.10.2" />
+		<PackageReference Include="System.ServiceModel.Primitives" Version="6.0.0" />
 	</ItemGroup>
 	<ItemGroup>
+		<Compile Update="Forms\DebugForm.cs">
+			<SubType>Form</SubType>
+		</Compile>
+		<Compile Update="Forms\DialogForm.cs">
+			<SubType>Form</SubType>
+		</Compile>
+		<Compile Update="Forms\InstallForm.cs">
+			<SubType>Form</SubType>
+		</Compile>
 		<Compile Update="Forms\SelectDialogForm.cs">
+			<SubType>Form</SubType>
+		</Compile>
+		<Compile Update="Forms\SelectForm.cs">
+			<SubType>Form</SubType>
+		</Compile>
+		<Compile Update="Forms\UpdateForm.cs">
 			<SubType>Form</SubType>
 		</Compile>
 		<Compile Update="Properties\Resources.Designer.cs">
@@ -159,7 +174,22 @@
 		</Compile>
 	</ItemGroup>
 	<ItemGroup>
+		<EmbeddedResource Update="Forms\DebugForm.resx">
+			<SubType>Designer</SubType>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Forms\DialogForm.resx">
+			<SubType>Designer</SubType>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Forms\InstallForm.resx">
+			<SubType>Designer</SubType>
+		</EmbeddedResource>
 		<EmbeddedResource Update="Forms\SelectDialogForm.resx">
+			<SubType>Designer</SubType>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Forms\SelectForm.resx">
+			<SubType>Designer</SubType>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Forms\UpdateForm.resx">
 			<SubType>Designer</SubType>
 		</EmbeddedResource>
 		<EmbeddedResource Update="Properties\Resources.resx">
