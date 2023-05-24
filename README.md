@@ -33,13 +33,6 @@ games and DLCs the user selects; however, through the use of **right-click conte
 If the program doesn't seem to launch, try downloading and installing [.NET Desktop Runtime 7.0.5](https://download.visualstudio.microsoft.com/download/pr/dffb1939-cef1-4db3-a579-5475a3061cdd/578b208733c914c7b7357f6baa4ecfd6/windowsdesktop-runtime-7.0.5-win-x64.exe).
 
 ---
-#### **NOTE:** This program does not automatically download nor install actual DLC files for you; as the title of the program states, this program is only a *DLC Unlocker* installer. Should the game you wish to unlock DLC for not already come with the DLCs installed, as is the case with a good majority of games, you must find, download and install those to the game yourself.
-
-#### **ALSO NOTE:** Assuming the program functioned as it was supposed to by installing the DLC unlocker(s) correctly, your game not working or its DLCs not unlocking is not an issue I can do anything about and it's entirely up to you to seek the appropriate resources to fix it yourself (hint: [cs.rin.ru](https://cs.rin.ru/forum/viewforum.php?f=10)).
-
-#### Preferably, should you encounter any issue outside of the program itself, you should be referring said issues to the proper [cs.rin.ru](https://cs.rin.ru/forum/viewforum.php?f=10) post for the game you're tinkering with; 99% of the time you will find the answers to your problems there (you will probably also find the DLC files you're looking for there *wink wink*).
-
----
 #### Usage:
 1. Start the program executable. *Read above under Installation if it doesn't launch.*
 2. Choose which programs and/or games the program should scan for DLC. *The program automatically gathers all installed games from Steam, Epic and Ubisoft directories.*
@@ -51,9 +44,13 @@ If the program doesn't seem to launch, try downloading and installing [.NET Desk
 8. Click the **OK** button to close the program.
 9. If any of the DLC unlockers cause problems with any of the games you installed them on, simply go back to step 5 and select what games you wish you **revert** changes to, and instead click the **Uninstall** button this time.
 
+##### **NOTE:** This program does not automatically download nor install actual DLC files for you; as the title of the program states, this program is only a *DLC Unlocker* installer. Should the game you wish to unlock DLC for not already come with the DLCs installed, as is the case with a good majority of games, you must find, download and install those to the game yourself. This process includes manually installing new DLCs and manually updating the previously manually installed DLCs after game updates.
+
 ---
 ##### Bugs/Crashes/Issues:
 For reliable and quick assistance, all bugs, crashes and other issues should be referred to the [GitHub Issues](https://github.com/pointfeev/CreamInstaller/issues) page!
+
+##### **HOWEVER**: Please read the template issue corresponding to your problem should one exist! Also, note that the [GitHub Issues](https://github.com/pointfeev/CreamInstaller/issues) page is not your personal assistance hotline, rather it is for genuine bugs/crashes/issues with the program itself. If you post an issue which has already been explained within the template issues and/or within this text, I will just close it.
 
 ---
 ##### More Information:
