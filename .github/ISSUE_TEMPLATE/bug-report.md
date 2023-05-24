@@ -3,7 +3,7 @@ name: Bug Report
 about: Report a program exception or general bug, not including game-specific unlocking
   issues.
 title: ''
-labels: Bug, Enhancement
+labels: Bug
 assignees: pointfeev
 
 ---
