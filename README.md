@@ -2,7 +2,7 @@
 
 ![Program Preview Image](https://raw.githubusercontent.com/pointfeev/CreamInstaller/main/preview.png)
 
-**NOTE:** This is simply a preview image; this is not a list of supported games nor configurations!
+###### **NOTE:** This is simply a preview image; this is not a list of supported games nor configurations!
 
 ##### The program utilizes the latest versions of [Koaloader](https://github.com/acidicoala/Koaloader), [SmokeAPI](https://github.com/acidicoala/SmokeAPI), [ScreamAPI](https://github.com/acidicoala/ScreamAPI), [Uplay R1 Unlocker](https://github.com/acidicoala/UplayR1Unlocker) and [Uplay R2 Unlocker](https://github.com/acidicoala/UplayR2Unlocker), all by the wonderful [acidicoala](https://github.com/acidicoala), and all downloaded from the posts above and embedded into the program itself; no further downloads necessary on your part!
 ---
