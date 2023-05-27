@@ -11,7 +11,6 @@ namespace CreamInstaller.Utility;
 internal static class ProgramData
 {
     private static readonly string DirectoryPathOld = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\CreamInstaller";
-
     internal static readonly string DirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\CreamInstaller";
 
     internal static readonly string AppInfoPath = DirectoryPath + @"\appinfo";
