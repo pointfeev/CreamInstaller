@@ -57,5 +57,5 @@ For reliable and quick assistance, all bugs, crashes and other issues should be 
 ---
 ##### More Information:
 * SteamCMD installation and appinfo cache can be found at **C:\ProgramData\CreamInstaller**.
-* The program automatically and very quickly updates from [GitHub](https://github.com/pointfeev/CreamInstaller) by choice of the user through a dialog on startup. *updates can be ignored*
+* The program automatically and very quickly updates from [GitHub](https://github.com/pointfeev/CreamInstaller) by choice of the user through a dialog on startup.
 * The program source and other information can be found on [GitHub](https://github.com/pointfeev/CreamInstaller).
