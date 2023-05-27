@@ -15,9 +15,9 @@ namespace CreamInstaller.Forms;
 
 internal sealed partial class InstallForm : CustomForm
 {
-    private readonly List<ProgramSelection> disabledSelections = new();
+    private readonly List<Selection> disabledSelections = new();
 
-    private readonly int programCount = ProgramSelection.AllEnabled.Count;
+    private readonly int programCount = Selection.AllEnabled.Count;
     private readonly bool uninstalling;
     private int completeOperationsCount;
 
@@ -58,7 +58,7 @@ internal sealed partial class InstallForm : CustomForm
             });
     }
 
-    private async Task OperateFor(ProgramSelection selection)
+    private async Task OperateFor(Selection selection)
     {
         UpdateProgress(0);
         if (selection.Id == "PL")
@@ -189,10 +189,10 @@ internal sealed partial class InstallForm : CustomForm
 
     private async Task Operate()
     {
-        List<ProgramSelection> programSelections = ProgramSelection.AllEnabled;
+        List<Selection> programSelections = Selection.AllEnabled;
         operationsCount = programSelections.Count;
         completeOperationsCount = 0;
-        foreach (ProgramSelection selection in programSelections)
+        foreach (Selection selection in programSelections)
         {
             if (Program.Canceled || !Program.AreDllsLockedDialog(this, selection))
                 throw new CustomMessageException("The operation was canceled.");
@@ -210,13 +210,13 @@ internal sealed partial class InstallForm : CustomForm
             ++completeOperationsCount;
         }
         Program.Cleanup();
-        List<ProgramSelection> failedSelections = ProgramSelection.AllEnabled;
-        if (failedSelections.Any())
+        List<Selection> failedSelections = Selection.AllEnabled;
+        if (failedSelections.Count > 0)
             if (failedSelections.Count == 1)
                 throw new CustomMessageException($"Operation failed for {failedSelections.First().Name}.");
             else
                 throw new CustomMessageException($"Operation failed for {failedSelections.Count} programs.");
-        foreach (ProgramSelection selection in disabledSelections)
+        foreach (Selection selection in disabledSelections)
             selection.Enabled = true;
         disabledSelections.Clear();
     }
@@ -281,7 +281,7 @@ internal sealed partial class InstallForm : CustomForm
     {
         Program.Cleanup();
         Reselecting = true;
-        foreach (ProgramSelection selection in disabledSelections)
+        foreach (Selection selection in disabledSelections)
             selection.Enabled = true;
         disabledSelections.Clear();
         Close();

@@ -27,13 +27,13 @@ internal static class EpicLibrary
         }
     }
 
-    internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(string gameDirectory)
+    internal static async Task<HashSet<(string directory, BinaryType binaryType)>> GetExecutableDirectories(string gameDirectory)
         => await Task.Run(async () => await gameDirectory.GetExecutableDirectories(true));
 
-    internal static async Task<List<Manifest>> GetGames()
+    internal static async Task<HashSet<Manifest>> GetGames()
         => await Task.Run(() =>
         {
-            List<Manifest> games = new();
+            HashSet<Manifest> games = new();
             string manifests = EpicManifestsPath;
             if (!manifests.DirectoryExists())
                 return games;
@@ -47,7 +47,7 @@ internal static class EpicLibrary
                     Manifest manifest = JsonConvert.DeserializeObject<Manifest>(json);
                     if (manifest is not null && manifest.CatalogItemId == manifest.MainGameCatalogItemId && !games.Any(g
                             => g.CatalogItemId == manifest.CatalogItemId && g.InstallLocation == manifest.InstallLocation))
-                        games.Add(manifest);
+                        _ = games.Add(manifest);
                 }
                 catch
                 {

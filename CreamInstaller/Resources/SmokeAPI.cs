@@ -25,46 +25,38 @@ internal static class SmokeAPI
         cache = directory + @"\SmokeAPI.cache.json";
     }
 
-    internal static void CheckConfig(string directory, ProgramSelection selection, InstallForm installForm = null)
+    internal static void CheckConfig(string directory, Selection selection, InstallForm installForm = null)
     {
         directory.GetSmokeApiComponents(out _, out _, out _, out _, out string old_config, out string config, out _, out _, out _);
-        List<KeyValuePair<string, (DlcType type, string name, string icon)>> overrideDlc = selection.AllDlc.Except(selection.SelectedDlc).ToList();
-        foreach (KeyValuePair<string, (string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> pair in selection.ExtraDlc)
-            if (selection.ExtraSelectedDlc.TryGetValue(pair.Key,
-                    out (string name, SortedList<string, (DlcType type, string name, string icon)> dlc) selectedPair))
-                overrideDlc.AddRange(pair.Value.dlc.Except(selectedPair.dlc));
-        List<KeyValuePair<string, (DlcType type, string name, string icon)>> injectDlc = new();
-        if (selection.AllDlc.Count > 64)
-            injectDlc.AddRange(selection.SelectedDlc.Where(pair => pair.Value.type is DlcType.SteamHidden));
-        List<KeyValuePair<string, (string name, SortedList<string, (DlcType type, string name, string icon)> injectDlc)>> extraApps = new();
-        if (selection.ExtraDlc.Any(e => e.Value.dlc.Count > 64))
-            foreach (KeyValuePair<string, (string name, SortedList<string, (DlcType type, string name, string icon)> injectDlc)> pair in selection
-                        .ExtraSelectedDlc)
-                if (selection.ExtraDlc.First(e => e.Key == pair.Key).Value.dlc.Count > 64)
-                {
-                    SortedList<string, (DlcType type, string name, string icon)> extraInjectDlc = new(PlatformIdComparer.String);
-                    foreach (KeyValuePair<string, (DlcType type, string name, string icon)> extraPair in pair.Value.injectDlc.Where(extraPair
-                                 => extraPair.Value.type is DlcType.SteamHidden))
-                        extraInjectDlc.Add(extraPair.Key, extraPair.Value);
-                    KeyValuePair<string, (string name, SortedList<string, (DlcType type, string name, string icon)> injectDlc)> newExtraPair = new(pair.Key,
-                        (pair.Value.name, extraInjectDlc));
-                    extraApps.Add(newExtraPair);
-                }
-        injectDlc = injectDlc.ToList();
+        List<SelectionDLC> overrideDlc = selection.DLC.Where(dlc => !dlc.Enabled).ToList();
+        foreach (Selection extraSelection in selection.ExtraSelections)
+            overrideDlc.AddRange(extraSelection.DLC.Where(dlc => !dlc.Enabled));
+        List<SelectionDLC> injectDlc = new();
+        if (selection.DLC.Count() > 64)
+            injectDlc.AddRange(selection.DLC.Where(dlc => dlc.Enabled && dlc.Type is DLCType.SteamHidden));
+        List<KeyValuePair<string, (string name, SortedList<string, SelectionDLC> injectDlc)>> extraApps = new();
+        foreach (Selection extraSelection in selection.ExtraSelections.Where(extraSelection => extraSelection.DLC.Count() > 64))
+        {
+            SortedList<string, SelectionDLC> extraInjectDlc = new(PlatformIdComparer.String);
+            foreach (SelectionDLC extraDlc in extraSelection.DLC.Where(extraDlc => extraDlc.Enabled && extraDlc.Type is DLCType.SteamHidden))
+                extraInjectDlc.Add(extraDlc.Id, extraDlc);
+            if (extraInjectDlc.Count > 0)
+                extraApps.Add(new(extraSelection.Id, (extraSelection.Name, extraInjectDlc)));
+        }
         if (old_config.FileExists())
         {
             old_config.DeleteFile();
             installForm?.UpdateUser($"Deleted old configuration: {Path.GetFileName(old_config)}", LogTextBox.Action, false);
         }
-        if (selection.ExtraSelectedDlc.Any(p => p.Value.dlc.Any()) || overrideDlc.Any() || injectDlc.Any())
+        if (selection.ExtraSelections.Any(extraSelection => extraSelection.DLC.Any()) || overrideDlc.Count > 0 || injectDlc.Count > 0)
         {
             /*if (installForm is not null)
                 installForm.UpdateUser("Generating SmokeAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);*/
             config.CreateFile(true, installForm).Close();
             StreamWriter writer = new(config, true, Encoding.UTF8);
-            WriteConfig(writer, selection.Id, new(extraApps.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String),
-                new(overrideDlc.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String),
-                new(injectDlc.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String), installForm);
+            WriteConfig(writer, selection.Id, new(extraApps.ToDictionary(extraApp => extraApp.Key, extraApp => extraApp.Value), PlatformIdComparer.String),
+                new(overrideDlc.ToDictionary(dlc => dlc.Id, dlc => dlc), PlatformIdComparer.String),
+                new(injectDlc.ToDictionary(dlc => dlc.Id, dlc => dlc), PlatformIdComparer.String), installForm);
             writer.Flush();
             writer.Close();
         }
@@ -75,10 +67,8 @@ internal static class SmokeAPI
         }
     }
 
-    private static void WriteConfig(StreamWriter writer, string appId,
-        SortedList<string, (string name, SortedList<string, (DlcType type, string name, string icon)> injectDlc)> extraApps,
-        SortedList<string, (DlcType type, string name, string icon)> overrideDlc, SortedList<string, (DlcType type, string name, string icon)> injectDlc,
-        InstallForm installForm = null)
+    private static void WriteConfig(TextWriter writer, string appId, SortedList<string, (string name, SortedList<string, SelectionDLC> injectDlc)> extraApps,
+        SortedList<string, SelectionDLC> overrideDlc, SortedList<string, SelectionDLC> injectDlc, InstallForm installForm = null)
     {
         writer.WriteLine("{");
         writer.WriteLine("  \"$version\": 2,");
@@ -89,13 +79,13 @@ internal static class SmokeAPI
         if (overrideDlc.Count > 0)
         {
             writer.WriteLine("  \"override_dlc_status\": {");
-            KeyValuePair<string, (DlcType type, string name, string icon)> lastOverrideDlc = overrideDlc.Last();
-            foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in overrideDlc)
+            KeyValuePair<string, SelectionDLC> lastOverrideDlc = overrideDlc.Last();
+            foreach (KeyValuePair<string, SelectionDLC> pair in overrideDlc)
             {
-                string dlcId = pair.Key;
-                (_, string dlcName, _) = pair.Value;
-                writer.WriteLine($"    \"{dlcId}\": \"locked\"{(pair.Equals(lastOverrideDlc) ? "" : ",")}");
-                installForm?.UpdateUser($"Added locked DLC to SmokeAPI.config.json with appid {dlcId} ({dlcName})", LogTextBox.Action, false);
+                SelectionDLC selectionDlc = pair.Value;
+                writer.WriteLine($"    \"{selectionDlc.Id}\": \"locked\"{(pair.Equals(lastOverrideDlc) ? "" : ",")}");
+                installForm?.UpdateUser($"Added locked DLC to SmokeAPI.config.json with appid {selectionDlc.Id} ({selectionDlc.Name})", LogTextBox.Action,
+                    false);
             }
             writer.WriteLine("  },");
         }
@@ -110,34 +100,34 @@ internal static class SmokeAPI
             {
                 writer.WriteLine("    \"" + appId + "\": {");
                 writer.WriteLine("      \"dlcs\": {");
-                KeyValuePair<string, (DlcType type, string name, string icon)> lastInjectDlc = injectDlc.Last();
-                foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in injectDlc)
+                KeyValuePair<string, SelectionDLC> lastInjectDlc = injectDlc.Last();
+                foreach (KeyValuePair<string, SelectionDLC> pair in injectDlc)
                 {
-                    string dlcId = pair.Key;
-                    (_, string dlcName, _) = pair.Value;
-                    writer.WriteLine($"        \"{dlcId}\": \"{dlcName}\"{(pair.Equals(lastInjectDlc) ? "" : ",")}");
-                    installForm?.UpdateUser($"Added extra DLC to SmokeAPI.config.json with appid {dlcId} ({dlcName})", LogTextBox.Action, false);
+                    SelectionDLC selectionDlc = pair.Value;
+                    writer.WriteLine($"        \"{selectionDlc.Id}\": \"{selectionDlc.Name}\"{(pair.Equals(lastInjectDlc) ? "" : ",")}");
+                    installForm?.UpdateUser($"Added extra DLC to SmokeAPI.config.json with appid {selectionDlc.Id} ({selectionDlc.Name})", LogTextBox.Action,
+                        false);
                 }
                 writer.WriteLine("      }");
                 writer.WriteLine(extraApps.Count > 0 ? "    }," : "    }");
             }
             if (extraApps.Count > 0)
             {
-                KeyValuePair<string, (string name, SortedList<string, (DlcType type, string name, string icon)> injectDlc)> lastExtraApp = extraApps.Last();
-                foreach (KeyValuePair<string, (string name, SortedList<string, (DlcType type, string name, string icon)> injectDlc)> pair in extraApps)
+                KeyValuePair<string, (string name, SortedList<string, SelectionDLC> injectDlc)> lastExtraApp = extraApps.Last();
+                foreach (KeyValuePair<string, (string name, SortedList<string, SelectionDLC> injectDlc)> pair in extraApps)
                 {
                     string extraAppId = pair.Key;
-                    (string _ /*extraAppName*/, SortedList<string, (DlcType type, string name, string icon)> extraInjectDlc) = pair.Value;
+                    (string _ /*extraAppName*/, SortedList<string, SelectionDLC> extraInjectDlc) = pair.Value;
                     writer.WriteLine("    \"" + extraAppId + "\": {");
                     writer.WriteLine("      \"dlcs\": {");
                     //installForm?.UpdateUser($"Added extra app to SmokeAPI.config.json with appid {extraAppId} ({extraAppName})", LogTextBox.Action, false);
-                    KeyValuePair<string, (DlcType type, string name, string icon)> lastExtraAppDlc = extraInjectDlc.Last();
-                    foreach (KeyValuePair<string, (DlcType type, string name, string icon)> extraPair in extraInjectDlc)
+                    KeyValuePair<string, SelectionDLC> lastExtraAppDlc = extraInjectDlc.Last();
+                    foreach (KeyValuePair<string, SelectionDLC> extraPair in extraInjectDlc)
                     {
-                        string dlcId = extraPair.Key;
-                        (_, string dlcName, _) = extraPair.Value;
-                        writer.WriteLine($"        \"{dlcId}\": \"{dlcName}\"{(extraPair.Equals(lastExtraAppDlc) ? "" : ",")}");
-                        installForm?.UpdateUser($"Added extra DLC to SmokeAPI.config.json with appid {dlcId} ({dlcName})", LogTextBox.Action, false);
+                        SelectionDLC selectionDlc = extraPair.Value;
+                        writer.WriteLine($"        \"{selectionDlc.Id}\": \"{selectionDlc.Name}\"{(extraPair.Equals(lastExtraAppDlc) ? "" : ",")}");
+                        installForm?.UpdateUser($"Added extra DLC to SmokeAPI.config.json with appid {selectionDlc.Id} ({selectionDlc.Name})",
+                            LogTextBox.Action, false);
                     }
                     writer.WriteLine("      }");
                     writer.WriteLine(pair.Equals(lastExtraApp) ? "    }" : "    },");
@@ -211,7 +201,7 @@ internal static class SmokeAPI
             }
         });
 
-    internal static async Task Install(string directory, ProgramSelection selection, InstallForm installForm = null, bool generateConfig = true)
+    internal static async Task Install(string directory, Selection selection, InstallForm installForm = null, bool generateConfig = true)
         => await Task.Run(() =>
         {
             directory.GetCreamApiComponents(out _, out _, out _, out _, out string oldConfig);

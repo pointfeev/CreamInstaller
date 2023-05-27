@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 using CreamInstaller.Components;
 
@@ -52,14 +51,14 @@ internal sealed partial class DialogForm : CustomForm
         }
         if (customFormIcon is not null)
             Icon = customFormIcon;
-        if (!links.Any())
+        if (links.Count < 1)
             return ShowDialog();
         foreach (LinkLabel.Link link in links)
             _ = descriptionLabel.Links.Add(link);
-        descriptionLabel.LinkClicked += (_, e) =>
+        descriptionLabel.LinkClicked += (s, e) =>
         {
             if (e.Link != null)
-                Process.Start(new ProcessStartInfo((string)e.Link.LinkData) { UseShellExecute = true });
+                _ = Process.Start(new ProcessStartInfo((string)e.Link.LinkData) { UseShellExecute = true });
         };
         return ShowDialog();
     }

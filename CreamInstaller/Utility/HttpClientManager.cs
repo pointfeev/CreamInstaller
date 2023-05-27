@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Drawing;
 using System.Globalization;
 using System.Net;
@@ -15,7 +15,7 @@ internal static class HttpClientManager
 {
     internal static HttpClient HttpClient;
 
-    private static readonly Dictionary<string, string> HttpContentCache = new();
+    private static readonly ConcurrentDictionary<string, string> HttpContentCache = new();
 
     internal static void Setup()
     {

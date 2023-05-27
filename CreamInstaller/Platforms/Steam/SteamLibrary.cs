@@ -22,14 +22,14 @@ internal static class SteamLibrary
         }
     }
 
-    internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(string gameDirectory)
+    internal static async Task<HashSet<(string directory, BinaryType binaryType)>> GetExecutableDirectories(string gameDirectory)
         => await Task.Run(async () => await gameDirectory.GetExecutableDirectories(true));
 
-    internal static async Task<List<(string appId, string name, string branch, int buildId, string gameDirectory)>> GetGames()
+    internal static async Task<HashSet<(string appId, string name, string branch, int buildId, string gameDirectory)>> GetGames()
         => await Task.Run(async () =>
         {
-            List<(string appId, string name, string branch, int buildId, string gameDirectory)> games = new();
-            List<string> gameLibraryDirectories = await GetLibraryDirectories();
+            HashSet<(string appId, string name, string branch, int buildId, string gameDirectory)> games = new();
+            HashSet<string> gameLibraryDirectories = await GetLibraryDirectories();
             foreach (string libraryDirectory in gameLibraryDirectories)
             {
                 if (Program.Canceled)
@@ -37,7 +37,7 @@ internal static class SteamLibrary
                 foreach ((string appId, string name, string branch, int buildId, string gameDirectory) game in
                          (await GetGamesFromLibraryDirectory(libraryDirectory)).Where(game
                              => !games.Any(_game => _game.appId == game.appId && _game.gameDirectory == game.gameDirectory)))
-                    games.Add(game);
+                    _ = games.Add(game);
             }
             return games;
         });
@@ -85,10 +85,10 @@ internal static class SteamLibrary
             return games;
         });
 
-    private static async Task<List<string>> GetLibraryDirectories()
+    private static async Task<HashSet<string>> GetLibraryDirectories()
         => await Task.Run(() =>
         {
-            List<string> gameDirectories = new();
+            HashSet<string> gameDirectories = new();
             if (Program.Canceled)
                 return gameDirectories;
             string steamInstallPath = InstallPath;
@@ -97,7 +97,7 @@ internal static class SteamLibrary
             string libraryFolder = steamInstallPath + @"\steamapps";
             if (!libraryFolder.DirectoryExists())
                 return gameDirectories;
-            gameDirectories.Add(libraryFolder);
+            _ = gameDirectories.Add(libraryFolder);
             string libraryFolders = libraryFolder + @"\libraryfolders.vdf";
             if (!libraryFolders.FileExists() || !ValveDataFile.TryDeserialize(libraryFolders.ReadFile(), out VProperty result))
                 return gameDirectories;
@@ -108,8 +108,8 @@ internal static class SteamLibrary
                 if (string.IsNullOrWhiteSpace(path))
                     continue;
                 path += @"\steamapps";
-                if (path.DirectoryExists() && !gameDirectories.Contains(path))
-                    gameDirectories.Add(path);
+                if (path.DirectoryExists())
+                    _ = gameDirectories.Add(path);
             }
             return gameDirectories;
         });

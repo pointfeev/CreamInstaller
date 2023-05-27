@@ -24,8 +24,8 @@ internal sealed class CustomTreeView : TreeView
     private static readonly Color C7 = ColorTranslator.FromHtml("#006900");
     private static readonly Color C8 = ColorTranslator.FromHtml("#69AA69");
 
-    private readonly Dictionary<ProgramSelection, Rectangle> checkBoxBounds = new();
-    private readonly Dictionary<ProgramSelection, Rectangle> comboBoxBounds = new();
+    private readonly Dictionary<Selection, Rectangle> checkBoxBounds = new();
+    private readonly Dictionary<Selection, Rectangle> comboBoxBounds = new();
 
     private readonly Dictionary<TreeNode, Rectangle> selectionBounds = new();
     private SolidBrush backBrush;
@@ -110,7 +110,7 @@ internal sealed class CustomTreeView : TreeView
         }
         if (form is SelectForm)
         {
-            ProgramSelection selection = ProgramSelection.FromPlatformId(platform, platformId);
+            Selection selection = Selection.FromPlatformId(platform, platformId);
             if (selection is not null)
             {
                 if (bounds == node.Bounds)
@@ -145,7 +145,7 @@ internal sealed class CustomTreeView : TreeView
                 {
                     comboBoxFont ??= new(font.FontFamily, 6, font.Style, font.Unit, font.GdiCharSet, font.GdiVerticalFont);
                     ComboBoxState comboBoxState = Enabled ? ComboBoxState.Normal : ComboBoxState.Disabled;
-                    text = (selection.KoaloaderProxy ?? ProgramSelection.DefaultKoaloaderProxy) + ".dll";
+                    text = (selection.KoaloaderProxy ?? Selection.DefaultKoaloaderProxy) + ".dll";
                     size = TextRenderer.MeasureText(graphics, text, comboBoxFont) + new Size(6, 0);
                     const int padding = 2;
                     bounds = new(bounds.X + bounds.Width, bounds.Y + padding / 2, size.Width, bounds.Height - padding);
@@ -186,9 +186,9 @@ internal sealed class CustomTreeView : TreeView
             }
         if (e.Button is not MouseButtons.Left)
             return;
-        if (comboBoxBounds.Any() && selectForm is not null)
-            foreach (KeyValuePair<ProgramSelection, Rectangle> pair in comboBoxBounds)
-                if (!ProgramSelection.All.Contains(pair.Key))
+        if (comboBoxBounds.Count > 0 && selectForm is not null)
+            foreach (KeyValuePair<Selection, Rectangle> pair in comboBoxBounds)
+                if (!Selection.All.Contains(pair.Key))
                     _ = comboBoxBounds.Remove(pair.Key);
                 else if (pair.Value.Contains(clickPoint))
                 {
@@ -214,15 +214,15 @@ internal sealed class CustomTreeView : TreeView
                         if (canUse)
                             _ = comboBoxDropDown.Items.Add(new ToolStripButton(proxy + ".dll", null, (_, _) =>
                             {
-                                pair.Key.KoaloaderProxy = proxy == ProgramSelection.DefaultKoaloaderProxy ? null : proxy;
+                                pair.Key.KoaloaderProxy = proxy == Selection.DefaultKoaloaderProxy ? null : proxy;
                                 selectForm.OnKoaloaderChanged();
                             }) { Font = comboBoxFont });
                     }
                     comboBoxDropDown.Show(this, PointToScreen(new(pair.Value.Left, pair.Value.Bottom - 1)));
                     break;
                 }
-        foreach (KeyValuePair<ProgramSelection, Rectangle> pair in checkBoxBounds)
-            if (!ProgramSelection.All.Contains(pair.Key))
+        foreach (KeyValuePair<Selection, Rectangle> pair in checkBoxBounds)
+            if (!Selection.All.Contains(pair.Key))
                 _ = checkBoxBounds.Remove(pair.Key);
             else if (pair.Value.Contains(clickPoint))
             {

@@ -34,49 +34,39 @@ internal static class ParadoxLauncher
         }
     }
 
-    internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(string gameDirectory)
+    internal static async Task<HashSet<(string directory, BinaryType binaryType)>> GetExecutableDirectories(string gameDirectory)
         => await Task.Run(async () => await gameDirectory.GetExecutableDirectories(validFunc: path => !Path.GetFileName(path).Contains("bootstrapper")));
 
-    private static void PopulateDlc(ProgramSelection paradoxLauncher = null)
+    private static void PopulateDlc(Selection paradoxLauncher = null)
     {
-        paradoxLauncher ??= ProgramSelection.FromPlatformId(Platform.Paradox, "PL");
-        if (paradoxLauncher is not null)
-        {
-            paradoxLauncher.ExtraDlc.Clear();
-            paradoxLauncher.ExtraSelectedDlc.Clear();
-            foreach (ProgramSelection selection in ProgramSelection.AllEnabled.Where(s => s != paradoxLauncher && s.Publisher == "Paradox Interactive"))
-            {
-                paradoxLauncher.ExtraDlc.Add(selection.Id, (selection.Name, selection.AllDlc));
-                paradoxLauncher.ExtraSelectedDlc.Add(selection.Id, (selection.Name, selection.SelectedDlc));
-            }
-            if (!paradoxLauncher.ExtraDlc.Any())
-                foreach (ProgramSelection selection in ProgramSelection.AllSafe.Where(s => s != paradoxLauncher && s.Publisher == "Paradox Interactive"))
-                {
-                    paradoxLauncher.ExtraDlc.Add(selection.Id, (selection.Name, selection.AllDlc));
-                    paradoxLauncher.ExtraSelectedDlc.Add(selection.Id, (selection.Name, selection.AllDlc));
-                }
-        }
+        paradoxLauncher ??= Selection.FromPlatformId(Platform.Paradox, "PL");
+        if (paradoxLauncher is null)
+            return;
+        paradoxLauncher.ExtraSelections.Clear();
+        foreach (Selection selection in Selection.AllEnabled.Where(s => s != paradoxLauncher && s.Publisher == "Paradox Interactive"))
+            _ = paradoxLauncher.ExtraSelections.Add(selection);
+        if (paradoxLauncher.ExtraSelections.Count > 0)
+            return;
+        foreach (Selection selection in Selection.AllSafe.Where(s => s != paradoxLauncher && s.Publisher == "Paradox Interactive"))
+            _ = paradoxLauncher.ExtraSelections.Add(selection);
     }
 
     internal static bool DlcDialog(Form form)
     {
-        ProgramSelection paradoxLauncher = ProgramSelection.FromPlatformId(Platform.Paradox, "PL");
-        if (paradoxLauncher is not null && paradoxLauncher.Enabled)
-        {
-            PopulateDlc(paradoxLauncher);
-            if (!paradoxLauncher.ExtraDlc.Any())
-            {
-                using DialogForm dialogForm = new(form);
-                return dialogForm.Show(SystemIcons.Warning,
-                    "WARNING: There are no scanned games with DLC that can be added to the Paradox Launcher!"
-                  + "\n\nInstalling DLC unlockers for the Paradox Launcher alone can cause existing configurations to be deleted!", "Ignore", "Cancel",
-                    "Paradox Launcher") != DialogResult.OK;
-            }
-        }
-        return false;
+        Selection paradoxLauncher = Selection.FromPlatformId(Platform.Paradox, "PL");
+        if (paradoxLauncher is null || !paradoxLauncher.Enabled)
+            return false;
+        PopulateDlc(paradoxLauncher);
+        if (paradoxLauncher.ExtraSelections.Count > 0)
+            return false;
+        using DialogForm dialogForm = new(form);
+        return dialogForm.Show(SystemIcons.Warning,
+            "WARNING: There are no scanned games with DLC that can be added to the Paradox Launcher!"
+          + "\n\nInstalling DLC unlockers for the Paradox Launcher alone can cause existing configurations to be deleted!", "Ignore", "Cancel",
+            "Paradox Launcher") != DialogResult.OK;
     }
 
-    internal static async Task<RepairResult> Repair(Form form, ProgramSelection selection)
+    internal static async Task<RepairResult> Repair(Form form, Selection selection)
     {
         InstallForm installForm = form as InstallForm;
         if (!Program.AreDllsLockedDialog(form, selection))

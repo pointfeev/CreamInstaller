@@ -22,20 +22,19 @@ internal static class UplayR1
         log = directory + @"\UplayR1Unlocker.log";
     }
 
-    internal static void CheckConfig(string directory, ProgramSelection selection, InstallForm installForm = null)
+    internal static void CheckConfig(string directory, Selection selection, InstallForm installForm = null)
     {
         directory.GetUplayR1Components(out _, out _, out _, out _, out string config, out _);
-        IEnumerable<KeyValuePair<string, (DlcType type, string name, string icon)>> blacklistDlc = selection.AllDlc.Except(selection.SelectedDlc);
-        foreach (KeyValuePair<string, (string _, SortedList<string, (DlcType type, string name, string icon)> extraDlc)> pair in selection.ExtraSelectedDlc)
-            blacklistDlc = blacklistDlc.Except(pair.Value.extraDlc);
-        blacklistDlc = blacklistDlc.ToList();
-        if (blacklistDlc.Any())
+        List<SelectionDLC> blacklistDlc = selection.DLC.Where(dlc => !dlc.Enabled).ToList();
+        foreach (Selection extraSelection in selection.ExtraSelections)
+            blacklistDlc.AddRange(extraSelection.DLC.Where(dlc => !dlc.Enabled));
+        if (blacklistDlc.Count > 0)
         {
             /*if (installForm is not null)
                 installForm.UpdateUser("Generating Uplay R1 Unlocker configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);*/
             config.CreateFile(true, installForm).Close();
             StreamWriter writer = new(config, true, Encoding.UTF8);
-            WriteConfig(writer, new(blacklistDlc.ToDictionary(pair => pair.Key, pair => pair.Value), PlatformIdComparer.String), installForm);
+            WriteConfig(writer, new(blacklistDlc.ToDictionary(dlc => dlc.Id, dlc => dlc), PlatformIdComparer.String), installForm);
             writer.Flush();
             writer.Close();
         }
@@ -46,8 +45,7 @@ internal static class UplayR1
         }
     }
 
-    private static void WriteConfig(StreamWriter writer, SortedList<string, (DlcType type, string name, string icon)> blacklistDlc,
-        InstallForm installForm = null)
+    private static void WriteConfig(TextWriter writer, SortedList<string, SelectionDLC> blacklistDlc, InstallForm installForm = null)
     {
         writer.WriteLine("{");
         writer.WriteLine("  \"logging\": false,");
@@ -56,13 +54,13 @@ internal static class UplayR1
         if (blacklistDlc.Count > 0)
         {
             writer.WriteLine("  \"blacklist\": [");
-            KeyValuePair<string, (DlcType type, string name, string icon)> lastBlacklistDlc = blacklistDlc.Last();
-            foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in blacklistDlc)
+            KeyValuePair<string, SelectionDLC> lastBlacklistDlc = blacklistDlc.Last();
+            foreach (KeyValuePair<string, SelectionDLC> pair in blacklistDlc)
             {
-                string dlcId = pair.Key;
-                (_, string dlcName, _) = pair.Value;
-                writer.WriteLine($"    {dlcId}{(pair.Equals(lastBlacklistDlc) ? "" : ",")}");
-                installForm?.UpdateUser($"Added blacklist DLC to UplayR1Unlocker.jsonc with appid {dlcId} ({dlcName})", LogTextBox.Action, false);
+                SelectionDLC selectionDlc = pair.Value;
+                writer.WriteLine($"    {selectionDlc.Id}{(pair.Equals(lastBlacklistDlc) ? "" : ",")}");
+                installForm?.UpdateUser($"Added blacklist DLC to UplayR1Unlocker.jsonc with appid {selectionDlc.Id} ({selectionDlc.Name})", LogTextBox.Action,
+                    false);
             }
             writer.WriteLine("  ],");
         }
@@ -109,7 +107,7 @@ internal static class UplayR1
             }
         });
 
-    internal static async Task Install(string directory, ProgramSelection selection, InstallForm installForm = null, bool generateConfig = true)
+    internal static async Task Install(string directory, Selection selection, InstallForm installForm = null, bool generateConfig = true)
         => await Task.Run(() =>
         {
             directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out _, out _);

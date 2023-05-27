@@ -36,7 +36,7 @@ internal static class SafeIO
         while (!Program.Canceled)
             try
             {
-                Directory.CreateDirectory(directoryPath);
+                _ = Directory.CreateDirectory(directoryPath);
                 break;
             }
             catch (Exception e)
@@ -251,6 +251,11 @@ internal static class SafeIO
     private static DialogResult IOWarnInternal(this string filePath, string message, Exception e, Form form = null)
     {
         using DialogForm dialogForm = new(form);
-        return dialogForm.Show(SystemIcons.Warning, message + ": " + filePath.BeautifyPath() + "\n\n" + e.FormatException(), "Retry", "OK");
+        string description = message + ": " + filePath.BeautifyPath() + "\n\n";
+        if (e is IOException && (e.HResult & 0x0000FFFF) == 225) // virus or potentially unwanted software
+            description += "Please resolve your anti-virus and press retry to continue . . . ";
+        else
+            description += e.FormatException();
+        return dialogForm.Show(SystemIcons.Warning, description, "Retry", "OK");
     }
 }

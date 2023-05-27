@@ -75,7 +75,7 @@ internal static class Koaloader
         }
         SortedList<string, string> targets = new(PlatformIdComparer.String);
         SortedList<string, string> modules = new(PlatformIdComparer.String);
-        if (targets.Any() || modules.Any())
+        if (targets.Count > 0 || modules.Count > 0)
         {
             /*if (installForm is not null)
                 installForm.UpdateUser("Generating Koaloader configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);*/
@@ -92,13 +92,13 @@ internal static class Koaloader
         }
     }
 
-    private static void WriteConfig(StreamWriter writer, SortedList<string, string> targets, SortedList<string, string> modules, InstallForm installForm = null)
+    private static void WriteConfig(TextWriter writer, SortedList<string, string> targets, SortedList<string, string> modules, InstallForm installForm = null)
     {
         writer.WriteLine("{");
         writer.WriteLine("  \"logging\": false,");
         writer.WriteLine("  \"enabled\": true,");
-        writer.WriteLine("  \"auto_load\": " + (modules.Any() ? "false" : "true") + ",");
-        if (targets.Any())
+        writer.WriteLine("  \"auto_load\": " + (modules.Count > 0 ? "false" : "true") + ",");
+        if (targets.Count > 0)
         {
             writer.WriteLine("  \"targets\": [");
             KeyValuePair<string, string> lastTarget = targets.Last();
@@ -112,7 +112,7 @@ internal static class Koaloader
         }
         else
             writer.WriteLine("  \"targets\": []");
-        if (modules.Any())
+        if (modules.Count > 0)
         {
             writer.WriteLine("  \"modules\": [");
             KeyValuePair<string, string> lastModule = modules.Last();
@@ -166,11 +166,11 @@ internal static class Koaloader
                 await Uninstall(rootDirectory, null, installForm, deleteConfig);
         });
 
-    internal static async Task Install(string directory, BinaryType binaryType, ProgramSelection selection, string rootDirectory = null,
+    internal static async Task Install(string directory, BinaryType binaryType, Selection selection, string rootDirectory = null,
         InstallForm installForm = null, bool generateConfig = true)
         => await Task.Run(() =>
         {
-            string proxy = selection.KoaloaderProxy ?? ProgramSelection.DefaultKoaloaderProxy;
+            string proxy = selection.KoaloaderProxy ?? Selection.DefaultKoaloaderProxy;
             string path = directory + @"\" + proxy + ".dll";
             foreach (string _path in directory.GetKoaloaderProxies().Where(p => p != path && p.FileExists() && p.IsResourceFile(ResourceIdentifier.Koaloader)))
             {

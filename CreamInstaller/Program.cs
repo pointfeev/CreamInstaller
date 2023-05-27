@@ -48,7 +48,7 @@ internal static class Program
         return ProtectedGameDirectories.Any(path => (directory + path).DirectoryExists());
     }
 
-    internal static bool AreDllsLockedDialog(Form form, ProgramSelection selection)
+    internal static bool AreDllsLockedDialog(Form form, Selection selection)
     {
         while (true)
         {

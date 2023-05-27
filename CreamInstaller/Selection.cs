@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using CreamInstaller.Components;
 using CreamInstaller.Resources;
 using CreamInstaller.Utility;
 using static CreamInstaller.Resources.Resources;
@@ -13,47 +12,31 @@ public enum Platform
     Epic, Ubisoft
 }
 
-public enum DlcType
-{
-    Steam, SteamHidden, EpicCatalogItem,
-    EpicEntitlement
-}
-
-internal sealed class ProgramSelection
+internal sealed class Selection
 {
     internal const string DefaultKoaloaderProxy = "version";
 
-    internal static readonly List<ProgramSelection> All = new();
+    internal static readonly HashSet<Selection> All = new();
+    internal readonly HashSet<Selection> ExtraSelections = new();
 
-    internal readonly SortedList<string, (DlcType type, string name, string icon)> AllDlc = new(PlatformIdComparer.String);
-
-    internal readonly SortedList<string, (string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> ExtraDlc = new();
-
-    internal readonly SortedList<string, (string name, SortedList<string, (DlcType type, string name, string icon)> dlc)> ExtraSelectedDlc = new();
-
-    internal readonly SortedList<string, (DlcType type, string name, string icon)> SelectedDlc = new(PlatformIdComparer.String);
-
-    internal List<string> DllDirectories;
+    internal HashSet<string> DllDirectories;
     internal bool Enabled;
-    internal List<(string directory, BinaryType binaryType)> ExecutableDirectories;
-    internal string IconUrl;
+    internal HashSet<(string directory, BinaryType binaryType)> ExecutableDirectories;
+    internal string Icon;
     internal string Id = "0";
     internal bool Koaloader;
     internal string KoaloaderProxy;
     internal string Name = "Program";
-
     internal Platform Platform;
-
-    internal string ProductUrl;
-
+    internal string Product;
     internal string Publisher;
-
     internal string RootDirectory;
-    internal string SubIconUrl;
+    internal string SubIcon;
+    internal string Website;
 
-    internal string WebsiteUrl;
+    internal Selection() => All.Add(this);
 
-    internal ProgramSelection() => All.Add(this);
+    internal IEnumerable<SelectionDLC> DLC => SelectionDLC.AllSafe.Where(dlc => dlc.Selection == this);
 
     internal bool AreDllsLocked
     {
@@ -96,69 +79,41 @@ internal sealed class ProgramSelection
         }
     }
 
-    internal static List<ProgramSelection> AllSafe => All.ToList();
+    internal static List<Selection> AllSafe => All.ToList();
 
-    internal static List<ProgramSelection> AllEnabled => AllSafe.FindAll(s => s.Enabled);
+    internal static List<Selection> AllEnabled => AllSafe.FindAll(s => s.Enabled);
 
-    private void Toggle(string dlcAppId, (DlcType type, string name, string icon) dlcApp, bool enabled)
+    private void Remove()
     {
-        if (enabled)
-            SelectedDlc[dlcAppId] = dlcApp;
-        else
-            _ = SelectedDlc.Remove(dlcAppId);
-    }
-
-    internal void ToggleDlc(string dlcId, bool enabled)
-    {
-        foreach ((string appId, (DlcType type, string name, string icon) dlcApp) in AllDlc)
-        {
-            if (appId != dlcId)
-                continue;
-            Toggle(appId, dlcApp, enabled);
-            break;
-        }
-        Enabled = SelectedDlc.Any() || ExtraSelectedDlc.Any();
-    }
-
-    private void Validate()
-    {
-        if (Program.IsGameBlocked(Name, RootDirectory))
-        {
-            _ = All.Remove(this);
-            return;
-        }
-        if (!RootDirectory.DirectoryExists())
-        {
-            _ = All.Remove(this);
-            return;
-        }
-        _ = DllDirectories.RemoveAll(directory => !directory.DirectoryExists());
-        if (!DllDirectories.Any())
-            _ = All.Remove(this);
+        _ = All.Remove(this);
+        foreach (SelectionDLC dlc in DLC)
+            dlc.Selection = null;
     }
 
     private void Validate(List<(Platform platform, string id, string name)> programsToScan)
     {
         if (programsToScan is null || !programsToScan.Any(p => p.platform == Platform && p.id == Id))
         {
-            _ = All.Remove(this);
+            Remove();
             return;
         }
-        Validate();
+        if (Program.IsGameBlocked(Name, RootDirectory))
+        {
+            Remove();
+            return;
+        }
+        if (!RootDirectory.DirectoryExists())
+        {
+            Remove();
+            return;
+        }
+        _ = DllDirectories.RemoveWhere(directory => !directory.DirectoryExists());
+        if (DllDirectories.Count < 1)
+            Remove();
     }
-
-    internal static void ValidateAll() => AllSafe.ForEach(selection => selection.Validate());
 
     internal static void ValidateAll(List<(Platform platform, string id, string name)> programsToScan)
         => AllSafe.ForEach(selection => selection.Validate(programsToScan));
 
-    internal static ProgramSelection FromPlatformId(Platform platform, string gameId) => AllSafe.Find(s => s.Platform == platform && s.Id == gameId);
-
-    internal static (string gameId, (DlcType type, string name, string icon) app)? GetDlcFromPlatformId(Platform platform, string dlcId)
-    {
-        foreach (ProgramSelection selection in AllSafe.Where(s => s.Platform == platform))
-            foreach (KeyValuePair<string, (DlcType type, string name, string icon)> pair in selection.AllDlc.Where(p => p.Key == dlcId))
-                return (selection.Id, pair.Value);
-        return null;
-    }
+    internal static Selection FromPlatformId(Platform platform, string gameId) => AllSafe.Find(s => s.Platform == platform && s.Id == gameId);
 }

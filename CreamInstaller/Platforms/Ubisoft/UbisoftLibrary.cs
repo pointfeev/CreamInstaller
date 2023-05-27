@@ -12,7 +12,7 @@ internal static class UbisoftLibrary
 {
     private static RegistryKey installsKey;
 
-    internal static RegistryKey InstallsKey
+    private static RegistryKey InstallsKey
     {
         get
         {
@@ -22,13 +22,13 @@ internal static class UbisoftLibrary
         }
     }
 
-    internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(string gameDirectory)
+    internal static async Task<HashSet<(string directory, BinaryType binaryType)>> GetExecutableDirectories(string gameDirectory)
         => await Task.Run(async () => await gameDirectory.GetExecutableDirectories(true));
 
-    internal static async Task<List<(string gameId, string name, string gameDirectory)>> GetGames()
+    internal static async Task<HashSet<(string gameId, string name, string gameDirectory)>> GetGames()
         => await Task.Run(() =>
         {
-            List<(string gameId, string name, string gameDirectory)> games = new();
+            HashSet<(string gameId, string name, string gameDirectory)> games = new();
             RegistryKey installsKey = InstallsKey;
             if (installsKey is null)
                 return games;
@@ -37,7 +37,7 @@ internal static class UbisoftLibrary
                 RegistryKey installKey = installsKey.OpenSubKey(gameId);
                 string installDir = installKey?.GetValue("InstallDir")?.ToString()?.BeautifyPath();
                 if (installDir is not null && !games.Any(g => g.gameId == gameId && g.gameDirectory == installDir))
-                    games.Add((gameId, new DirectoryInfo(installDir).Name, installDir));
+                    _ = games.Add((gameId, new DirectoryInfo(installDir).Name, installDir));
             }
             return games;
         });
