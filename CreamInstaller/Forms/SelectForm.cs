@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using CreamInstaller.Components;
 using CreamInstaller.Platforms.Epic;
+using CreamInstaller.Platforms.Epic.Heroic;
 using CreamInstaller.Platforms.Paradox;
 using CreamInstaller.Platforms.Steam;
 using CreamInstaller.Platforms.Ubisoft;
@@ -647,7 +648,7 @@ internal sealed partial class SelectForm : CustomForm
                              => !Program.IsGameBlocked(g.name, g.gameDirectory)))
                     gameChoices.Add((Platform.Steam, appId, name,
                         programsToScan is not null && programsToScan.Any(p => p.platform is Platform.Steam && p.id == appId)));
-            if (EpicLibrary.EpicManifestsPath.DirectoryExists())
+            if (EpicLibrary.EpicManifestsPath.DirectoryExists() || HeroicLibrary.HeroicLibraryPath.DirectoryExists())
                 gameChoices.AddRange((await EpicLibrary.GetGames()).Where(m => !Program.IsGameBlocked(m.DisplayName, m.InstallLocation)).Select(manifest
                     => (Platform.Epic, manifest.CatalogNamespace, manifest.DisplayName,
                         programsToScan is not null && programsToScan.Any(p => p.platform is Platform.Epic && p.id == manifest.CatalogNamespace))));
@@ -659,7 +660,7 @@ internal sealed partial class SelectForm : CustomForm
                 using SelectDialogForm form = new(this);
                 DialogResult selectResult = form.QueryUser("Choose which programs and/or games to scan:", gameChoices,
                     out List<(Platform platform, string id, string name)> choices);
-                if (selectResult == DialogResult.Abort) // will be an uninstall all button
+                if (selectResult == DialogResult.Abort)
                 {
                     int maxProgress = 0;
                     int curProgress = 0;

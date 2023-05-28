@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CreamInstaller.Platforms.Epic.Heroic;
 using CreamInstaller.Utility;
 using Microsoft.Win32;
 using Newtonsoft.Json;
@@ -29,29 +30,31 @@ internal static class EpicLibrary
         => await Task.Run(async () => await gameDirectory.GetExecutableDirectories(true));
 
     internal static async Task<HashSet<Manifest>> GetGames()
-        => await Task.Run(() =>
+        => await Task.Run(async () =>
         {
             HashSet<Manifest> games = new();
             string manifests = EpicManifestsPath;
-            if (!manifests.DirectoryExists())
+            if (manifests.DirectoryExists())
+                foreach (string item in manifests.EnumerateDirectory("*.item"))
+                {
+                    if (Program.Canceled)
+                        return games;
+                    string json = item.ReadFile();
+                    try
+                    {
+                        Manifest manifest = JsonConvert.DeserializeObject<Manifest>(json);
+                        if (manifest is not null && !games.Any(g
+                                => g.CatalogNamespace == manifest.CatalogNamespace && g.InstallLocation == manifest.InstallLocation))
+                            _ = games.Add(manifest);
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+                }
+            if (Program.Canceled)
                 return games;
-            foreach (string file in manifests.EnumerateDirectory("*.item"))
-            {
-                if (Program.Canceled)
-                    return games;
-                string json = file.ReadFile();
-                try
-                {
-                    Manifest manifest = JsonConvert.DeserializeObject<Manifest>(json);
-                    if (manifest is not null && manifest.CatalogItemId == manifest.MainGameCatalogItemId && !games.Any(g
-                            => g.CatalogItemId == manifest.CatalogItemId && g.InstallLocation == manifest.InstallLocation))
-                        _ = games.Add(manifest);
-                }
-                catch
-                {
-                    // ignored
-                }
-            }
+            await HeroicLibrary.GetGames(games);
             return games;
         });
 }
