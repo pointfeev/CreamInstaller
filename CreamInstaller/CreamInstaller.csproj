@@ -4,7 +4,7 @@
 		<TargetFramework>net7.0-windows</TargetFramework>
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Resources\ini.ico</ApplicationIcon>
-		<Version>4.9.1</Version>
+		<Version>4.9.2</Version>
 		<Copyright>2021, pointfeev (https://github.com/pointfeev)</Copyright>
 		<Company>CreamInstaller</Company>
 		<Product>Automatic DLC Unlocker Installer &amp; Configuration Generator</Product>

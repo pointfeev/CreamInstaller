@@ -16,7 +16,7 @@ internal sealed partial class InstallForm : CustomForm
 {
     private readonly HashSet<Selection> disabledSelections = new();
 
-    private readonly int programCount = Selection.AllEnabled.Count;
+    private readonly int programCount = Selection.AllEnabled.Count();
     private readonly bool uninstalling;
     private int completeOperationsCount;
 
@@ -184,7 +184,7 @@ internal sealed partial class InstallForm : CustomForm
 
     private async Task Operate()
     {
-        HashSet<Selection> programSelections = Selection.AllEnabled;
+        HashSet<Selection> programSelections = Selection.AllEnabled.ToHashSet();
         operationsCount = programSelections.Count;
         completeOperationsCount = 0;
         foreach (Selection selection in programSelections)
@@ -205,7 +205,7 @@ internal sealed partial class InstallForm : CustomForm
             ++completeOperationsCount;
         }
         Program.Cleanup();
-        HashSet<Selection> failedSelections = Selection.AllEnabled;
+        HashSet<Selection> failedSelections = Selection.AllEnabled.ToHashSet();
         if (failedSelections.Count > 0)
             if (failedSelections.Count == 1)
                 throw new CustomMessageException($"Operation failed for {failedSelections.First().Name}.");

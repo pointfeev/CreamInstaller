@@ -2,6 +2,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
+using CreamInstaller.Forms;
 using CreamInstaller.Resources;
 using CreamInstaller.Utility;
 using static CreamInstaller.Resources.Resources;
@@ -27,8 +29,7 @@ internal sealed class Selection : IEquatable<Selection>
     internal readonly string Name;
     internal readonly Platform Platform;
     internal readonly string RootDirectory;
-
-    internal bool Enabled;
+    internal readonly TreeNode TreeNode;
     internal string Icon;
     internal bool Koaloader;
     internal string KoaloaderProxy;
@@ -47,9 +48,19 @@ internal sealed class Selection : IEquatable<Selection>
         DllDirectories = dllDirectories;
         ExecutableDirectories = executableDirectories;
         _ = All.TryAdd(this, default);
+        TreeNode = new() { Tag = Platform, Name = Id, Text = Name };
+        SelectForm selectForm = SelectForm.Current;
+        if (selectForm is null)
+            return;
+        Enabled = selectForm.allCheckBox.Checked;
+        Koaloader = selectForm.koaloaderAllCheckBox.Checked;
     }
 
-    internal IEnumerable<SelectionDLC> DLC => SelectionDLC.AllSafe.Where(dlc => dlc.Selection.Equals(this));
+    internal static IEnumerable<Selection> AllEnabled => All.Keys.Where(s => s.Enabled);
+
+    internal bool Enabled { get => TreeNode.Checked; set => TreeNode.Checked = value; }
+
+    internal IEnumerable<SelectionDLC> DLC => SelectionDLC.All.Keys.Where(dlc => dlc.Selection.Equals(this));
 
     internal bool AreDllsLocked
     {
@@ -92,10 +103,6 @@ internal sealed class Selection : IEquatable<Selection>
         }
     }
 
-    internal static HashSet<Selection> AllSafe => All.Keys.ToHashSet();
-
-    internal static HashSet<Selection> AllEnabled => All.Keys.Where(s => s.Enabled).ToHashSet();
-
     public bool Equals(Selection other)
         => other is not null && (ReferenceEquals(this, other) || Id == other.Id && Platform == other.Platform && RootDirectory == other.RootDirectory);
 
@@ -106,6 +113,7 @@ internal sealed class Selection : IEquatable<Selection>
     private void Remove()
     {
         _ = All.TryRemove(this, out _);
+        TreeNode.Remove();
         foreach (SelectionDLC dlc in DLC)
             dlc.Selection = null;
     }
@@ -134,11 +142,11 @@ internal sealed class Selection : IEquatable<Selection>
 
     internal static void ValidateAll(List<(Platform platform, string id, string name)> programsToScan)
     {
-        foreach (Selection selection in AllSafe)
+        foreach (Selection selection in All.Keys.ToHashSet())
             selection.Validate(programsToScan);
     }
 
-    internal static Selection FromPlatformId(Platform platform, string gameId) => AllSafe.FirstOrDefault(s => s.Platform == platform && s.Id == gameId);
+    internal static Selection FromPlatformId(Platform platform, string gameId) => All.Keys.FirstOrDefault(s => s.Platform == platform && s.Id == gameId);
 
     public override bool Equals(object obj) => ReferenceEquals(this, obj) || obj is Selection other && Equals(other);
 

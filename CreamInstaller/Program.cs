@@ -38,15 +38,9 @@ internal static class Program
     internal static readonly string[] ProtectedGameDirectoryExceptions = Array.Empty<string>();
 
     internal static bool IsGameBlocked(string name, string directory = null)
-    {
-        if (!BlockProtectedGames)
-            return false;
-        if (ProtectedGames.Contains(name))
-            return true;
-        if (directory is null || ProtectedGameDirectoryExceptions.Contains(name))
-            return false;
-        return ProtectedGameDirectories.Any(path => (directory + path).DirectoryExists());
-    }
+        => BlockProtectedGames && (ProtectedGames.Contains(name) || directory is not null && !ProtectedGameDirectoryExceptions.Contains(name)
+                                                                                          && ProtectedGameDirectories.Any(path
+                                                                                                 => (directory + path).DirectoryExists()));
 
     internal static bool AreDllsLockedDialog(Form form, Selection selection)
     {
@@ -57,8 +51,8 @@ internal static class Program
                 using DialogForm dialogForm = new(form);
                 if (dialogForm.Show(SystemIcons.Error,
                         $"ERROR: One or more DLLs crucial to unlocker installation are locked for {selection.Name}!"
-                      + "\n\nThis is commonly caused by the program/game being active or an anti-virus blocking access."
-                      + "\n\nPlease close the program/game or resolve your anti-virus to continue . . . ", "Retry", "Cancel") == DialogResult.OK)
+                      + "\n\nPlease close the program/game or resolve your anti-virus and press retry to continue . . . ", "Retry", "Cancel")
+                 == DialogResult.OK)
                     continue;
             }
             else

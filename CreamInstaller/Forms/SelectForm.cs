@@ -25,21 +25,29 @@ internal sealed partial class SelectForm : CustomForm
 {
     private const string HelpButtonListPrefix = "\n    •  ";
 
+    private static SelectForm current;
+
     private readonly ConcurrentDictionary<string, string> remainingDLCs = new();
 
     private readonly ConcurrentDictionary<string, string> remainingGames = new();
 
     private List<(Platform platform, string id, string name)> programsToScan;
 
-    internal SelectForm()
+    private SelectForm()
     {
         InitializeComponent();
         Text = Program.ApplicationName;
     }
 
-    public override ContextMenuStrip ContextMenuStrip => base.ContextMenuStrip ??= new();
-
-    private List<TreeNode> TreeNodes => GatherTreeNodes(selectionTreeView.Nodes);
+    internal static SelectForm Current
+    {
+        get
+        {
+            if (current is not null && (current.Disposing || current.IsDisposed))
+                current = null;
+            return current ??= new();
+        }
+    }
 
     private static void UpdateRemaining(Label label, ConcurrentDictionary<string, string> list, string descriptor)
         => label.Text = list.IsEmpty ? "" : $"Remaining {descriptor} ({list.Count}): " + string.Join(", ", list.Values).Replace("&", "&&");
@@ -119,7 +127,6 @@ internal sealed partial class SelectForm : CustomForm
         }
         if (Program.Canceled)
             return;
-        List<TreeNode> treeNodes = TreeNodes;
         remainingGames.Clear(); // for display purposes only, otherwise ignorable
         remainingDLCs.Clear(); // for display purposes only, otherwise ignorable
         List<Task> appTasks = new();
@@ -133,20 +140,8 @@ internal sealed partial class SelectForm : CustomForm
                     await ParadoxLauncher.InstallPath.GetExecutableDirectories(validFunc: path => !Path.GetFileName(path).Contains("bootstrapper")));
                 if (uninstallAll)
                     selection.Enabled = true;
-                else
-                {
-                    if (allCheckBox.Checked)
-                        selection.Enabled = true;
-                    if (koaloaderAllCheckBox.Checked)
-                        selection.Koaloader = true;
-                    TreeNode programNode = treeNodes.Find(s => s.Tag is Platform.Paradox && s.Name == selection.Id) ?? new TreeNode();
-                    programNode.Tag = selection.Platform;
-                    programNode.Name = selection.Id;
-                    programNode.Text = selection.Name;
-                    programNode.Checked = selection.Enabled;
-                    if (programNode.TreeView is null)
-                        _ = selectionTreeView.Nodes.Add(programNode);
-                }
+                else if (selection.TreeNode.TreeView is null)
+                    _ = selectionTreeView.Nodes.Add(selection.TreeNode);
                 RemoveFromRemainingGames("Paradox Launcher");
             }
         }
@@ -313,10 +308,6 @@ internal sealed partial class SelectForm : CustomForm
                     }
                     Selection selection = Selection.GetOrCreate(Platform.Steam, appId, appData?.Name ?? name, gameDirectory, dllDirectories,
                         await gameDirectory.GetExecutableDirectories(true));
-                    selection.Enabled = allCheckBox.Checked || selection.DLC.Any(dlc => dlc.Enabled)
-                                                            || selection.ExtraSelections.Any(extraSelection => extraSelection.DLC.Any(dlc => dlc.Enabled));
-                    if (koaloaderAllCheckBox.Checked)
-                        selection.Koaloader = true;
                     selection.Product = "https://store.steampowered.com/app/" + appId;
                     selection.Icon = IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value.GetChild("common")?.GetChild("icon")}.jpg";
                     selection.SubIcon = appData?.HeaderImage ?? IconGrabber.SteamAppImagesPath
@@ -329,26 +320,13 @@ internal sealed partial class SelectForm : CustomForm
                     {
                         if (Program.Canceled)
                             return;
-                        TreeNode programNode = treeNodes.Find(s => (Platform)s.Tag == selection.Platform && s.Name == appId) ?? new TreeNode();
-                        programNode.Tag = selection.Platform;
-                        programNode.Name = appId;
-                        programNode.Text = appData?.Name ?? name;
-                        programNode.Checked = selection.Enabled;
-                        if (programNode.TreeView is null)
-                            _ = selectionTreeView.Nodes.Add(programNode);
+                        if (selection.TreeNode.TreeView is null)
+                            _ = selectionTreeView.Nodes.Add(selection.TreeNode);
                         foreach ((SelectionDLC dlc, _) in dlc)
                         {
                             if (Program.Canceled)
                                 return;
                             dlc.Selection = selection;
-                            dlc.Enabled = dlc.Name != "Unknown" && allCheckBox.Checked;
-                            TreeNode dlcNode = treeNodes.Find(s => (DLCType)s.Tag == dlc.Type && s.Name == dlc.Id) ?? new TreeNode();
-                            dlcNode.Tag = dlc.Type;
-                            dlcNode.Name = dlc.Id;
-                            dlcNode.Text = dlc.Name;
-                            dlcNode.Checked = dlc.Enabled;
-                            if (dlcNode.Parent is null)
-                                _ = programNode.Nodes.Add(dlcNode);
                         }
                     });
                     if (Program.Canceled)
@@ -431,10 +409,6 @@ internal sealed partial class SelectForm : CustomForm
                     }
                     Selection selection = Selection.GetOrCreate(Platform.Epic, @namespace, name, directory, dllDirectories,
                         await directory.GetExecutableDirectories(true));
-                    selection.Enabled = allCheckBox.Checked || selection.DLC.Any(dlc => dlc.Enabled)
-                                                            || selection.ExtraSelections.Any(extraSelection => extraSelection.DLC.Any(dlc => dlc.Enabled));
-                    if (koaloaderAllCheckBox.Checked)
-                        selection.Koaloader = true;
                     foreach ((SelectionDLC dlc, _) in entitlements.Where(dlc => dlc.Key.Name == selection.Name))
                     {
                         if (Program.Canceled)
@@ -449,57 +423,22 @@ internal sealed partial class SelectForm : CustomForm
                     {
                         if (Program.Canceled)
                             return;
-                        TreeNode programNode = treeNodes.Find(s => (Platform)s.Tag == selection.Platform && s.Name == @namespace) ?? new TreeNode();
-                        programNode.Tag = selection.Platform;
-                        programNode.Name = @namespace;
-                        programNode.Text = name;
-                        programNode.Checked = selection.Enabled;
-                        if (programNode.TreeView is null)
-                            _ = selectionTreeView.Nodes.Add(programNode);
+                        if (selection.TreeNode.TreeView is null)
+                            _ = selectionTreeView.Nodes.Add(selection.TreeNode);
                         if (!catalogItems.IsEmpty)
-                            /*TreeNode catalogItemsNode = treeNodes.Find(node => (Platform)s.Tag == selection.Platform && node.Name == @namespace + "_catalogItems") ?? new();
-                            catalogItemsNode.Tag = selection.Platform;
-                            catalogItemsNode.Name = @namespace + "_catalogItems";
-                            catalogItemsNode.Text = "Catalog Items";
-                            catalogItemsNode.Checked = selection.DLC.Any(dlc => dlc.Type is DLCType.EpicCatalogItem && dlc.Enabled);
-                            if (catalogItemsNode.Parent is null)
-                                _ = programNode.Nodes.Add(catalogItemsNode);*/
                             foreach ((SelectionDLC dlc, _) in catalogItems)
                             {
                                 if (Program.Canceled)
                                     return;
                                 dlc.Selection = selection;
-                                dlc.Enabled = allCheckBox.Checked;
-                                TreeNode dlcNode = treeNodes.Find(s => (DLCType)s.Tag == dlc.Type && s.Name == dlc.Id) ?? new TreeNode();
-                                dlcNode.Tag = dlc.Type;
-                                dlcNode.Name = dlc.Id;
-                                dlcNode.Text = dlc.Name;
-                                dlcNode.Checked = dlc.Enabled;
-                                if (dlcNode.Parent is null)
-                                    _ = programNode.Nodes.Add(dlcNode); //_ = catalogItemsNode.Nodes.Add(dlcNode);
                             }
                         if (entitlements.IsEmpty)
                             return;
-                        /*TreeNode entitlementsNode = treeNodes.Find(node => (Platform)s.Tag == selection.Platform && node.Name == @namespace + "_entitlements") ?? new();
-                        entitlementsNode.Name = selection.Platform;
-                        entitlementsNode.Name = @namespace + "_entitlements";
-                        entitlementsNode.Text = "Entitlements";
-                        entitlementsNode.Checked = selection.DLC.Any(dlc => dlc.Type is DLCType.EpicEntitlement && dlc.Enabled);
-                        if (entitlementsNode.Parent is null)
-                            _ = programNode.Nodes.Add(entitlementsNode);*/
                         foreach ((SelectionDLC dlc, _) in entitlements)
                         {
                             if (Program.Canceled)
                                 return;
                             dlc.Selection = selection;
-                            dlc.Enabled = allCheckBox.Checked;
-                            TreeNode dlcNode = treeNodes.Find(s => (DLCType)s.Tag == dlc.Type && s.Name == dlc.Id) ?? new TreeNode();
-                            dlcNode.Tag = dlc.Type;
-                            dlcNode.Name = dlc.Id;
-                            dlcNode.Text = dlc.Name;
-                            dlcNode.Checked = dlc.Enabled;
-                            if (dlcNode.Parent is null)
-                                _ = programNode.Nodes.Add(dlcNode); //_ = entitlementsNode.Nodes.Add(dlcNode);
                         }
                     });
                     if (Program.Canceled)
@@ -541,22 +480,13 @@ internal sealed partial class SelectForm : CustomForm
                         return;
                     Selection selection = Selection.GetOrCreate(Platform.Ubisoft, gameId, name, gameDirectory, dllDirectories,
                         await gameDirectory.GetExecutableDirectories(true));
-                    selection.Enabled = allCheckBox.Checked || selection.DLC.Any(dlc => dlc.Enabled)
-                                                            || selection.ExtraSelections.Any(extraSelection => extraSelection.DLC.Any(dlc => dlc.Enabled));
-                    if (koaloaderAllCheckBox.Checked)
-                        selection.Koaloader = true;
                     selection.Icon = IconGrabber.GetDomainFaviconUrl("store.ubi.com");
                     selectionTreeView.Invoke(delegate
                     {
                         if (Program.Canceled)
                             return;
-                        TreeNode programNode = treeNodes.Find(s => (Platform)s.Tag == selection.Platform && s.Name == gameId) ?? new TreeNode();
-                        programNode.Tag = selection.Platform;
-                        programNode.Name = gameId;
-                        programNode.Text = name;
-                        programNode.Checked = selection.Enabled;
-                        if (programNode.TreeView is null)
-                            _ = selectionTreeView.Nodes.Add(programNode);
+                        if (selection.TreeNode.TreeView is null)
+                            _ = selectionTreeView.Nodes.Add(selection.TreeNode);
                     });
                     if (Program.Canceled)
                         return;
@@ -639,7 +569,8 @@ internal sealed partial class SelectForm : CustomForm
                         progressBar.Value = p;
                     };
                     progressLabel.Text = "Quickly gathering games for uninstallation . . . ";
-                    TreeNodes.ForEach(node => node.Remove());
+                    foreach (Selection selection in Selection.All.Keys)
+                        selection.TreeNode.Remove();
                     await GetApplicablePrograms(iProgress, true);
                     if (!Program.Canceled)
                         OnUninstall(null, null);
@@ -691,7 +622,8 @@ internal sealed partial class SelectForm : CustomForm
             setup = false;
             progressLabel.Text = "Gathering and caching your applicable games and their DLCs . . . ";
             Selection.ValidateAll(programsToScan);
-            TreeNodes.ForEach(node => node.Remove());
+            foreach (Selection selection in Selection.All.Keys)
+                selection.TreeNode.Remove();
             await GetApplicablePrograms(iProgress);
             await SteamCMD.Cleanup();
         }
@@ -702,7 +634,7 @@ internal sealed partial class SelectForm : CustomForm
         allCheckBox.Enabled = selectionTreeView.Enabled;
         koaloaderAllCheckBox.Enabled = selectionTreeView.Enabled;
         noneFoundLabel.Visible = !selectionTreeView.Enabled;
-        installButton.Enabled = Selection.AllEnabled.Count > 0;
+        installButton.Enabled = Selection.AllEnabled.Any();
         uninstallButton.Enabled = installButton.Enabled;
         saveButton.Enabled = CanSaveDlc();
         loadButton.Enabled = CanLoadDlc();
@@ -723,13 +655,12 @@ internal sealed partial class SelectForm : CustomForm
         TreeNode node = e.Node;
         if (node is null)
             return;
-        SyncNode(node);
         SyncNodeAncestors(node);
         SyncNodeDescendants(node);
         allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
-        allCheckBox.Checked = TreeNodes.TrueForAll(node => node.Text == "Unknown" || node.Checked);
+        allCheckBox.Checked = EnumerateTreeNodes(selectionTreeView.Nodes).All(node => node.Text == "Unknown" || node.Checked);
         allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
-        installButton.Enabled = Selection.AllEnabled.Count > 0;
+        installButton.Enabled = Selection.AllEnabled.Any();
         uninstallButton.Enabled = installButton.Enabled;
         saveButton.Enabled = CanSaveDlc();
         resetButton.Enabled = CanResetDlc();
@@ -737,17 +668,11 @@ internal sealed partial class SelectForm : CustomForm
 
     private static void SyncNodeAncestors(TreeNode node)
     {
-        while (true)
-        {
-            TreeNode parentNode = node.Parent;
-            if (parentNode is not null)
-            {
-                parentNode.Checked = parentNode.Nodes.Cast<TreeNode>().Any(childNode => childNode.Checked);
-                node = parentNode;
-                continue;
-            }
-            break;
-        }
+        TreeNode parentNode = node.Parent;
+        if (parentNode is null)
+            return;
+        parentNode.Checked = parentNode.Nodes.Cast<TreeNode>().Any(childNode => childNode.Checked);
+        SyncNodeAncestors(parentNode);
     }
 
     private static void SyncNodeDescendants(TreeNode node)
@@ -755,38 +680,20 @@ internal sealed partial class SelectForm : CustomForm
         foreach (TreeNode childNode in node.Nodes)
         {
             if (childNode.Text == "Unknown")
-                return;
+                continue;
             childNode.Checked = node.Checked;
-            SyncNode(childNode);
             SyncNodeDescendants(childNode);
         }
     }
 
-    private static void SyncNode(TreeNode node)
+    private static IEnumerable<TreeNode> EnumerateTreeNodes(TreeNodeCollection nodeCollection)
     {
-        string id = node.Name;
-        Platform platform = (Platform)node.Tag;
-        Selection selection = Selection.FromPlatformId(platform, id);
-        if (selection is not null)
-        {
-            selection.Enabled = node.Checked;
-            return;
-        }
-        DLCType type = (DLCType)node.Tag;
-        SelectionDLC dlc = SelectionDLC.FromTypeId(type, id);
-        if (dlc is not null)
-            dlc.Enabled = node.Checked;
-    }
-
-    private static List<TreeNode> GatherTreeNodes(TreeNodeCollection nodeCollection)
-    {
-        List<TreeNode> treeNodes = new();
         foreach (TreeNode rootNode in nodeCollection)
         {
-            treeNodes.Add(rootNode);
-            treeNodes.AddRange(GatherTreeNodes(rootNode.Nodes));
+            yield return rootNode;
+            foreach (TreeNode childNode in EnumerateTreeNodes(rootNode.Nodes))
+                yield return childNode;
         }
-        return treeNodes;
     }
 
     private void ShowProgressBar()
@@ -1027,45 +934,44 @@ internal sealed partial class SelectForm : CustomForm
 
     private void OnAllCheckBoxChanged(object sender, EventArgs e)
     {
-        bool shouldCheck = TreeNodes.Any(node => node.Parent is null && !node.Checked);
-        foreach (TreeNode node in TreeNodes.Where(node => node.Parent is null && node.Checked != shouldCheck))
+        bool shouldEnable = Selection.All.Keys.Any(s => !s.Enabled);
+        foreach (Selection selection in Selection.All.Keys.Where(s => s.Enabled != shouldEnable))
         {
-            node.Checked = shouldCheck;
-            OnTreeViewNodeCheckedChanged(null, new(node, TreeViewAction.ByMouse));
+            selection.Enabled = shouldEnable;
+            OnTreeViewNodeCheckedChanged(null, new(selection.TreeNode, TreeViewAction.ByMouse));
         }
         allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
-        allCheckBox.Checked = shouldCheck;
+        allCheckBox.Checked = shouldEnable;
         allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
     }
 
     private void OnKoaloaderAllCheckBoxChanged(object sender, EventArgs e)
     {
-        bool shouldCheck = Selection.AllSafe.Any(selection => !selection.Koaloader);
-        foreach (Selection selection in Selection.AllSafe)
-            selection.Koaloader = shouldCheck;
+        bool shouldEnable = Selection.All.Keys.Any(selection => !selection.Koaloader);
+        foreach (Selection selection in Selection.All.Keys)
+            selection.Koaloader = shouldEnable;
         selectionTreeView.Invalidate();
         koaloaderAllCheckBox.CheckedChanged -= OnKoaloaderAllCheckBoxChanged;
-        koaloaderAllCheckBox.Checked = shouldCheck;
+        koaloaderAllCheckBox.Checked = shouldEnable;
         koaloaderAllCheckBox.CheckedChanged += OnKoaloaderAllCheckBoxChanged;
+        resetKoaloaderButton.Enabled = CanResetKoaloader();
     }
 
     private bool AreSelectionsDefault()
-        => TreeNodes.All(node => node.Parent is null || node.Tag is not Platform || (node.Text == "Unknown" ? !node.Checked : node.Checked));
+        => EnumerateTreeNodes(selectionTreeView.Nodes).All(node
+            => node.Parent is null || node.Tag is not Platform and not DLCType || (node.Text == "Unknown" ? !node.Checked : node.Checked));
 
     private bool CanSaveDlc() => installButton.Enabled && (ProgramData.ReadDlcChoices().Any() || !AreSelectionsDefault());
 
     private void OnSaveDlc(object sender, EventArgs e)
     {
         List<(Platform platform, string gameId, string dlcId)> choices = ProgramData.ReadDlcChoices().ToList();
-        foreach (TreeNode node in TreeNodes)
-            if (node.Parent is { } parent && node.Tag is Platform platform)
-            {
-                if ((node.Text == "Unknown" ? node.Checked : !node.Checked)
-                 && !choices.Any(c => c.platform == platform && c.gameId == parent.Name && c.dlcId == node.Name))
-                    choices.Add((platform, node.Parent.Name, node.Name));
-                else
-                    _ = choices.RemoveAll(n => n.platform == platform && n.gameId == parent.Name && n.dlcId == node.Name);
-            }
+        foreach (SelectionDLC dlc in SelectionDLC.All.Keys)
+            if ((dlc.Name == "Unknown" ? dlc.Enabled : !dlc.Enabled)
+             && !choices.Any(c => c.platform == dlc.Selection.Platform && c.gameId == dlc.Selection.Id && c.dlcId == dlc.Id))
+                choices.Add((dlc.Selection.Platform, dlc.Selection.Id, dlc.Id));
+            else
+                _ = choices.RemoveAll(n => n.platform == dlc.Selection.Platform && n.gameId == dlc.Selection.Id && n.dlcId == dlc.Id);
         ProgramData.WriteDlcChoices(choices);
         loadButton.Enabled = CanLoadDlc();
         saveButton.Enabled = CanSaveDlc();
@@ -1076,36 +982,35 @@ internal sealed partial class SelectForm : CustomForm
     private void OnLoadDlc(object sender, EventArgs e)
     {
         List<(Platform platform, string gameId, string dlcId)> choices = ProgramData.ReadDlcChoices().ToList();
-        foreach (TreeNode node in TreeNodes)
-            if (node.Parent is { } parent && node.Tag is Platform platform)
-            {
-                node.Checked = choices.Any(c => c.platform == platform && c.gameId == parent.Name && c.dlcId == node.Name)
-                    ? node.Text == "Unknown"
-                    : node.Text != "Unknown";
-                OnTreeViewNodeCheckedChanged(null, new(node, TreeViewAction.ByMouse));
-            }
+        foreach (SelectionDLC dlc in SelectionDLC.All.Keys)
+        {
+            dlc.Enabled = choices.Any(c => c.platform == dlc.Selection.Platform && c.gameId == dlc.Selection.Id && c.dlcId == dlc.Id)
+                ? dlc.Name == "Unknown"
+                : dlc.Name != "Unknown";
+            OnTreeViewNodeCheckedChanged(null, new(dlc.TreeNode, TreeViewAction.ByMouse));
+        }
     }
 
     private bool CanResetDlc() => !AreSelectionsDefault();
 
     private void OnResetDlc(object sender, EventArgs e)
     {
-        foreach (TreeNode node in TreeNodes.Where(node => node.Parent is not null && node.Tag is Platform))
+        foreach (SelectionDLC dlc in SelectionDLC.All.Keys)
         {
-            node.Checked = node.Text != "Unknown";
-            OnTreeViewNodeCheckedChanged(null, new(node, TreeViewAction.ByMouse));
+            dlc.Enabled = dlc.Name != "Unknown";
+            OnTreeViewNodeCheckedChanged(null, new(dlc.TreeNode, TreeViewAction.ByMouse));
         }
         resetButton.Enabled = CanResetDlc();
     }
 
-    private static bool AreKoaloaderSelectionsDefault() => Selection.AllSafe.All(selection => selection.Koaloader && selection.KoaloaderProxy is null);
+    private static bool AreKoaloaderSelectionsDefault() => Selection.All.Keys.All(selection => selection.Koaloader && selection.KoaloaderProxy is null);
 
     private static bool CanSaveKoaloader() => ProgramData.ReadKoaloaderChoices().Any() || !AreKoaloaderSelectionsDefault();
 
     private void OnSaveKoaloader(object sender, EventArgs e)
     {
         List<(Platform platform, string id, string proxy, bool enabled)> choices = ProgramData.ReadKoaloaderChoices().ToList();
-        foreach (Selection selection in Selection.AllSafe)
+        foreach (Selection selection in Selection.All.Keys)
         {
             _ = choices.RemoveAll(c => c.platform == selection.Platform && c.id == selection.Id);
             if (selection.KoaloaderProxy is not null and not Selection.DefaultKoaloaderProxy || !selection.Koaloader)
@@ -1122,7 +1027,7 @@ internal sealed partial class SelectForm : CustomForm
     private void OnLoadKoaloader(object sender, EventArgs e)
     {
         List<(Platform platform, string id, string proxy, bool enabled)> choices = ProgramData.ReadKoaloaderChoices().ToList();
-        foreach (Selection selection in Selection.AllSafe)
+        foreach (Selection selection in Selection.All.Keys)
             if (choices.Any(c => c.platform == selection.Platform && c.id == selection.Id))
             {
                 (Platform platform, string id, string proxy, bool enabled)
@@ -1155,7 +1060,7 @@ internal sealed partial class SelectForm : CustomForm
 
     private void OnResetKoaloader(object sender, EventArgs e)
     {
-        foreach (Selection selection in Selection.AllSafe)
+        foreach (Selection selection in Selection.All.Keys)
         {
             selection.Koaloader = true;
             selection.KoaloaderProxy = null;
@@ -1169,7 +1074,7 @@ internal sealed partial class SelectForm : CustomForm
         saveKoaloaderButton.Enabled = CanSaveKoaloader();
         resetKoaloaderButton.Enabled = CanResetKoaloader();
         koaloaderAllCheckBox.CheckedChanged -= OnKoaloaderAllCheckBoxChanged;
-        koaloaderAllCheckBox.Checked = Selection.AllSafe.All(selection => selection.Koaloader);
+        koaloaderAllCheckBox.Checked = Selection.All.Keys.All(selection => selection.Koaloader);
         koaloaderAllCheckBox.CheckedChanged += OnKoaloaderAllCheckBoxChanged;
     }
 

@@ -35,11 +35,11 @@ internal static class ParadoxLauncher
         if (paradoxLauncher is null)
             return;
         paradoxLauncher.ExtraSelections.Clear();
-        foreach (Selection selection in Selection.AllEnabled.Where(s => s != paradoxLauncher && s.Publisher == "Paradox Interactive"))
+        foreach (Selection selection in Selection.AllEnabled.Where(s => !s.Equals(paradoxLauncher) && s.Publisher == "Paradox Interactive"))
             _ = paradoxLauncher.ExtraSelections.Add(selection);
         if (paradoxLauncher.ExtraSelections.Count > 0)
             return;
-        foreach (Selection selection in Selection.AllSafe.Where(s => s != paradoxLauncher && s.Publisher == "Paradox Interactive"))
+        foreach (Selection selection in Selection.All.Keys.Where(s => !s.Equals(paradoxLauncher) && s.Publisher == "Paradox Interactive"))
             _ = paradoxLauncher.ExtraSelections.Add(selection);
     }
 

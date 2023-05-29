@@ -32,7 +32,7 @@ internal sealed partial class UpdateForm : CustomForm
 
     private void StartProgram()
     {
-        SelectForm form = new();
+        SelectForm form = SelectForm.Current;
         form.InheritLocation(this);
         form.FormClosing += (_, _) => Close();
         form.Show();

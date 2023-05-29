@@ -447,7 +447,7 @@ namespace CreamInstaller.Forms
         private GroupBox programsGroupBox;
         private ProgressBar progressBar;
         private Label progressLabel;
-        private CheckBox allCheckBox;
+        internal CheckBox allCheckBox;
         private Button scanButton;
         private Label noneFoundLabel;
         private CustomTreeView selectionTreeView;
@@ -460,7 +460,7 @@ namespace CreamInstaller.Forms
         private Label progressLabelDLCs;
         private CheckBox sortCheckBox;
         private FlowLayoutPanel koaloaderFlowPanel;
-        private CheckBox koaloaderAllCheckBox;
+        internal CheckBox koaloaderAllCheckBox;
         private Button saveButton;
         private Button loadButton;
         private Button resetKoaloaderButton;
