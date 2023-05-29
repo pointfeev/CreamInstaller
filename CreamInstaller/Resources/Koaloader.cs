@@ -38,7 +38,7 @@ internal static class Koaloader
 
     private static void WriteProxy(this string path, string proxyName, BinaryType binaryType)
     {
-        foreach (string resourceIdentifier in EmbeddedResources.FindAll(r => r.StartsWith("Koaloader", StringComparison.Ordinal)))
+        foreach (string resourceIdentifier in EmbeddedResources.Where(r => r.StartsWith("Koaloader", StringComparison.Ordinal)))
         {
             resourceIdentifier.GetProxyInfoFromIdentifier(out string _proxyName, out BinaryType _binaryType);
             if (_proxyName != proxyName || _binaryType != binaryType)

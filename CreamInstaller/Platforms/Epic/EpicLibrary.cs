@@ -6,7 +6,6 @@ using CreamInstaller.Platforms.Epic.Heroic;
 using CreamInstaller.Utility;
 using Microsoft.Win32;
 using Newtonsoft.Json;
-using static CreamInstaller.Resources.Resources;
 
 namespace CreamInstaller.Platforms.Epic;
 
@@ -26,13 +25,10 @@ internal static class EpicLibrary
         }
     }
 
-    internal static async Task<HashSet<(string directory, BinaryType binaryType)>> GetExecutableDirectories(string gameDirectory)
-        => await Task.Run(async () => await gameDirectory.GetExecutableDirectories(true));
-
-    internal static async Task<HashSet<Manifest>> GetGames()
+    internal static async Task<List<Manifest>> GetGames()
         => await Task.Run(async () =>
         {
-            HashSet<Manifest> games = new();
+            List<Manifest> games = new();
             string manifests = EpicManifestsPath;
             if (manifests.DirectoryExists())
                 foreach (string item in manifests.EnumerateDirectory("*.item"))
@@ -45,7 +41,7 @@ internal static class EpicLibrary
                         Manifest manifest = JsonConvert.DeserializeObject<Manifest>(json);
                         if (manifest is not null && !games.Any(g
                                 => g.CatalogNamespace == manifest.CatalogNamespace && g.InstallLocation == manifest.InstallLocation))
-                            _ = games.Add(manifest);
+                            games.Add(manifest);
                     }
                     catch
                     {

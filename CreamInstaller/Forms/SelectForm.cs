@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -128,30 +129,16 @@ internal sealed partial class SelectForm : CustomForm
             HashSet<string> dllDirectories = await ParadoxLauncher.InstallPath.GetDllDirectoriesFromGameDirectory(Platform.Paradox);
             if (dllDirectories is not null)
             {
+                Selection selection = Selection.GetOrCreate(Platform.Paradox, "PL", "Paradox Launcher", ParadoxLauncher.InstallPath, dllDirectories,
+                    await ParadoxLauncher.InstallPath.GetExecutableDirectories(validFunc: path => !Path.GetFileName(path).Contains("bootstrapper")));
                 if (uninstallAll)
-                {
-                    Selection bareSelection = Selection.FromPlatformId(Platform.Paradox, "PL") ?? new();
-                    bareSelection.Enabled = true;
-                    bareSelection.Id = "PL";
-                    bareSelection.Name = "Paradox Launcher";
-                    bareSelection.RootDirectory = ParadoxLauncher.InstallPath;
-                    bareSelection.ExecutableDirectories = await ParadoxLauncher.GetExecutableDirectories(bareSelection.RootDirectory);
-                    bareSelection.DllDirectories = dllDirectories;
-                    bareSelection.Platform = Platform.Paradox;
-                }
+                    selection.Enabled = true;
                 else
                 {
-                    Selection selection = Selection.FromPlatformId(Platform.Paradox, "PL") ?? new();
                     if (allCheckBox.Checked)
                         selection.Enabled = true;
                     if (koaloaderAllCheckBox.Checked)
                         selection.Koaloader = true;
-                    selection.Id = "PL";
-                    selection.Name = "Paradox Launcher";
-                    selection.RootDirectory = ParadoxLauncher.InstallPath;
-                    selection.ExecutableDirectories = await ParadoxLauncher.GetExecutableDirectories(selection.RootDirectory);
-                    selection.DllDirectories = dllDirectories;
-                    selection.Platform = Platform.Paradox;
                     TreeNode programNode = treeNodes.Find(s => s.Tag is Platform.Paradox && s.Name == selection.Id) ?? new TreeNode();
                     programNode.Tag = selection.Platform;
                     programNode.Name = selection.Id;
@@ -166,7 +153,7 @@ internal sealed partial class SelectForm : CustomForm
         int steamGamesToCheck;
         if (uninstallAll || programsToScan.Any(c => c.platform is Platform.Steam))
         {
-            HashSet<(string appId, string name, string branch, int buildId, string gameDirectory)> steamGames = await SteamLibrary.GetGames();
+            List<(string appId, string name, string branch, int buildId, string gameDirectory)> steamGames = await SteamLibrary.GetGames();
             steamGamesToCheck = steamGames.Count;
             foreach ((string appId, string name, string branch, int buildId, string gameDirectory) in steamGames)
             {
@@ -191,14 +178,9 @@ internal sealed partial class SelectForm : CustomForm
                     }
                     if (uninstallAll)
                     {
-                        Selection bareSelection = Selection.FromPlatformId(Platform.Steam, appId) ?? new Selection();
+                        Selection bareSelection = Selection.GetOrCreate(Platform.Steam, appId, name, gameDirectory, dllDirectories,
+                            await gameDirectory.GetExecutableDirectories(true));
                         bareSelection.Enabled = true;
-                        bareSelection.Id = appId;
-                        bareSelection.Name = name;
-                        bareSelection.RootDirectory = gameDirectory;
-                        bareSelection.ExecutableDirectories = await SteamLibrary.GetExecutableDirectories(bareSelection.RootDirectory);
-                        bareSelection.DllDirectories = dllDirectories;
-                        bareSelection.Platform = Platform.Steam;
                         RemoveFromRemainingGames(name);
                         return;
                     }
@@ -214,14 +196,15 @@ internal sealed partial class SelectForm : CustomForm
                     }
                     if (Program.Canceled)
                         return;
-                    ConcurrentDictionary<string, SelectionDLC> dlc = new();
+                    ConcurrentDictionary<SelectionDLC, byte> dlc = new();
                     List<Task> dlcTasks = new();
-                    List<string> dlcIds = new();
+                    HashSet<string> dlcIds = new();
                     if (appData is not null)
-                        dlcIds.AddRange(await SteamStore.ParseDlcAppIds(appData));
+                        foreach (string dlcId in await SteamStore.ParseDlcAppIds(appData))
+                            _ = dlcIds.Add(dlcId);
                     if (appInfo is not null)
-                        dlcIds.AddRange(await SteamCMD.ParseDlcAppIds(appInfo));
-                    dlcIds = dlcIds.Distinct().ToList();
+                        foreach (string dlcId in await SteamCMD.ParseDlcAppIds(appInfo))
+                            _ = dlcIds.Add(dlcId);
                     if (dlcIds.Count > 0)
                         foreach (string dlcAppId in dlcIds)
                         {
@@ -291,20 +274,20 @@ internal sealed partial class SelectForm : CustomForm
                                     if (Program.Canceled)
                                         return;
                                     if (!string.IsNullOrWhiteSpace(fullGameName))
-                                        dlc[fullGameAppId] = new()
-                                        {
-                                            Id = fullGameAppId, Type = fullGameOnSteamStore ? DLCType.Steam : DLCType.SteamHidden, Name = fullGameName,
-                                            Icon = fullGameIcon
-                                        };
+                                    {
+                                        SelectionDLC fullGameDlc = SelectionDLC.GetOrCreate(fullGameOnSteamStore ? DLCType.Steam : DLCType.SteamHidden,
+                                            fullGameAppId, fullGameName);
+                                        fullGameDlc.Icon = fullGameIcon;
+                                        _ = dlc.TryAdd(fullGameDlc, default);
+                                    }
                                 }
                                 if (Program.Canceled)
                                     return;
                                 if (string.IsNullOrWhiteSpace(dlcName))
                                     dlcName = "Unknown";
-                                dlc[dlcAppId] = new()
-                                {
-                                    Id = dlcAppId, Type = onSteamStore ? DLCType.Steam : DLCType.SteamHidden, Name = dlcName, Icon = dlcIcon
-                                };
+                                SelectionDLC _dlc = SelectionDLC.GetOrCreate(onSteamStore ? DLCType.Steam : DLCType.SteamHidden, dlcAppId, dlcName);
+                                _dlc.Icon = dlcIcon;
+                                _ = dlc.TryAdd(_dlc, default);
                                 RemoveFromRemainingDLCs(dlcAppId);
                             });
                             dlcTasks.Add(task);
@@ -328,17 +311,12 @@ internal sealed partial class SelectForm : CustomForm
                         RemoveFromRemainingGames(name);
                         return;
                     }
-                    Selection selection = Selection.FromPlatformId(Platform.Steam, appId) ?? new Selection();
+                    Selection selection = Selection.GetOrCreate(Platform.Steam, appId, appData?.Name ?? name, gameDirectory, dllDirectories,
+                        await gameDirectory.GetExecutableDirectories(true));
                     selection.Enabled = allCheckBox.Checked || selection.DLC.Any(dlc => dlc.Enabled)
                                                             || selection.ExtraSelections.Any(extraSelection => extraSelection.DLC.Any(dlc => dlc.Enabled));
                     if (koaloaderAllCheckBox.Checked)
                         selection.Koaloader = true;
-                    selection.Id = appId;
-                    selection.Name = appData?.Name ?? name;
-                    selection.RootDirectory = gameDirectory;
-                    selection.ExecutableDirectories = await SteamLibrary.GetExecutableDirectories(selection.RootDirectory);
-                    selection.DllDirectories = dllDirectories;
-                    selection.Platform = Platform.Steam;
                     selection.Product = "https://store.steampowered.com/app/" + appId;
                     selection.Icon = IconGrabber.SteamAppImagesPath + @$"\{appId}\{appInfo?.Value.GetChild("common")?.GetChild("icon")}.jpg";
                     selection.SubIcon = appData?.HeaderImage ?? IconGrabber.SteamAppImagesPath
@@ -351,21 +329,21 @@ internal sealed partial class SelectForm : CustomForm
                     {
                         if (Program.Canceled)
                             return;
-                        TreeNode programNode = treeNodes.Find(s => s.Tag is Platform.Steam && s.Name == appId) ?? new TreeNode();
+                        TreeNode programNode = treeNodes.Find(s => (Platform)s.Tag == selection.Platform && s.Name == appId) ?? new TreeNode();
                         programNode.Tag = selection.Platform;
                         programNode.Name = appId;
                         programNode.Text = appData?.Name ?? name;
                         programNode.Checked = selection.Enabled;
                         if (programNode.TreeView is null)
                             _ = selectionTreeView.Nodes.Add(programNode);
-                        foreach ((_, SelectionDLC dlc) in dlc)
+                        foreach ((SelectionDLC dlc, _) in dlc)
                         {
                             if (Program.Canceled)
                                 return;
                             dlc.Selection = selection;
                             dlc.Enabled = dlc.Name != "Unknown" && allCheckBox.Checked;
-                            TreeNode dlcNode = treeNodes.Find(s => s.Tag is Platform.Steam && s.Name == dlc.Id) ?? new TreeNode();
-                            dlcNode.Tag = selection.Platform;
+                            TreeNode dlcNode = treeNodes.Find(s => (DLCType)s.Tag == dlc.Type && s.Name == dlc.Id) ?? new TreeNode();
+                            dlcNode.Tag = dlc.Type;
                             dlcNode.Name = dlc.Id;
                             dlcNode.Text = dlc.Name;
                             dlcNode.Checked = dlc.Enabled;
@@ -382,7 +360,7 @@ internal sealed partial class SelectForm : CustomForm
         }
         if (uninstallAll || programsToScan.Any(c => c.platform is Platform.Epic))
         {
-            HashSet<Manifest> epicGames = await EpicLibrary.GetGames();
+            List<Manifest> epicGames = await EpicLibrary.GetGames();
             foreach (Manifest manifest in epicGames)
             {
                 string @namespace = manifest.CatalogNamespace;
@@ -405,22 +383,17 @@ internal sealed partial class SelectForm : CustomForm
                     }
                     if (uninstallAll)
                     {
-                        Selection bareSelection = Selection.FromPlatformId(Platform.Epic, @namespace) ?? new Selection();
+                        Selection bareSelection = Selection.GetOrCreate(Platform.Epic, @namespace, name, directory, dllDirectories,
+                            await directory.GetExecutableDirectories(true));
                         bareSelection.Enabled = true;
-                        bareSelection.Id = @namespace;
-                        bareSelection.Name = name;
-                        bareSelection.RootDirectory = directory;
-                        bareSelection.ExecutableDirectories = await EpicLibrary.GetExecutableDirectories(bareSelection.RootDirectory);
-                        bareSelection.DllDirectories = dllDirectories;
-                        bareSelection.Platform = Platform.Epic;
                         RemoveFromRemainingGames(name);
                         return;
                     }
                     if (Program.Canceled)
                         return;
-                    ConcurrentDictionary<string, SelectionDLC> catalogItems = new();
+                    ConcurrentDictionary<SelectionDLC, byte> catalogItems = new();
                     // get catalog items
-                    ConcurrentDictionary<string, SelectionDLC> entitlements = new();
+                    ConcurrentDictionary<SelectionDLC, byte> entitlements = new();
                     List<Task> dlcTasks = new();
                     List<(string id, string name, string product, string icon, string developer)>
                         entitlementIds = await EpicStore.QueryEntitlements(@namespace);
@@ -434,11 +407,11 @@ internal sealed partial class SelectForm : CustomForm
                             {
                                 if (Program.Canceled)
                                     return;
-                                entitlements[id] = new()
-                                {
-                                    Id = id, Name = name, Product = product, Icon = icon,
-                                    Publisher = developer
-                                };
+                                SelectionDLC entitlement = SelectionDLC.GetOrCreate(DLCType.EpicEntitlement, id, name);
+                                entitlement.Icon = icon;
+                                entitlement.Product = product;
+                                entitlement.Publisher = developer;
+                                _ = entitlements.TryAdd(entitlement, default);
                                 RemoveFromRemainingDLCs(id);
                             });
                             dlcTasks.Add(task);
@@ -456,24 +429,19 @@ internal sealed partial class SelectForm : CustomForm
                         RemoveFromRemainingGames(name);
                         return;
                     }
-                    Selection selection = Selection.FromPlatformId(Platform.Epic, @namespace) ?? new Selection();
+                    Selection selection = Selection.GetOrCreate(Platform.Epic, @namespace, name, directory, dllDirectories,
+                        await directory.GetExecutableDirectories(true));
                     selection.Enabled = allCheckBox.Checked || selection.DLC.Any(dlc => dlc.Enabled)
                                                             || selection.ExtraSelections.Any(extraSelection => extraSelection.DLC.Any(dlc => dlc.Enabled));
                     if (koaloaderAllCheckBox.Checked)
                         selection.Koaloader = true;
-                    selection.Id = @namespace;
-                    selection.Name = name;
-                    selection.RootDirectory = directory;
-                    selection.ExecutableDirectories = await EpicLibrary.GetExecutableDirectories(selection.RootDirectory);
-                    selection.DllDirectories = dllDirectories;
-                    selection.Platform = Platform.Epic;
-                    foreach (KeyValuePair<string, SelectionDLC> dlc in entitlements.Where(dlc => dlc.Value.Name == selection.Name))
+                    foreach ((SelectionDLC dlc, _) in entitlements.Where(dlc => dlc.Key.Name == selection.Name))
                     {
                         if (Program.Canceled)
                             return;
-                        selection.Product = "https://www.epicgames.com/store/product/" + dlc.Value.Product;
-                        selection.Icon = dlc.Value.Icon;
-                        selection.Publisher = dlc.Value.Publisher;
+                        selection.Product = "https://www.epicgames.com/store/product/" + dlc.Product;
+                        selection.Icon = dlc.Icon;
+                        selection.Publisher = dlc.Publisher;
                     }
                     if (Program.Canceled)
                         return;
@@ -481,7 +449,7 @@ internal sealed partial class SelectForm : CustomForm
                     {
                         if (Program.Canceled)
                             return;
-                        TreeNode programNode = treeNodes.Find(s => s.Tag is Platform.Epic && s.Name == @namespace) ?? new TreeNode();
+                        TreeNode programNode = treeNodes.Find(s => (Platform)s.Tag == selection.Platform && s.Name == @namespace) ?? new TreeNode();
                         programNode.Tag = selection.Platform;
                         programNode.Name = @namespace;
                         programNode.Text = name;
@@ -489,20 +457,21 @@ internal sealed partial class SelectForm : CustomForm
                         if (programNode.TreeView is null)
                             _ = selectionTreeView.Nodes.Add(programNode);
                         if (!catalogItems.IsEmpty)
-                            /*TreeNode catalogItemsNode = treeNodes.Find(node => node.Tag is Platform.Epic && node.Name == @namespace + "_catalogItems") ?? new();
+                            /*TreeNode catalogItemsNode = treeNodes.Find(node => (Platform)s.Tag == selection.Platform && node.Name == @namespace + "_catalogItems") ?? new();
+                            catalogItemsNode.Tag = selection.Platform;
                             catalogItemsNode.Name = @namespace + "_catalogItems";
                             catalogItemsNode.Text = "Catalog Items";
                             catalogItemsNode.Checked = selection.DLC.Any(dlc => dlc.Type is DLCType.EpicCatalogItem && dlc.Enabled);
                             if (catalogItemsNode.Parent is null)
                                 _ = programNode.Nodes.Add(catalogItemsNode);*/
-                            foreach ((_, SelectionDLC dlc) in catalogItems)
+                            foreach ((SelectionDLC dlc, _) in catalogItems)
                             {
                                 if (Program.Canceled)
                                     return;
                                 dlc.Selection = selection;
                                 dlc.Enabled = allCheckBox.Checked;
-                                TreeNode dlcNode = treeNodes.Find(s => s.Tag is Platform.Epic && s.Name == dlc.Id) ?? new TreeNode();
-                                dlcNode.Tag = selection.Platform;
+                                TreeNode dlcNode = treeNodes.Find(s => (DLCType)s.Tag == dlc.Type && s.Name == dlc.Id) ?? new TreeNode();
+                                dlcNode.Tag = dlc.Type;
                                 dlcNode.Name = dlc.Id;
                                 dlcNode.Text = dlc.Name;
                                 dlcNode.Checked = dlc.Enabled;
@@ -511,20 +480,21 @@ internal sealed partial class SelectForm : CustomForm
                             }
                         if (entitlements.IsEmpty)
                             return;
-                        /*TreeNode entitlementsNode = treeNodes.Find(node => node.Tag is Platform.Epic && node.Name == @namespace + "_entitlements") ?? new();
+                        /*TreeNode entitlementsNode = treeNodes.Find(node => (Platform)s.Tag == selection.Platform && node.Name == @namespace + "_entitlements") ?? new();
+                        entitlementsNode.Name = selection.Platform;
                         entitlementsNode.Name = @namespace + "_entitlements";
                         entitlementsNode.Text = "Entitlements";
                         entitlementsNode.Checked = selection.DLC.Any(dlc => dlc.Type is DLCType.EpicEntitlement && dlc.Enabled);
                         if (entitlementsNode.Parent is null)
                             _ = programNode.Nodes.Add(entitlementsNode);*/
-                        foreach ((_, SelectionDLC dlc) in entitlements)
+                        foreach ((SelectionDLC dlc, _) in entitlements)
                         {
                             if (Program.Canceled)
                                 return;
                             dlc.Selection = selection;
                             dlc.Enabled = allCheckBox.Checked;
-                            TreeNode dlcNode = treeNodes.Find(s => s.Tag is Platform.Epic && s.Name == dlc.Id) ?? new TreeNode();
-                            dlcNode.Tag = selection.Platform;
+                            TreeNode dlcNode = treeNodes.Find(s => (DLCType)s.Tag == dlc.Type && s.Name == dlc.Id) ?? new TreeNode();
+                            dlcNode.Tag = dlc.Type;
                             dlcNode.Name = dlc.Id;
                             dlcNode.Text = dlc.Name;
                             dlcNode.Checked = dlc.Enabled;
@@ -541,7 +511,7 @@ internal sealed partial class SelectForm : CustomForm
         }
         if (uninstallAll || programsToScan.Any(c => c.platform is Platform.Ubisoft))
         {
-            HashSet<(string gameId, string name, string gameDirectory)> ubisoftGames = await UbisoftLibrary.GetGames();
+            List<(string gameId, string name, string gameDirectory)> ubisoftGames = await UbisoftLibrary.GetGames();
             foreach ((string gameId, string name, string gameDirectory) in ubisoftGames)
             {
                 if (Program.Canceled)
@@ -561,36 +531,26 @@ internal sealed partial class SelectForm : CustomForm
                     }
                     if (uninstallAll)
                     {
-                        Selection bareSelection = Selection.FromPlatformId(Platform.Ubisoft, gameId) ?? new Selection();
+                        Selection bareSelection = Selection.GetOrCreate(Platform.Ubisoft, gameId, name, gameDirectory, dllDirectories,
+                            await gameDirectory.GetExecutableDirectories(true));
                         bareSelection.Enabled = true;
-                        bareSelection.Id = gameId;
-                        bareSelection.Name = name;
-                        bareSelection.RootDirectory = gameDirectory;
-                        bareSelection.ExecutableDirectories = await UbisoftLibrary.GetExecutableDirectories(bareSelection.RootDirectory);
-                        bareSelection.DllDirectories = dllDirectories;
-                        bareSelection.Platform = Platform.Ubisoft;
                         RemoveFromRemainingGames(name);
                         return;
                     }
                     if (Program.Canceled)
                         return;
-                    Selection selection = Selection.FromPlatformId(Platform.Ubisoft, gameId) ?? new Selection();
+                    Selection selection = Selection.GetOrCreate(Platform.Ubisoft, gameId, name, gameDirectory, dllDirectories,
+                        await gameDirectory.GetExecutableDirectories(true));
                     selection.Enabled = allCheckBox.Checked || selection.DLC.Any(dlc => dlc.Enabled)
                                                             || selection.ExtraSelections.Any(extraSelection => extraSelection.DLC.Any(dlc => dlc.Enabled));
                     if (koaloaderAllCheckBox.Checked)
                         selection.Koaloader = true;
-                    selection.Id = gameId;
-                    selection.Name = name;
-                    selection.RootDirectory = gameDirectory;
-                    selection.ExecutableDirectories = await UbisoftLibrary.GetExecutableDirectories(selection.RootDirectory);
-                    selection.DllDirectories = dllDirectories;
-                    selection.Platform = Platform.Ubisoft;
                     selection.Icon = IconGrabber.GetDomainFaviconUrl("store.ubi.com");
                     selectionTreeView.Invoke(delegate
                     {
                         if (Program.Canceled)
                             return;
-                        TreeNode programNode = treeNodes.Find(s => s.Tag is Platform.Ubisoft && s.Name == gameId) ?? new TreeNode();
+                        TreeNode programNode = treeNodes.Find(s => (Platform)s.Tag == selection.Platform && s.Name == gameId) ?? new TreeNode();
                         programNode.Tag = selection.Platform;
                         programNode.Name = gameId;
                         programNode.Text = name;
@@ -738,7 +698,7 @@ internal sealed partial class SelectForm : CustomForm
         OnLoadDlc(null, null);
         OnLoadKoaloader(null, null);
         HideProgressBar();
-        selectionTreeView.Enabled = Selection.All.Count > 0;
+        selectionTreeView.Enabled = !Selection.All.IsEmpty;
         allCheckBox.Enabled = selectionTreeView.Enabled;
         koaloaderAllCheckBox.Enabled = selectionTreeView.Enabled;
         noneFoundLabel.Visible = !selectionTreeView.Enabled;
@@ -791,14 +751,16 @@ internal sealed partial class SelectForm : CustomForm
     }
 
     private static void SyncNodeDescendants(TreeNode node)
-        => node.Nodes.Cast<TreeNode>().ToList().ForEach(childNode =>
+    {
+        foreach (TreeNode childNode in node.Nodes)
         {
             if (childNode.Text == "Unknown")
                 return;
             childNode.Checked = node.Checked;
             SyncNode(childNode);
             SyncNodeDescendants(childNode);
-        });
+        }
+    }
 
     private static void SyncNode(TreeNode node)
     {
@@ -810,7 +772,8 @@ internal sealed partial class SelectForm : CustomForm
             selection.Enabled = node.Checked;
             return;
         }
-        SelectionDLC dlc = SelectionDLC.FromPlatformId(platform, id);
+        DLCType type = (DLCType)node.Tag;
+        SelectionDLC dlc = SelectionDLC.FromTypeId(type, id);
         if (dlc is not null)
             dlc.Enabled = node.Checked;
     }
@@ -867,10 +830,10 @@ internal sealed partial class SelectForm : CustomForm
             Selection selection = Selection.FromPlatformId(platform, id);
             SelectionDLC dlc = null;
             if (selection is null)
-                dlc = SelectionDLC.FromPlatformId(platform, id);
+                dlc = SelectionDLC.FromTypeId((DLCType)node.Tag, id);
             Selection dlcParentSelection = null;
             if (dlc is not null)
-                dlcParentSelection = Selection.FromPlatformId(platform, dlc.Selection.Id);
+                dlcParentSelection = dlc.Selection;
             if (selection is null && dlcParentSelection is null)
                 return;
             ContextMenuItem header = id == "PL"
@@ -922,10 +885,10 @@ internal sealed partial class SelectForm : CustomForm
                 _ = items.Add(new ContextMenuItem("Open Root Directory", "File Explorer",
                     (_, _) => Diagnostics.OpenDirectoryInFileExplorer(selection.RootDirectory)));
                 int executables = 0;
-                foreach ((string directory, BinaryType binaryType) in selection.ExecutableDirectories.ToList())
+                foreach ((string directory, BinaryType binaryType) in selection.ExecutableDirectories)
                     _ = items.Add(new ContextMenuItem($"Open Executable Directory #{++executables} ({(binaryType == BinaryType.BIT32 ? "32" : "64")}-bit)",
                         "File Explorer", (_, _) => Diagnostics.OpenDirectoryInFileExplorer(directory)));
-                List<string> directories = selection.DllDirectories.ToList();
+                HashSet<string> directories = selection.DllDirectories;
                 int steam = 0, epic = 0, r1 = 0, r2 = 0;
                 if (selection.Platform is Platform.Steam or Platform.Paradox)
                     foreach (string directory in directories)
@@ -1020,7 +983,7 @@ internal sealed partial class SelectForm : CustomForm
 
     private void OnAccept(bool uninstall = false)
     {
-        if (Selection.All.Count < 1)
+        if (Selection.All.IsEmpty)
             return;
         if (Selection.AllEnabled.Any(selection => !Program.AreDllsLockedDialog(this, selection)))
             return;
@@ -1097,12 +1060,12 @@ internal sealed partial class SelectForm : CustomForm
         foreach (TreeNode node in TreeNodes)
             if (node.Parent is { } parent && node.Tag is Platform platform)
             {
-                if (node.Text == "Unknown" ? node.Checked : !node.Checked)
+                if ((node.Text == "Unknown" ? node.Checked : !node.Checked)
+                 && !choices.Any(c => c.platform == platform && c.gameId == parent.Name && c.dlcId == node.Name))
                     choices.Add((platform, node.Parent.Name, node.Name));
                 else
                     _ = choices.RemoveAll(n => n.platform == platform && n.gameId == parent.Name && n.dlcId == node.Name);
             }
-        choices = choices.Distinct().ToList();
         ProgramData.WriteDlcChoices(choices);
         loadButton.Enabled = CanLoadDlc();
         saveButton.Enabled = CanSaveDlc();
@@ -1206,7 +1169,7 @@ internal sealed partial class SelectForm : CustomForm
         saveKoaloaderButton.Enabled = CanSaveKoaloader();
         resetKoaloaderButton.Enabled = CanResetKoaloader();
         koaloaderAllCheckBox.CheckedChanged -= OnKoaloaderAllCheckBoxChanged;
-        koaloaderAllCheckBox.Checked = Selection.AllSafe.TrueForAll(selection => selection.Koaloader);
+        koaloaderAllCheckBox.Checked = Selection.AllSafe.All(selection => selection.Koaloader);
         koaloaderAllCheckBox.CheckedChanged += OnKoaloaderAllCheckBoxChanged;
     }
 

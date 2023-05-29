@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using CreamInstaller.Components;
 using CreamInstaller.Resources;
@@ -15,7 +14,7 @@ namespace CreamInstaller.Forms;
 
 internal sealed partial class InstallForm : CustomForm
 {
-    private readonly List<Selection> disabledSelections = new();
+    private readonly HashSet<Selection> disabledSelections = new();
 
     private readonly int programCount = Selection.AllEnabled.Count;
     private readonly bool uninstalling;
@@ -87,7 +86,6 @@ internal sealed partial class InstallForm : CustomForm
                     UpdateUser("Uninstalling Koaloader from " + selection.Name + $" in incorrect directory \"{directory}\" . . . ", LogTextBox.Operation);
                     await Koaloader.Uninstall(directory, selection.RootDirectory, this);
                 }
-                Thread.Sleep(1);
             }
         if (uninstalling || !selection.Koaloader)
             foreach ((string directory, BinaryType _) in selection.ExecutableDirectories)
@@ -101,7 +99,6 @@ internal sealed partial class InstallForm : CustomForm
                     UpdateUser("Uninstalling Koaloader from " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
                     await Koaloader.Uninstall(directory, selection.RootDirectory, this);
                 }
-                Thread.Sleep(1);
             }
         bool uninstallProxy = uninstalling || selection.Koaloader;
         int count = selection.DllDirectories.Count, cur = 0;
@@ -173,7 +170,6 @@ internal sealed partial class InstallForm : CustomForm
                 }
             }
             UpdateProgress(++cur / count * 100);
-            Thread.Sleep(1);
         }
         if (selection.Koaloader && !uninstalling)
             foreach ((string directory, BinaryType binaryType) in selection.ExecutableDirectories)
@@ -182,14 +178,13 @@ internal sealed partial class InstallForm : CustomForm
                     throw new CustomMessageException("The operation was canceled.");
                 UpdateUser("Installing Koaloader to " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
                 await Koaloader.Install(directory, binaryType, selection, selection.RootDirectory, this);
-                Thread.Sleep(1);
             }
         UpdateProgress(100);
     }
 
     private async Task Operate()
     {
-        List<Selection> programSelections = Selection.AllEnabled;
+        HashSet<Selection> programSelections = Selection.AllEnabled;
         operationsCount = programSelections.Count;
         completeOperationsCount = 0;
         foreach (Selection selection in programSelections)
@@ -201,7 +196,7 @@ internal sealed partial class InstallForm : CustomForm
                 await OperateFor(selection);
                 UpdateUser($"Operation succeeded for {selection.Name}.", LogTextBox.Success);
                 selection.Enabled = false;
-                disabledSelections.Add(selection);
+                _ = disabledSelections.Add(selection);
             }
             catch (Exception exception)
             {
@@ -210,7 +205,7 @@ internal sealed partial class InstallForm : CustomForm
             ++completeOperationsCount;
         }
         Program.Cleanup();
-        List<Selection> failedSelections = Selection.AllEnabled;
+        HashSet<Selection> failedSelections = Selection.AllEnabled;
         if (failedSelections.Count > 0)
             if (failedSelections.Count == 1)
                 throw new CustomMessageException($"Operation failed for {failedSelections.First().Name}.");

@@ -27,9 +27,9 @@ internal static class UplayR2
     internal static void CheckConfig(string directory, Selection selection, InstallForm installForm = null)
     {
         directory.GetUplayR2Components(out _, out _, out _, out _, out _, out _, out string config, out _);
-        List<SelectionDLC> blacklistDlc = selection.DLC.Where(dlc => !dlc.Enabled).ToList();
-        foreach (Selection extraSelection in selection.ExtraSelections)
-            blacklistDlc.AddRange(extraSelection.DLC.Where(dlc => !dlc.Enabled));
+        HashSet<SelectionDLC> blacklistDlc = selection.DLC.Where(dlc => !dlc.Enabled).ToHashSet();
+        foreach (SelectionDLC extraDlc in selection.ExtraSelections.SelectMany(extraSelection => extraSelection.DLC.Where(dlc => !dlc.Enabled)))
+            _ = blacklistDlc.Add(extraDlc);
         if (blacklistDlc.Count > 0)
         {
             /*if (installForm is not null)

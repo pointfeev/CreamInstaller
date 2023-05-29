@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using CreamInstaller.Utility;
 using Microsoft.Win32;
-using static CreamInstaller.Resources.Resources;
 
 namespace CreamInstaller.Platforms.Ubisoft;
 
@@ -21,13 +20,10 @@ internal static class UbisoftLibrary
         }
     }
 
-    internal static async Task<HashSet<(string directory, BinaryType binaryType)>> GetExecutableDirectories(string gameDirectory)
-        => await Task.Run(async () => await gameDirectory.GetExecutableDirectories(true));
-
-    internal static async Task<HashSet<(string gameId, string name, string gameDirectory)>> GetGames()
+    internal static async Task<List<(string gameId, string name, string gameDirectory)>> GetGames()
         => await Task.Run(() =>
         {
-            HashSet<(string gameId, string name, string gameDirectory)> games = new();
+            List<(string gameId, string name, string gameDirectory)> games = new();
             RegistryKey installsKey = InstallsKey;
             if (installsKey is null)
                 return games;
@@ -36,7 +32,7 @@ internal static class UbisoftLibrary
                 RegistryKey installKey = installsKey.OpenSubKey(gameId);
                 string installDir = installKey?.GetValue("InstallDir")?.ToString()?.BeautifyPath();
                 if (installDir is not null && !games.Any(g => g.gameId == gameId && g.gameDirectory == installDir))
-                    _ = games.Add((gameId, new DirectoryInfo(installDir).Name, installDir));
+                    games.Add((gameId, new DirectoryInfo(installDir).Name, installDir));
             }
             return games;
         });

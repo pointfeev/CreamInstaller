@@ -25,9 +25,9 @@ internal static class UplayR1
     internal static void CheckConfig(string directory, Selection selection, InstallForm installForm = null)
     {
         directory.GetUplayR1Components(out _, out _, out _, out _, out string config, out _);
-        List<SelectionDLC> blacklistDlc = selection.DLC.Where(dlc => !dlc.Enabled).ToList();
-        foreach (Selection extraSelection in selection.ExtraSelections)
-            blacklistDlc.AddRange(extraSelection.DLC.Where(dlc => !dlc.Enabled));
+        HashSet<SelectionDLC> blacklistDlc = selection.DLC.Where(dlc => !dlc.Enabled).ToHashSet();
+        foreach (SelectionDLC extraDlc in selection.ExtraSelections.SelectMany(extraSelection => extraSelection.DLC.Where(dlc => !dlc.Enabled)))
+            _ = blacklistDlc.Add(extraDlc);
         if (blacklistDlc.Count > 0)
         {
             /*if (installForm is not null)
@@ -100,11 +100,10 @@ internal static class UplayR1
                 config.DeleteFile();
                 installForm?.UpdateUser($"Deleted configuration: {Path.GetFileName(config)}", LogTextBox.Action, false);
             }
-            if (log.FileExists())
-            {
-                log.DeleteFile();
-                installForm?.UpdateUser($"Deleted log: {Path.GetFileName(log)}", LogTextBox.Action, false);
-            }
+            if (!log.FileExists())
+                return;
+            log.DeleteFile();
+            installForm?.UpdateUser($"Deleted log: {Path.GetFileName(log)}", LogTextBox.Action, false);
         });
 
     internal static async Task Install(string directory, Selection selection, InstallForm installForm = null, bool generateConfig = true)

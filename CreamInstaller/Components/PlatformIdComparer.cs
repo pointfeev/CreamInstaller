@@ -8,12 +8,10 @@ namespace CreamInstaller.Components;
 internal static class PlatformIdComparer
 {
     private static StringComparer stringComparer;
-
     private static NodeComparer nodeComparer;
-
     private static NodeNameComparer nodeNameComparer;
-
     private static NodeTextComparer nodeTextComparer;
+
     internal static StringComparer String => stringComparer ??= new();
     internal static NodeComparer Node => nodeComparer ??= new();
     internal static NodeNameComparer NodeName => nodeNameComparer ??= new();
@@ -39,15 +37,17 @@ internal sealed class StringComparer : IComparer<string>
 internal sealed class NodeComparer : IComparer<TreeNode>
 {
     public int Compare(TreeNode a, TreeNode b)
-        => a?.Tag is not Platform A
+        => a is null
             ? 1
-            : b?.Tag is not Platform B
+            : b is null
                 ? -1
-                : A > B
-                    ? 1
-                    : A < B
-                        ? -1
-                        : 0;
+                : a.Tag is not Platform pA || b.Tag is not Platform pB
+                    ? 0
+                    : pA > pB
+                        ? 1
+                        : pA < pB
+                            ? -1
+                            : 0;
 }
 
 internal sealed class NodeNameComparer : IComparer

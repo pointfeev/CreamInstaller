@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using CreamInstaller.Utility;
 using Gameloop.Vdf.Linq;
 using Microsoft.Win32;
-using static CreamInstaller.Resources.Resources;
 
 namespace CreamInstaller.Platforms.Steam;
 
@@ -22,13 +21,10 @@ internal static class SteamLibrary
         }
     }
 
-    internal static async Task<HashSet<(string directory, BinaryType binaryType)>> GetExecutableDirectories(string gameDirectory)
-        => await Task.Run(async () => await gameDirectory.GetExecutableDirectories(true));
-
-    internal static async Task<HashSet<(string appId, string name, string branch, int buildId, string gameDirectory)>> GetGames()
+    internal static async Task<List<(string appId, string name, string branch, int buildId, string gameDirectory)>> GetGames()
         => await Task.Run(async () =>
         {
-            HashSet<(string appId, string name, string branch, int buildId, string gameDirectory)> games = new();
+            List<(string appId, string name, string branch, int buildId, string gameDirectory)> games = new();
             HashSet<string> gameLibraryDirectories = await GetLibraryDirectories();
             foreach (string libraryDirectory in gameLibraryDirectories)
             {
@@ -37,7 +33,7 @@ internal static class SteamLibrary
                 foreach ((string appId, string name, string branch, int buildId, string gameDirectory) game in
                          (await GetGamesFromLibraryDirectory(libraryDirectory)).Where(game
                              => !games.Any(_game => _game.appId == game.appId && _game.gameDirectory == game.gameDirectory)))
-                    _ = games.Add(game);
+                    games.Add(game);
             }
             return games;
         });

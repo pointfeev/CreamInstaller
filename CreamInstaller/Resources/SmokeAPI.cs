@@ -28,12 +28,13 @@ internal static class SmokeAPI
     internal static void CheckConfig(string directory, Selection selection, InstallForm installForm = null)
     {
         directory.GetSmokeApiComponents(out _, out _, out _, out _, out string old_config, out string config, out _, out _, out _);
-        List<SelectionDLC> overrideDlc = selection.DLC.Where(dlc => !dlc.Enabled).ToList();
-        foreach (Selection extraSelection in selection.ExtraSelections)
-            overrideDlc.AddRange(extraSelection.DLC.Where(dlc => !dlc.Enabled));
-        List<SelectionDLC> injectDlc = new();
+        HashSet<SelectionDLC> overrideDlc = selection.DLC.Where(dlc => !dlc.Enabled).ToHashSet();
+        foreach (SelectionDLC extraDlc in selection.ExtraSelections.SelectMany(extraSelection => extraSelection.DLC.Where(dlc => !dlc.Enabled)))
+            _ = overrideDlc.Add(extraDlc);
+        HashSet<SelectionDLC> injectDlc = new();
         if (selection.DLC.Count() > 64)
-            injectDlc.AddRange(selection.DLC.Where(dlc => dlc.Enabled && dlc.Type is DLCType.SteamHidden));
+            foreach (SelectionDLC hiddenDlc in selection.DLC.Where(dlc => dlc.Enabled && dlc.Type is DLCType.SteamHidden))
+                _ = injectDlc.Add(hiddenDlc);
         List<KeyValuePair<string, (string name, SortedList<string, SelectionDLC> injectDlc)>> extraApps = new();
         foreach (Selection extraSelection in selection.ExtraSelections.Where(extraSelection => extraSelection.DLC.Count() > 64))
         {

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
+﻿using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -30,9 +28,6 @@ internal static class ParadoxLauncher
             return installPath.BeautifyPath();
         }
     }
-
-    internal static async Task<HashSet<(string directory, BinaryType binaryType)>> GetExecutableDirectories(string gameDirectory)
-        => await Task.Run(async () => await gameDirectory.GetExecutableDirectories(validFunc: path => !Path.GetFileName(path).Contains("bootstrapper")));
 
     private static void PopulateDlc(Selection paradoxLauncher = null)
     {

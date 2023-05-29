@@ -146,7 +146,7 @@ internal sealed partial class UpdateForm : CustomForm
                 throw new TaskCanceledException();
             using HttpResponseMessage response = await HttpClientManager.HttpClient.GetAsync(latestRelease.Asset.BrowserDownloadUrl,
                 HttpCompletionOption.ResponseHeadersRead, cancellation.Token);
-            response.EnsureSuccessStatusCode();
+            _ = response.EnsureSuccessStatusCode();
             if (cancellation is null || Program.Canceled)
                 throw new TaskCanceledException();
             await using Stream download = await response.Content.ReadAsStreamAsync(cancellation.Token);
@@ -196,18 +196,18 @@ internal sealed partial class UpdateForm : CustomForm
             string properExecutable = Path.GetFileName(ExecutablePath);
             string properExecutablePath = Path.Combine(currentDirectory!, properExecutable!);
             StringBuilder commands = new();
-            commands.AppendLine(CultureInfo.InvariantCulture, $"\nTASKKILL /F /T /PID {Program.CurrentProcessId}");
-            commands.AppendLine(CultureInfo.InvariantCulture, $":LOOP");
-            commands.AppendLine(CultureInfo.InvariantCulture, $"TASKLIST | FIND \" {Program.CurrentProcessId}\" ");
-            commands.AppendLine(CultureInfo.InvariantCulture, $"IF NOT ERRORLEVEL 1 (");
-            commands.AppendLine(CultureInfo.InvariantCulture, $"   TIMEOUT /T 1");
-            commands.AppendLine(CultureInfo.InvariantCulture, $"   GOTO LOOP");
-            commands.AppendLine(CultureInfo.InvariantCulture, $")");
-            commands.AppendLine(CultureInfo.InvariantCulture, $"DEL /F /Q \"{currentPath}\"");
-            commands.AppendLine(CultureInfo.InvariantCulture, $"DEL /F /Q \"{properExecutablePath}\"");
-            commands.AppendLine(CultureInfo.InvariantCulture, $"MOVE /Y \"{ExecutablePath}\" \"{properExecutablePath}\"");
-            commands.AppendLine(CultureInfo.InvariantCulture, $"START \"\" /D \"{currentDirectory}\" \"{properExecutable}\"");
-            commands.AppendLine(CultureInfo.InvariantCulture, $"EXIT");
+            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"\nTASKKILL /F /T /PID {Program.CurrentProcessId}");
+            _ = commands.AppendLine(CultureInfo.InvariantCulture, $":LOOP");
+            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"TASKLIST | FIND \" {Program.CurrentProcessId}\" ");
+            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"IF NOT ERRORLEVEL 1 (");
+            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"   TIMEOUT /T 1");
+            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"   GOTO LOOP");
+            _ = commands.AppendLine(CultureInfo.InvariantCulture, $")");
+            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"DEL /F /Q \"{currentPath}\"");
+            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"DEL /F /Q \"{properExecutablePath}\"");
+            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"MOVE /Y \"{ExecutablePath}\" \"{properExecutablePath}\"");
+            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"START \"\" /D \"{currentDirectory}\" \"{properExecutable}\"");
+            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"EXIT");
             UpdaterPath.WriteFile(commands.ToString(), true, this);
             Process process = new();
             ProcessStartInfo startInfo = new()
@@ -216,7 +216,7 @@ internal sealed partial class UpdateForm : CustomForm
                 CreateNoWindow = true
             };
             process.StartInfo = startInfo;
-            process.Start();
+            _ = process.Start();
             return;
         }
         if (!retry)

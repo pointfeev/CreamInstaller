@@ -12,7 +12,7 @@ internal static class HeroicLibrary
     internal static readonly string HeroicLibraryPath
         = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\heroic\store_cache\legendary_library.json";
 
-    internal static async Task GetGames(HashSet<Manifest> games)
+    internal static async Task GetGames(List<Manifest> games)
         => await Task.Run(() =>
         {
             string libraryPath = HeroicLibraryPath;
@@ -28,14 +28,14 @@ internal static class HeroicLibrary
                     try
                     {
                         HeroicAppData appData = token.ToObject<HeroicAppData>();
-                        if (appData is null || appData.Runner != "legendary" || string.IsNullOrWhiteSpace(appData.Install.InstallPath))
+                        if (appData is null || string.IsNullOrWhiteSpace(appData.Install.InstallPath))
                             continue;
                         Manifest manifest = new()
                         {
                             DisplayName = appData.Title, CatalogNamespace = appData.Namespace, InstallLocation = appData.Install.InstallPath
                         };
                         if (!games.Any(g => g.CatalogNamespace == manifest.CatalogNamespace && g.InstallLocation == manifest.InstallLocation))
-                            _ = games.Add(manifest);
+                            games.Add(manifest);
                     }
                     catch
                     {

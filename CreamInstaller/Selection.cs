@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using CreamInstaller.Resources;
 using CreamInstaller.Utility;
@@ -12,31 +14,42 @@ public enum Platform
     Epic, Ubisoft
 }
 
-internal sealed class Selection
+internal sealed class Selection : IEquatable<Selection>
 {
     internal const string DefaultKoaloaderProxy = "version";
 
-    internal static readonly HashSet<Selection> All = new();
-    internal readonly HashSet<Selection> ExtraSelections = new();
+    internal static readonly ConcurrentDictionary<Selection, byte> All = new();
 
-    internal HashSet<string> DllDirectories;
+    internal readonly HashSet<string> DllDirectories;
+    internal readonly List<(string directory, BinaryType binaryType)> ExecutableDirectories;
+    internal readonly HashSet<Selection> ExtraSelections = new();
+    internal readonly string Id;
+    internal readonly string Name;
+    internal readonly Platform Platform;
+    internal readonly string RootDirectory;
+
     internal bool Enabled;
-    internal HashSet<(string directory, BinaryType binaryType)> ExecutableDirectories;
     internal string Icon;
-    internal string Id = "0";
     internal bool Koaloader;
     internal string KoaloaderProxy;
-    internal string Name = "Program";
-    internal Platform Platform;
     internal string Product;
     internal string Publisher;
-    internal string RootDirectory;
     internal string SubIcon;
     internal string Website;
 
-    internal Selection() => All.Add(this);
+    private Selection(Platform platform, string id, string name, string rootDirectory, HashSet<string> dllDirectories,
+        List<(string directory, BinaryType binaryType)> executableDirectories)
+    {
+        Platform = platform;
+        Id = id;
+        Name = name;
+        RootDirectory = rootDirectory;
+        DllDirectories = dllDirectories;
+        ExecutableDirectories = executableDirectories;
+        _ = All.TryAdd(this, default);
+    }
 
-    internal IEnumerable<SelectionDLC> DLC => SelectionDLC.AllSafe.Where(dlc => dlc.Selection == this);
+    internal IEnumerable<SelectionDLC> DLC => SelectionDLC.AllSafe.Where(dlc => dlc.Selection.Equals(this));
 
     internal bool AreDllsLocked
     {
@@ -79,13 +92,20 @@ internal sealed class Selection
         }
     }
 
-    internal static List<Selection> AllSafe => All.ToList();
+    internal static HashSet<Selection> AllSafe => All.Keys.ToHashSet();
 
-    internal static List<Selection> AllEnabled => AllSafe.FindAll(s => s.Enabled);
+    internal static HashSet<Selection> AllEnabled => All.Keys.Where(s => s.Enabled).ToHashSet();
+
+    public bool Equals(Selection other)
+        => other is not null && (ReferenceEquals(this, other) || Id == other.Id && Platform == other.Platform && RootDirectory == other.RootDirectory);
+
+    internal static Selection GetOrCreate(Platform platform, string id, string name, string rootDirectory, HashSet<string> dllDirectories,
+        List<(string directory, BinaryType binaryType)> executableDirectories)
+        => FromPlatformId(platform, id) ?? new Selection(platform, id, name, rootDirectory, dllDirectories, executableDirectories);
 
     private void Remove()
     {
-        _ = All.Remove(this);
+        _ = All.TryRemove(this, out _);
         foreach (SelectionDLC dlc in DLC)
             dlc.Selection = null;
     }
@@ -113,7 +133,14 @@ internal sealed class Selection
     }
 
     internal static void ValidateAll(List<(Platform platform, string id, string name)> programsToScan)
-        => AllSafe.ForEach(selection => selection.Validate(programsToScan));
+    {
+        foreach (Selection selection in AllSafe)
+            selection.Validate(programsToScan);
+    }
 
-    internal static Selection FromPlatformId(Platform platform, string gameId) => AllSafe.Find(s => s.Platform == platform && s.Id == gameId);
+    internal static Selection FromPlatformId(Platform platform, string gameId) => AllSafe.FirstOrDefault(s => s.Platform == platform && s.Id == gameId);
+
+    public override bool Equals(object obj) => ReferenceEquals(this, obj) || obj is Selection other && Equals(other);
+
+    public override int GetHashCode() => HashCode.Combine(Id, (int)Platform, RootDirectory);
 }

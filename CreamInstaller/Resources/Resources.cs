@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using CreamInstaller.Utility;
@@ -13,12 +12,12 @@ namespace CreamInstaller.Resources;
 
 internal static class Resources
 {
-    private static List<string> embeddedResources;
+    private static HashSet<string> embeddedResources;
 
-    private static readonly Dictionary<ResourceIdentifier, IReadOnlyList<string>> ResourceMD5s = new()
+    private static readonly Dictionary<ResourceIdentifier, HashSet<string>> ResourceMD5s = new()
     {
         {
-            ResourceIdentifier.Koaloader, new List<string>
+            ResourceIdentifier.Koaloader, new()
             {
                 "8A0958687B5ED7C34DAD037856DD1530", // Koaloader v2.0.0
                 "8FECDEB40980F4E687C10E056232D96B", // Koaloader v2.0.0
@@ -355,7 +354,7 @@ internal static class Resources
             }
         },
         {
-            ResourceIdentifier.EpicOnlineServices32, new List<string>
+            ResourceIdentifier.EpicOnlineServices32, new()
             {
                 "069A57B1834A960193D2AD6B96926D70", // ScreamAPI v3.0.0
                 "E2FB3A4A9583FDC215832E5F935E4440", // ScreamAPI v3.0.1
@@ -363,7 +362,7 @@ internal static class Resources
             }
         },
         {
-            ResourceIdentifier.EpicOnlineServices64, new List<string>
+            ResourceIdentifier.EpicOnlineServices64, new()
             {
                 "0D62E57139F1A64F807A9934946A9474", // ScreamAPI v3.0.0
                 "3875C7B735EE80C23239CC4749FDCBE6", // ScreamAPI v3.0.1
@@ -371,7 +370,7 @@ internal static class Resources
             }
         },
         {
-            ResourceIdentifier.Steamworks32, new List<string>
+            ResourceIdentifier.Steamworks32, new()
             {
                 "02594110FE56B2945955D46670B9A094", // CreamAPI v4.5.0.0 Hotfix
                 "B2434578957CBE38BDCE0A671C1262FC", // SmokeAPI v1.0.0
@@ -389,7 +388,7 @@ internal static class Resources
             }
         },
         {
-            ResourceIdentifier.Steamworks64, new List<string>
+            ResourceIdentifier.Steamworks64, new()
             {
                 "30091B91923D9583A54A93ED1145554B", // CreamAPI v4.5.0.0 Hotfix
                 "08713035CAD6F52548FF324D0487B88D", // SmokeAPI v1.0.0
@@ -407,26 +406,26 @@ internal static class Resources
             }
         },
         {
-            ResourceIdentifier.Uplay32, new List<string>
+            ResourceIdentifier.Uplay32, new()
             {
                 "1977967B2549A38EC2DB39D4C8ED499B" // Uplay R1 Unlocker v2.0.0
             }
         },
         {
-            ResourceIdentifier.Uplay64, new List<string>
+            ResourceIdentifier.Uplay64, new()
             {
                 "333FEDD9DC2B299419B37ED1624FF8DB" // Uplay R1 Unlocker v2.0.0
             }
         },
         {
-            ResourceIdentifier.Upc32, new List<string>
+            ResourceIdentifier.Upc32, new()
             {
                 "C14368BC4EE19FDE8DBAC07E31C67AE4", // Uplay R2 Unlocker v3.0.0
                 "DED3A3EA1876E3110D7D87B9A22946B0" // Uplay R2 Unlocker v3.0.1
             }
         },
         {
-            ResourceIdentifier.Upc64, new List<string>
+            ResourceIdentifier.Upc64, new()
             {
                 "7D9A4C12972BAABCB6C181920CC0F19B", // Uplay R2 Unlocker v3.0.0
                 "D7FDBFE0FC8D7600FEB8EC0A97713184" // Uplay R2 Unlocker v3.0.1
@@ -434,7 +433,7 @@ internal static class Resources
         }
     };
 
-    internal static List<string> EmbeddedResources
+    internal static HashSet<string> EmbeddedResources
     {
         get
         {
@@ -443,7 +442,7 @@ internal static class Resources
             string[] names = Assembly.GetExecutingAssembly().GetManifestResourceNames();
             embeddedResources = new();
             foreach (string resourceName in names.Where(n => n.StartsWith("CreamInstaller.Resources.", StringComparison.Ordinal)))
-                embeddedResources.Add(resourceName[25..]);
+                _ = embeddedResources.Add(resourceName[25..]);
             return embeddedResources;
         }
     }
@@ -483,21 +482,21 @@ internal static class Resources
 
     internal static bool TryGetFileBinaryType(this string path, out BinaryType binaryType) => NativeImports.GetBinaryType(path, out binaryType);
 
-    internal static async Task<HashSet<(string directory, BinaryType binaryType)>> GetExecutableDirectories(this string rootDirectory,
-        bool filterCommon = false, Func<string, bool> validFunc = null)
+    internal static async Task<List<(string directory, BinaryType binaryType)>> GetExecutableDirectories(this string rootDirectory, bool filterCommon = false,
+        Func<string, bool> validFunc = null)
         => await Task.Run(async ()
             => (await rootDirectory.GetExecutables(filterCommon, validFunc)
              ?? (filterCommon || validFunc is not null ? await rootDirectory.GetExecutables() : null))?.Select(e =>
             {
                 e.path = Path.GetDirectoryName(e.path);
                 return e;
-            }).DistinctBy(e => e.path).ToHashSet());
+            }).DistinctBy(e => e.path).ToList());
 
-    internal static async Task<HashSet<(string path, BinaryType binaryType)>> GetExecutables(this string rootDirectory, bool filterCommon = false,
+    internal static async Task<List<(string path, BinaryType binaryType)>> GetExecutables(this string rootDirectory, bool filterCommon = false,
         Func<string, bool> validFunc = null)
         => await Task.Run(() =>
         {
-            HashSet<(string path, BinaryType binaryType)> executables = new();
+            List<(string path, BinaryType binaryType)> executables = new();
             if (Program.Canceled || !rootDirectory.DirectoryExists())
                 return null;
             foreach (string path in rootDirectory.EnumerateDirectory("*.exe", true))
@@ -507,8 +506,7 @@ internal static class Resources
                 if (executables.All(e => e.path != path) && (!filterCommon || !rootDirectory.IsCommonIncorrectExecutable(path))
                                                          && (validFunc is null || validFunc(path)) && path.TryGetFileBinaryType(out BinaryType binaryType)
                                                          && binaryType is BinaryType.BIT64)
-                    _ = executables.Add((path, binaryType));
-                Thread.Sleep(1);
+                    executables.Add((path, binaryType));
             }
             foreach (string path in rootDirectory.EnumerateDirectory("*.exe", true))
             {
@@ -517,8 +515,7 @@ internal static class Resources
                 if (executables.All(e => e.path != path) && (!filterCommon || !rootDirectory.IsCommonIncorrectExecutable(path))
                                                          && (validFunc is null || validFunc(path)) && path.TryGetFileBinaryType(out BinaryType binaryType)
                                                          && binaryType is BinaryType.BIT32)
-                    _ = executables.Add((path, binaryType));
-                Thread.Sleep(1);
+                    executables.Add((path, binaryType));
             }
             return executables.Count > 0 ? executables : null;
         });

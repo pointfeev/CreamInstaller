@@ -59,7 +59,7 @@ internal static class SteamCMD
                 {
                     if (appId != null)
                     {
-                        AttemptCount.TryGetValue(appId, out int count);
+                        _ = AttemptCount.TryGetValue(appId, out int count);
                         AttemptCount[appId] = ++count;
                     }
                     if (Program.Canceled)
@@ -113,7 +113,6 @@ internal static class SteamCMD
                     _ = Interlocked.Decrement(ref Locks[i]);
                     return appInfo.ToString();
                 }
-                Thread.Sleep(200);
             }
             Thread.Sleep(200);
             goto wait_for_lock;
@@ -232,7 +231,7 @@ internal static class SteamCMD
 #endif
                 continue;
             }
-            if (appInfo.Value.Children().ToList().Count == 0)
+            if (!appInfo.Value.Children().Any())
                 return appInfo;
             VToken type = appInfo.Value.GetChild("common")?.GetChild("type");
             if (type is not null && type.ToString() != "Game")
@@ -242,7 +241,7 @@ internal static class SteamCMD
                 return appInfo;
             if (type is not null && (!int.TryParse(buildid, out int gamebuildId) || gamebuildId >= buildId))
                 return appInfo;
-            List<string> dlcAppIds = await ParseDlcAppIds(appInfo);
+            HashSet<string> dlcAppIds = await ParseDlcAppIds(appInfo);
             foreach (string dlcAppUpdateFile in dlcAppIds.Select(id => $@"{AppInfoPath}\{id}.vdf"))
                 dlcAppUpdateFile.DeleteFile();
             appUpdateFile.DeleteFile();
@@ -253,10 +252,10 @@ internal static class SteamCMD
         return null;
     }
 
-    internal static async Task<List<string>> ParseDlcAppIds(VProperty appInfo)
+    internal static async Task<HashSet<string>> ParseDlcAppIds(VProperty appInfo)
         => await Task.Run(() =>
         {
-            List<string> dlcIds = new();
+            HashSet<string> dlcIds = new();
             if (Program.Canceled || appInfo is null)
                 return dlcIds;
             VToken extended = appInfo.Value.GetChild("extended");
@@ -265,8 +264,8 @@ internal static class SteamCMD
                 {
                     VProperty property = (VProperty)vToken;
                     foreach (string id in property.Value.ToString().Split(","))
-                        if (int.TryParse(id, out int appId) && appId > 0 && !dlcIds.Contains("" + appId))
-                            dlcIds.Add("" + appId);
+                        if (int.TryParse(id, out int appId) && appId > 0)
+                            _ = dlcIds.Add("" + appId);
                 }
             VToken depots = appInfo.Value.GetChild("depots");
             if (depots is null)
@@ -274,8 +273,8 @@ internal static class SteamCMD
             foreach (VToken vToken in depots.Where(p => p is VProperty property && int.TryParse(property.Key, out int _)))
             {
                 VProperty property = (VProperty)vToken;
-                if (int.TryParse(property.Value.GetChild("dlcappid")?.ToString(), out int appId) && appId > 0 && !dlcIds.Contains("" + appId))
-                    dlcIds.Add("" + appId);
+                if (int.TryParse(property.Value.GetChild("dlcappid")?.ToString(), out int appId) && appId > 0)
+                    _ = dlcIds.Add("" + appId);
             }
             return dlcIds;
         });

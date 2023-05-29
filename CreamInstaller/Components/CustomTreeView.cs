@@ -76,16 +76,24 @@ internal sealed class CustomTreeView : TreeView
         Form form = FindForm();
         if (form is not SelectForm and not SelectDialogForm)
             return;
-        string platformId = node.Name;
+        string id = node.Name;
         Platform platform = (node.Tag as Platform?).GetValueOrDefault(Platform.None);
-        if (string.IsNullOrWhiteSpace(platformId) || platform is Platform.None)
+        DLCType dlcType = (node.Tag as DLCType?).GetValueOrDefault(DLCType.None);
+        if (string.IsNullOrWhiteSpace(id) || platform is Platform.None && dlcType is DLCType.None)
             return;
         Color color = highlighted
             ? C1
             : Enabled
                 ? C2
                 : C3;
-        string text = platform.ToString();
+        string text;
+        if (dlcType is not DLCType.None)
+        {
+            SelectionDLC dlc = SelectionDLC.FromTypeId(dlcType, id);
+            text = dlc is not null ? dlc.Selection.Platform.ToString() : dlcType.ToString();
+        }
+        else
+            text = platform.ToString();
         Size size = TextRenderer.MeasureText(graphics, text, font);
         bounds = bounds with { X = bounds.X + bounds.Width, Width = size.Width };
         selectionBounds = new(selectionBounds.Location, selectionBounds.Size + bounds.Size with { Height = 0 });
@@ -99,7 +107,7 @@ internal sealed class CustomTreeView : TreeView
                 : Enabled
                     ? C5
                     : C6;
-            text = platformId;
+            text = id;
             size = TextRenderer.MeasureText(graphics, text, font);
             const int left = -4;
             bounds = bounds with { X = bounds.X + bounds.Width + left, Width = size.Width };
@@ -110,7 +118,7 @@ internal sealed class CustomTreeView : TreeView
         }
         if (form is SelectForm)
         {
-            Selection selection = Selection.FromPlatformId(platform, platformId);
+            Selection selection = Selection.FromPlatformId(platform, id);
             if (selection is not null)
             {
                 if (bounds == node.Bounds)
@@ -188,15 +196,15 @@ internal sealed class CustomTreeView : TreeView
             return;
         if (comboBoxBounds.Count > 0 && selectForm is not null)
             foreach (KeyValuePair<Selection, Rectangle> pair in comboBoxBounds)
-                if (!Selection.All.Contains(pair.Key))
+                if (!Selection.All.ContainsKey(pair.Key))
                     _ = comboBoxBounds.Remove(pair.Key);
                 else if (pair.Value.Contains(clickPoint))
                 {
-                    List<string> proxies = EmbeddedResources.FindAll(r => r.StartsWith("Koaloader", StringComparison.Ordinal)).Select(p =>
+                    HashSet<string> proxies = EmbeddedResources.Where(r => r.StartsWith("Koaloader", StringComparison.Ordinal)).Select(p =>
                     {
                         p.GetProxyInfoFromIdentifier(out string proxyName, out _);
                         return proxyName;
-                    }).Distinct().ToList();
+                    }).ToHashSet();
                     comboBoxDropDown ??= new();
                     comboBoxDropDown.ShowItemToolTips = false;
                     comboBoxDropDown.Items.Clear();
@@ -222,7 +230,7 @@ internal sealed class CustomTreeView : TreeView
                     break;
                 }
         foreach (KeyValuePair<Selection, Rectangle> pair in checkBoxBounds)
-            if (!Selection.All.Contains(pair.Key))
+            if (!Selection.All.ContainsKey(pair.Key))
                 _ = checkBoxBounds.Remove(pair.Key);
             else if (pair.Value.Contains(clickPoint))
             {

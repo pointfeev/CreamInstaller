@@ -25,12 +25,14 @@ internal static class ScreamAPI
     internal static void CheckConfig(string directory, Selection selection, InstallForm installForm = null)
     {
         directory.GetScreamApiComponents(out _, out _, out _, out _, out string config, out _);
-        List<SelectionDLC> overrideCatalogItems = selection.DLC.Where(dlc => dlc.Type is DLCType.EpicCatalogItem && !dlc.Enabled).ToList();
-        List<SelectionDLC> overrideEntitlements = selection.DLC.Where(dlc => dlc.Type is DLCType.EpicEntitlement && !dlc.Enabled).ToList();
+        HashSet<SelectionDLC> overrideCatalogItems = selection.DLC.Where(dlc => dlc.Type is DLCType.EpicCatalogItem && !dlc.Enabled).ToHashSet();
+        HashSet<SelectionDLC> overrideEntitlements = selection.DLC.Where(dlc => dlc.Type is DLCType.EpicEntitlement && !dlc.Enabled).ToHashSet();
         foreach (Selection extraSelection in selection.ExtraSelections)
         {
-            overrideCatalogItems.AddRange(extraSelection.DLC.Where(dlc => dlc.Type is DLCType.EpicCatalogItem && !dlc.Enabled));
-            overrideEntitlements.AddRange(extraSelection.DLC.Where(dlc => dlc.Type is DLCType.EpicEntitlement && !dlc.Enabled));
+            foreach (SelectionDLC extraDlc in extraSelection.DLC.Where(dlc => dlc.Type is DLCType.EpicCatalogItem && !dlc.Enabled))
+                _ = overrideCatalogItems.Add(extraDlc);
+            foreach (SelectionDLC extraDlc in extraSelection.DLC.Where(dlc => dlc.Type is DLCType.EpicEntitlement && !dlc.Enabled))
+                _ = overrideEntitlements.Add(extraDlc);
         }
         if (overrideCatalogItems.Count > 0 || overrideEntitlements.Count > 0)
         {

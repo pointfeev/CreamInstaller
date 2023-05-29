@@ -14,6 +14,4 @@ public class HeroicAppData
     [JsonProperty("namespace")] public string Namespace { get; set; }
 
     [JsonProperty("title")] public string Title { get; set; }
-
-    [JsonProperty("runner")] public string Runner { get; set; }
 }

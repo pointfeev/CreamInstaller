@@ -18,13 +18,14 @@ internal static class SteamStore
     private const int CooldownGame = 600;
     private const int CooldownDlc = 1200;
 
-    internal static async Task<List<string>> ParseDlcAppIds(AppData appData)
+    internal static async Task<HashSet<string>> ParseDlcAppIds(AppData appData)
         => await Task.Run(() =>
         {
-            List<string> dlcIds = new();
+            HashSet<string> dlcIds = new();
             if (appData.DLC is null)
                 return dlcIds;
-            dlcIds.AddRange(from appId in appData.DLC where appId > 0 select appId.ToString(CultureInfo.InvariantCulture));
+            foreach (string dlcId in from appId in appData.DLC where appId > 0 select appId.ToString(CultureInfo.InvariantCulture))
+                _ = dlcIds.Add(dlcId);
             return dlcIds;
         });
 
