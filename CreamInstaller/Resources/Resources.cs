@@ -522,8 +522,8 @@ internal static class Resources
 
     private static bool IsCommonIncorrectExecutable(this string rootDirectory, string path)
     {
-        string subPath = path[rootDirectory.Length..].ToUpperInvariant().BeautifyPath();
-        return subPath.Contains("SETUP") || subPath.Contains("REDIST") || subPath.Contains("SUPPORT")
+        string subPath = path[rootDirectory.Length..].ResolvePath();
+        return subPath is null || subPath.Contains("SETUP") || subPath.Contains("REDIST") || subPath.Contains("SUPPORT")
             || subPath.Contains("CRASH") && (subPath.Contains("PAD") || subPath.Contains("REPORT")) || subPath.Contains("HELPER")
             || subPath.Contains("CEFPROCESS") || subPath.Contains("ZFGAMEBROWSER") || subPath.Contains("MONO") || subPath.Contains("PLUGINS")
             || subPath.Contains("MODDING") || subPath.Contains("MOD") && subPath.Contains("MANAGER") || subPath.Contains("BATTLEYE")
@@ -540,8 +540,8 @@ internal static class Resources
             {
                 if (Program.Canceled)
                     return null;
-                string subDirectory = directory.BeautifyPath();
-                if (dllDirectories.Contains(subDirectory))
+                string subDirectory = directory.ResolvePath();
+                if (subDirectory is null || dllDirectories.Contains(subDirectory))
                     continue;
                 bool koaloaderInstalled = Koaloader.AutoLoadDLLs.Select(pair => (pair.unlocker, path: directory + @"\" + pair.dll))
                    .Any(pair => pair.path.FileExists() && pair.path.IsResourceFile());

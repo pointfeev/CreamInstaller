@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Windows.Forms;
-
 using CreamInstaller.Components;
 
 namespace CreamInstaller.Forms

@@ -251,7 +251,7 @@ internal static class SafeIO
     private static DialogResult IOWarnInternal(this string filePath, string message, Exception e, Form form = null)
     {
         using DialogForm dialogForm = new(form);
-        string description = message + ": " + filePath.BeautifyPath() + "\n\n";
+        string description = message + ": " + filePath.ResolvePath() + "\n\n";
         if (e is IOException && (e.HResult & 0x0000FFFF) == 225) // virus or potentially unwanted software
             description += "Please resolve your anti-virus and press retry to continue . . . ";
         else

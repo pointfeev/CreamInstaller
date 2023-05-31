@@ -42,5 +42,15 @@ internal static class Diagnostics
 
     internal static void OpenUrlInInternetBrowser(string url) => Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
 
-    internal static string BeautifyPath(this string path) => path is null ? null : Path.TrimEndingDirectorySeparator(Path.GetFullPath(path)).ToLowerInvariant();
+    internal static string ResolvePath(this string path)
+    {
+        if (path is null || !path.FileExists() && !path.DirectoryExists())
+            return null;
+        DirectoryInfo info = new(path);
+        if (info.Parent is null)
+            return info.Name.ToUpperInvariant();
+        string parent = ResolvePath(info.Parent.FullName);
+        string name = info.Parent.GetFileSystemInfos(info.Name)[0].Name;
+        return parent is null ? name : Path.Combine(parent, name);
+    }
 }

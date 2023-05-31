@@ -30,8 +30,8 @@ internal static class UbisoftLibrary
             foreach (string gameId in installsKey.GetSubKeyNames())
             {
                 RegistryKey installKey = installsKey.OpenSubKey(gameId);
-                string installDir = installKey?.GetValue("InstallDir")?.ToString()?.BeautifyPath();
-                if (installDir is not null && !games.Any(g => g.gameId == gameId && g.gameDirectory == installDir))
+                string installDir = installKey?.GetValue("InstallDir")?.ToString()?.ResolvePath();
+                if (installDir is not null && games.All(g => g.gameId != gameId))
                     games.Add((gameId, new DirectoryInfo(installDir).Name, installDir));
             }
             return games;

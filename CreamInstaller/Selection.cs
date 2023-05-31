@@ -103,8 +103,7 @@ internal sealed class Selection : IEquatable<Selection>
         }
     }
 
-    public bool Equals(Selection other)
-        => other is not null && (ReferenceEquals(this, other) || Id == other.Id && Platform == other.Platform && RootDirectory == other.RootDirectory);
+    public bool Equals(Selection other) => other is not null && (ReferenceEquals(this, other) || Id == other.Id && Platform == other.Platform);
 
     internal static Selection GetOrCreate(Platform platform, string id, string name, string rootDirectory, HashSet<string> dllDirectories,
         List<(string directory, BinaryType binaryType)> executableDirectories)
@@ -150,5 +149,5 @@ internal sealed class Selection : IEquatable<Selection>
 
     public override bool Equals(object obj) => ReferenceEquals(this, obj) || obj is Selection other && Equals(other);
 
-    public override int GetHashCode() => HashCode.Combine(Id, (int)Platform, RootDirectory);
+    public override int GetHashCode() => HashCode.Combine(Id, (int)Platform);
 }

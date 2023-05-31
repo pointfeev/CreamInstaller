@@ -34,7 +34,7 @@ internal static class HeroicLibrary
                         {
                             DisplayName = appData.Title, CatalogNamespace = appData.Namespace, InstallLocation = appData.Install.InstallPath
                         };
-                        if (!games.Any(g => g.CatalogNamespace == manifest.CatalogNamespace && g.InstallLocation == manifest.InstallLocation))
+                        if (games.All(g => g.CatalogNamespace != manifest.CatalogNamespace))
                             games.Add(manifest);
                     }
                     catch

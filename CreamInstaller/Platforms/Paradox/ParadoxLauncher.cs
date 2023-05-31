@@ -25,7 +25,7 @@ internal static class ParadoxLauncher
         get
         {
             installPath ??= Registry.GetValue(@"HKEY_CURRENT_USER\Software\Paradox Interactive\Paradox Launcher v2", "LauncherInstallation", null) as string;
-            return installPath.BeautifyPath();
+            return installPath.ResolvePath();
         }
     }
 

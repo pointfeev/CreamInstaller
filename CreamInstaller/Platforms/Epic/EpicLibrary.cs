@@ -21,7 +21,7 @@ internal static class EpicLibrary
             epicManifestsPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Epic Games\EpicGamesLauncher", "AppDataPath", null) as string;
             if (epicManifestsPath is not null && epicManifestsPath.EndsWith(@"\Data", StringComparison.Ordinal))
                 epicManifestsPath += @"\Manifests";
-            return epicManifestsPath.BeautifyPath();
+            return epicManifestsPath.ResolvePath();
         }
     }
 
@@ -39,8 +39,7 @@ internal static class EpicLibrary
                     try
                     {
                         Manifest manifest = JsonConvert.DeserializeObject<Manifest>(json);
-                        if (manifest is not null && !games.Any(g
-                                => g.CatalogNamespace == manifest.CatalogNamespace && g.InstallLocation == manifest.InstallLocation))
+                        if (manifest is not null && games.All(g => g.CatalogNamespace != manifest.CatalogNamespace))
                             games.Add(manifest);
                     }
                     catch

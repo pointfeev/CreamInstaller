@@ -17,7 +17,7 @@ internal static class SteamLibrary
         {
             installPath ??= Registry.GetValue(@"HKEY_CURRENT_USER\Software\Valve\Steam", "SteamPath", null) as string;
             installPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam", "InstallPath", null) as string;
-            return installPath.BeautifyPath();
+            return installPath.ResolvePath();
         }
     }
 
@@ -31,7 +31,7 @@ internal static class SteamLibrary
                 if (Program.Canceled)
                     return games;
                 foreach ((string appId, string name, string branch, int buildId, string gameDirectory) game in (await GetGamesFromLibraryDirectory(
-                             libraryDirectory)).Where(game => !games.Any(_game => _game.appId == game.appId && _game.gameDirectory == game.gameDirectory)))
+                             libraryDirectory)).Where(game => games.All(_game => _game.appId != game.appId)))
                     games.Add(game);
             }
             return games;
@@ -57,12 +57,8 @@ internal static class SteamLibrary
                 if (string.IsNullOrWhiteSpace(appId) || string.IsNullOrWhiteSpace(installdir) || string.IsNullOrWhiteSpace(name)
                  || string.IsNullOrWhiteSpace(buildId))
                     continue;
-                string gameDirectory = (libraryDirectory + @"\common\" + installdir).BeautifyPath();
-                if (games.Any(g => g.appId == appId && g.gameDirectory == gameDirectory))
-                    continue;
-                if (!int.TryParse(appId, out int _))
-                    continue;
-                if (!int.TryParse(buildId, out int buildIdInt))
+                string gameDirectory = (libraryDirectory + @"\common\" + installdir).ResolvePath();
+                if (gameDirectory is null || !int.TryParse(appId, out int _) || !int.TryParse(buildId, out int buildIdInt) || games.Any(g => g.appId == appId))
                     continue;
                 VToken userConfig = result.Value.GetChild("UserConfig");
                 string branch = userConfig?.GetChild("BetaKey")?.ToString();
