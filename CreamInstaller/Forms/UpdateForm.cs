@@ -191,9 +191,9 @@ internal sealed partial class UpdateForm : CustomForm
         PackagePath.DeleteFile(canContinue);
         if (canContinue)
         {
-            string currentPath = Program.CurrentProcessFilePath;
-            string currentDirectory = Path.GetDirectoryName(currentPath);
-            string currentExecutable = Path.GetFileName(currentPath);
+            string path = Program.CurrentProcessFilePath;
+            string directory = Path.GetDirectoryName(path);
+            string file = Path.GetFileName(path);
             StringBuilder commands = new();
             _ = commands.AppendLine(CultureInfo.InvariantCulture, $"\nTASKKILL /F /T /PID {Program.CurrentProcessId}");
             _ = commands.AppendLine(CultureInfo.InvariantCulture, $":LOOP");
@@ -202,8 +202,8 @@ internal sealed partial class UpdateForm : CustomForm
             _ = commands.AppendLine(CultureInfo.InvariantCulture, $"   TIMEOUT /T 1");
             _ = commands.AppendLine(CultureInfo.InvariantCulture, $"   GOTO LOOP");
             _ = commands.AppendLine(CultureInfo.InvariantCulture, $")");
-            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"MOVE /Y \"{ExecutablePath}\" \"{currentExecutable}\"");
-            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"START \"\" /D \"{currentDirectory}\" \"{currentExecutable}\"");
+            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"MOVE /Y \"{ExecutablePath}\" \"{path}\"");
+            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"START \"\" /D \"{directory}\" \"{file}\"");
             _ = commands.AppendLine(CultureInfo.InvariantCulture, $"EXIT");
             UpdaterPath.WriteFile(commands.ToString(), true, this);
             Process process = new();
