@@ -522,8 +522,8 @@ internal static class Resources
 
     private static bool IsCommonIncorrectExecutable(this string rootDirectory, string path)
     {
-        string subPath = path[rootDirectory.Length..].ResolvePath()?.ToUpperInvariant();
-        return subPath is null || subPath.Contains("SETUP") || subPath.Contains("REDIST") || subPath.Contains("SUPPORT")
+        string subPath = path[rootDirectory.Length..].ToUpperInvariant();
+        return subPath.Contains("SETUP") || subPath.Contains("REDIST") || subPath.Contains("SUPPORT")
             || subPath.Contains("CRASH") && (subPath.Contains("PAD") || subPath.Contains("REPORT")) || subPath.Contains("HELPER")
             || subPath.Contains("CEFPROCESS") || subPath.Contains("ZFGAMEBROWSER") || subPath.Contains("MONO") || subPath.Contains("PLUGINS")
             || subPath.Contains("MODDING") || subPath.Contains("MOD") && subPath.Contains("MANAGER") || subPath.Contains("BATTLEYE")
