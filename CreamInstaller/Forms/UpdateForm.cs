@@ -193,8 +193,7 @@ internal sealed partial class UpdateForm : CustomForm
         {
             string currentPath = Program.CurrentProcessFilePath;
             string currentDirectory = Path.GetDirectoryName(currentPath);
-            string properExecutable = Path.GetFileName(ExecutablePath);
-            string properExecutablePath = Path.Combine(currentDirectory!, properExecutable!);
+            string currentExecutable = Path.GetFileName(currentPath);
             StringBuilder commands = new();
             _ = commands.AppendLine(CultureInfo.InvariantCulture, $"\nTASKKILL /F /T /PID {Program.CurrentProcessId}");
             _ = commands.AppendLine(CultureInfo.InvariantCulture, $":LOOP");
@@ -203,10 +202,8 @@ internal sealed partial class UpdateForm : CustomForm
             _ = commands.AppendLine(CultureInfo.InvariantCulture, $"   TIMEOUT /T 1");
             _ = commands.AppendLine(CultureInfo.InvariantCulture, $"   GOTO LOOP");
             _ = commands.AppendLine(CultureInfo.InvariantCulture, $")");
-            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"DEL /F /Q \"{currentPath}\"");
-            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"DEL /F /Q \"{properExecutablePath}\"");
-            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"MOVE /Y \"{ExecutablePath}\" \"{properExecutablePath}\"");
-            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"START \"\" /D \"{currentDirectory}\" \"{properExecutable}\"");
+            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"MOVE /Y \"{ExecutablePath}\" \"{currentExecutable}\"");
+            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"START \"\" /D \"{currentDirectory}\" \"{currentExecutable}\"");
             _ = commands.AppendLine(CultureInfo.InvariantCulture, $"EXIT");
             UpdaterPath.WriteFile(commands.ToString(), true, this);
             Process process = new();
