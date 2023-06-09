@@ -464,20 +464,21 @@ internal static class Resources
             }
     }
 
-    internal static void WriteResource(this byte[] resource, string filePath)
+    internal static bool WriteResource(this byte[] resource, string filePath)
     {
         while (!Program.Canceled)
             try
             {
                 using FileStream fileStream = new(filePath, FileMode.Create, FileAccess.Write);
                 fileStream.Write(resource);
-                break;
+                return true;
             }
             catch (Exception e)
             {
                 if (filePath.IOWarn("Failed to write a crucial resource", e) is not DialogResult.OK)
                     break;
             }
+        return false;
     }
 
     internal static bool TryGetFileBinaryType(this string path, out BinaryType binaryType) => NativeImports.GetBinaryType(path, out binaryType);
@@ -504,8 +505,7 @@ internal static class Resources
                 if (Program.Canceled)
                     return null;
                 if (executables.All(e => e.path != path) && (!filterCommon || !rootDirectory.IsCommonIncorrectExecutable(path))
-                                                         && (validFunc is null || validFunc(path)) && path.TryGetFileBinaryType(out BinaryType binaryType)
-                                                         && binaryType is BinaryType.BIT64)
+                 && (validFunc is null || validFunc(path)) && path.TryGetFileBinaryType(out BinaryType binaryType) && binaryType is BinaryType.BIT64)
                     executables.Add((path, binaryType));
             }
             foreach (string path in rootDirectory.EnumerateDirectory("*.exe", true))
@@ -513,8 +513,7 @@ internal static class Resources
                 if (Program.Canceled)
                     return null;
                 if (executables.All(e => e.path != path) && (!filterCommon || !rootDirectory.IsCommonIncorrectExecutable(path))
-                                                         && (validFunc is null || validFunc(path)) && path.TryGetFileBinaryType(out BinaryType binaryType)
-                                                         && binaryType is BinaryType.BIT32)
+                 && (validFunc is null || validFunc(path)) && path.TryGetFileBinaryType(out BinaryType binaryType) && binaryType is BinaryType.BIT32)
                     executables.Add((path, binaryType));
             }
             return executables.Count > 0 ? executables : null;
@@ -524,10 +523,9 @@ internal static class Resources
     {
         string subPath = path[rootDirectory.Length..].ToUpperInvariant();
         return subPath.Contains("SETUP") || subPath.Contains("REDIST") || subPath.Contains("SUPPORT")
-            || subPath.Contains("CRASH") && (subPath.Contains("PAD") || subPath.Contains("REPORT")) || subPath.Contains("HELPER")
-            || subPath.Contains("CEFPROCESS") || subPath.Contains("ZFGAMEBROWSER") || subPath.Contains("MONO") || subPath.Contains("PLUGINS")
-            || subPath.Contains("MODDING") || subPath.Contains("MOD") && subPath.Contains("MANAGER") || subPath.Contains("BATTLEYE")
-            || subPath.Contains("ANTICHEAT");
+         || subPath.Contains("CRASH") && (subPath.Contains("PAD") || subPath.Contains("REPORT")) || subPath.Contains("HELPER") || subPath.Contains("CEFPROCESS")
+         || subPath.Contains("ZFGAMEBROWSER") || subPath.Contains("MONO") || subPath.Contains("PLUGINS") || subPath.Contains("MODDING")
+         || subPath.Contains("MOD") && subPath.Contains("MANAGER") || subPath.Contains("BATTLEYE") || subPath.Contains("ANTICHEAT");
     }
 
     internal static async Task<HashSet<string>> GetDllDirectoriesFromGameDirectory(this string gameDirectory, Platform platform)

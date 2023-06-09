@@ -14,14 +14,12 @@ namespace CreamInstaller.Forms;
 
 internal sealed partial class InstallForm : CustomForm
 {
-    private readonly HashSet<Selection> disabledSelections = new();
-
-    private readonly int programCount = Selection.AllEnabled.Count();
+    private readonly HashSet<Selection> activeSelections = new();
     private readonly bool uninstalling;
     private int completeOperationsCount;
-
     private int operationsCount;
     internal bool Reselecting;
+    private int selectionCount;
 
     internal InstallForm(bool uninstall = false)
     {
@@ -77,7 +75,7 @@ internal sealed partial class InstallForm : CustomForm
             foreach (string directory in invalidDirectories)
             {
                 if (Program.Canceled)
-                    throw new CustomMessageException("The operation was canceled.");
+                    return;
                 directory.GetKoaloaderComponents(out string old_config, out string config);
                 if (directory.GetKoaloaderProxies().Any(proxy => proxy.FileExists() && proxy.IsResourceFile(ResourceIdentifier.Koaloader))
                  || directory != selection.RootDirectory && Koaloader.AutoLoadDLLs.Any(pair => (directory + @"\" + pair.dll).FileExists())
@@ -91,7 +89,7 @@ internal sealed partial class InstallForm : CustomForm
             foreach ((string directory, BinaryType _) in selection.ExecutableDirectories)
             {
                 if (Program.Canceled)
-                    throw new CustomMessageException("The operation was canceled.");
+                    return;
                 directory.GetKoaloaderComponents(out string old_config, out string config);
                 if (directory.GetKoaloaderProxies().Any(proxy => proxy.FileExists() && proxy.IsResourceFile(ResourceIdentifier.Koaloader))
                  || Koaloader.AutoLoadDLLs.Any(pair => (directory + @"\" + pair.dll).FileExists()) || old_config.FileExists() || config.FileExists())
@@ -105,15 +103,15 @@ internal sealed partial class InstallForm : CustomForm
         foreach (string directory in selection.DllDirectories)
         {
             if (Program.Canceled)
-                throw new CustomMessageException("The operation was canceled.");
+                return;
             if (selection.Platform is Platform.Steam or Platform.Paradox)
             {
                 directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string old_config,
                     out string config, out string old_log, out string log, out string cache);
                 if (uninstallProxy
-                        ? api32_o.FileExists() || api64_o.FileExists() || old_config.FileExists() || config.FileExists() || old_log.FileExists()
-                       || log.FileExists() || cache.FileExists()
-                        : api32.FileExists() || api64.FileExists())
+                    ? api32_o.FileExists() || api64_o.FileExists() || old_config.FileExists() || config.FileExists() || old_log.FileExists() || log.FileExists()
+                 || cache.FileExists()
+                    : api32.FileExists() || api64.FileExists())
                 {
                     UpdateUser(
                         $"{(uninstallProxy ? "Uninstalling" : "Installing")} SmokeAPI" + $" {(uninstallProxy ? "from" : "for")} " + selection.Name
@@ -128,8 +126,8 @@ internal sealed partial class InstallForm : CustomForm
             {
                 directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out string log);
                 if (uninstallProxy
-                        ? api32_o.FileExists() || api64_o.FileExists() || config.FileExists() || log.FileExists()
-                        : api32.FileExists() || api64.FileExists())
+                    ? api32_o.FileExists() || api64_o.FileExists() || config.FileExists() || log.FileExists()
+                    : api32.FileExists() || api64.FileExists())
                 {
                     UpdateUser(
                         $"{(uninstallProxy ? "Uninstalling" : "Installing")} ScreamAPI" + $" {(uninstallProxy ? "from" : "for")} " + selection.Name
@@ -144,8 +142,8 @@ internal sealed partial class InstallForm : CustomForm
             {
                 directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out string log);
                 if (uninstallProxy
-                        ? api32_o.FileExists() || api64_o.FileExists() || config.FileExists() || log.FileExists()
-                        : api32.FileExists() || api64.FileExists())
+                    ? api32_o.FileExists() || api64_o.FileExists() || config.FileExists() || log.FileExists()
+                    : api32.FileExists() || api64.FileExists())
                 {
                     UpdateUser(
                         $"{(uninstallProxy ? "Uninstalling" : "Installing")} Uplay R1 Unlocker" + $" {(uninstallProxy ? "from" : "for")} " + selection.Name
@@ -157,8 +155,8 @@ internal sealed partial class InstallForm : CustomForm
                 }
                 directory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o, out api64, out api64_o, out config, out log);
                 if (uninstallProxy
-                        ? api32_o.FileExists() || api64_o.FileExists() || config.FileExists() || log.FileExists()
-                        : old_api32.FileExists() || old_api64.FileExists() || api32.FileExists() || api64.FileExists())
+                    ? api32_o.FileExists() || api64_o.FileExists() || config.FileExists() || log.FileExists()
+                    : old_api32.FileExists() || old_api64.FileExists() || api32.FileExists() || api64.FileExists())
                 {
                     UpdateUser(
                         $"{(uninstallProxy ? "Uninstalling" : "Installing")} Uplay R2 Unlocker" + $" {(uninstallProxy ? "from" : "for")} " + selection.Name
@@ -175,7 +173,7 @@ internal sealed partial class InstallForm : CustomForm
             foreach ((string directory, BinaryType binaryType) in selection.ExecutableDirectories)
             {
                 if (Program.Canceled)
-                    throw new CustomMessageException("The operation was canceled.");
+                    return;
                 UpdateUser("Installing Koaloader to " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
                 await Koaloader.Install(directory, binaryType, selection, selection.RootDirectory, this);
             }
@@ -184,19 +182,19 @@ internal sealed partial class InstallForm : CustomForm
 
     private async Task Operate()
     {
-        HashSet<Selection> programSelections = Selection.AllEnabled.ToHashSet();
-        operationsCount = programSelections.Count;
+        operationsCount = activeSelections.Count;
         completeOperationsCount = 0;
-        foreach (Selection selection in programSelections)
+        foreach (Selection selection in activeSelections)
         {
-            if (Program.Canceled || !Program.AreDllsLockedDialog(this, selection))
+            if (Program.Canceled)
                 throw new CustomMessageException("The operation was canceled.");
             try
             {
                 await OperateFor(selection);
+                if (Program.Canceled)
+                    throw new CustomMessageException("The operation was canceled.");
                 UpdateUser($"Operation succeeded for {selection.Name}.", LogTextBox.Success);
-                selection.Enabled = false;
-                _ = disabledSelections.Add(selection);
+                _ = activeSelections.Remove(selection);
             }
             catch (Exception exception)
             {
@@ -205,15 +203,12 @@ internal sealed partial class InstallForm : CustomForm
             ++completeOperationsCount;
         }
         Program.Cleanup();
-        HashSet<Selection> failedSelections = Selection.AllEnabled.ToHashSet();
-        if (failedSelections.Count > 0)
-            if (failedSelections.Count == 1)
-                throw new CustomMessageException($"Operation failed for {failedSelections.First().Name}.");
+        int activeCount = activeSelections.Count;
+        if (activeCount > 0)
+            if (activeCount == 1)
+                throw new CustomMessageException($"Operation failed for {activeSelections.First().Name}.");
             else
-                throw new CustomMessageException($"Operation failed for {failedSelections.Count} programs.");
-        foreach (Selection selection in disabledSelections)
-            selection.Enabled = true;
-        disabledSelections.Clear();
+                throw new CustomMessageException($"Operation failed for {activeCount} programs.");
     }
 
     private async void Start()
@@ -227,7 +222,7 @@ internal sealed partial class InstallForm : CustomForm
         try
         {
             await Operate();
-            UpdateUser($"DLC unlocker(s) successfully {(uninstalling ? "uninstalled" : "installed and generated")} for " + programCount + " program(s).",
+            UpdateUser($"DLC unlocker(s) successfully {(uninstalling ? "uninstalled" : "installed and generated")} for " + selectionCount + " program(s).",
                 LogTextBox.Success);
         }
         catch (Exception exception)
@@ -241,13 +236,19 @@ internal sealed partial class InstallForm : CustomForm
         reselectButton.Enabled = true;
     }
 
-    private void OnLoad(object sender, EventArgs _)
+    private void OnLoad(object sender, EventArgs a)
     {
     retry:
         try
         {
             userInfoLabel.Text = "Loading . . . ";
             logTextBox.Text = string.Empty;
+            selectionCount = 0;
+            foreach (Selection selection in Selection.AllEnabled)
+            {
+                selectionCount++;
+                _ = activeSelections.Add(selection);
+            }
             Start();
         }
         catch (Exception e)
@@ -276,9 +277,6 @@ internal sealed partial class InstallForm : CustomForm
     {
         Program.Cleanup();
         Reselecting = true;
-        foreach (Selection selection in disabledSelections)
-            selection.Enabled = true;
-        disabledSelections.Clear();
         Close();
     }
 }

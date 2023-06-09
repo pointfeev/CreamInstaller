@@ -535,7 +535,7 @@ internal sealed partial class SelectForm : CustomForm
                     programsToScan is not null && programsToScan.Any(p => p.platform is Platform.Paradox && p.id == "PL")));
             if (SteamLibrary.InstallPath.DirectoryExists())
                 foreach ((string appId, string name, string _, int _, string _) in (await SteamLibrary.GetGames()).Where(g
-                             => !Program.IsGameBlocked(g.name, g.gameDirectory)))
+                    => !Program.IsGameBlocked(g.name, g.gameDirectory)))
                     gameChoices.Add((Platform.Steam, appId, name,
                         programsToScan is not null && programsToScan.Any(p => p.platform is Platform.Steam && p.id == appId)));
             if (EpicLibrary.EpicManifestsPath.DirectoryExists() || HeroicLibrary.HeroicLibraryPath.DirectoryExists())
@@ -709,7 +709,7 @@ internal sealed partial class SelectForm : CustomForm
         programsGroupBox.Size = programsGroupBox.Size with
         {
             Height = programsGroupBox.Size.Height - 3 - progressLabel.Size.Height - progressLabelGames.Size.Height - progressLabelDLCs.Size.Height
-                   - progressBar.Size.Height
+          - progressBar.Size.Height
         };
     }
 
@@ -723,7 +723,7 @@ internal sealed partial class SelectForm : CustomForm
         programsGroupBox.Size = programsGroupBox.Size with
         {
             Height = programsGroupBox.Size.Height + 3 + progressLabel.Size.Height + progressLabelGames.Size.Height + progressLabelDLCs.Size.Height
-                   + progressBar.Size.Height
+          + progressBar.Size.Height
         };
     }
 
@@ -785,7 +785,11 @@ internal sealed partial class SelectForm : CustomForm
                 if (id == "PL")
                 {
                     _ = items.Add(new ToolStripSeparator());
-                    async void EventHandler(object sender, EventArgs e) => await ParadoxLauncher.Repair(this, selection);
+                    async void EventHandler(object sender, EventArgs e)
+                    {
+                        _ = await ParadoxLauncher.Repair(this, selection);
+                        Program.Canceled = false;
+                    }
                     _ = items.Add(new ContextMenuItem("Repair", "Command Prompt", EventHandler));
                 }
                 _ = items.Add(new ToolStripSeparator());
@@ -890,11 +894,7 @@ internal sealed partial class SelectForm : CustomForm
 
     private void OnAccept(bool uninstall = false)
     {
-        if (Selection.All.IsEmpty)
-            return;
-        if (Selection.AllEnabled.Any(selection => !Program.AreDllsLockedDialog(this, selection)))
-            return;
-        if (!uninstall && ParadoxLauncher.DlcDialog(this))
+        if (Selection.All.IsEmpty || !uninstall && ParadoxLauncher.DlcDialog(this))
             return;
         Hide();
         InstallForm form = new(uninstall);

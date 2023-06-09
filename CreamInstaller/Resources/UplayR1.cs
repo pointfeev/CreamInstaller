@@ -77,7 +77,7 @@ internal static class UplayR1
             {
                 if (api32.FileExists())
                 {
-                    api32.DeleteFile();
+                    api32.DeleteFile(true);
                     installForm?.UpdateUser($"Deleted Uplay R1 Unlocker: {Path.GetFileName(api32)}", LogTextBox.Action, false);
                 }
                 api32_o.MoveFile(api32!);
@@ -87,7 +87,7 @@ internal static class UplayR1
             {
                 if (api64.FileExists())
                 {
-                    api64.DeleteFile();
+                    api64.DeleteFile(true);
                     installForm?.UpdateUser($"Deleted Uplay R1 Unlocker: {Path.GetFileName(api64)}", LogTextBox.Action, false);
                 }
                 api64_o.MoveFile(api64!);
@@ -112,7 +112,7 @@ internal static class UplayR1
             directory.GetUplayR1Components(out string api32, out string api32_o, out string api64, out string api64_o, out _, out _);
             if (api32.FileExists() && !api32_o.FileExists())
             {
-                api32.MoveFile(api32_o!);
+                api32.MoveFile(api32_o!, true);
                 installForm?.UpdateUser($"Renamed Uplay R1: {Path.GetFileName(api32)} -> {Path.GetFileName(api32_o)}", LogTextBox.Action, false);
             }
             if (api32_o.FileExists())
@@ -122,7 +122,7 @@ internal static class UplayR1
             }
             if (api64.FileExists() && !api64_o.FileExists())
             {
-                api64.MoveFile(api64_o!);
+                api64.MoveFile(api64_o!, true);
                 installForm?.UpdateUser($"Renamed Uplay R1: {Path.GetFileName(api64)} -> {Path.GetFileName(api64_o)}", LogTextBox.Action, false);
             }
             if (api64_o.FileExists())

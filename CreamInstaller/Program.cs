@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
@@ -39,27 +38,7 @@ internal static class Program
 
     internal static bool IsGameBlocked(string name, string directory = null)
         => BlockProtectedGames && (ProtectedGames.Contains(name) || directory is not null && !ProtectedGameDirectoryExceptions.Contains(name)
-                                                                                          && ProtectedGameDirectories.Any(path
-                                                                                                 => (directory + path).DirectoryExists()));
-
-    internal static bool AreDllsLockedDialog(Form form, Selection selection)
-    {
-        while (true)
-        {
-            if (selection.AreDllsLocked)
-            {
-                using DialogForm dialogForm = new(form);
-                if (dialogForm.Show(SystemIcons.Error,
-                        $"ERROR: One or more DLLs crucial to unlocker installation are locked for {selection.Name}!"
-                      + "\n\nPlease close the program/game or resolve your anti-virus and press retry to continue . . . ", "Retry", "Cancel")
-                 == DialogResult.OK)
-                    continue;
-            }
-            else
-                return true;
-            return false;
-        }
-    }
+         && ProtectedGameDirectories.Any(path => (directory + path).DirectoryExists()));
 
     [STAThread]
     private static void Main()

@@ -21,7 +21,7 @@ internal static class ExceptionHandler
             string[] stackTrace = e.StackTrace?.Split('\n');
             if (stackTrace is not null && stackTrace.Length > 0)
             {
-                _ = output.Append(e.GetType() + (": " + e.Message));
+                _ = output.Append($"[{e.HResult & 0x0000FFFF}] {e.GetType()}: {e.Message}");
                 foreach (string line in stackTrace)
                 {
                     int atNum = line.IndexOf("at ", StringComparison.Ordinal);

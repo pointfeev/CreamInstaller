@@ -42,7 +42,7 @@ internal static class SteamCMD
     private static string GetArguments(string appId)
         => AttemptCount.TryGetValue(appId, out int attempts)
             ? $@"@ShutdownOnFailedCommand 0 +force_install_dir {DirectoryPath} +login anonymous +app_info_print {appId} "
-            + string.Concat(Enumerable.Repeat("+app_update 4 ", attempts)) + "+quit"
+          + string.Concat(Enumerable.Repeat("+app_update 4 ", attempts)) + "+quit"
             : $"+login anonymous +app_info_print {appId} +quit";
 
     private static async Task<string> Run(string appId)
@@ -129,7 +129,7 @@ internal static class SteamCMD
                 try
                 {
                     byte[] file = await httpClient.GetByteArrayAsync(new Uri("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip"));
-                    file.WriteResource(ArchivePath);
+                    _ = file.WriteResource(ArchivePath);
                     ArchivePath.ExtractZip(DirectoryPath);
                     ArchivePath.DeleteFile();
                     break;

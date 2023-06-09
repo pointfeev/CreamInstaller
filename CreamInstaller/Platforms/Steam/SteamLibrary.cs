@@ -31,7 +31,7 @@ internal static class SteamLibrary
                 if (Program.Canceled)
                     return games;
                 foreach ((string appId, string name, string branch, int buildId, string gameDirectory) game in (await GetGamesFromLibraryDirectory(
-                             libraryDirectory)).Where(game => games.All(_game => _game.appId != game.appId)))
+                    libraryDirectory)).Where(game => games.All(_game => _game.appId != game.appId)))
                     games.Add(game);
             }
             return games;

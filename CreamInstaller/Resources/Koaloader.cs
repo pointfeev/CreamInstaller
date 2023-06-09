@@ -24,11 +24,11 @@ internal static class Koaloader
 
     internal static IEnumerable<string> GetKoaloaderProxies(this string directory)
         => from resource in EmbeddedResources
-           select resource[(resource.IndexOf('.') + 1)..]
-           into resource
-           select resource[(resource.IndexOf('.') + 1)..]
-           into resource
-           select directory + @"\" + resource;
+            select resource[(resource.IndexOf('.') + 1)..]
+            into resource
+            select resource[(resource.IndexOf('.') + 1)..]
+            into resource
+            select directory + @"\" + resource;
 
     internal static void GetKoaloaderComponents(this string directory, out string old_config, out string config)
     {
@@ -137,15 +137,15 @@ internal static class Koaloader
         {
             directory.GetKoaloaderComponents(out string old_config, out string config);
             foreach (string proxyPath in directory.GetKoaloaderProxies().Where(proxyPath
-                         => proxyPath.FileExists() && proxyPath.IsResourceFile(ResourceIdentifier.Koaloader)))
+                => proxyPath.FileExists() && proxyPath.IsResourceFile(ResourceIdentifier.Koaloader)))
             {
-                proxyPath.DeleteFile();
+                proxyPath.DeleteFile(true);
                 installForm?.UpdateUser($"Deleted Koaloader: {Path.GetFileName(proxyPath)}", LogTextBox.Action, false);
             }
             foreach ((string unlocker, string path) in AutoLoadDLLs.Select(pair => (pair.unlocker, path: directory + @"\" + pair.dll))
-                        .Where(pair => pair.path.FileExists() && pair.path.IsResourceFile()))
+               .Where(pair => pair.path.FileExists() && pair.path.IsResourceFile()))
             {
-                path.DeleteFile();
+                path.DeleteFile(true);
                 installForm?.UpdateUser($"Deleted {unlocker}: {Path.GetFileName(path)}", LogTextBox.Action, false);
             }
             if (deleteConfig && old_config.FileExists())
@@ -174,7 +174,7 @@ internal static class Koaloader
             string path = directory + @"\" + proxy + ".dll";
             foreach (string _path in directory.GetKoaloaderProxies().Where(p => p != path && p.FileExists() && p.IsResourceFile(ResourceIdentifier.Koaloader)))
             {
-                _path.DeleteFile();
+                _path.DeleteFile(true);
                 installForm?.UpdateUser($"Deleted Koaloader: {Path.GetFileName(_path)}", LogTextBox.Action, false);
             }
             if (path.FileExists() && !path.IsResourceFile(ResourceIdentifier.Koaloader))

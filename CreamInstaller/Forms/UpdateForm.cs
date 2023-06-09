@@ -155,7 +155,7 @@ internal sealed partial class UpdateForm : CustomForm
             long bytesRead = 0;
             int newBytes;
             while (cancellation is not null && !Program.Canceled
-                                            && (newBytes = await download.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellation.Token)) != 0)
+             && (newBytes = await download.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellation.Token)) != 0)
             {
                 if (cancellation is null || Program.Canceled)
                     throw new TaskCanceledException();

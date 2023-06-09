@@ -12,21 +12,6 @@ namespace CreamInstaller.Utility;
 
 internal static class SafeIO
 {
-    internal static bool FileLocked(this string filePath)
-    {
-        if (!FileExists(filePath))
-            return false;
-        try
-        {
-            File.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None).Close();
-        }
-        catch
-        {
-            return true;
-        }
-        return false;
-    }
-
     internal static bool DirectoryExists(this string directoryPath) => Directory.Exists(directoryPath);
 
     internal static void CreateDirectory(this string directoryPath, bool crucial = false, Form form = null)
@@ -37,7 +22,7 @@ internal static class SafeIO
             try
             {
                 _ = Directory.CreateDirectory(directoryPath);
-                break;
+                return;
             }
             catch (Exception e)
             {
@@ -54,7 +39,7 @@ internal static class SafeIO
             try
             {
                 Directory.Move(directoryPath, newDirectoryPath);
-                break;
+                return;
             }
             catch (Exception e)
             {
@@ -71,12 +56,12 @@ internal static class SafeIO
             try
             {
                 Directory.Delete(directoryPath, true);
-                break;
+                return;
             }
             catch (Exception e)
             {
                 if (!crucial || !directoryPath.DirectoryExists()
-                             || directoryPath.IOWarn("Failed to delete a crucial directory", e, form) is not DialogResult.OK)
+                 || directoryPath.IOWarn("Failed to delete a crucial directory", e, form) is not DialogResult.OK)
                     break;
             }
     }
@@ -96,7 +81,7 @@ internal static class SafeIO
             catch (Exception e)
             {
                 if (!crucial || !directoryPath.DirectoryExists()
-                             || directoryPath.IOWarn("Failed to enumerate a crucial directory's files", e, form) is not DialogResult.OK)
+                 || directoryPath.IOWarn("Failed to enumerate a crucial directory's files", e, form) is not DialogResult.OK)
                     break;
             }
         return Enumerable.Empty<string>();
@@ -117,7 +102,7 @@ internal static class SafeIO
             catch (Exception e)
             {
                 if (!crucial || !directoryPath.DirectoryExists()
-                             || directoryPath.IOWarn("Failed to enumerate a crucial directory's subdirectories", e, form) is not DialogResult.OK)
+                 || directoryPath.IOWarn("Failed to enumerate a crucial directory's subdirectories", e, form) is not DialogResult.OK)
                     break;
             }
         return Enumerable.Empty<string>();
@@ -148,7 +133,7 @@ internal static class SafeIO
             try
             {
                 File.Move(filePath, newFilePath);
-                break;
+                return;
             }
             catch (Exception e)
             {
@@ -165,7 +150,7 @@ internal static class SafeIO
             try
             {
                 File.Delete(filePath);
-                break;
+                return;
             }
             catch (Exception e)
             {
@@ -214,7 +199,7 @@ internal static class SafeIO
             try
             {
                 File.WriteAllText(filePath, text, Encoding.UTF8);
-                break;
+                return;
             }
             catch (Exception e)
             {
@@ -231,7 +216,7 @@ internal static class SafeIO
             try
             {
                 ZipFile.ExtractToDirectory(archivePath, destinationPath);
-                break;
+                return;
             }
             catch (Exception e)
             {
@@ -251,11 +236,26 @@ internal static class SafeIO
     private static DialogResult IOWarnInternal(this string filePath, string message, Exception e, Form form = null)
     {
         using DialogForm dialogForm = new(form);
-        string description = message + ": " + filePath.ResolvePath() + "\n\n";
-        if (e is IOException && (e.HResult & 0x0000FFFF) == 225) // virus or potentially unwanted software
-            description += "Please resolve your anti-virus and press retry to continue . . . ";
-        else
-            description += e.FormatException();
-        return dialogForm.Show(SystemIcons.Warning, description, "Retry", "OK");
+        string description = message + ": " + (filePath.ResolvePath() ?? filePath) + "\n\n";
+        int code = e.HResult & 0x0000FFFF;
+        switch (code) // https://learn.microsoft.com/en-us/windows/win32/debug/system-error-codes#system-error-codes
+        {
+            case 5: // ERROR_ACCESS_DENIED
+            case 32: // ERROR_SHARING_VIOLATION
+            case 33: // ERROR_LOCK_VIOLATION
+                description += "Please close the program/game and press retry to continue . . . ";
+                break;
+            case 225: // ERROR_VIRUS_INFECTED
+            case 226: // ERROR_VIRUS_DELETED
+                description += "Please resolve your anti-virus and press retry to continue . . . ";
+                break;
+            default:
+                description += e.FormatException();
+                break;
+        }
+        DialogResult result = dialogForm.Show(SystemIcons.Warning, description, "Retry", "Cancel");
+        if (result is not DialogResult.OK)
+            Program.Canceled = true;
+        return result;
     }
 }
