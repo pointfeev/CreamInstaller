@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using CreamInstaller.Forms;
@@ -57,6 +58,12 @@ internal static class ParadoxLauncher
     internal static async Task<RepairResult> Repair(Form form, Selection selection)
     {
         InstallForm installForm = form as InstallForm;
+        StringBuilder dialogText = null;
+        if (installForm is null)
+        {
+            Program.Canceled = false;
+            dialogText = new();
+        }
         using DialogForm dialogForm = new(form);
         bool smokeInstalled = false;
         byte[] steamOriginalSdk32 = null;
@@ -99,13 +106,19 @@ internal static class ParadoxLauncher
                 if (steamOriginalSdk32 is not null && api32.IsResourceFile(ResourceIdentifier.Steamworks32))
                 {
                     steamOriginalSdk32.WriteResource(api32);
-                    installForm?.UpdateUser("Corrected Steamworks: " + api32, LogTextBox.Action);
+                    if (installForm is not null)
+                        installForm.UpdateUser("Corrected Steamworks: " + api32, LogTextBox.Action);
+                    else
+                        dialogText.AppendLine("Corrected Steamworks: " + api32);
                     neededRepair = true;
                 }
                 if (steamOriginalSdk64 is not null && api64.IsResourceFile(ResourceIdentifier.Steamworks64))
                 {
                     steamOriginalSdk64.WriteResource(api64);
-                    installForm?.UpdateUser("Corrected Steamworks: " + api64, LogTextBox.Action);
+                    if (installForm is not null)
+                        installForm.UpdateUser("Corrected Steamworks: " + api64, LogTextBox.Action);
+                    else
+                        dialogText.AppendLine("Corrected Steamworks: " + api64);
                     neededRepair = true;
                 }
                 if (smokeInstalled)
@@ -114,13 +127,19 @@ internal static class ParadoxLauncher
                 if (epicOriginalSdk32 is not null && api32.IsResourceFile(ResourceIdentifier.EpicOnlineServices32))
                 {
                     epicOriginalSdk32.WriteResource(api32);
-                    installForm?.UpdateUser("Corrected Epic Online Services: " + api32, LogTextBox.Action);
+                    if (installForm is not null)
+                        installForm.UpdateUser("Corrected Epic Online Services: " + api32, LogTextBox.Action);
+                    else
+                        dialogText.AppendLine("Corrected Epic Online Services: " + api32);
                     neededRepair = true;
                 }
                 if (epicOriginalSdk64 is not null && api64.IsResourceFile(ResourceIdentifier.EpicOnlineServices64))
                 {
                     epicOriginalSdk64.WriteResource(api64);
-                    installForm?.UpdateUser("Corrected Epic Online Services: " + api64, LogTextBox.Action);
+                    if (installForm is not null)
+                        installForm.UpdateUser("Corrected Epic Online Services: " + api64, LogTextBox.Action);
+                    else
+                        dialogText.AppendLine("Corrected Epic Online Services: " + api64);
                     neededRepair = true;
                 }
                 if (screamInstalled)
@@ -131,9 +150,12 @@ internal static class ParadoxLauncher
                 if (neededRepair)
                 {
                     if (installForm is not null)
-                        installForm.UpdateUser("Paradox Launcher successfully repaired!", LogTextBox.Success);
+                        installForm.UpdateUser("Paradox Launcher successfully repaired!", LogTextBox.Action);
                     else
-                        _ = dialogForm.Show(form.Icon, "Paradox Launcher successfully repaired!", customFormText: "Paradox Launcher");
+                    {
+                        dialogText.AppendLine("\nParadox Launcher successfully repaired!");
+                        _ = dialogForm.Show(form.Icon, dialogText.ToString(), customFormText: "Paradox Launcher");
+                    }
                     return RepairResult.Success;
                 }
                 if (installForm is not null)
