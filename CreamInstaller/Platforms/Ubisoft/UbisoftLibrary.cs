@@ -15,7 +15,7 @@ internal static class UbisoftLibrary
     {
         get
         {
-            installsKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Ubisoft\Launcher\Installs");
+            installsKey ??= Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\Ubisoft\Launcher\Installs");
             return installsKey;
         }
     }
