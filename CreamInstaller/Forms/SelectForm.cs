@@ -455,7 +455,7 @@ internal sealed partial class SelectForm : CustomForm
             {
                 if (Program.Canceled)
                     return;
-                if (Program.IsGameBlocked(name, gameDirectory) || !programsToScan.Any(c => c.platform is Platform.Ubisoft && c.id == gameId))
+                if (!uninstallAll && (Program.IsGameBlocked(name, gameDirectory) || !programsToScan.Any(c => c.platform is Platform.Ubisoft && c.id == gameId)))
                     continue;
                 AddToRemainingGames(name);
                 Task task = Task.Run(async () =>
