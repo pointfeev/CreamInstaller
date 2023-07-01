@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Windows.Forms;
+
 using CreamInstaller.Components;
 
 namespace CreamInstaller.Forms
@@ -30,8 +31,8 @@ namespace CreamInstaller.Forms
             cancelButton = new Button();
             loadButton = new Button();
             saveButton = new Button();
-            selectionTreeView = new CustomTreeView();
             uninstallAllButton = new Button();
+            selectionTreeView = new CustomTreeView();
             groupBox.SuspendLayout();
             allCheckBoxFlowPanel.SuspendLayout();
             SuspendLayout();
@@ -42,11 +43,10 @@ namespace CreamInstaller.Forms
             acceptButton.AutoSize = true;
             acceptButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             acceptButton.DialogResult = DialogResult.OK;
-            acceptButton.FlatStyle = FlatStyle.System;
-            acceptButton.Location = new System.Drawing.Point(475, 243);
+            acceptButton.Location = new System.Drawing.Point(479, 243);
             acceptButton.Name = "acceptButton";
             acceptButton.Padding = new Padding(12, 0, 12, 0);
-            acceptButton.Size = new System.Drawing.Size(61, 24);
+            acceptButton.Size = new System.Drawing.Size(57, 25);
             acceptButton.TabIndex = 6;
             acceptButton.Text = "OK";
             acceptButton.UseVisualStyleBackColor = true;
@@ -86,20 +86,20 @@ namespace CreamInstaller.Forms
             allCheckBoxFlowPanel.AutoSize = true;
             allCheckBoxFlowPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             allCheckBoxFlowPanel.Controls.Add(allCheckBox);
-            allCheckBoxFlowPanel.Location = new System.Drawing.Point(485, -1);
+            allCheckBoxFlowPanel.Location = new System.Drawing.Point(477, -1);
             allCheckBoxFlowPanel.Margin = new Padding(0);
             allCheckBoxFlowPanel.Name = "allCheckBoxFlowPanel";
-            allCheckBoxFlowPanel.Size = new System.Drawing.Size(34, 19);
+            allCheckBoxFlowPanel.Size = new System.Drawing.Size(42, 19);
             allCheckBoxFlowPanel.TabIndex = 1007;
             // 
             // allCheckBox
             // 
             allCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            allCheckBox.FlatStyle = FlatStyle.System;
+            allCheckBox.AutoSize = true;
             allCheckBox.Location = new System.Drawing.Point(2, 0);
             allCheckBox.Margin = new Padding(2, 0, 0, 0);
             allCheckBox.Name = "allCheckBox";
-            allCheckBox.Size = new System.Drawing.Size(32, 19);
+            allCheckBox.Size = new System.Drawing.Size(40, 19);
             allCheckBox.TabIndex = 1;
             allCheckBox.Text = "All";
             allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
@@ -108,11 +108,10 @@ namespace CreamInstaller.Forms
             // 
             sortCheckBox.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             sortCheckBox.AutoSize = true;
-            sortCheckBox.FlatStyle = FlatStyle.System;
-            sortCheckBox.Location = new System.Drawing.Point(220, 245);
+            sortCheckBox.Location = new System.Drawing.Point(220, 247);
             sortCheckBox.Margin = new Padding(3, 0, 0, 0);
             sortCheckBox.Name = "sortCheckBox";
-            sortCheckBox.Size = new System.Drawing.Size(104, 20);
+            sortCheckBox.Size = new System.Drawing.Size(98, 19);
             sortCheckBox.TabIndex = 3;
             sortCheckBox.Text = "Sort By Name";
             sortCheckBox.CheckedChanged += OnSortCheckBoxChanged;
@@ -123,11 +122,10 @@ namespace CreamInstaller.Forms
             cancelButton.AutoSize = true;
             cancelButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             cancelButton.DialogResult = DialogResult.Cancel;
-            cancelButton.FlatStyle = FlatStyle.System;
             cancelButton.Location = new System.Drawing.Point(12, 243);
             cancelButton.Name = "cancelButton";
             cancelButton.Padding = new Padding(12, 0, 12, 0);
-            cancelButton.Size = new System.Drawing.Size(81, 24);
+            cancelButton.Size = new System.Drawing.Size(77, 25);
             cancelButton.TabIndex = 2;
             cancelButton.Text = "Cancel";
             cancelButton.UseVisualStyleBackColor = true;
@@ -138,11 +136,10 @@ namespace CreamInstaller.Forms
             loadButton.AutoSize = true;
             loadButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             loadButton.Enabled = false;
-            loadButton.FlatStyle = FlatStyle.System;
-            loadButton.Location = new System.Drawing.Point(398, 243);
+            loadButton.Location = new System.Drawing.Point(406, 243);
             loadButton.Name = "loadButton";
             loadButton.Padding = new Padding(12, 0, 12, 0);
-            loadButton.Size = new System.Drawing.Size(71, 24);
+            loadButton.Size = new System.Drawing.Size(67, 25);
             loadButton.TabIndex = 5;
             loadButton.Text = "Load";
             loadButton.UseVisualStyleBackColor = true;
@@ -154,11 +151,10 @@ namespace CreamInstaller.Forms
             saveButton.AutoSize = true;
             saveButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             saveButton.Enabled = false;
-            saveButton.FlatStyle = FlatStyle.System;
-            saveButton.Location = new System.Drawing.Point(323, 243);
+            saveButton.Location = new System.Drawing.Point(335, 243);
             saveButton.Name = "saveButton";
             saveButton.Padding = new Padding(12, 0, 12, 0);
-            saveButton.Size = new System.Drawing.Size(69, 24);
+            saveButton.Size = new System.Drawing.Size(65, 25);
             saveButton.TabIndex = 4;
             saveButton.Text = "Save";
             saveButton.UseVisualStyleBackColor = true;
@@ -170,11 +166,10 @@ namespace CreamInstaller.Forms
             uninstallAllButton.AutoSize = true;
             uninstallAllButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             uninstallAllButton.DialogResult = DialogResult.Abort;
-            uninstallAllButton.FlatStyle = FlatStyle.System;
-            uninstallAllButton.Location = new System.Drawing.Point(99, 242);
+            uninstallAllButton.Location = new System.Drawing.Point(95, 243);
             uninstallAllButton.Name = "uninstallAllButton";
             uninstallAllButton.Padding = new Padding(12, 0, 12, 0);
-            uninstallAllButton.Size = new System.Drawing.Size(108, 24);
+            uninstallAllButton.Size = new System.Drawing.Size(104, 25);
             uninstallAllButton.TabIndex = 7;
             uninstallAllButton.Text = "Uninstall All";
             uninstallAllButton.UseVisualStyleBackColor = true;
@@ -204,6 +199,7 @@ namespace CreamInstaller.Forms
             groupBox.ResumeLayout(false);
             groupBox.PerformLayout();
             allCheckBoxFlowPanel.ResumeLayout(false);
+            allCheckBoxFlowPanel.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }

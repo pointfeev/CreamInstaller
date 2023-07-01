@@ -89,8 +89,8 @@ internal sealed class CustomTreeView : TreeView
         string text;
         if (dlcType is not DLCType.None)
         {
-            SelectionDLC dlc = SelectionDLC.FromTypeId(dlcType, id);
-            text = dlc is not null ? dlc.Selection.Platform.ToString() : dlcType.ToString();
+            SelectionDLC dlc = SelectionDLC.FromId(dlcType, node.Parent?.Name, id);
+            text = dlc?.Selection != null ? dlc.Selection.Platform.ToString() : dlcType.ToString();
         }
         else
             text = platform.ToString();
@@ -118,7 +118,7 @@ internal sealed class CustomTreeView : TreeView
         }
         if (form is SelectForm)
         {
-            Selection selection = Selection.FromPlatformId(platform, id);
+            Selection selection = Selection.FromId(platform, id);
             if (selection is not null)
             {
                 if (bounds == node.Bounds)

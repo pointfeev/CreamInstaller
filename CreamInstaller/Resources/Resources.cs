@@ -491,7 +491,7 @@ internal static class Resources
             {
                 e.path = Path.GetDirectoryName(e.path);
                 return e;
-            }).DistinctBy(e => e.path).ToList());
+            }).DistinctBy(e => e.path).ToList() ?? new());
 
     internal static async Task<List<(string path, BinaryType binaryType)>> GetExecutables(this string rootDirectory, bool filterCommon = false,
         Func<string, bool> validFunc = null)

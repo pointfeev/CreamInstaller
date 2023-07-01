@@ -28,7 +28,7 @@ internal static class ParadoxLauncher
 
     private static void PopulateDlc(Selection paradoxLauncher = null)
     {
-        paradoxLauncher ??= Selection.FromPlatformId(Platform.Paradox, "PL");
+        paradoxLauncher ??= Selection.FromId(Platform.Paradox, "PL");
         if (paradoxLauncher is null)
             return;
         paradoxLauncher.ExtraSelections.Clear();
@@ -42,7 +42,7 @@ internal static class ParadoxLauncher
 
     internal static bool DlcDialog(Form form)
     {
-        Selection paradoxLauncher = Selection.FromPlatformId(Platform.Paradox, "PL");
+        Selection paradoxLauncher = Selection.FromId(Platform.Paradox, "PL");
         if (paradoxLauncher is null || !paradoxLauncher.Enabled)
             return false;
         PopulateDlc(paradoxLauncher);

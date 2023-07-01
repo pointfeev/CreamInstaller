@@ -32,7 +32,7 @@ internal sealed partial class InstallForm : CustomForm
     private void UpdateProgress(int progress)
     {
         if (!userProgressBar.Disposing && !userProgressBar.IsDisposed)
-            userProgressBar.Invoke(() =>
+            Invoke(() =>
             {
                 int value = (int)((float)completeOperationsCount / operationsCount * 100) + progress / operationsCount;
                 if (value < userProgressBar.Value)
@@ -44,9 +44,9 @@ internal sealed partial class InstallForm : CustomForm
     internal void UpdateUser(string text, Color color, bool info = true, bool log = true)
     {
         if (info)
-            _ = userInfoLabel.Invoke(() => userInfoLabel.Text = text);
+            _ = Invoke(() => userInfoLabel.Text = text);
         if (log && !logTextBox.Disposing && !logTextBox.IsDisposed)
-            logTextBox.Invoke(() =>
+            Invoke(() =>
             {
                 if (logTextBox.Text.Length > 0)
                     logTextBox.AppendText(Environment.NewLine, color);

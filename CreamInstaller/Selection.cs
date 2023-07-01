@@ -65,9 +65,9 @@ internal sealed class Selection : IEquatable<Selection>
 
     internal static Selection GetOrCreate(Platform platform, string id, string name, string rootDirectory, HashSet<string> dllDirectories,
         List<(string directory, BinaryType binaryType)> executableDirectories)
-        => FromPlatformId(platform, id) ?? new Selection(platform, id, name, rootDirectory, dllDirectories, executableDirectories);
+        => FromId(platform, id) ?? new Selection(platform, id, name, rootDirectory, dllDirectories, executableDirectories);
 
-    private void Remove()
+    internal void Remove()
     {
         _ = All.TryRemove(this, out _);
         TreeNode.Remove();
@@ -103,7 +103,7 @@ internal sealed class Selection : IEquatable<Selection>
             selection.Validate(programsToScan);
     }
 
-    internal static Selection FromPlatformId(Platform platform, string gameId) => All.Keys.FirstOrDefault(s => s.Platform == platform && s.Id == gameId);
+    internal static Selection FromId(Platform platform, string gameId) => All.Keys.FirstOrDefault(s => s.Platform == platform && s.Id == gameId);
 
     public override bool Equals(object obj) => ReferenceEquals(this, obj) || obj is Selection other && Equals(other);
 

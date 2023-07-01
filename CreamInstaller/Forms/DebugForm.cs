@@ -72,7 +72,7 @@ internal sealed partial class DebugForm : CustomForm
     internal void Log(string text, Color color)
     {
         if (!debugTextBox.Disposing && !debugTextBox.IsDisposed)
-            debugTextBox.Invoke(() =>
+            Invoke(() =>
             {
                 if (debugTextBox.Text.Length > 0)
                     debugTextBox.AppendText(Environment.NewLine, color, true);

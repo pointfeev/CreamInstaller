@@ -58,7 +58,7 @@ internal sealed partial class SelectForm : CustomForm
     {
         if (Program.Canceled)
             return;
-        progressLabelGames.Invoke(delegate
+        Invoke(delegate
         {
             if (Program.Canceled)
                 return;
@@ -71,7 +71,7 @@ internal sealed partial class SelectForm : CustomForm
     {
         if (Program.Canceled)
             return;
-        progressLabelGames.Invoke(delegate
+        Invoke(delegate
         {
             if (Program.Canceled)
                 return;
@@ -86,7 +86,7 @@ internal sealed partial class SelectForm : CustomForm
     {
         if (Program.Canceled)
             return;
-        progressLabelDLCs.Invoke(delegate
+        Invoke(delegate
         {
             if (Program.Canceled)
                 return;
@@ -99,7 +99,7 @@ internal sealed partial class SelectForm : CustomForm
     {
         if (Program.Canceled)
             return;
-        progressLabelDLCs.Invoke(delegate
+        Invoke(delegate
         {
             if (Program.Canceled)
                 return;
@@ -270,7 +270,7 @@ internal sealed partial class SelectForm : CustomForm
                                         return;
                                     if (!string.IsNullOrWhiteSpace(fullGameName))
                                     {
-                                        SelectionDLC fullGameDlc = SelectionDLC.GetOrCreate(fullGameOnSteamStore ? DLCType.Steam : DLCType.SteamHidden,
+                                        SelectionDLC fullGameDlc = SelectionDLC.GetOrCreate(fullGameOnSteamStore ? DLCType.Steam : DLCType.SteamHidden, appId,
                                             fullGameAppId, fullGameName);
                                         fullGameDlc.Icon = fullGameIcon;
                                         _ = dlc.TryAdd(fullGameDlc, default);
@@ -280,7 +280,7 @@ internal sealed partial class SelectForm : CustomForm
                                     return;
                                 if (string.IsNullOrWhiteSpace(dlcName))
                                     dlcName = "Unknown";
-                                SelectionDLC _dlc = SelectionDLC.GetOrCreate(onSteamStore ? DLCType.Steam : DLCType.SteamHidden, dlcAppId, dlcName);
+                                SelectionDLC _dlc = SelectionDLC.GetOrCreate(onSteamStore ? DLCType.Steam : DLCType.SteamHidden, appId, dlcAppId, dlcName);
                                 _dlc.Icon = dlcIcon;
                                 _ = dlc.TryAdd(_dlc, default);
                                 RemoveFromRemainingDLCs(dlcAppId);
@@ -316,7 +316,7 @@ internal sealed partial class SelectForm : CustomForm
                     selection.Website = appData?.Website;
                     if (Program.Canceled)
                         return;
-                    selectionTreeView.Invoke(delegate
+                    Invoke(delegate
                     {
                         if (Program.Canceled)
                             return;
@@ -385,7 +385,7 @@ internal sealed partial class SelectForm : CustomForm
                             {
                                 if (Program.Canceled)
                                     return;
-                                SelectionDLC entitlement = SelectionDLC.GetOrCreate(DLCType.EpicEntitlement, id, name);
+                                SelectionDLC entitlement = SelectionDLC.GetOrCreate(DLCType.EpicEntitlement, @namespace, id, name);
                                 entitlement.Icon = icon;
                                 entitlement.Product = product;
                                 entitlement.Publisher = developer;
@@ -419,7 +419,7 @@ internal sealed partial class SelectForm : CustomForm
                     }
                     if (Program.Canceled)
                         return;
-                    selectionTreeView.Invoke(delegate
+                    Invoke(delegate
                     {
                         if (Program.Canceled)
                             return;
@@ -481,7 +481,7 @@ internal sealed partial class SelectForm : CustomForm
                     Selection selection = Selection.GetOrCreate(Platform.Ubisoft, gameId, name, gameDirectory, dllDirectories,
                         await gameDirectory.GetExecutableDirectories(true));
                     selection.Icon = IconGrabber.GetDomainFaviconUrl("store.ubi.com");
-                    selectionTreeView.Invoke(delegate
+                    Invoke(delegate
                     {
                         if (Program.Canceled)
                             return;
@@ -734,10 +734,10 @@ internal sealed partial class SelectForm : CustomForm
             ToolStripItemCollection items = contextMenuStrip.Items;
             string id = node.Name;
             Platform platform = (Platform)node.Tag;
-            Selection selection = Selection.FromPlatformId(platform, id);
+            Selection selection = Selection.FromId(platform, id);
             SelectionDLC dlc = null;
             if (selection is null)
-                dlc = SelectionDLC.FromTypeId((DLCType)node.Tag, id);
+                dlc = SelectionDLC.FromId((DLCType)node.Tag, node.Parent?.Name, id);
             Selection dlcParentSelection = null;
             if (dlc is not null)
                 dlcParentSelection = dlc.Selection;
@@ -776,6 +776,9 @@ internal sealed partial class SelectForm : CustomForm
                         appInfoVDF.DeleteFile();
                         appInfoJSON.DeleteFile();
                         cooldown.DeleteFile();
+                        selection?.Remove();
+                        if (dlc is not null)
+                            dlc.Selection = null;
                         OnLoad(true);
                     }));
                 }

@@ -56,13 +56,16 @@ internal sealed class SelectionDLC : IEquatable<SelectionDLC>
         }
     }
 
-    public bool Equals(SelectionDLC other) => other is not null && (ReferenceEquals(this, other) || Id == other.Id && Type == other.Type);
+    public bool Equals(SelectionDLC other)
+        => other is not null && (ReferenceEquals(this, other) || Type == other.Type && Selection?.Id == other.Selection?.Id && Id == other.Id);
 
-    internal static SelectionDLC GetOrCreate(DLCType type, string id, string name) => FromTypeId(type, id) ?? new SelectionDLC(type, id, name);
+    internal static SelectionDLC GetOrCreate(DLCType type, string gameId, string id, string name)
+        => FromId(type, gameId, id) ?? new SelectionDLC(type, id, name);
 
-    internal static SelectionDLC FromTypeId(DLCType Type, string dlcId) => All.Keys.FirstOrDefault(dlc => dlc.Type == Type && dlc.Id == dlcId);
+    internal static SelectionDLC FromId(DLCType type, string gameId, string dlcId)
+        => All.Keys.FirstOrDefault(dlc => dlc.Type == type && dlc.Selection?.Id == gameId && dlc.Id == dlcId);
 
     public override bool Equals(object obj) => ReferenceEquals(this, obj) || obj is SelectionDLC other && Equals(other);
 
-    public override int GetHashCode() => HashCode.Combine(Id, (int)Type);
+    public override int GetHashCode() => HashCode.Combine((int)Type, Selection?.Id, Id);
 }

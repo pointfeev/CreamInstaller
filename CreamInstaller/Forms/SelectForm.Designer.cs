@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Windows.Forms;
+
 using CreamInstaller.Components;
 
 namespace CreamInstaller.Forms
@@ -18,426 +19,409 @@ namespace CreamInstaller.Forms
 
         private void InitializeComponent()
         {
-            this.installButton = new System.Windows.Forms.Button();
-            this.cancelButton = new System.Windows.Forms.Button();
-            this.programsGroupBox = new System.Windows.Forms.GroupBox();
-            this.koaloaderFlowPanel = new System.Windows.Forms.FlowLayoutPanel();
-            this.koaloaderAllCheckBox = new System.Windows.Forms.CheckBox();
-            this.noneFoundLabel = new System.Windows.Forms.Label();
-            this.blockedGamesFlowPanel = new System.Windows.Forms.FlowLayoutPanel();
-            this.blockedGamesCheckBox = new System.Windows.Forms.CheckBox();
-            this.blockProtectedHelpButton = new System.Windows.Forms.Button();
-            this.selectionTreeView = new CreamInstaller.Components.CustomTreeView();
-            this.allCheckBoxLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
-            this.allCheckBox = new System.Windows.Forms.CheckBox();
-            this.progressBar = new System.Windows.Forms.ProgressBar();
-            this.progressLabel = new System.Windows.Forms.Label();
-            this.scanButton = new System.Windows.Forms.Button();
-            this.uninstallButton = new System.Windows.Forms.Button();
-            this.progressLabelGames = new System.Windows.Forms.Label();
-            this.progressLabelDLCs = new System.Windows.Forms.Label();
-            this.sortCheckBox = new System.Windows.Forms.CheckBox();
-            this.saveButton = new System.Windows.Forms.Button();
-            this.loadButton = new System.Windows.Forms.Button();
-            this.resetKoaloaderButton = new System.Windows.Forms.Button();
-            this.resetButton = new System.Windows.Forms.Button();
-            this.saveKoaloaderButton = new System.Windows.Forms.Button();
-            this.loadKoaloaderButton = new System.Windows.Forms.Button();
-            this.programsGroupBox.SuspendLayout();
-            this.koaloaderFlowPanel.SuspendLayout();
-            this.blockedGamesFlowPanel.SuspendLayout();
-            this.allCheckBoxLayoutPanel.SuspendLayout();
-            this.SuspendLayout();
+            installButton = new Button();
+            cancelButton = new Button();
+            programsGroupBox = new GroupBox();
+            koaloaderFlowPanel = new FlowLayoutPanel();
+            koaloaderAllCheckBox = new CheckBox();
+            noneFoundLabel = new Label();
+            blockedGamesFlowPanel = new FlowLayoutPanel();
+            blockedGamesCheckBox = new CheckBox();
+            blockProtectedHelpButton = new Button();
+            allCheckBoxLayoutPanel = new FlowLayoutPanel();
+            allCheckBox = new CheckBox();
+            progressBar = new ProgressBar();
+            progressLabel = new Label();
+            scanButton = new Button();
+            uninstallButton = new Button();
+            progressLabelGames = new Label();
+            progressLabelDLCs = new Label();
+            sortCheckBox = new CheckBox();
+            saveButton = new Button();
+            loadButton = new Button();
+            resetKoaloaderButton = new Button();
+            resetButton = new Button();
+            saveKoaloaderButton = new Button();
+            loadKoaloaderButton = new Button();
+            selectionTreeView = new CustomTreeView();
+            programsGroupBox.SuspendLayout();
+            koaloaderFlowPanel.SuspendLayout();
+            blockedGamesFlowPanel.SuspendLayout();
+            allCheckBoxLayoutPanel.SuspendLayout();
+            SuspendLayout();
             // 
             // installButton
             // 
-            this.installButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.installButton.AutoSize = true;
-            this.installButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.installButton.Enabled = false;
-            this.installButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.installButton.Location = new System.Drawing.Point(423, 325);
-            this.installButton.Name = "installButton";
-            this.installButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.installButton.Size = new System.Drawing.Size(149, 24);
-            this.installButton.TabIndex = 10000;
-            this.installButton.Text = "Generate and Install";
-            this.installButton.UseVisualStyleBackColor = true;
-            this.installButton.Click += new System.EventHandler(this.OnInstall);
+            installButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            installButton.AutoSize = true;
+            installButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            installButton.Enabled = false;
+            installButton.Location = new System.Drawing.Point(427, 326);
+            installButton.Name = "installButton";
+            installButton.Padding = new Padding(12, 0, 12, 0);
+            installButton.Size = new System.Drawing.Size(145, 25);
+            installButton.TabIndex = 10000;
+            installButton.Text = "Generate and Install";
+            installButton.UseVisualStyleBackColor = true;
+            installButton.Click += OnInstall;
             // 
             // cancelButton
             // 
-            this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.cancelButton.AutoSize = true;
-            this.cancelButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.cancelButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.cancelButton.Location = new System.Drawing.Point(12, 325);
-            this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.cancelButton.Size = new System.Drawing.Size(81, 24);
-            this.cancelButton.TabIndex = 10004;
-            this.cancelButton.Text = "Cancel";
-            this.cancelButton.UseVisualStyleBackColor = true;
-            this.cancelButton.Click += new System.EventHandler(this.OnCancel);
+            cancelButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            cancelButton.AutoSize = true;
+            cancelButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            cancelButton.Location = new System.Drawing.Point(12, 326);
+            cancelButton.Name = "cancelButton";
+            cancelButton.Padding = new Padding(12, 0, 12, 0);
+            cancelButton.Size = new System.Drawing.Size(77, 25);
+            cancelButton.TabIndex = 10004;
+            cancelButton.Text = "Cancel";
+            cancelButton.UseVisualStyleBackColor = true;
+            cancelButton.Click += OnCancel;
             // 
             // programsGroupBox
             // 
-            this.programsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.programsGroupBox.Controls.Add(this.koaloaderFlowPanel);
-            this.programsGroupBox.Controls.Add(this.noneFoundLabel);
-            this.programsGroupBox.Controls.Add(this.blockedGamesFlowPanel);
-            this.programsGroupBox.Controls.Add(this.selectionTreeView);
-            this.programsGroupBox.Controls.Add(this.allCheckBoxLayoutPanel);
-            this.programsGroupBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.programsGroupBox.Location = new System.Drawing.Point(12, 12);
-            this.programsGroupBox.Name = "programsGroupBox";
-            this.programsGroupBox.Size = new System.Drawing.Size(560, 209);
-            this.programsGroupBox.TabIndex = 8;
-            this.programsGroupBox.TabStop = false;
-            this.programsGroupBox.Text = "Programs / Games";
+            programsGroupBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            programsGroupBox.Controls.Add(koaloaderFlowPanel);
+            programsGroupBox.Controls.Add(noneFoundLabel);
+            programsGroupBox.Controls.Add(blockedGamesFlowPanel);
+            programsGroupBox.Controls.Add(allCheckBoxLayoutPanel);
+            programsGroupBox.Controls.Add(selectionTreeView);
+            programsGroupBox.Location = new System.Drawing.Point(12, 12);
+            programsGroupBox.Name = "programsGroupBox";
+            programsGroupBox.Size = new System.Drawing.Size(560, 209);
+            programsGroupBox.TabIndex = 8;
+            programsGroupBox.TabStop = false;
+            programsGroupBox.Text = "Programs / Games";
             // 
             // koaloaderFlowPanel
             // 
-            this.koaloaderFlowPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.koaloaderFlowPanel.AutoSize = true;
-            this.koaloaderFlowPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.koaloaderFlowPanel.Controls.Add(this.koaloaderAllCheckBox);
-            this.koaloaderFlowPanel.Location = new System.Drawing.Point(430, -1);
-            this.koaloaderFlowPanel.Margin = new System.Windows.Forms.Padding(0);
-            this.koaloaderFlowPanel.Name = "koaloaderFlowPanel";
-            this.koaloaderFlowPanel.Size = new System.Drawing.Size(73, 19);
-            this.koaloaderFlowPanel.TabIndex = 10005;
-            this.koaloaderFlowPanel.WrapContents = false;
+            koaloaderFlowPanel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            koaloaderFlowPanel.AutoSize = true;
+            koaloaderFlowPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            koaloaderFlowPanel.Controls.Add(koaloaderAllCheckBox);
+            koaloaderFlowPanel.Location = new System.Drawing.Point(422, -1);
+            koaloaderFlowPanel.Margin = new Padding(0);
+            koaloaderFlowPanel.Name = "koaloaderFlowPanel";
+            koaloaderFlowPanel.Size = new System.Drawing.Size(81, 19);
+            koaloaderFlowPanel.TabIndex = 10005;
+            koaloaderFlowPanel.WrapContents = false;
             // 
             // koaloaderAllCheckBox
             // 
-            this.koaloaderAllCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.koaloaderAllCheckBox.Checked = true;
-            this.koaloaderAllCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.koaloaderAllCheckBox.Enabled = false;
-            this.koaloaderAllCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.koaloaderAllCheckBox.Location = new System.Drawing.Point(2, 0);
-            this.koaloaderAllCheckBox.Margin = new System.Windows.Forms.Padding(2, 0, 0, 0);
-            this.koaloaderAllCheckBox.Name = "koaloaderAllCheckBox";
-            this.koaloaderAllCheckBox.Size = new System.Drawing.Size(71, 19);
-            this.koaloaderAllCheckBox.TabIndex = 4;
-            this.koaloaderAllCheckBox.Text = "Koaloader";
-            this.koaloaderAllCheckBox.CheckedChanged += new System.EventHandler(this.OnKoaloaderAllCheckBoxChanged);
+            koaloaderAllCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            koaloaderAllCheckBox.AutoSize = true;
+            koaloaderAllCheckBox.Checked = true;
+            koaloaderAllCheckBox.CheckState = CheckState.Checked;
+            koaloaderAllCheckBox.Enabled = false;
+            koaloaderAllCheckBox.Location = new System.Drawing.Point(2, 0);
+            koaloaderAllCheckBox.Margin = new Padding(2, 0, 0, 0);
+            koaloaderAllCheckBox.Name = "koaloaderAllCheckBox";
+            koaloaderAllCheckBox.Size = new System.Drawing.Size(79, 19);
+            koaloaderAllCheckBox.TabIndex = 4;
+            koaloaderAllCheckBox.Text = "Koaloader";
+            koaloaderAllCheckBox.CheckedChanged += OnKoaloaderAllCheckBoxChanged;
             // 
             // noneFoundLabel
             // 
-            this.noneFoundLabel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.noneFoundLabel.Location = new System.Drawing.Point(3, 19);
-            this.noneFoundLabel.Name = "noneFoundLabel";
-            this.noneFoundLabel.Size = new System.Drawing.Size(554, 187);
-            this.noneFoundLabel.TabIndex = 1002;
-            this.noneFoundLabel.Text = "No applicable programs nor games were found on your computer!";
-            this.noneFoundLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.noneFoundLabel.Visible = false;
+            noneFoundLabel.Dock = DockStyle.Fill;
+            noneFoundLabel.Location = new System.Drawing.Point(3, 19);
+            noneFoundLabel.Name = "noneFoundLabel";
+            noneFoundLabel.Size = new System.Drawing.Size(554, 187);
+            noneFoundLabel.TabIndex = 1002;
+            noneFoundLabel.Text = "No applicable programs nor games were found on your computer!";
+            noneFoundLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            noneFoundLabel.Visible = false;
             // 
             // blockedGamesFlowPanel
             // 
-            this.blockedGamesFlowPanel.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.blockedGamesFlowPanel.AutoSize = true;
-            this.blockedGamesFlowPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.blockedGamesFlowPanel.Controls.Add(this.blockedGamesCheckBox);
-            this.blockedGamesFlowPanel.Controls.Add(this.blockProtectedHelpButton);
-            this.blockedGamesFlowPanel.Location = new System.Drawing.Point(125, -1);
-            this.blockedGamesFlowPanel.Margin = new System.Windows.Forms.Padding(0);
-            this.blockedGamesFlowPanel.Name = "blockedGamesFlowPanel";
-            this.blockedGamesFlowPanel.Size = new System.Drawing.Size(162, 20);
-            this.blockedGamesFlowPanel.TabIndex = 1005;
-            this.blockedGamesFlowPanel.WrapContents = false;
+            blockedGamesFlowPanel.Anchor = AnchorStyles.Top;
+            blockedGamesFlowPanel.AutoSize = true;
+            blockedGamesFlowPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            blockedGamesFlowPanel.Controls.Add(blockedGamesCheckBox);
+            blockedGamesFlowPanel.Controls.Add(blockProtectedHelpButton);
+            blockedGamesFlowPanel.Location = new System.Drawing.Point(125, -1);
+            blockedGamesFlowPanel.Margin = new Padding(0);
+            blockedGamesFlowPanel.Name = "blockedGamesFlowPanel";
+            blockedGamesFlowPanel.Size = new System.Drawing.Size(170, 19);
+            blockedGamesFlowPanel.TabIndex = 1005;
+            blockedGamesFlowPanel.WrapContents = false;
             // 
             // blockedGamesCheckBox
             // 
-            this.blockedGamesCheckBox.Checked = true;
-            this.blockedGamesCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.blockedGamesCheckBox.Enabled = false;
-            this.blockedGamesCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.blockedGamesCheckBox.Location = new System.Drawing.Point(2, 0);
-            this.blockedGamesCheckBox.Margin = new System.Windows.Forms.Padding(2, 0, 0, 0);
-            this.blockedGamesCheckBox.Name = "blockedGamesCheckBox";
-            this.blockedGamesCheckBox.Size = new System.Drawing.Size(140, 20);
-            this.blockedGamesCheckBox.TabIndex = 1;
-            this.blockedGamesCheckBox.Text = "Block Protected Games";
-            this.blockedGamesCheckBox.UseVisualStyleBackColor = true;
-            this.blockedGamesCheckBox.CheckedChanged += new System.EventHandler(this.OnBlockProtectedGamesCheckBoxChanged);
+            blockedGamesCheckBox.AutoSize = true;
+            blockedGamesCheckBox.Checked = true;
+            blockedGamesCheckBox.CheckState = CheckState.Checked;
+            blockedGamesCheckBox.Enabled = false;
+            blockedGamesCheckBox.Location = new System.Drawing.Point(2, 0);
+            blockedGamesCheckBox.Margin = new Padding(2, 0, 0, 0);
+            blockedGamesCheckBox.Name = "blockedGamesCheckBox";
+            blockedGamesCheckBox.Size = new System.Drawing.Size(148, 19);
+            blockedGamesCheckBox.TabIndex = 1;
+            blockedGamesCheckBox.Text = "Block Protected Games";
+            blockedGamesCheckBox.UseVisualStyleBackColor = true;
+            blockedGamesCheckBox.CheckedChanged += OnBlockProtectedGamesCheckBoxChanged;
             // 
             // blockProtectedHelpButton
             // 
-            this.blockProtectedHelpButton.Enabled = false;
-            this.blockProtectedHelpButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.blockProtectedHelpButton.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.blockProtectedHelpButton.Location = new System.Drawing.Point(142, 0);
-            this.blockProtectedHelpButton.Margin = new System.Windows.Forms.Padding(0, 0, 1, 0);
-            this.blockProtectedHelpButton.Name = "blockProtectedHelpButton";
-            this.blockProtectedHelpButton.Size = new System.Drawing.Size(19, 19);
-            this.blockProtectedHelpButton.TabIndex = 2;
-            this.blockProtectedHelpButton.Text = "?";
-            this.blockProtectedHelpButton.UseVisualStyleBackColor = true;
-            this.blockProtectedHelpButton.Click += new System.EventHandler(this.OnBlockProtectedGamesHelpButtonClicked);
+            blockProtectedHelpButton.Enabled = false;
+            blockProtectedHelpButton.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            blockProtectedHelpButton.Location = new System.Drawing.Point(150, 0);
+            blockProtectedHelpButton.Margin = new Padding(0, 0, 1, 0);
+            blockProtectedHelpButton.Name = "blockProtectedHelpButton";
+            blockProtectedHelpButton.Size = new System.Drawing.Size(19, 19);
+            blockProtectedHelpButton.TabIndex = 2;
+            blockProtectedHelpButton.Text = "?";
+            blockProtectedHelpButton.UseVisualStyleBackColor = true;
+            blockProtectedHelpButton.Click += OnBlockProtectedGamesHelpButtonClicked;
             // 
             // selectionTreeView
             // 
-            this.selectionTreeView.BackColor = System.Drawing.SystemColors.Control;
-            this.selectionTreeView.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.selectionTreeView.CheckBoxes = true;
-            this.selectionTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.selectionTreeView.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawAll;
-            this.selectionTreeView.Enabled = false;
-            this.selectionTreeView.FullRowSelect = true;
-            this.selectionTreeView.Location = new System.Drawing.Point(3, 19);
-            this.selectionTreeView.Name = "selectionTreeView";
-            this.selectionTreeView.Size = new System.Drawing.Size(554, 187);
-            this.selectionTreeView.Sorted = true;
-            this.selectionTreeView.TabIndex = 1001;
+            selectionTreeView.BackColor = System.Drawing.SystemColors.Control;
+            selectionTreeView.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            selectionTreeView.CheckBoxes = true;
+            selectionTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
+            selectionTreeView.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawAll;
+            selectionTreeView.Enabled = false;
+            selectionTreeView.FullRowSelect = true;
+            selectionTreeView.Location = new System.Drawing.Point(3, 19);
+            selectionTreeView.Name = "selectionTreeView";
+            selectionTreeView.Size = new System.Drawing.Size(554, 187);
+            selectionTreeView.Sorted = true;
+            selectionTreeView.TabIndex = 1001;
             // 
             // allCheckBoxLayoutPanel
             // 
-            this.allCheckBoxLayoutPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.allCheckBoxLayoutPanel.AutoSize = true;
-            this.allCheckBoxLayoutPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.allCheckBoxLayoutPanel.Controls.Add(this.allCheckBox);
-            this.allCheckBoxLayoutPanel.Location = new System.Drawing.Point(520, -1);
-            this.allCheckBoxLayoutPanel.Margin = new System.Windows.Forms.Padding(0);
-            this.allCheckBoxLayoutPanel.Name = "allCheckBoxLayoutPanel";
-            this.allCheckBoxLayoutPanel.Size = new System.Drawing.Size(34, 19);
-            this.allCheckBoxLayoutPanel.TabIndex = 1006;
-            this.allCheckBoxLayoutPanel.WrapContents = false;
+            allCheckBoxLayoutPanel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            allCheckBoxLayoutPanel.AutoSize = true;
+            allCheckBoxLayoutPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            allCheckBoxLayoutPanel.Controls.Add(allCheckBox);
+            allCheckBoxLayoutPanel.Location = new System.Drawing.Point(512, -1);
+            allCheckBoxLayoutPanel.Margin = new Padding(0);
+            allCheckBoxLayoutPanel.Name = "allCheckBoxLayoutPanel";
+            allCheckBoxLayoutPanel.Size = new System.Drawing.Size(42, 19);
+            allCheckBoxLayoutPanel.TabIndex = 1006;
+            allCheckBoxLayoutPanel.WrapContents = false;
             // 
             // allCheckBox
             // 
-            this.allCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.allCheckBox.Checked = true;
-            this.allCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.allCheckBox.Enabled = false;
-            this.allCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.allCheckBox.Location = new System.Drawing.Point(2, 0);
-            this.allCheckBox.Margin = new System.Windows.Forms.Padding(2, 0, 0, 0);
-            this.allCheckBox.Name = "allCheckBox";
-            this.allCheckBox.Size = new System.Drawing.Size(32, 19);
-            this.allCheckBox.TabIndex = 4;
-            this.allCheckBox.Text = "All";
-            this.allCheckBox.CheckedChanged += new System.EventHandler(this.OnAllCheckBoxChanged);
+            allCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            allCheckBox.AutoSize = true;
+            allCheckBox.Checked = true;
+            allCheckBox.CheckState = CheckState.Checked;
+            allCheckBox.Enabled = false;
+            allCheckBox.Location = new System.Drawing.Point(2, 0);
+            allCheckBox.Margin = new Padding(2, 0, 0, 0);
+            allCheckBox.Name = "allCheckBox";
+            allCheckBox.Size = new System.Drawing.Size(40, 19);
+            allCheckBox.TabIndex = 4;
+            allCheckBox.Text = "All";
+            allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
             // 
             // progressBar
             // 
-            this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar.Location = new System.Drawing.Point(12, 266);
-            this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(560, 23);
-            this.progressBar.TabIndex = 9;
+            progressBar.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            progressBar.Location = new System.Drawing.Point(12, 266);
+            progressBar.Name = "progressBar";
+            progressBar.Size = new System.Drawing.Size(560, 23);
+            progressBar.TabIndex = 9;
             // 
             // progressLabel
             // 
-            this.progressLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressLabel.Location = new System.Drawing.Point(12, 224);
-            this.progressLabel.Name = "progressLabel";
-            this.progressLabel.Size = new System.Drawing.Size(560, 15);
-            this.progressLabel.TabIndex = 10;
-            this.progressLabel.Text = "Gathering and caching your applicable games and their DLCs . . . 0%";
+            progressLabel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            progressLabel.Location = new System.Drawing.Point(12, 224);
+            progressLabel.Name = "progressLabel";
+            progressLabel.Size = new System.Drawing.Size(560, 15);
+            progressLabel.TabIndex = 10;
+            progressLabel.Text = "Gathering and caching your applicable games and their DLCs . . . 0%";
             // 
             // scanButton
             // 
-            this.scanButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.scanButton.AutoSize = true;
-            this.scanButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.scanButton.Enabled = false;
-            this.scanButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.scanButton.Location = new System.Drawing.Point(238, 325);
-            this.scanButton.Name = "scanButton";
-            this.scanButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.scanButton.Size = new System.Drawing.Size(82, 24);
-            this.scanButton.TabIndex = 10002;
-            this.scanButton.Text = "Rescan";
-            this.scanButton.UseVisualStyleBackColor = true;
-            this.scanButton.Click += new System.EventHandler(this.OnScan);
+            scanButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            scanButton.AutoSize = true;
+            scanButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            scanButton.Enabled = false;
+            scanButton.Location = new System.Drawing.Point(250, 326);
+            scanButton.Name = "scanButton";
+            scanButton.Padding = new Padding(12, 0, 12, 0);
+            scanButton.Size = new System.Drawing.Size(78, 25);
+            scanButton.TabIndex = 10002;
+            scanButton.Text = "Rescan";
+            scanButton.UseVisualStyleBackColor = true;
+            scanButton.Click += OnScan;
             // 
             // uninstallButton
             // 
-            this.uninstallButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.uninstallButton.AutoSize = true;
-            this.uninstallButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.uninstallButton.Enabled = false;
-            this.uninstallButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.uninstallButton.Location = new System.Drawing.Point(326, 325);
-            this.uninstallButton.Name = "uninstallButton";
-            this.uninstallButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.uninstallButton.Size = new System.Drawing.Size(91, 24);
-            this.uninstallButton.TabIndex = 10001;
-            this.uninstallButton.Text = "Uninstall";
-            this.uninstallButton.UseVisualStyleBackColor = true;
-            this.uninstallButton.Click += new System.EventHandler(this.OnUninstall);
+            uninstallButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            uninstallButton.AutoSize = true;
+            uninstallButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            uninstallButton.Enabled = false;
+            uninstallButton.Location = new System.Drawing.Point(334, 326);
+            uninstallButton.Name = "uninstallButton";
+            uninstallButton.Padding = new Padding(12, 0, 12, 0);
+            uninstallButton.Size = new System.Drawing.Size(87, 25);
+            uninstallButton.TabIndex = 10001;
+            uninstallButton.Text = "Uninstall";
+            uninstallButton.UseVisualStyleBackColor = true;
+            uninstallButton.Click += OnUninstall;
             // 
             // progressLabelGames
             // 
-            this.progressLabelGames.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressLabelGames.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.progressLabelGames.Location = new System.Drawing.Point(12, 239);
-            this.progressLabelGames.Name = "progressLabelGames";
-            this.progressLabelGames.Size = new System.Drawing.Size(560, 12);
-            this.progressLabelGames.TabIndex = 11;
-            this.progressLabelGames.Text = "Remaining games (2): Game 1, Game 2";
+            progressLabelGames.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            progressLabelGames.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            progressLabelGames.Location = new System.Drawing.Point(12, 239);
+            progressLabelGames.Name = "progressLabelGames";
+            progressLabelGames.Size = new System.Drawing.Size(560, 12);
+            progressLabelGames.TabIndex = 11;
+            progressLabelGames.Text = "Remaining games (2): Game 1, Game 2";
             // 
             // progressLabelDLCs
             // 
-            this.progressLabelDLCs.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressLabelDLCs.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.progressLabelDLCs.Location = new System.Drawing.Point(12, 251);
-            this.progressLabelDLCs.Name = "progressLabelDLCs";
-            this.progressLabelDLCs.Size = new System.Drawing.Size(560, 12);
-            this.progressLabelDLCs.TabIndex = 12;
-            this.progressLabelDLCs.Text = "Remaining DLC (2): 123456, 654321";
+            progressLabelDLCs.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            progressLabelDLCs.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            progressLabelDLCs.Location = new System.Drawing.Point(12, 251);
+            progressLabelDLCs.Name = "progressLabelDLCs";
+            progressLabelDLCs.Size = new System.Drawing.Size(560, 12);
+            progressLabelDLCs.TabIndex = 12;
+            progressLabelDLCs.Text = "Remaining DLC (2): 123456, 654321";
             // 
             // sortCheckBox
             // 
-            this.sortCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.sortCheckBox.AutoSize = true;
-            this.sortCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.sortCheckBox.Location = new System.Drawing.Point(120, 328);
-            this.sortCheckBox.Margin = new System.Windows.Forms.Padding(3, 0, 0, 0);
-            this.sortCheckBox.Name = "sortCheckBox";
-            this.sortCheckBox.Size = new System.Drawing.Size(104, 20);
-            this.sortCheckBox.TabIndex = 10003;
-            this.sortCheckBox.Text = "Sort By Name";
-            this.sortCheckBox.CheckedChanged += new System.EventHandler(this.OnSortCheckBoxChanged);
+            sortCheckBox.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            sortCheckBox.AutoSize = true;
+            sortCheckBox.Location = new System.Drawing.Point(125, 330);
+            sortCheckBox.Margin = new Padding(3, 0, 0, 0);
+            sortCheckBox.Name = "sortCheckBox";
+            sortCheckBox.Size = new System.Drawing.Size(98, 19);
+            sortCheckBox.TabIndex = 10003;
+            sortCheckBox.Text = "Sort By Name";
+            sortCheckBox.CheckedChanged += OnSortCheckBoxChanged;
             // 
             // saveButton
             // 
-            this.saveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.saveButton.AutoSize = true;
-            this.saveButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.saveButton.Enabled = false;
-            this.saveButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.saveButton.Location = new System.Drawing.Point(424, 295);
-            this.saveButton.Name = "saveButton";
-            this.saveButton.Size = new System.Drawing.Size(70, 24);
-            this.saveButton.TabIndex = 10006;
-            this.saveButton.Text = "Save DLC";
-            this.saveButton.UseVisualStyleBackColor = true;
-            this.saveButton.Click += new System.EventHandler(this.OnSaveDlc);
+            saveButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            saveButton.AutoSize = true;
+            saveButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            saveButton.Enabled = false;
+            saveButton.Location = new System.Drawing.Point(432, 295);
+            saveButton.Name = "saveButton";
+            saveButton.Size = new System.Drawing.Size(66, 25);
+            saveButton.TabIndex = 10006;
+            saveButton.Text = "Save DLC";
+            saveButton.UseVisualStyleBackColor = true;
+            saveButton.Click += OnSaveDlc;
             // 
             // loadButton
             // 
-            this.loadButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.loadButton.AutoSize = true;
-            this.loadButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.loadButton.Enabled = false;
-            this.loadButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.loadButton.Location = new System.Drawing.Point(500, 295);
-            this.loadButton.Name = "loadButton";
-            this.loadButton.Size = new System.Drawing.Size(72, 24);
-            this.loadButton.TabIndex = 10005;
-            this.loadButton.Text = "Load DLC";
-            this.loadButton.UseVisualStyleBackColor = true;
-            this.loadButton.Click += new System.EventHandler(this.OnLoadDlc);
+            loadButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            loadButton.AutoSize = true;
+            loadButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            loadButton.Enabled = false;
+            loadButton.Location = new System.Drawing.Point(504, 295);
+            loadButton.Name = "loadButton";
+            loadButton.Size = new System.Drawing.Size(68, 25);
+            loadButton.TabIndex = 10005;
+            loadButton.Text = "Load DLC";
+            loadButton.UseVisualStyleBackColor = true;
+            loadButton.Click += OnLoadDlc;
             // 
             // resetKoaloaderButton
             // 
-            this.resetKoaloaderButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.resetKoaloaderButton.AutoSize = true;
-            this.resetKoaloaderButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.resetKoaloaderButton.Enabled = false;
-            this.resetKoaloaderButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.resetKoaloaderButton.Location = new System.Drawing.Point(12, 295);
-            this.resetKoaloaderButton.Name = "resetKoaloaderButton";
-            this.resetKoaloaderButton.Size = new System.Drawing.Size(105, 24);
-            this.resetKoaloaderButton.TabIndex = 10010;
-            this.resetKoaloaderButton.Text = "Reset Koaloader";
-            this.resetKoaloaderButton.UseVisualStyleBackColor = true;
-            this.resetKoaloaderButton.Click += new System.EventHandler(this.OnResetKoaloader);
+            resetKoaloaderButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            resetKoaloaderButton.AutoSize = true;
+            resetKoaloaderButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            resetKoaloaderButton.Enabled = false;
+            resetKoaloaderButton.Location = new System.Drawing.Point(12, 295);
+            resetKoaloaderButton.Name = "resetKoaloaderButton";
+            resetKoaloaderButton.Size = new System.Drawing.Size(101, 25);
+            resetKoaloaderButton.TabIndex = 10010;
+            resetKoaloaderButton.Text = "Reset Koaloader";
+            resetKoaloaderButton.UseVisualStyleBackColor = true;
+            resetKoaloaderButton.Click += OnResetKoaloader;
             // 
             // resetButton
             // 
-            this.resetButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.resetButton.AutoSize = true;
-            this.resetButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.resetButton.Enabled = false;
-            this.resetButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.resetButton.Location = new System.Drawing.Point(344, 295);
-            this.resetButton.Name = "resetButton";
-            this.resetButton.Size = new System.Drawing.Size(74, 24);
-            this.resetButton.TabIndex = 10007;
-            this.resetButton.Text = "Reset DLC";
-            this.resetButton.UseVisualStyleBackColor = true;
-            this.resetButton.Click += new System.EventHandler(this.OnResetDlc);
+            resetButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            resetButton.AutoSize = true;
+            resetButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            resetButton.Enabled = false;
+            resetButton.Location = new System.Drawing.Point(356, 295);
+            resetButton.Name = "resetButton";
+            resetButton.Size = new System.Drawing.Size(70, 25);
+            resetButton.TabIndex = 10007;
+            resetButton.Text = "Reset DLC";
+            resetButton.UseVisualStyleBackColor = true;
+            resetButton.Click += OnResetDlc;
             // 
             // saveKoaloaderButton
             // 
-            this.saveKoaloaderButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.saveKoaloaderButton.AutoSize = true;
-            this.saveKoaloaderButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.saveKoaloaderButton.Enabled = false;
-            this.saveKoaloaderButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.saveKoaloaderButton.Location = new System.Drawing.Point(123, 295);
-            this.saveKoaloaderButton.Name = "saveKoaloaderButton";
-            this.saveKoaloaderButton.Size = new System.Drawing.Size(101, 24);
-            this.saveKoaloaderButton.TabIndex = 10009;
-            this.saveKoaloaderButton.Text = "Save Koaloader";
-            this.saveKoaloaderButton.UseVisualStyleBackColor = true;
-            this.saveKoaloaderButton.Click += new System.EventHandler(this.OnSaveKoaloader);
+            saveKoaloaderButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            saveKoaloaderButton.AutoSize = true;
+            saveKoaloaderButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            saveKoaloaderButton.Enabled = false;
+            saveKoaloaderButton.Location = new System.Drawing.Point(119, 295);
+            saveKoaloaderButton.Name = "saveKoaloaderButton";
+            saveKoaloaderButton.Size = new System.Drawing.Size(97, 25);
+            saveKoaloaderButton.TabIndex = 10009;
+            saveKoaloaderButton.Text = "Save Koaloader";
+            saveKoaloaderButton.UseVisualStyleBackColor = true;
+            saveKoaloaderButton.Click += OnSaveKoaloader;
             // 
             // loadKoaloaderButton
             // 
-            this.loadKoaloaderButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.loadKoaloaderButton.AutoSize = true;
-            this.loadKoaloaderButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.loadKoaloaderButton.Enabled = false;
-            this.loadKoaloaderButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.loadKoaloaderButton.Location = new System.Drawing.Point(230, 295);
-            this.loadKoaloaderButton.Name = "loadKoaloaderButton";
-            this.loadKoaloaderButton.Size = new System.Drawing.Size(103, 24);
-            this.loadKoaloaderButton.TabIndex = 10008;
-            this.loadKoaloaderButton.Text = "Load Koaloader";
-            this.loadKoaloaderButton.UseVisualStyleBackColor = true;
-            this.loadKoaloaderButton.Click += new System.EventHandler(this.OnLoadKoaloader);
+            loadKoaloaderButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            loadKoaloaderButton.AutoSize = true;
+            loadKoaloaderButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            loadKoaloaderButton.Enabled = false;
+            loadKoaloaderButton.Location = new System.Drawing.Point(222, 295);
+            loadKoaloaderButton.Name = "loadKoaloaderButton";
+            loadKoaloaderButton.Size = new System.Drawing.Size(99, 25);
+            loadKoaloaderButton.TabIndex = 10008;
+            loadKoaloaderButton.Text = "Load Koaloader";
+            loadKoaloaderButton.UseVisualStyleBackColor = true;
+            loadKoaloaderButton.Click += OnLoadKoaloader;
             // 
             // SelectForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSize = true;
-            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(584, 361);
-            this.Controls.Add(this.loadKoaloaderButton);
-            this.Controls.Add(this.saveKoaloaderButton);
-            this.Controls.Add(this.resetButton);
-            this.Controls.Add(this.resetKoaloaderButton);
-            this.Controls.Add(this.loadButton);
-            this.Controls.Add(this.saveButton);
-            this.Controls.Add(this.sortCheckBox);
-            this.Controls.Add(this.progressLabelDLCs);
-            this.Controls.Add(this.progressLabelGames);
-            this.Controls.Add(this.uninstallButton);
-            this.Controls.Add(this.scanButton);
-            this.Controls.Add(this.programsGroupBox);
-            this.Controls.Add(this.progressBar);
-            this.Controls.Add(this.cancelButton);
-            this.Controls.Add(this.installButton);
-            this.Controls.Add(this.progressLabel);
-            this.DoubleBuffered = true;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "SelectForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
-            this.Text = "SelectForm";
-            this.Load += new System.EventHandler(this.OnLoad);
-            this.programsGroupBox.ResumeLayout(false);
-            this.programsGroupBox.PerformLayout();
-            this.koaloaderFlowPanel.ResumeLayout(false);
-            this.blockedGamesFlowPanel.ResumeLayout(false);
-            this.allCheckBoxLayoutPanel.ResumeLayout(false);
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            AutoSize = true;
+            AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            ClientSize = new System.Drawing.Size(584, 361);
+            Controls.Add(loadKoaloaderButton);
+            Controls.Add(saveKoaloaderButton);
+            Controls.Add(resetButton);
+            Controls.Add(resetKoaloaderButton);
+            Controls.Add(loadButton);
+            Controls.Add(saveButton);
+            Controls.Add(sortCheckBox);
+            Controls.Add(progressLabelDLCs);
+            Controls.Add(progressLabelGames);
+            Controls.Add(uninstallButton);
+            Controls.Add(scanButton);
+            Controls.Add(programsGroupBox);
+            Controls.Add(progressBar);
+            Controls.Add(cancelButton);
+            Controls.Add(installButton);
+            Controls.Add(progressLabel);
+            DoubleBuffered = true;
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "SelectForm";
+            StartPosition = FormStartPosition.Manual;
+            Text = "SelectForm";
+            Load += OnLoad;
+            programsGroupBox.ResumeLayout(false);
+            programsGroupBox.PerformLayout();
+            koaloaderFlowPanel.ResumeLayout(false);
+            koaloaderFlowPanel.PerformLayout();
+            blockedGamesFlowPanel.ResumeLayout(false);
+            blockedGamesFlowPanel.PerformLayout();
+            allCheckBoxLayoutPanel.ResumeLayout(false);
+            allCheckBoxLayoutPanel.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

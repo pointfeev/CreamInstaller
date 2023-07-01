@@ -86,7 +86,7 @@ internal sealed partial class UpdateForm : CustomForm
                 if (changelogTreeView.Nodes.Count > 0)
                     changelogTreeView.Nodes[0].EnsureVisible();
                 for (int i = release.Changes.Length - 1; i >= 0; i--)
-                    changelogTreeView.Invoke(delegate
+                    Invoke(delegate
                     {
                         string change = release.Changes[i];
                         TreeNode changeNode = new() { Text = change };

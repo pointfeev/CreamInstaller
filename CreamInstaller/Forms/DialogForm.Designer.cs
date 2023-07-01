@@ -21,141 +21,137 @@ namespace CreamInstaller.Forms
         /// </summary>
         private void InitializeComponent()
         {
-            this.cancelButton = new System.Windows.Forms.Button();
-            this.acceptButton = new System.Windows.Forms.Button();
-            this.descriptionLabel = new System.Windows.Forms.LinkLabel();
-            this.icon = new System.Windows.Forms.PictureBox();
-            this.descriptionPanel = new System.Windows.Forms.FlowLayoutPanel();
-            this.descriptionLabelPanel = new System.Windows.Forms.FlowLayoutPanel();
-            this.buttonPanel = new System.Windows.Forms.FlowLayoutPanel();
-            ((System.ComponentModel.ISupportInitialize)(this.icon)).BeginInit();
-            this.descriptionPanel.SuspendLayout();
-            this.descriptionLabelPanel.SuspendLayout();
-            this.buttonPanel.SuspendLayout();
-            this.SuspendLayout();
+            cancelButton = new Button();
+            acceptButton = new Button();
+            descriptionLabel = new LinkLabel();
+            icon = new PictureBox();
+            descriptionPanel = new FlowLayoutPanel();
+            descriptionLabelPanel = new FlowLayoutPanel();
+            buttonPanel = new FlowLayoutPanel();
+            ((ISupportInitialize)icon).BeginInit();
+            descriptionPanel.SuspendLayout();
+            descriptionLabelPanel.SuspendLayout();
+            buttonPanel.SuspendLayout();
+            SuspendLayout();
             // 
             // cancelButton
             // 
-            this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.cancelButton.AutoSize = true;
-            this.cancelButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cancelButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.cancelButton.Location = new System.Drawing.Point(132, 9);
-            this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.cancelButton.Size = new System.Drawing.Size(115, 24);
-            this.cancelButton.TabIndex = 1;
-            this.cancelButton.Text = "cancelButton";
-            this.cancelButton.UseVisualStyleBackColor = true;
+            cancelButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            cancelButton.AutoSize = true;
+            cancelButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            cancelButton.DialogResult = DialogResult.Cancel;
+            cancelButton.Location = new System.Drawing.Point(136, 10);
+            cancelButton.Name = "cancelButton";
+            cancelButton.Padding = new Padding(12, 0, 12, 0);
+            cancelButton.Size = new System.Drawing.Size(115, 24);
+            cancelButton.TabIndex = 1;
+            cancelButton.Text = "cancelButton";
+            cancelButton.UseVisualStyleBackColor = true;
             // 
             // acceptButton
             // 
-            this.acceptButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.acceptButton.AutoSize = true;
-            this.acceptButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.acceptButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.acceptButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.acceptButton.Location = new System.Drawing.Point(253, 9);
-            this.acceptButton.Name = "acceptButton";
-            this.acceptButton.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.acceptButton.Size = new System.Drawing.Size(116, 24);
-            this.acceptButton.TabIndex = 0;
-            this.acceptButton.Text = "acceptButton";
-            this.acceptButton.UseVisualStyleBackColor = true;
+            acceptButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            acceptButton.AutoSize = true;
+            acceptButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            acceptButton.DialogResult = DialogResult.OK;
+            acceptButton.Location = new System.Drawing.Point(257, 9);
+            acceptButton.Name = "acceptButton";
+            acceptButton.Padding = new Padding(12, 0, 12, 0);
+            acceptButton.Size = new System.Drawing.Size(112, 25);
+            acceptButton.TabIndex = 0;
+            acceptButton.Text = "acceptButton";
+            acceptButton.UseVisualStyleBackColor = true;
             // 
             // descriptionLabel
             // 
-            this.descriptionLabel.AutoSize = true;
-            this.descriptionLabel.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.descriptionLabel.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
-            this.descriptionLabel.Location = new System.Drawing.Point(9, 0);
-            this.descriptionLabel.Margin = new System.Windows.Forms.Padding(9, 0, 3, 0);
-            this.descriptionLabel.Name = "descriptionLabel";
-            this.descriptionLabel.Size = new System.Drawing.Size(94, 15);
-            this.descriptionLabel.TabIndex = 2;
-            this.descriptionLabel.Text = "descriptionLabel";
+            descriptionLabel.AutoSize = true;
+            descriptionLabel.LinkArea = new LinkArea(0, 0);
+            descriptionLabel.Location = new System.Drawing.Point(9, 0);
+            descriptionLabel.Margin = new Padding(9, 0, 3, 0);
+            descriptionLabel.Name = "descriptionLabel";
+            descriptionLabel.Size = new System.Drawing.Size(94, 15);
+            descriptionLabel.TabIndex = 2;
+            descriptionLabel.Text = "descriptionLabel";
             // 
             // icon
             // 
-            this.icon.Location = new System.Drawing.Point(15, 15);
-            this.icon.Name = "icon";
-            this.icon.Size = new System.Drawing.Size(48, 48);
-            this.icon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.icon.TabIndex = 4;
-            this.icon.TabStop = false;
+            icon.Location = new System.Drawing.Point(15, 15);
+            icon.Name = "icon";
+            icon.Size = new System.Drawing.Size(48, 48);
+            icon.SizeMode = PictureBoxSizeMode.AutoSize;
+            icon.TabIndex = 4;
+            icon.TabStop = false;
             // 
             // descriptionPanel
             // 
-            this.descriptionPanel.AutoSize = true;
-            this.descriptionPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.descriptionPanel.Controls.Add(this.icon);
-            this.descriptionPanel.Controls.Add(this.descriptionLabelPanel);
-            this.descriptionPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.descriptionPanel.Location = new System.Drawing.Point(0, 0);
-            this.descriptionPanel.Margin = new System.Windows.Forms.Padding(0);
-            this.descriptionPanel.Name = "descriptionPanel";
-            this.descriptionPanel.Padding = new System.Windows.Forms.Padding(12, 12, 12, 6);
-            this.descriptionPanel.Size = new System.Drawing.Size(384, 73);
-            this.descriptionPanel.TabIndex = 5;
+            descriptionPanel.AutoSize = true;
+            descriptionPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            descriptionPanel.Controls.Add(icon);
+            descriptionPanel.Controls.Add(descriptionLabelPanel);
+            descriptionPanel.Dock = DockStyle.Fill;
+            descriptionPanel.Location = new System.Drawing.Point(0, 0);
+            descriptionPanel.Margin = new Padding(0);
+            descriptionPanel.Name = "descriptionPanel";
+            descriptionPanel.Padding = new Padding(12, 12, 12, 6);
+            descriptionPanel.Size = new System.Drawing.Size(384, 72);
+            descriptionPanel.TabIndex = 5;
             // 
             // descriptionLabelPanel
             // 
-            this.descriptionLabelPanel.AutoScroll = true;
-            this.descriptionLabelPanel.AutoSize = true;
-            this.descriptionLabelPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.descriptionLabelPanel.Controls.Add(this.descriptionLabel);
-            this.descriptionLabelPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.descriptionLabelPanel.Location = new System.Drawing.Point(66, 12);
-            this.descriptionLabelPanel.Margin = new System.Windows.Forms.Padding(0);
-            this.descriptionLabelPanel.Name = "descriptionLabelPanel";
-            this.descriptionLabelPanel.Size = new System.Drawing.Size(106, 54);
-            this.descriptionLabelPanel.TabIndex = 6;
+            descriptionLabelPanel.AutoScroll = true;
+            descriptionLabelPanel.AutoSize = true;
+            descriptionLabelPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            descriptionLabelPanel.Controls.Add(descriptionLabel);
+            descriptionLabelPanel.Dock = DockStyle.Fill;
+            descriptionLabelPanel.Location = new System.Drawing.Point(66, 12);
+            descriptionLabelPanel.Margin = new Padding(0);
+            descriptionLabelPanel.Name = "descriptionLabelPanel";
+            descriptionLabelPanel.Size = new System.Drawing.Size(106, 54);
+            descriptionLabelPanel.TabIndex = 6;
             // 
             // buttonPanel
             // 
-            this.buttonPanel.AutoSize = true;
-            this.buttonPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.buttonPanel.Controls.Add(this.acceptButton);
-            this.buttonPanel.Controls.Add(this.cancelButton);
-            this.buttonPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.buttonPanel.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.buttonPanel.Location = new System.Drawing.Point(0, 73);
-            this.buttonPanel.Name = "buttonPanel";
-            this.buttonPanel.Padding = new System.Windows.Forms.Padding(12, 6, 0, 12);
-            this.buttonPanel.Size = new System.Drawing.Size(384, 48);
-            this.buttonPanel.TabIndex = 6;
+            buttonPanel.AutoSize = true;
+            buttonPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            buttonPanel.Controls.Add(acceptButton);
+            buttonPanel.Controls.Add(cancelButton);
+            buttonPanel.Dock = DockStyle.Bottom;
+            buttonPanel.FlowDirection = FlowDirection.RightToLeft;
+            buttonPanel.Location = new System.Drawing.Point(0, 72);
+            buttonPanel.Name = "buttonPanel";
+            buttonPanel.Padding = new Padding(12, 6, 0, 12);
+            buttonPanel.Size = new System.Drawing.Size(384, 49);
+            buttonPanel.TabIndex = 6;
             // 
             // DialogForm
             // 
-            this.AcceptButton = this.acceptButton;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSize = true;
-            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.CancelButton = this.cancelButton;
-            this.ClientSize = new System.Drawing.Size(384, 121);
-            this.Controls.Add(this.descriptionPanel);
-            this.Controls.Add(this.buttonPanel);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(1600, 900);
-            this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(400, 160);
-            this.Name = "DialogForm";
-            this.ShowInTaskbar = false;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "DialogForm";
-            ((System.ComponentModel.ISupportInitialize)(this.icon)).EndInit();
-            this.descriptionPanel.ResumeLayout(false);
-            this.descriptionPanel.PerformLayout();
-            this.descriptionLabelPanel.ResumeLayout(false);
-            this.descriptionLabelPanel.PerformLayout();
-            this.buttonPanel.ResumeLayout(false);
-            this.buttonPanel.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AcceptButton = acceptButton;
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            AutoSize = true;
+            AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            CancelButton = cancelButton;
+            ClientSize = new System.Drawing.Size(384, 121);
+            Controls.Add(descriptionPanel);
+            Controls.Add(buttonPanel);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
+            MaximumSize = new System.Drawing.Size(1600, 900);
+            MinimizeBox = false;
+            MinimumSize = new System.Drawing.Size(400, 160);
+            Name = "DialogForm";
+            ShowInTaskbar = false;
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "DialogForm";
+            ((ISupportInitialize)icon).EndInit();
+            descriptionPanel.ResumeLayout(false);
+            descriptionPanel.PerformLayout();
+            descriptionLabelPanel.ResumeLayout(false);
+            descriptionLabelPanel.PerformLayout();
+            buttonPanel.ResumeLayout(false);
+            buttonPanel.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

@@ -21,125 +21,115 @@ namespace CreamInstaller.Forms
         /// </summary>
         private void InitializeComponent()
         {
-            this.userProgressBar = new System.Windows.Forms.ProgressBar();
-            this.userInfoLabel = new System.Windows.Forms.Label();
-            this.acceptButton = new System.Windows.Forms.Button();
-            this.retryButton = new System.Windows.Forms.Button();
-            this.cancelButton = new System.Windows.Forms.Button();
-            this.logTextBox = new System.Windows.Forms.RichTextBox();
-            this.reselectButton = new System.Windows.Forms.Button();
-            this.SuspendLayout();
+            userProgressBar = new ProgressBar();
+            userInfoLabel = new Label();
+            acceptButton = new Button();
+            retryButton = new Button();
+            cancelButton = new Button();
+            logTextBox = new RichTextBox();
+            reselectButton = new Button();
+            SuspendLayout();
             // 
             // userProgressBar
             // 
-            this.userProgressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.userProgressBar.Location = new System.Drawing.Point(12, 27);
-            this.userProgressBar.Name = "userProgressBar";
-            this.userProgressBar.Size = new System.Drawing.Size(760, 23);
-            this.userProgressBar.TabIndex = 1;
+            userProgressBar.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            userProgressBar.Location = new System.Drawing.Point(12, 27);
+            userProgressBar.Name = "userProgressBar";
+            userProgressBar.Size = new System.Drawing.Size(760, 23);
+            userProgressBar.TabIndex = 1;
             // 
             // userInfoLabel
             // 
-            this.userInfoLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.userInfoLabel.AutoEllipsis = true;
-            this.userInfoLabel.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.userInfoLabel.Location = new System.Drawing.Point(12, 9);
-            this.userInfoLabel.Name = "userInfoLabel";
-            this.userInfoLabel.Size = new System.Drawing.Size(760, 15);
-            this.userInfoLabel.TabIndex = 2;
-            this.userInfoLabel.Text = "Loading . . . ";
+            userInfoLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            userInfoLabel.AutoEllipsis = true;
+            userInfoLabel.Location = new System.Drawing.Point(12, 9);
+            userInfoLabel.Name = "userInfoLabel";
+            userInfoLabel.Size = new System.Drawing.Size(760, 15);
+            userInfoLabel.TabIndex = 2;
+            userInfoLabel.Text = "Loading . . . ";
             // 
             // acceptButton
             // 
-            this.acceptButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.acceptButton.Enabled = false;
-            this.acceptButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.acceptButton.Location = new System.Drawing.Point(697, 526);
-            this.acceptButton.Name = "acceptButton";
-            this.acceptButton.Size = new System.Drawing.Size(75, 23);
-            this.acceptButton.TabIndex = 4;
-            this.acceptButton.Text = "OK";
-            this.acceptButton.UseVisualStyleBackColor = true;
-            this.acceptButton.Click += new System.EventHandler(this.OnAccept);
+            acceptButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            acceptButton.Enabled = false;
+            acceptButton.Location = new System.Drawing.Point(697, 526);
+            acceptButton.Name = "acceptButton";
+            acceptButton.Size = new System.Drawing.Size(75, 23);
+            acceptButton.TabIndex = 4;
+            acceptButton.Text = "OK";
+            acceptButton.UseVisualStyleBackColor = true;
+            acceptButton.Click += OnAccept;
             // 
             // retryButton
             // 
-            this.retryButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.retryButton.Enabled = false;
-            this.retryButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.retryButton.Location = new System.Drawing.Point(616, 526);
-            this.retryButton.Name = "retryButton";
-            this.retryButton.Size = new System.Drawing.Size(75, 23);
-            this.retryButton.TabIndex = 3;
-            this.retryButton.Text = "Retry";
-            this.retryButton.UseVisualStyleBackColor = true;
-            this.retryButton.Click += new System.EventHandler(this.OnRetry);
+            retryButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            retryButton.Enabled = false;
+            retryButton.Location = new System.Drawing.Point(616, 526);
+            retryButton.Name = "retryButton";
+            retryButton.Size = new System.Drawing.Size(75, 23);
+            retryButton.TabIndex = 3;
+            retryButton.Text = "Retry";
+            retryButton.UseVisualStyleBackColor = true;
+            retryButton.Click += OnRetry;
             // 
             // cancelButton
             // 
-            this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.cancelButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.cancelButton.Location = new System.Drawing.Point(12, 526);
-            this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 1;
-            this.cancelButton.Text = "Cancel";
-            this.cancelButton.UseVisualStyleBackColor = true;
-            this.cancelButton.Click += new System.EventHandler(this.OnCancel);
+            cancelButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            cancelButton.Location = new System.Drawing.Point(12, 526);
+            cancelButton.Name = "cancelButton";
+            cancelButton.Size = new System.Drawing.Size(75, 23);
+            cancelButton.TabIndex = 1;
+            cancelButton.Text = "Cancel";
+            cancelButton.UseVisualStyleBackColor = true;
+            cancelButton.Click += OnCancel;
             // 
             // logTextBox
             // 
-            this.logTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.logTextBox.HideSelection = false;
-            this.logTextBox.Location = new System.Drawing.Point(12, 56);
-            this.logTextBox.Name = "logTextBox";
-            this.logTextBox.ReadOnly = true;
-            this.logTextBox.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedBoth;
-            this.logTextBox.Size = new System.Drawing.Size(760, 464);
-            this.logTextBox.TabIndex = 4;
-            this.logTextBox.TabStop = false;
-            this.logTextBox.Text = "";
+            logTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            logTextBox.HideSelection = false;
+            logTextBox.Location = new System.Drawing.Point(12, 56);
+            logTextBox.Name = "logTextBox";
+            logTextBox.ReadOnly = true;
+            logTextBox.ScrollBars = RichTextBoxScrollBars.ForcedBoth;
+            logTextBox.Size = new System.Drawing.Size(760, 464);
+            logTextBox.TabIndex = 4;
+            logTextBox.TabStop = false;
+            logTextBox.Text = "";
             // 
             // reselectButton
             // 
-            this.reselectButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.reselectButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.reselectButton.Location = new System.Drawing.Point(410, 526);
-            this.reselectButton.Name = "reselectButton";
-            this.reselectButton.Size = new System.Drawing.Size(200, 23);
-            this.reselectButton.TabIndex = 2;
-            this.reselectButton.Text = "Reselect Programs / Games";
-            this.reselectButton.UseVisualStyleBackColor = true;
-            this.reselectButton.Click += new System.EventHandler(this.OnReselect);
+            reselectButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            reselectButton.Location = new System.Drawing.Point(410, 526);
+            reselectButton.Name = "reselectButton";
+            reselectButton.Size = new System.Drawing.Size(200, 23);
+            reselectButton.TabIndex = 2;
+            reselectButton.Text = "Reselect Programs / Games";
+            reselectButton.UseVisualStyleBackColor = true;
+            reselectButton.Click += OnReselect;
             // 
             // InstallForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSize = true;
-            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(784, 561);
-            this.Controls.Add(this.reselectButton);
-            this.Controls.Add(this.logTextBox);
-            this.Controls.Add(this.cancelButton);
-            this.Controls.Add(this.retryButton);
-            this.Controls.Add(this.acceptButton);
-            this.Controls.Add(this.userProgressBar);
-            this.Controls.Add(this.userInfoLabel);
-            this.DoubleBuffered = true;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "InstallForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
-            this.Text = "InstallForm";
-            this.Load += new System.EventHandler(this.OnLoad);
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            AutoSize = true;
+            AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            ClientSize = new System.Drawing.Size(784, 561);
+            Controls.Add(reselectButton);
+            Controls.Add(logTextBox);
+            Controls.Add(cancelButton);
+            Controls.Add(retryButton);
+            Controls.Add(acceptButton);
+            Controls.Add(userProgressBar);
+            Controls.Add(userInfoLabel);
+            DoubleBuffered = true;
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "InstallForm";
+            StartPosition = FormStartPosition.Manual;
+            Text = "InstallForm";
+            Load += OnLoad;
+            ResumeLayout(false);
         }
 
         #endregion
