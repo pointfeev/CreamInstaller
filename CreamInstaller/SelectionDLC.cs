@@ -8,7 +8,7 @@ namespace CreamInstaller;
 public enum DLCType
 {
     None = 0, Steam, SteamHidden,
-    EpicCatalogItem, EpicEntitlement
+    Epic, EpicEntitlement
 }
 
 internal sealed class SelectionDLC : IEquatable<SelectionDLC>

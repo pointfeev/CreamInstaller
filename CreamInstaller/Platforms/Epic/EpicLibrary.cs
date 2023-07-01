@@ -39,7 +39,8 @@ internal static class EpicLibrary
                     try
                     {
                         Manifest manifest = JsonConvert.DeserializeObject<Manifest>(json);
-                        if (manifest is not null && games.All(g => g.CatalogNamespace != manifest.CatalogNamespace))
+                        if (manifest is not null && (manifest.InstallLocation = manifest.InstallLocation.ResolvePath()) is not null
+                         && games.All(g => g.CatalogNamespace != manifest.CatalogNamespace))
                             games.Add(manifest);
                     }
                     catch

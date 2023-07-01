@@ -369,14 +369,11 @@ internal sealed partial class SelectForm : CustomForm
                     }
                     if (Program.Canceled)
                         return;
-                    ConcurrentDictionary<SelectionDLC, byte> catalogItems = new();
-                    // get catalog items
-                    ConcurrentDictionary<SelectionDLC, byte> entitlements = new();
                     List<Task> dlcTasks = new();
-                    List<(string id, string name, string product, string icon, string developer)>
-                        entitlementIds = await EpicStore.QueryEntitlements(@namespace);
-                    if (entitlementIds.Count > 0)
-                        foreach ((string id, string name, string product, string icon, string developer) in entitlementIds)
+                    ConcurrentDictionary<SelectionDLC, byte> catalogItems = new();
+                    List<(string id, string name, string product, string icon, string developer)> catalogIds = await EpicStore.QueryCatalog(@namespace);
+                    if (catalogIds.Count > 0)
+                        foreach ((string id, string name, string product, string icon, string developer) in catalogIds)
                         {
                             if (Program.Canceled)
                                 return;
@@ -385,11 +382,11 @@ internal sealed partial class SelectForm : CustomForm
                             {
                                 if (Program.Canceled)
                                     return;
-                                SelectionDLC entitlement = SelectionDLC.GetOrCreate(DLCType.EpicEntitlement, @namespace, id, name);
-                                entitlement.Icon = icon;
-                                entitlement.Product = product;
-                                entitlement.Publisher = developer;
-                                _ = entitlements.TryAdd(entitlement, default);
+                                SelectionDLC catalogItem = SelectionDLC.GetOrCreate(DLCType.Epic, @namespace, id, name);
+                                catalogItem.Icon = icon;
+                                catalogItem.Product = product;
+                                catalogItem.Publisher = developer;
+                                _ = catalogItems.TryAdd(catalogItem, default);
                                 RemoveFromRemainingDLCs(id);
                             });
                             dlcTasks.Add(task);
@@ -402,14 +399,14 @@ internal sealed partial class SelectForm : CustomForm
                             return;
                         await task;
                     }
-                    if (catalogItems.IsEmpty && entitlements.IsEmpty)
+                    if (catalogItems.IsEmpty)
                     {
                         RemoveFromRemainingGames(name);
                         return;
                     }
                     Selection selection = Selection.GetOrCreate(Platform.Epic, @namespace, name, directory, dllDirectories,
                         await directory.GetExecutableDirectories(true));
-                    foreach ((SelectionDLC dlc, _) in entitlements.Where(dlc => dlc.Key.Name == selection.Name))
+                    foreach ((SelectionDLC dlc, _) in catalogItems.Where(dlc => dlc.Key.Name == selection.Name))
                     {
                         if (Program.Canceled)
                             return;
@@ -425,16 +422,9 @@ internal sealed partial class SelectForm : CustomForm
                             return;
                         if (selection.TreeNode.TreeView is null)
                             _ = selectionTreeView.Nodes.Add(selection.TreeNode);
-                        if (!catalogItems.IsEmpty)
-                            foreach ((SelectionDLC dlc, _) in catalogItems)
-                            {
-                                if (Program.Canceled)
-                                    return;
-                                dlc.Selection = selection;
-                            }
-                        if (entitlements.IsEmpty)
+                        if (catalogItems.IsEmpty)
                             return;
-                        foreach ((SelectionDLC dlc, _) in entitlements)
+                        foreach ((SelectionDLC dlc, _) in catalogItems)
                         {
                             if (Program.Canceled)
                                 return;

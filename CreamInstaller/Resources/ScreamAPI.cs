@@ -25,23 +25,36 @@ internal static class ScreamAPI
     internal static void CheckConfig(string directory, Selection selection, InstallForm installForm = null)
     {
         directory.GetScreamApiComponents(out _, out _, out _, out _, out string config, out _);
-        HashSet<SelectionDLC> overrideCatalogItems = selection.DLC.Where(dlc => dlc.Type is DLCType.EpicCatalogItem && !dlc.Enabled).ToHashSet();
-        HashSet<SelectionDLC> overrideEntitlements = selection.DLC.Where(dlc => dlc.Type is DLCType.EpicEntitlement && !dlc.Enabled).ToHashSet();
+        HashSet<SelectionDLC> overrideCatalogItems = selection.DLC.Where(dlc => dlc.Type is DLCType.Epic && !dlc.Enabled).ToHashSet();
+        int entitlementCount = 0;
+        HashSet<SelectionDLC> injectedEntitlements = new();
+        foreach (SelectionDLC dlc in selection.DLC.Where(dlc => dlc.Type is DLCType.EpicEntitlement))
+        {
+            if (dlc.Enabled)
+                _ = injectedEntitlements.Add(dlc);
+            entitlementCount++;
+        }
         foreach (Selection extraSelection in selection.ExtraSelections)
         {
-            foreach (SelectionDLC extraDlc in extraSelection.DLC.Where(dlc => dlc.Type is DLCType.EpicCatalogItem && !dlc.Enabled))
+            foreach (SelectionDLC extraDlc in extraSelection.DLC.Where(dlc => dlc.Type is DLCType.Epic && !dlc.Enabled))
                 _ = overrideCatalogItems.Add(extraDlc);
-            foreach (SelectionDLC extraDlc in extraSelection.DLC.Where(dlc => dlc.Type is DLCType.EpicEntitlement && !dlc.Enabled))
-                _ = overrideEntitlements.Add(extraDlc);
+            foreach (SelectionDLC extraDlc in extraSelection.DLC.Where(dlc => dlc.Type is DLCType.EpicEntitlement))
+            {
+                if (extraDlc.Enabled)
+                    _ = injectedEntitlements.Add(extraDlc);
+                entitlementCount++;
+            }
         }
-        if (overrideCatalogItems.Count > 0 || overrideEntitlements.Count > 0)
+        if (injectedEntitlements.Count == entitlementCount)
+            injectedEntitlements.Clear();
+        if (overrideCatalogItems.Count > 0 || injectedEntitlements.Count > 0)
         {
             /*if (installForm is not null)
                 installForm.UpdateUser("Generating ScreamAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);*/
             config.CreateFile(true, installForm).Close();
             StreamWriter writer = new(config, true, Encoding.UTF8);
             WriteConfig(writer, new(overrideCatalogItems.ToDictionary(dlc => dlc.Id, dlc => dlc), PlatformIdComparer.String),
-                new(overrideEntitlements.ToDictionary(dlc => dlc.Id, dlc => dlc), PlatformIdComparer.String), installForm);
+                new(injectedEntitlements.ToDictionary(dlc => dlc.Id, dlc => dlc), PlatformIdComparer.String), installForm);
             writer.Flush();
             writer.Close();
         }
@@ -52,8 +65,8 @@ internal static class ScreamAPI
         }
     }
 
-    private static void WriteConfig(TextWriter writer, SortedList<string, SelectionDLC> overrideCatalogItems, SortedList<string, SelectionDLC> entitlements,
-        InstallForm installForm = null)
+    private static void WriteConfig(TextWriter writer, SortedList<string, SelectionDLC> overrideCatalogItems,
+        SortedList<string, SelectionDLC> injectedEntitlements, InstallForm installForm = null)
     {
         writer.WriteLine("{");
         writer.WriteLine("  \"version\": 2,");
@@ -79,23 +92,27 @@ internal static class ScreamAPI
             writer.WriteLine("    \"override\": []");
         writer.WriteLine("  },");
         writer.WriteLine("  \"entitlements\": {");
-        writer.WriteLine("    \"unlock_all\": true,");
-        writer.WriteLine("    \"auto_inject\": true,");
-        if (entitlements.Count > 0)
+        if (injectedEntitlements.Count > 0)
         {
+            writer.WriteLine("    \"unlock_all\": false,");
+            writer.WriteLine("    \"auto_inject\": false,");
             writer.WriteLine("    \"inject\": [");
-            KeyValuePair<string, SelectionDLC> lastEntitlement = entitlements.Last();
-            foreach (KeyValuePair<string, SelectionDLC> pair in entitlements)
+            KeyValuePair<string, SelectionDLC> lastEntitlement = injectedEntitlements.Last();
+            foreach (KeyValuePair<string, SelectionDLC> pair in injectedEntitlements)
             {
                 SelectionDLC selectionDlc = pair.Value;
                 writer.WriteLine($"      \"{selectionDlc.Id}\"{(pair.Equals(lastEntitlement) ? "" : ",")}");
-                installForm?.UpdateUser($"Added locked entitlement to ScreamAPI.json with id {selectionDlc.Id} ({selectionDlc.Name})", LogTextBox.Action,
+                installForm?.UpdateUser($"Added injected entitlement to ScreamAPI.json with id {selectionDlc.Id} ({selectionDlc.Name})", LogTextBox.Action,
                     false);
             }
             writer.WriteLine("    ]");
         }
         else
+        {
+            writer.WriteLine("    \"unlock_all\": true,");
+            writer.WriteLine("    \"auto_inject\": true,");
             writer.WriteLine("    \"inject\": []");
+        }
         writer.WriteLine("  }");
         writer.WriteLine("}");
     }

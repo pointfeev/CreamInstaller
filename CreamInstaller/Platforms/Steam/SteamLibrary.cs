@@ -79,19 +79,19 @@ internal static class SteamLibrary
     private static async Task<HashSet<string>> GetLibraryDirectories()
         => await Task.Run(() =>
         {
-            HashSet<string> gameDirectories = new();
+            HashSet<string> libraryDirectories = new();
             if (Program.Canceled)
-                return gameDirectories;
+                return libraryDirectories;
             string steamInstallPath = InstallPath;
             if (steamInstallPath == null || !steamInstallPath.DirectoryExists())
-                return gameDirectories;
+                return libraryDirectories;
             string libraryFolder = steamInstallPath + @"\steamapps";
             if (!libraryFolder.DirectoryExists())
-                return gameDirectories;
-            _ = gameDirectories.Add(libraryFolder);
+                return libraryDirectories;
+            _ = libraryDirectories.Add(libraryFolder);
             string libraryFolders = libraryFolder + @"\libraryfolders.vdf";
             if (!libraryFolders.FileExists() || !ValveDataFile.TryDeserialize(libraryFolders.ReadFile(), out VProperty result))
-                return gameDirectories;
+                return libraryDirectories;
             foreach (VToken vToken in result.Value.Where(p => p is VProperty property && int.TryParse(property.Key, out int _)))
             {
                 VProperty property = (VProperty)vToken;
@@ -100,8 +100,8 @@ internal static class SteamLibrary
                     continue;
                 path += @"\steamapps";
                 if (path.DirectoryExists())
-                    _ = gameDirectories.Add(path);
+                    _ = libraryDirectories.Add(path);
             }
-            return gameDirectories;
+            return libraryDirectories;
         });
 }

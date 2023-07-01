@@ -12,22 +12,15 @@ namespace CreamInstaller.Platforms.Epic;
 
 internal static class EpicStore
 {
-    //private const int CooldownCatalogItem = 600;
+    private const int Cooldown = 600;
 
-    /* need a method to query catalog items
-    internal static async Task QueryCatalogItems(Manifest manifest)
-    {
-    }*/
-
-    private const int CooldownEntitlement = 600;
-
-    internal static async Task<List<(string id, string name, string product, string icon, string developer)>> QueryEntitlements(string categoryNamespace)
+    internal static async Task<List<(string id, string name, string product, string icon, string developer)>> QueryCatalog(string categoryNamespace)
     {
         List<(string id, string name, string product, string icon, string developer)> dlcIds = new();
         string cacheFile = ProgramData.AppInfoPath + @$"\{categoryNamespace}.json";
         bool cachedExists = cacheFile.FileExists();
         Response response = null;
-        if (!cachedExists || ProgramData.CheckCooldown(categoryNamespace, CooldownEntitlement))
+        if (!cachedExists || ProgramData.CheckCooldown(categoryNamespace, Cooldown))
         {
             response = await QueryGraphQL(categoryNamespace);
             try

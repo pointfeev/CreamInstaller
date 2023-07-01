@@ -28,7 +28,7 @@ internal static class HeroicLibrary
                     try
                     {
                         HeroicAppData appData = token.ToObject<HeroicAppData>();
-                        if (appData is null || string.IsNullOrWhiteSpace(appData.Install.InstallPath))
+                        if (appData is null || string.IsNullOrWhiteSpace(appData.Install.InstallPath = appData.Install.InstallPath.ResolvePath()))
                             continue;
                         Manifest manifest = new()
                         {
