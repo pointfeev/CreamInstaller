@@ -59,7 +59,7 @@ internal sealed class Selection : IEquatable<Selection>
 
     internal bool Enabled { get => TreeNode.Checked; set => TreeNode.Checked = value; }
 
-    internal IEnumerable<SelectionDLC> DLC => SelectionDLC.All.Keys.Where(dlc => dlc.Selection.Equals(this));
+    internal IEnumerable<SelectionDLC> DLC => SelectionDLC.All.Keys.Where(dlc => Equals(dlc.Selection, this));
 
     public bool Equals(Selection other) => other is not null && (ReferenceEquals(this, other) || Id == other.Id && Platform == other.Platform);
 
