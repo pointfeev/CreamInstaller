@@ -32,7 +32,7 @@ games and DLCs the user selects; however, through the use of **right-click conte
 1. Click [here](https://github.com/pointfeev/CreamInstaller/releases/latest/download/CreamInstaller.zip) to download the latest release from [GitHub](https://github.com/pointfeev/CreamInstaller).
 2. Extract the executable from the ZIP file to anywhere on your computer you want. *It's completely self-contained.*
 
-If the program doesn't seem to launch, try downloading and installing [.NET Desktop Runtime 7.0.8](https://download.visualstudio.microsoft.com/download/pr/53868e57-c621-476a-885b-dea78ac6edba/f1d5957ba91bde28370f0e782b3d6177/windowsdesktop-runtime-7.0.8-win-x64.exe). Note that the program currently only supports Windows 8+ 64-bit machines, as .NET 7+ no longer support Windows 7.
+If the program doesn't seem to launch, try downloading and installing [.NET Desktop Runtime 7.0.12](https://download.visualstudio.microsoft.com/download/pr/f9ea536d-8e1f-4247-88b8-e79e33fa0873/c06e39f73a3bb1ec8833bb1cde98fce3/windowsdesktop-runtime-7.0.12-win-x64.exe). Note that the program currently only supports Windows 8+ 64-bit machines, as .NET 7+ no longer support Windows 7.
 
 ---
 #### Usage:
@@ -49,10 +49,14 @@ If the program doesn't seem to launch, try downloading and installing [.NET Desk
 ##### **NOTE:** This program does not automatically download nor install actual DLC files for you; as the title of the program states, this program is only a *DLC Unlocker* installer. Should the game you wish to unlock DLC for not already come with the DLCs installed, as is the case with a good majority of games, you must find, download and install those to the game yourself. This process includes manually installing new DLCs and manually updating the previously manually installed DLCs after game updates.
 
 ---
+#### FAQ:
+
+
+---
 ##### Bugs/Crashes/Issues:
 For reliable and quick assistance, all bugs, crashes and other issues should be referred to the [GitHub Issues](https://github.com/pointfeev/CreamInstaller/issues) page!
 
-##### **HOWEVER**: Please read the template issue corresponding to your problem should one exist! Also, note that the [GitHub Issues](https://github.com/pointfeev/CreamInstaller/issues) page is not your personal assistance hotline, rather it is for genuine bugs/crashes/issues with the program itself. If you post an issue which has already been explained within the template issues and/or within this text, I will just close it.
+##### **HOWEVER**: Please read the [template issue](https://github.com/pointfeev/CreamInstaller/issues/new/choose) corresponding to your problem should one exist! Also, note that the [GitHub Issues](https://github.com/pointfeev/CreamInstaller/issues) page is not your personal assistance hotline, rather it is for genuine bugs/crashes/issues with the program itself. If you post an issue which is off-topic or has already been explained within the template issues and/or within this text, I will just close it.
 
 ---
 ##### More Information:
