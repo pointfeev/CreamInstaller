@@ -137,7 +137,7 @@ internal static class SteamCMD
                 catch (Exception e)
                 {
                     using DialogForm dialogForm = new(Form.ActiveForm);
-                    if (dialogForm.Show(SystemIcons.Warning, "Failed to download SteamCMD:\n    " + e.Message, "Retry", "OK") is not DialogResult.OK)
+                    if (dialogForm.Show(SystemIcons.Warning, "Failed to download SteamCMD:\n    " + e.FormatException(), "Retry", "OK") is not DialogResult.OK)
                         return false;
                 }
         }
