@@ -605,6 +605,7 @@ internal sealed partial class SelectForm : CustomForm
                 progressLabel.Text = "Setting up SteamCMD . . . ";
                 if (!await SteamCMD.Setup(iProgress))
                 {
+                    HideProgressBar();
                     OnLoad(forceScan, true);
                     return;
                 }

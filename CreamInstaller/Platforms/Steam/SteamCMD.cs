@@ -122,6 +122,7 @@ internal static class SteamCMD
         await Cleanup();
         if (!FilePath.FileExists())
         {
+        retryDownload:
             HttpClient httpClient = HttpClientManager.HttpClient;
             if (httpClient is null)
                 return false;
@@ -136,9 +137,9 @@ internal static class SteamCMD
                 }
                 catch (Exception e)
                 {
-                    using DialogForm dialogForm = new(Form.ActiveForm);
-                    if (dialogForm.Show(SystemIcons.Warning, "Failed to download SteamCMD:\n    " + e.FormatException(), "Retry", "OK") is not DialogResult.OK)
-                        return false;
+                    if (e.HandleException(caption: Program.Name + " failed to download SteamCMD"))
+                        goto retryDownload;
+                    return false;
                 }
         }
         if (DllPath.FileExists())
