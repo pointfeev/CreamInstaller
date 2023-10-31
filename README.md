@@ -61,7 +61,7 @@ If the program doesn't seem to launch, try downloading and installing [.NET Desk
 
 **Q:** The program and/or output files are detected as a virus/trojan/malware.
 
-**A:** The "issue" of the program's outputted Koaloader DLLs being detected as false positives such as Mamson.A!ac, Phonzy.A!ml, Wacatac.H!ml, Malgent!MSR, Tiggre!rfn, and many many others, has already been posted and explained dozens of times now... please do not post it again, otherwise you will likely be ignored; instead, refer to the explanations within issue #40 and its linked issues: https://github.com/pointfeev/CreamInstaller/issues/40
+**A:** The "issue" of the program's outputted Koaloader DLLs being detected as false positives such as Mamson.A!ac, Phonzy.A!ml, Wacatac.H!ml, Malgent!MSR, Tiggre!rfn, and many many others, has already been posted and explained dozens of times now in many different manners... please do not post it again, you will just be ignored; instead, refer to the explanations within issue #40 and its linked issues: https://github.com/pointfeev/CreamInstaller/issues/40.
 
 ---
 ##### Bugs/Crashes/Issues:
