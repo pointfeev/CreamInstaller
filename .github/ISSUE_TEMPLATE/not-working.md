@@ -1,5 +1,5 @@
 ---
-name: Game Not Working / DLCs Not Unlocking
+name: Game not working/DLCs not unlocking
 about: This is not the place to report game-specific issues; see this template's content.
 title: I promise not to post another issue about game-specific unlocking issues.
 labels: ''
