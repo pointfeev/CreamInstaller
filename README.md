@@ -64,10 +64,11 @@ If the program doesn't seem to launch, try downloading and installing [.NET Desk
 ##### Bugs/Crashes/Issues:
 For reliable and quick assistance, all bugs, crashes and other issues should be referred to the [GitHub Issues](https://github.com/pointfeev/CreamInstaller/issues) page!
 
-##### **HOWEVER**: Please read the [FAQ entry](https://github.com/pointfeev/CreamInstaller#faq--common-issues) and/or [template issue](https://github.com/pointfeev/CreamInstaller/issues/new/choose) corresponding to your problem should one exist! Also, note that the [GitHub Issues](https://github.com/pointfeev/CreamInstaller/issues) page is not your personal assistance hotline, rather it is for genuine bugs/crashes/issues with the program itself. If you post an issue which is off-topic or has already been explained within the FAQ, template issues, and/or within this text in general, I will just close it and you will be ignored.
+##### **HOWEVER**: Please read the [FAQ entry](https://github.com/pointfeev/CreamInstaller#faq--common-issues) above and/or [template issue](https://github.com/pointfeev/CreamInstaller/issues/new/choose) corresponding to your problem should one exist! Also, note that the [GitHub Issues](https://github.com/pointfeev/CreamInstaller/issues) page is not your personal assistance hotline, rather it is for genuine bugs/crashes/issues with the program itself. If you post an issue which is off-topic or has already been explained within the FAQ, template issues, and/or within this text in general, I will just close it and you will be ignored.
 
 ---
 ##### More Information:
 * SteamCMD installation and appinfo cache can be found at **C:\ProgramData\CreamInstaller**.
 * The program automatically and very quickly updates from [GitHub](https://github.com/pointfeev/CreamInstaller) by choice of the user through a dialog on startup.
 * The program source and other information can be found on [GitHub](https://github.com/pointfeev/CreamInstaller).
+* Credit to [Mattahan](https://www.mattahan.com) for the program icon.
