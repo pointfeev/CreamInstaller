@@ -243,10 +243,12 @@ internal static class SafeIO
             case 5: // ERROR_ACCESS_DENIED
             case 32: // ERROR_SHARING_VIOLATION
             case 33: // ERROR_LOCK_VIOLATION
+                description += e.Message + "\n\n";
                 description += "Please close the program/game and press retry to continue . . . ";
                 break;
             case 225: // ERROR_VIRUS_INFECTED
             case 226: // ERROR_VIRUS_DELETED
+                description += e.Message + "\n\n";
                 description += "Please resolve your anti-virus and press retry to continue . . . ";
                 break;
             default:

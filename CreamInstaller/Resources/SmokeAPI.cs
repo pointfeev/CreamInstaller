@@ -53,7 +53,7 @@ internal static class SmokeAPI
         {
             /*if (installForm is not null)
                 installForm.UpdateUser("Generating SmokeAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);*/
-            config.CreateFile(true, installForm).Close();
+            config.CreateFile(true, installForm)?.Close();
             StreamWriter writer = new(config, true, Encoding.UTF8);
             WriteConfig(writer, selection.Id, new(extraApps.ToDictionary(extraApp => extraApp.Key, extraApp => extraApp.Value), PlatformIdComparer.String),
                 new(overrideDlc.ToDictionary(dlc => dlc.Id, dlc => dlc), PlatformIdComparer.String),

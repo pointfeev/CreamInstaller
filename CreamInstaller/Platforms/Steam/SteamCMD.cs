@@ -2,18 +2,18 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
-using CreamInstaller.Forms;
 using CreamInstaller.Resources;
 using CreamInstaller.Utility;
 using Gameloop.Vdf.Linq;
+#if DEBUG
+using CreamInstaller.Forms;
+#endif
 
 namespace CreamInstaller.Platforms.Steam;
 
