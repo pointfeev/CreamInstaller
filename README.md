@@ -57,7 +57,7 @@ If the program doesn't seem to launch, try downloading and installing [.NET Desk
 **Q:** The game I installed the unlocker(s) to is not working/the DLCs are not unlocked.
 **A:** Make sure you've read the note under Usage! Assuming the program functioned as it was supposed to by properly installing DLC unlockers to your chosen games, this is not an issue I can do anything about and it's entirely up to you to seek the appropriate resources to fix it yourself (hint: https://cs.rin.ru/forum/viewforum.php?f=10).
 
-**Q:** The program and/or output files are detected as a virus/trojan/malware.
+**Q:** The program and/or files installed by the program are detected as a virus/trojan/malware.
 **A:** The "issue" of the program's outputted Koaloader DLLs being detected as false positives such as Mamson.A!ac, Phonzy.A!ml, Wacatac.H!ml, Malgent!MSR, Tiggre!rfn, and many many others, has already been posted and explained dozens of times now in many different manners... please do not post it again, you will just be ignored; instead, refer to the explanations within issue #40 and its linked issues: https://github.com/pointfeev/CreamInstaller/issues/40.
 
 ---
