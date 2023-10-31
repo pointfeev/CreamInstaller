@@ -1,6 +1,6 @@
 ---
-name: Program Not Launching
-about: I likely cannot do anything about this; see this template's content.
+name: Program not launching
+about: I likely can not do anything about this; see this template's content.
 title: I promise not to post another issue about the program not launching.
 labels: ''
 assignees: ''
