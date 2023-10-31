@@ -1,7 +1,6 @@
 ---
 name: Bug Report
-about: Report a program exception or general bug, not including game-specific unlocking
-  issues.
+about: Report a program exception or general bug, not including those explained within the FAQ and/or template issues.
 title: ''
 labels: Bug
 assignees: pointfeev
