@@ -49,7 +49,7 @@ If the program doesn't seem to launch, try downloading and installing [.NET Desk
 ##### **NOTE:** This program does not automatically download nor install actual DLC files for you; as the title of the program states, this program is only a *DLC Unlocker* installer. Should the game you wish to unlock DLC for not already come with the DLCs installed, as is the case with a good majority of games, you must find, download and install those to the game yourself. This process includes manually installing new DLCs and manually updating the previously manually installed DLCs after game updates.
 
 ---
-### FAQ / Common Issues:
+#### FAQ / Common Issues:
 
 **Q:** The program is not launching.
 
@@ -67,7 +67,7 @@ If the program doesn't seem to launch, try downloading and installing [.NET Desk
 ##### Bugs/Crashes/Issues:
 For reliable and quick assistance, all bugs, crashes and other issues should be referred to the [GitHub Issues](https://github.com/pointfeev/CreamInstaller/issues) page!
 
-##### **HOWEVER**: Please read the [FAQ entry]() and/or [template issue](https://github.com/pointfeev/CreamInstaller/issues/new/choose) corresponding to your problem should one exist! Also, note that the [GitHub Issues](https://github.com/pointfeev/CreamInstaller/issues) page is not your personal assistance hotline, rather it is for genuine bugs/crashes/issues with the program itself. If you post an issue which is off-topic or has already been explained within the template issues and/or within this text, I will just close it.
+##### **HOWEVER**: Please read the [FAQ entry](https://github.com/pointfeev/CreamInstaller#faq--common-issues) and/or [template issue](https://github.com/pointfeev/CreamInstaller/issues/new/choose) corresponding to your problem should one exist! Also, note that the [GitHub Issues](https://github.com/pointfeev/CreamInstaller/issues) page is not your personal assistance hotline, rather it is for genuine bugs/crashes/issues with the program itself. If you post an issue which is off-topic or has already been explained within the FAQ, template issues, and/or within this text in general, I will just close it and you will be ignored.
 
 ---
 ##### More Information:
