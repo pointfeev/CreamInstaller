@@ -32,7 +32,7 @@ games and DLCs the user selects; however, through the use of **right-click conte
 1. Click [here](https://github.com/pointfeev/CreamInstaller/releases/latest/download/CreamInstaller.zip) to download the latest release from [GitHub](https://github.com/pointfeev/CreamInstaller).
 2. Extract the executable from the ZIP file to anywhere on your computer you want. *It's completely self-contained.*
 
-If the program doesn't seem to launch, try downloading and installing [.NET Desktop Runtime 7.0.12](https://download.visualstudio.microsoft.com/download/pr/f9ea536d-8e1f-4247-88b8-e79e33fa0873/c06e39f73a3bb1ec8833bb1cde98fce3/windowsdesktop-runtime-7.0.12-win-x64.exe). Note that the program currently only supports Windows 8+ 64-bit machines, as .NET 7+ no longer support Windows 7.
+If the program doesn't seem to launch, try downloading and installing [.NET Desktop Runtime 7.0.12](https://download.visualstudio.microsoft.com/download/pr/f9ea536d-8e1f-4247-88b8-e79e33fa0873/c06e39f73a3bb1ec8833bb1cde98fce3/windowsdesktop-runtime-7.0.12-win-x64.exe) and restarting your computer. Note that the program currently only supports Windows 8+ 64-bit machines, as .NET 7+ no longer support Windows 7.
 
 ---
 #### Usage:
@@ -49,14 +49,25 @@ If the program doesn't seem to launch, try downloading and installing [.NET Desk
 ##### **NOTE:** This program does not automatically download nor install actual DLC files for you; as the title of the program states, this program is only a *DLC Unlocker* installer. Should the game you wish to unlock DLC for not already come with the DLCs installed, as is the case with a good majority of games, you must find, download and install those to the game yourself. This process includes manually installing new DLCs and manually updating the previously manually installed DLCs after game updates.
 
 ---
-#### FAQ:
+### FAQ / Common Issues:
 
+**Q:** The program is not launching.
+
+**A:** First and foremost, note that the program currently only supports Windows 8+ 64-bit machines, as .NET 7+ no longer support Windows 7. If that does not apply to you, then make sure you've extracted the executable from the ZIP file before you've launched it, resolved your anti-virus, and have tried downloading the .NET Desktop Runtime mentioned under installation instructions and restarted your computer. If none of the above work, then I simply cannot do anything about it, I do not control .NET. Either your system is not supported by the current version of .NET, or something is wrong/corrupted with your system.
+
+**Q:** The game I installed the unlocker(s) to is not working/the DLCs are not unlocked.
+
+**A:** Make sure you've read the big bold note under Usage! Assuming the program functioned as it was supposed to by properly installing DLC unlockers to your chosen games, this is not an issue I can do anything about and it's entirely up to you to seek the appropriate resources to fix it yourself (hint: https://cs.rin.ru/forum/viewforum.php?f=10).
+
+**Q:** The program and/or output files are detected as a virus/trojan/malware.
+
+**A:** The "issue" of the program's outputted Koaloader DLLs being detected as false positives such as Mamson.A!ac, Phonzy.A!ml, Wacatac.H!ml, Malgent!MSR, Tiggre!rfn, and many many others, has already been posted and explained dozens of times now... please do not post it again, otherwise you will likely be ignored; instead, refer to the explanations within issue #40 and its linked issues: https://github.com/pointfeev/CreamInstaller/issues/40
 
 ---
 ##### Bugs/Crashes/Issues:
 For reliable and quick assistance, all bugs, crashes and other issues should be referred to the [GitHub Issues](https://github.com/pointfeev/CreamInstaller/issues) page!
 
-##### **HOWEVER**: Please read the [template issue](https://github.com/pointfeev/CreamInstaller/issues/new/choose) corresponding to your problem should one exist! Also, note that the [GitHub Issues](https://github.com/pointfeev/CreamInstaller/issues) page is not your personal assistance hotline, rather it is for genuine bugs/crashes/issues with the program itself. If you post an issue which is off-topic or has already been explained within the template issues and/or within this text, I will just close it.
+##### **HOWEVER**: Please read the [FAQ entry]() and/or [template issue](https://github.com/pointfeev/CreamInstaller/issues/new/choose) corresponding to your problem should one exist! Also, note that the [GitHub Issues](https://github.com/pointfeev/CreamInstaller/issues) page is not your personal assistance hotline, rather it is for genuine bugs/crashes/issues with the program itself. If you post an issue which is off-topic or has already been explained within the template issues and/or within this text, I will just close it.
 
 ---
 ##### More Information:
