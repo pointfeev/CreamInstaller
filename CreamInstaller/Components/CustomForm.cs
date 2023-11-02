@@ -71,7 +71,7 @@ internal class CustomForm : Form
           + "a good majority of games, you must find, download and install those to the game yourself. This process includes manually installing new\n"
           + "DLCs and manually updating the previously manually installed DLCs after game updates.\n\n"
           + $"For reliable and quick assistance, all bugs, crashes and other issues should be referred to the [GitHub Issues]({repository}/issues) page!\n\n"
-          + $"HOWEVER: Please read the [FAQ entry]({repository}/issues/new/choose) and/or [template issue]({repository}/issues/new/choose) corresponding to your problem should one exist! Also, note that the [GitHub Issues]({repository}/issues)\n"
+          + $"HOWEVER: Please read the [FAQ entry]({repository}#faq--common-issues) and/or [template issue]({repository}/issues/new/choose) corresponding to your problem should one exist! Also, note that the [GitHub Issues]({repository}/issues)\n"
           + "page is not your personal assistance hotline, rather it is for genuine bugs/crashes/issues with the program itself. If you post an issue which\n"
           + "has already been explained within the FAQ, template issues, and/or within this text in general, I will just close it and you will be ignored.\n\n"
           + "SteamCMD installation and appinfo cache can be found at [C:\\ProgramData\\CreamInstaller]().\n"
