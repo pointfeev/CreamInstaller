@@ -32,7 +32,7 @@ games and DLCs the user selects; however, through the use of **right-click conte
 1. Click [here](https://github.com/pointfeev/CreamInstaller/releases/latest/download/CreamInstaller.zip) to download the latest release from [GitHub](https://github.com/pointfeev/CreamInstaller).
 2. Extract the executable from the ZIP file to anywhere on your computer you want. *It's completely self-contained.*
 
-If the program doesn't seem to launch, try downloading and installing [.NET Desktop Runtime 7.0.12](https://download.visualstudio.microsoft.com/download/pr/f9ea536d-8e1f-4247-88b8-e79e33fa0873/c06e39f73a3bb1ec8833bb1cde98fce3/windowsdesktop-runtime-7.0.12-win-x64.exe) and restarting your computer. Note that the program currently only supports Windows 8+ 64-bit machines, as .NET 7+ no longer support Windows 7.
+If the program doesn't seem to launch, try downloading and installing [.NET Desktop Runtime 8.0.1](https://download.visualstudio.microsoft.com/download/pr/f18288f6-1732-415b-b577-7fb46510479a/a98239f751a7aed31bc4aa12f348a9bf/windowsdesktop-runtime-8.0.1-win-x64.exe) and restarting your computer. Note that the program currently only supports Windows 8+ 64-bit machines, as .NET 7+ no longer support Windows 7.
 
 ---
 #### Usage:
