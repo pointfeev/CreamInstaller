@@ -47,7 +47,7 @@ internal static class UplayR2
         }
     }
 
-    private static void WriteConfig(TextWriter writer, SortedList<string, SelectionDLC> blacklistDlc, InstallForm installForm = null)
+    private static void WriteConfig(StreamWriter writer, SortedList<string, SelectionDLC> blacklistDlc, InstallForm installForm = null)
     {
         writer.WriteLine("{");
         writer.WriteLine("  \"logging\": false,");

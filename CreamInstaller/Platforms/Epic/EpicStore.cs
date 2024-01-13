@@ -16,7 +16,7 @@ internal static class EpicStore
 
     internal static async Task<List<(string id, string name, string product, string icon, string developer)>> QueryCatalog(string categoryNamespace)
     {
-        List<(string id, string name, string product, string icon, string developer)> dlcIds = new();
+        List<(string id, string name, string product, string icon, string developer)> dlcIds = [];
         string cacheFile = ProgramData.AppInfoPath + @$"\{categoryNamespace}.json";
         bool cachedExists = cacheFile.FileExists();
         Response response = null;
@@ -43,7 +43,7 @@ internal static class EpicStore
             }
         if (response is null)
             return dlcIds;
-        List<Element> searchStore = new(response.Data.Catalog.SearchStore.Elements);
+        List<Element> searchStore = [..response.Data.Catalog.SearchStore.Elements];
         foreach (Element element in searchStore)
         {
             string title = element.Title;
@@ -60,7 +60,7 @@ internal static class EpicStore
             foreach (Item item in element.Items)
                 dlcIds.Populate(item.Id, title, product, icon, null, element.Items.Length == 1);
         }
-        List<Element> catalogOffers = new(response.Data.Catalog.CatalogOffers.Elements);
+        List<Element> catalogOffers = [..response.Data.Catalog.CatalogOffers.Elements];
         foreach (Element element in catalogOffers)
         {
             string title = element.Title;

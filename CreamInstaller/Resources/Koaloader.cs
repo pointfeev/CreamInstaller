@@ -13,14 +13,14 @@ namespace CreamInstaller.Resources;
 
 internal static class Koaloader
 {
-    internal static readonly List<(string unlocker, string dll)> AutoLoadDLLs = new()
-    {
+    internal static readonly List<(string unlocker, string dll)> AutoLoadDLLs =
+    [
         ("Koaloader", "Unlocker.dll"), ("Koaloader", "Unlocker32.dll"), ("Koaloader", "Unlocker64.dll"), ("Lyptus", "Lyptus.dll"),
         ("Lyptus", "Lyptus32.dll"), ("Lyptus", "Lyptus64.dll"), ("SmokeAPI", "SmokeAPI.dll"), ("SmokeAPI", "SmokeAPI32.dll"),
         ("SmokeAPI", "SmokeAPI64.dll"), ("ScreamAPI", "ScreamAPI.dll"), ("ScreamAPI", "ScreamAPI32.dll"), ("ScreamAPI", "ScreamAPI64.dll"),
         ("Uplay R1 Unlocker", "UplayR1Unlocker.dll"), ("Uplay R1 Unlocker", "UplayR1Unlocker32.dll"), ("Uplay R1 Unlocker", "UplayR1Unlocker64.dll"),
         ("Uplay R2 Unlocker", "UplayR2Unlocker.dll"), ("Uplay R2 Unlocker", "UplayR2Unlocker32.dll"), ("Uplay R2 Unlocker", "UplayR2Unlocker64.dll")
-    };
+    ];
 
     internal static IEnumerable<string> GetKoaloaderProxies(this string directory)
         => from resource in EmbeddedResources
@@ -92,7 +92,7 @@ internal static class Koaloader
         }
     }
 
-    private static void WriteConfig(TextWriter writer, SortedList<string, string> targets, SortedList<string, string> modules, InstallForm installForm = null)
+    private static void WriteConfig(StreamWriter writer, SortedList<string, string> targets, SortedList<string, string> modules, InstallForm installForm = null)
     {
         writer.WriteLine("{");
         writer.WriteLine("  \"logging\": false,");

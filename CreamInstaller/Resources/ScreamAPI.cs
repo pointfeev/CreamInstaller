@@ -27,7 +27,7 @@ internal static class ScreamAPI
         directory.GetScreamApiComponents(out _, out _, out _, out _, out string config, out _);
         HashSet<SelectionDLC> overrideCatalogItems = selection.DLC.Where(dlc => dlc.Type is DLCType.Epic && !dlc.Enabled).ToHashSet();
         int entitlementCount = 0;
-        HashSet<SelectionDLC> injectedEntitlements = new();
+        HashSet<SelectionDLC> injectedEntitlements = [];
         foreach (SelectionDLC dlc in selection.DLC.Where(dlc => dlc.Type is DLCType.EpicEntitlement))
         {
             if (dlc.Enabled)
@@ -65,7 +65,7 @@ internal static class ScreamAPI
         }
     }
 
-    private static void WriteConfig(TextWriter writer, SortedList<string, SelectionDLC> overrideCatalogItems,
+    private static void WriteConfig(StreamWriter writer, SortedList<string, SelectionDLC> overrideCatalogItems,
         SortedList<string, SelectionDLC> injectedEntitlements, InstallForm installForm = null)
     {
         writer.WriteLine("{");

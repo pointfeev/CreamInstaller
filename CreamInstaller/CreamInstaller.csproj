@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net7.0-windows10.0.22621.0</TargetFramework>
+		<TargetFramework>net8.0-windows10.0.22621.0</TargetFramework>
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Resources\program.ico</ApplicationIcon>
-		<Version>4.10.0</Version>
+		<Version>4.10.1</Version>
 		<Copyright>2021, pointfeev (https://github.com/pointfeev)</Copyright>
 		<Company>CreamInstaller</Company>
 		<Product>Automatic DLC Unlocker Installer &amp; Configuration Generator</Product>

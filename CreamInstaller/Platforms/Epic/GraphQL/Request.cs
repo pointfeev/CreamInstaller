@@ -13,50 +13,52 @@ internal sealed class Request
 
     [JsonProperty(PropertyName = "query")]
     private string Query
-        => @"query searchOffers($namespace: String!) {
-    Catalog {
-        searchStore(category: ""*"", namespace: $namespace){
-            elements {
-                id
-                title
-                developer
-                items {
-                    id
-                }
-                catalogNs {
-                    mappings(pageType: ""productHome"") {
-                        pageSlug
-                    }
-                }
-            }
-        }
-        catalogOffers(
-            namespace: $namespace
-            params: {
-                count: 1000,
-            }
-        ) {
-            elements {
-                id
-                title
-                keyImages {
-                    type
-                    url
-                }
-                items {
-                    id
-                    title
-                    developer
-                }
-                catalogNs {
-                    mappings(pageType: ""productHome"") {
-                        pageSlug
-                    }
-                }
-            }
-        }
-    }
-}";
+        => """
+           query searchOffers($namespace: String!) {
+               Catalog {
+                   searchStore(category: "*", namespace: $namespace){
+                       elements {
+                           id
+                           title
+                           developer
+                           items {
+                               id
+                           }
+                           catalogNs {
+                               mappings(pageType: "productHome") {
+                                   pageSlug
+                               }
+                           }
+                       }
+                   }
+                   catalogOffers(
+                       namespace: $namespace
+                       params: {
+                           count: 1000,
+                       }
+                   ) {
+                       elements {
+                           id
+                           title
+                           keyImages {
+                               type
+                               url
+                           }
+                           items {
+                               id
+                               title
+                               developer
+                           }
+                           catalogNs {
+                               mappings(pageType: "productHome") {
+                                   pageSlug
+                               }
+                           }
+                       }
+                   }
+               }
+           }
+           """;
 
     [JsonProperty(PropertyName = "variables")]
     private Variables Vars { get; set; }

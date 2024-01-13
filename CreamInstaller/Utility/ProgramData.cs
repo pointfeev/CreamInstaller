@@ -139,7 +139,7 @@ internal static class ProgramData
     {
         try
         {
-            if (choices is null || !choices.Any())
+            if (choices is null || choices.Count == 0)
                 DlcChoicesPath.DeleteFile();
             else
                 DlcChoicesPath.WriteFile(JsonConvert.SerializeObject(choices));

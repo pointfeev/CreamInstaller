@@ -138,7 +138,7 @@ internal sealed partial class UpdateForm : CustomForm
         cancellation = new();
         bool success = true;
         PackagePath.DeleteFile(true);
-        await using Stream update = PackagePath.CreateFile(true);
+        await using FileStream update = PackagePath.CreateFile(true);
         bool retry = true;
         try
         {

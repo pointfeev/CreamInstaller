@@ -31,11 +31,11 @@ internal static class SmokeAPI
         HashSet<SelectionDLC> overrideDlc = selection.DLC.Where(dlc => !dlc.Enabled).ToHashSet();
         foreach (SelectionDLC extraDlc in selection.ExtraSelections.SelectMany(extraSelection => extraSelection.DLC.Where(dlc => !dlc.Enabled)))
             _ = overrideDlc.Add(extraDlc);
-        HashSet<SelectionDLC> injectDlc = new();
+        HashSet<SelectionDLC> injectDlc = [];
         if (selection.DLC.Count() > 64)
             foreach (SelectionDLC hiddenDlc in selection.DLC.Where(dlc => dlc.Enabled && dlc.Type is DLCType.SteamHidden))
                 _ = injectDlc.Add(hiddenDlc);
-        List<KeyValuePair<string, (string name, SortedList<string, SelectionDLC> injectDlc)>> extraApps = new();
+        List<KeyValuePair<string, (string name, SortedList<string, SelectionDLC> injectDlc)>> extraApps = [];
         foreach (Selection extraSelection in selection.ExtraSelections.Where(extraSelection => extraSelection.DLC.Count() > 64))
         {
             SortedList<string, SelectionDLC> extraInjectDlc = new(PlatformIdComparer.String);
@@ -68,7 +68,7 @@ internal static class SmokeAPI
         }
     }
 
-    private static void WriteConfig(TextWriter writer, string appId, SortedList<string, (string name, SortedList<string, SelectionDLC> injectDlc)> extraApps,
+    private static void WriteConfig(StreamWriter writer, string appId, SortedList<string, (string name, SortedList<string, SelectionDLC> injectDlc)> extraApps,
         SortedList<string, SelectionDLC> overrideDlc, SortedList<string, SelectionDLC> injectDlc, InstallForm installForm = null)
     {
         writer.WriteLine("{");

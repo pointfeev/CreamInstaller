@@ -205,8 +205,8 @@ internal static class SteamCMD
             if (output is null)
             {
                 output = await Run(appId) ?? "";
-                int openBracket = output.IndexOf("{", StringComparison.Ordinal);
-                int closeBracket = output.LastIndexOf("}", StringComparison.Ordinal);
+                int openBracket = output.IndexOf('{');
+                int closeBracket = output.LastIndexOf('}');
                 if (openBracket != -1 && closeBracket != -1 && closeBracket > openBracket)
                 {
                     output = $"\"{appId}\"\n" + output[openBracket..(1 + closeBracket)];
@@ -255,7 +255,7 @@ internal static class SteamCMD
     internal static async Task<HashSet<string>> ParseDlcAppIds(VProperty appInfo)
         => await Task.Run(() =>
         {
-            HashSet<string> dlcIds = new();
+            HashSet<string> dlcIds = [];
             if (Program.Canceled || appInfo is null)
                 return dlcIds;
             VToken extended = appInfo.Value.GetChild("extended");

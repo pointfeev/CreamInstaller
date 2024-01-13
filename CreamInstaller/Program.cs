@@ -13,7 +13,7 @@ internal static class Program
 {
     internal static readonly string Name = Application.CompanyName;
     private static readonly string Description = Application.ProductName;
-    internal static readonly string Version = Application.ProductVersion;
+    internal static readonly string Version = Application.ProductVersion[..(Application.ProductVersion.IndexOf('+') is var index && index != -1 ? index : Application.ProductVersion.Length)];
 
     internal const string RepositoryOwner = "pointfeev";
     internal static readonly string RepositoryName = Name;
@@ -32,9 +32,9 @@ internal static class Program
     internal static readonly int CurrentProcessId = CurrentProcess.Id;
 
     internal static bool BlockProtectedGames = true;
-    internal static readonly string[] ProtectedGames = { "PAYDAY 2" };
-    internal static readonly string[] ProtectedGameDirectories = { @"\EasyAntiCheat", @"\BattlEye" };
-    internal static readonly string[] ProtectedGameDirectoryExceptions = Array.Empty<string>();
+    internal static readonly string[] ProtectedGames = ["PAYDAY 2"];
+    internal static readonly string[] ProtectedGameDirectories = [@"\EasyAntiCheat", @"\BattlEye"];
+    internal static readonly string[] ProtectedGameDirectoryExceptions = [];
 
     internal static bool IsGameBlocked(string name, string directory = null)
         => BlockProtectedGames && (ProtectedGames.Contains(name) || directory is not null && !ProtectedGameDirectoryExceptions.Contains(name)

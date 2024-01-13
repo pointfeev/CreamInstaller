@@ -16,14 +16,14 @@ internal sealed partial class DialogForm : CustomForm
     {
         descriptionIcon ??= Icon;
         icon.Image = descriptionIcon?.ToBitmap();
-        List<LinkLabel.Link> links = new();
+        List<LinkLabel.Link> links = [];
         for (int i = 0; i < descriptionText.Length; i++)
             if (descriptionText[i] == '[')
             {
-                int textLeft = descriptionText.IndexOf("[", i, StringComparison.Ordinal);
-                int textRight = descriptionText.IndexOf("]", textLeft == -1 ? i : textLeft, StringComparison.Ordinal);
-                int linkLeft = descriptionText.IndexOf("(", textRight == -1 ? i : textRight, StringComparison.Ordinal);
-                int linkRight = descriptionText.IndexOf(")", linkLeft == -1 ? i : linkLeft, StringComparison.Ordinal);
+                int textLeft = descriptionText.IndexOf('[', i);
+                int textRight = descriptionText.IndexOf(']', textLeft == -1 ? i : textLeft);
+                int linkLeft = descriptionText.IndexOf('(', textRight == -1 ? i : textRight);
+                int linkRight = descriptionText.IndexOf(')', linkLeft == -1 ? i : linkLeft);
                 if (textLeft == -1 || textRight != linkLeft - 1 || linkRight == -1)
                     continue;
                 string text = descriptionText[(textLeft + 1)..textRight];

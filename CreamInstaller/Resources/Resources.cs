@@ -17,8 +17,7 @@ internal static class Resources
     private static readonly Dictionary<ResourceIdentifier, HashSet<string>> ResourceMD5s = new()
     {
         {
-            ResourceIdentifier.Koaloader, new()
-            {
+            ResourceIdentifier.Koaloader, [
                 "8A0958687B5ED7C34DAD037856DD1530", // Koaloader v2.0.0
                 "8FECDEB40980F4E687C10E056232D96B", // Koaloader v2.0.0
                 "92AD5E145A7CF9BA6F841BEB714B919B", // Koaloader v2.0.0
@@ -351,27 +350,24 @@ internal static class Resources
                 "4207947D0452C1E33428ED098DC23D26", // Koaloader v3.0.2
                 "BDD0DCAE7A5FBBBA0D8B857AC34BD43C", // Koaloader v3.0.2
                 "A0933D21552CC5C835416DFD7604548D" // Koaloader v3.0.2
-            }
+            ]
         },
         {
-            ResourceIdentifier.EpicOnlineServices32, new()
-            {
+            ResourceIdentifier.EpicOnlineServices32, [
                 "069A57B1834A960193D2AD6B96926D70", // ScreamAPI v3.0.0
                 "E2FB3A4A9583FDC215832E5F935E4440", // ScreamAPI v3.0.1
                 "8B4B30AFAE8D7B06413EE2F2266B20DB" // ScreamAPI v4.0.0-rc01
-            }
+            ]
         },
         {
-            ResourceIdentifier.EpicOnlineServices64, new()
-            {
+            ResourceIdentifier.EpicOnlineServices64, [
                 "0D62E57139F1A64F807A9934946A9474", // ScreamAPI v3.0.0
                 "3875C7B735EE80C23239CC4749FDCBE6", // ScreamAPI v3.0.1
                 "CBC89E2221713B0D4482F91282030A88" // ScreamAPI v4.0.0-rc01
-            }
+            ]
         },
         {
-            ResourceIdentifier.Steamworks32, new()
-            {
+            ResourceIdentifier.Steamworks32, [
                 "02594110FE56B2945955D46670B9A094", // CreamAPI v4.5.0.0 Hotfix
                 "B2434578957CBE38BDCE0A671C1262FC", // SmokeAPI v1.0.0
                 "973AB1632B747D4BF3B2666F32E34327", // SmokeAPI v1.0.1
@@ -385,11 +381,10 @@ internal static class Resources
                 "8B075C6B272A172A014D5C9E60F13DF2", // SmokeAPI v2.0.3
                 "A3873569DECAD08962C46E88352E6DB1", // SmokeAPI v2.0.4
                 "4A1A823E5CF4FB861DD6BA94539D29C4" // SmokeAPI v2.0.5
-            }
+            ]
         },
         {
-            ResourceIdentifier.Steamworks64, new()
-            {
+            ResourceIdentifier.Steamworks64, [
                 "30091B91923D9583A54A93ED1145554B", // CreamAPI v4.5.0.0 Hotfix
                 "08713035CAD6F52548FF324D0487B88D", // SmokeAPI v1.0.0
                 "D077737B9979D32458AC938A2978FA3C", // SmokeAPI v1.0.1
@@ -403,33 +398,29 @@ internal static class Resources
                 "E4DC2AF2B8B77A0C9BF9BFBBAEA11CF7", // SmokeAPI v2.0.3
                 "C0DDB49C9BFD3E05CBC1C61D117E93F9", // SmokeAPI v2.0.4
                 "F7C3064D5E3C892B168F504C21AC4923" // SmokeAPI v2.0.5
-            }
+            ]
         },
         {
-            ResourceIdentifier.Uplay32, new()
-            {
+            ResourceIdentifier.Uplay32, [
                 "1977967B2549A38EC2DB39D4C8ED499B" // Uplay R1 Unlocker v2.0.0
-            }
+            ]
         },
         {
-            ResourceIdentifier.Uplay64, new()
-            {
+            ResourceIdentifier.Uplay64, [
                 "333FEDD9DC2B299419B37ED1624FF8DB" // Uplay R1 Unlocker v2.0.0
-            }
+            ]
         },
         {
-            ResourceIdentifier.Upc32, new()
-            {
+            ResourceIdentifier.Upc32, [
                 "C14368BC4EE19FDE8DBAC07E31C67AE4", // Uplay R2 Unlocker v3.0.0
                 "DED3A3EA1876E3110D7D87B9A22946B0" // Uplay R2 Unlocker v3.0.1
-            }
+            ]
         },
         {
-            ResourceIdentifier.Upc64, new()
-            {
+            ResourceIdentifier.Upc64, [
                 "7D9A4C12972BAABCB6C181920CC0F19B", // Uplay R2 Unlocker v3.0.0
                 "D7FDBFE0FC8D7600FEB8EC0A97713184" // Uplay R2 Unlocker v3.0.1
-            }
+            ]
         }
     };
 
@@ -440,7 +431,7 @@ internal static class Resources
             if (embeddedResources is not null)
                 return embeddedResources;
             string[] names = Assembly.GetExecutingAssembly().GetManifestResourceNames();
-            embeddedResources = new();
+            embeddedResources = [];
             foreach (string resourceName in names.Where(n => n.StartsWith("CreamInstaller.Resources.", StringComparison.Ordinal)))
                 _ = embeddedResources.Add(resourceName[25..]);
             return embeddedResources;
@@ -491,13 +482,13 @@ internal static class Resources
             {
                 e.path = Path.GetDirectoryName(e.path);
                 return e;
-            }).DistinctBy(e => e.path).ToList() ?? new());
+            }).DistinctBy(e => e.path).ToList() ?? []);
 
     internal static async Task<List<(string path, BinaryType binaryType)>> GetExecutables(this string rootDirectory, bool filterCommon = false,
         Func<string, bool> validFunc = null)
         => await Task.Run(() =>
         {
-            List<(string path, BinaryType binaryType)> executables = new();
+            List<(string path, BinaryType binaryType)> executables = [];
             if (Program.Canceled || !rootDirectory.DirectoryExists())
                 return null;
             foreach (string path in rootDirectory.EnumerateDirectory("*.exe", true))
@@ -531,7 +522,7 @@ internal static class Resources
     internal static async Task<HashSet<string>> GetDllDirectoriesFromGameDirectory(this string gameDirectory, Platform platform)
         => await Task.Run(() =>
         {
-            HashSet<string> dllDirectories = new();
+            HashSet<string> dllDirectories = [];
             if (Program.Canceled || !gameDirectory.DirectoryExists())
                 return null;
             foreach (string directory in gameDirectory.EnumerateSubdirectories("*", true).Append(gameDirectory))
