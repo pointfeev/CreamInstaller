@@ -205,23 +205,31 @@ internal sealed partial class UpdateForm : CustomForm
             string directory = Path.GetDirectoryName(path);
             string file = Path.GetFileName(path);
             StringBuilder commands = new();
-            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"\nTASKKILL /F /T /PID {Program.CurrentProcessId}");
+            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"chcp 65001");
             _ = commands.AppendLine(CultureInfo.InvariantCulture, $":LOOP");
-            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"TASKLIST | FIND \" {Program.CurrentProcessId}\" ");
+            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"TASKKILL /F /T /PID {Program.CurrentProcessId}");
+            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"TASKLIST | FIND \" {Program.CurrentProcessId} \"");
             _ = commands.AppendLine(CultureInfo.InvariantCulture, $"IF NOT ERRORLEVEL 1 (");
             _ = commands.AppendLine(CultureInfo.InvariantCulture, $"   TIMEOUT /T 1");
             _ = commands.AppendLine(CultureInfo.InvariantCulture, $"   GOTO LOOP");
             _ = commands.AppendLine(CultureInfo.InvariantCulture, $")");
             _ = commands.AppendLine(CultureInfo.InvariantCulture, $"MOVE /Y \"{ExecutablePath}\" \"{path}\"");
             _ = commands.AppendLine(CultureInfo.InvariantCulture, $"START \"\" /D \"{directory}\" \"{file}\"");
+#if DEBUG
+            _ = commands.AppendLine(CultureInfo.InvariantCulture, $"PAUSE");
+#endif
             _ = commands.AppendLine(CultureInfo.InvariantCulture, $"EXIT");
-            UpdaterPath.WriteFile(commands.ToString(), true, this);
+            UpdaterPath.WriteFile(commands.ToString(), true, this, Encoding.Default);
             Process process = new();
             ProcessStartInfo startInfo = new()
             {
                 WorkingDirectory = ProgramData.DirectoryPath, FileName = "cmd.exe",
                 Arguments = $"/C START \"UPDATER\" /B {Path.GetFileName(UpdaterPath)}",
+#if DEBUG
+                CreateNoWindow = false
+#else
                 CreateNoWindow = true
+#endif
             };
             process.StartInfo = startInfo;
             _ = process.Start();
