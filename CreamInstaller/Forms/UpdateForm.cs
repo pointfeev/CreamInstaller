@@ -79,9 +79,8 @@ internal sealed partial class UpdateForm : CustomForm
             updateButton.Enabled = true;
             updateButton.Click += OnUpdate;
             changelogTreeView.Visible = true;
-            for (int r = 0; r < releases!.Count; r++)
+            foreach (ProgramRelease release in releases)
             {
-                ProgramRelease release = releases[r];
 #if !DEBUG
                 if (release.Version <= currentVersion)
                     continue;
@@ -90,10 +89,9 @@ internal sealed partial class UpdateForm : CustomForm
                 changelogTreeView.Nodes.Add(root);
                 if (changelogTreeView.Nodes.Count > 0)
                     changelogTreeView.Nodes[0].EnsureVisible();
-                for (int c = 0; c < release.Changes.Length; c++)
+                foreach (string change in release.Changes)
                     Invoke(delegate
                     {
-                        string change = release.Changes[c];
                         TreeNode changeNode = new() { Text = change };
                         root.Nodes.Add(changeNode);
                         root.Expand();
