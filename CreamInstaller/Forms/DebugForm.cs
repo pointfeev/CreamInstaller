@@ -36,6 +36,7 @@ internal sealed partial class DebugForm : CustomForm
             if (command == 0xF010) // SC_MOVE
                 return;
         }
+
         base.WndProc(ref message);
     }
 
@@ -48,6 +49,7 @@ internal sealed partial class DebugForm : CustomForm
             attachedForm.SizeChanged -= OnChange;
             attachedForm.VisibleChanged -= OnChange;
         }
+
         attachedForm = form;
         attachedForm.Activated += OnChange;
         attachedForm.LocationChanged += OnChange;

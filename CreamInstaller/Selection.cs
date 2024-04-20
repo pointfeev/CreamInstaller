@@ -11,8 +11,11 @@ namespace CreamInstaller;
 
 public enum Platform
 {
-    None = 0, Paradox, Steam,
-    Epic, Ubisoft
+    None = 0,
+    Paradox,
+    Steam,
+    Epic,
+    Ubisoft
 }
 
 internal sealed class Selection : IEquatable<Selection>
@@ -57,15 +60,23 @@ internal sealed class Selection : IEquatable<Selection>
 
     internal static IEnumerable<Selection> AllEnabled => All.Keys.Where(s => s.Enabled);
 
-    internal bool Enabled { get => TreeNode.Checked; set => TreeNode.Checked = value; }
+    internal bool Enabled
+    {
+        get => TreeNode.Checked;
+        set => TreeNode.Checked = value;
+    }
 
     internal IEnumerable<SelectionDLC> DLC => SelectionDLC.All.Keys.Where(dlc => Equals(dlc.Selection, this));
 
-    public bool Equals(Selection other) => other is not null && (ReferenceEquals(this, other) || Id == other.Id && Platform == other.Platform);
+    public bool Equals(Selection other) => other is not null &&
+                                           (ReferenceEquals(this, other) ||
+                                            Id == other.Id && Platform == other.Platform);
 
-    internal static Selection GetOrCreate(Platform platform, string id, string name, string rootDirectory, HashSet<string> dllDirectories,
+    internal static Selection GetOrCreate(Platform platform, string id, string name, string rootDirectory,
+        HashSet<string> dllDirectories,
         List<(string directory, BinaryType binaryType)> executableDirectories)
-        => FromId(platform, id) ?? new Selection(platform, id, name, rootDirectory, dllDirectories, executableDirectories);
+        => FromId(platform, id) ??
+           new Selection(platform, id, name, rootDirectory, dllDirectories, executableDirectories);
 
     internal void Remove()
     {
@@ -82,16 +93,19 @@ internal sealed class Selection : IEquatable<Selection>
             Remove();
             return;
         }
+
         if (Program.IsGameBlocked(Name, RootDirectory))
         {
             Remove();
             return;
         }
+
         if (!RootDirectory.DirectoryExists())
         {
             Remove();
             return;
         }
+
         _ = DllDirectories.RemoveWhere(directory => !directory.DirectoryExists());
         if (DllDirectories.Count < 1)
             Remove();
@@ -103,7 +117,8 @@ internal sealed class Selection : IEquatable<Selection>
             selection.Validate(programsToScan);
     }
 
-    internal static Selection FromId(Platform platform, string gameId) => All.Keys.FirstOrDefault(s => s.Platform == platform && s.Id == gameId);
+    internal static Selection FromId(Platform platform, string gameId) =>
+        All.Keys.FirstOrDefault(s => s.Platform == platform && s.Id == gameId);
 
     public override bool Equals(object obj) => ReferenceEquals(this, obj) || obj is Selection other && Equals(other);
 

@@ -94,6 +94,7 @@ internal sealed class CustomTreeView : TreeView
         }
         else
             text = platform.ToString();
+
         Size size = TextRenderer.MeasureText(graphics, text, font);
         bounds = bounds with { X = bounds.X + bounds.Width, Width = size.Width };
         selectionBounds = new(selectionBounds.Location, selectionBounds.Size + bounds.Size with { Height = 0 });
@@ -111,11 +112,13 @@ internal sealed class CustomTreeView : TreeView
             size = TextRenderer.MeasureText(graphics, text, font);
             const int left = -4;
             bounds = bounds with { X = bounds.X + bounds.Width + left, Width = size.Width };
-            selectionBounds = new(selectionBounds.Location, selectionBounds.Size + new Size(bounds.Size.Width + left, 0));
+            selectionBounds = new(selectionBounds.Location,
+                selectionBounds.Size + new Size(bounds.Size.Width + left, 0));
             graphics.FillRectangle(brush, bounds);
             point = new(bounds.Location.X - 1, bounds.Location.Y + 1);
             TextRenderer.DrawText(graphics, text, font, point, color, TextFormatFlags.Default);
         }
+
         if (form is SelectForm)
         {
             Selection selection = Selection.FromId(platform, id);
@@ -127,6 +130,7 @@ internal sealed class CustomTreeView : TreeView
                     bounds = bounds with { X = bounds.X + bounds.Width, Width = size.Width };
                     graphics.FillRectangle(brush, bounds);
                 }
+
                 CheckBoxState checkBoxState = selection.Koaloader
                     ? Enabled ? CheckBoxState.CheckedPressed : CheckBoxState.CheckedDisabled
                     : Enabled
@@ -151,21 +155,25 @@ internal sealed class CustomTreeView : TreeView
                 this.checkBoxBounds[selection] = RectangleToClient(checkBoxBounds);
                 if (selection.Koaloader)
                 {
-                    comboBoxFont ??= new(font.FontFamily, 6, font.Style, font.Unit, font.GdiCharSet, font.GdiVerticalFont);
+                    comboBoxFont ??= new(font.FontFamily, 6, font.Style, font.Unit, font.GdiCharSet,
+                        font.GdiVerticalFont);
                     ComboBoxState comboBoxState = Enabled ? ComboBoxState.Normal : ComboBoxState.Disabled;
                     text = (selection.KoaloaderProxy ?? Selection.DefaultKoaloaderProxy) + ".dll";
                     size = TextRenderer.MeasureText(graphics, text, comboBoxFont) + new Size(6, 0);
                     const int padding = 2;
                     bounds = new(bounds.X + bounds.Width, bounds.Y + padding / 2, size.Width, bounds.Height - padding);
-                    selectionBounds = new(selectionBounds.Location, selectionBounds.Size + bounds.Size with { Height = 0 });
+                    selectionBounds = new(selectionBounds.Location,
+                        selectionBounds.Size + bounds.Size with { Height = 0 });
                     Rectangle comboBoxBounds = bounds;
                     graphics.FillRectangle(backBrush, bounds);
                     ComboBoxRenderer.DrawTextBox(graphics, bounds, text, comboBoxFont, comboBoxState);
                     size = new(14, 0);
                     left = -1;
                     bounds = bounds with { X = bounds.X + bounds.Width + left, Width = size.Width };
-                    selectionBounds = new(selectionBounds.Location, selectionBounds.Size + new Size(bounds.Size.Width + left, 0));
-                    comboBoxBounds = new(comboBoxBounds.Location, comboBoxBounds.Size + new Size(bounds.Size.Width + left, 0));
+                    selectionBounds = new(selectionBounds.Location,
+                        selectionBounds.Size + new Size(bounds.Size.Width + left, 0));
+                    comboBoxBounds = new(comboBoxBounds.Location,
+                        comboBoxBounds.Size + new Size(bounds.Size.Width + left, 0));
                     ComboBoxRenderer.DrawDropDownButton(graphics, bounds, comboBoxState);
                     this.comboBoxBounds[selection] = RectangleToClient(comboBoxBounds);
                 }
@@ -173,6 +181,7 @@ internal sealed class CustomTreeView : TreeView
                     _ = comboBoxBounds.Remove(selection);
             }
         }
+
         this.selectionBounds[node] = RectangleToClient(selectionBounds);
     }
 
@@ -192,6 +201,7 @@ internal sealed class CustomTreeView : TreeView
                     selectForm.OnNodeRightClick(pair.Key, e.Location);
                 break;
             }
+
         if (e.Button is not MouseButtons.Left)
             return;
         if (comboBoxBounds.Count > 0 && selectForm is not null)
@@ -200,11 +210,12 @@ internal sealed class CustomTreeView : TreeView
                     _ = comboBoxBounds.Remove(pair.Key);
                 else if (pair.Value.Contains(clickPoint))
                 {
-                    HashSet<string> proxies = EmbeddedResources.Where(r => r.StartsWith("Koaloader", StringComparison.Ordinal)).Select(p =>
-                    {
-                        p.GetProxyInfoFromIdentifier(out string proxyName, out _);
-                        return proxyName;
-                    }).ToHashSet();
+                    HashSet<string> proxies = EmbeddedResources
+                        .Where(r => r.StartsWith("Koaloader", StringComparison.Ordinal)).Select(p =>
+                        {
+                            p.GetProxyInfoFromIdentifier(out string proxyName, out _);
+                            return proxyName;
+                        }).ToHashSet();
                     comboBoxDropDown ??= new();
                     comboBoxDropDown.ShowItemToolTips = false;
                     comboBoxDropDown.Items.Clear();
@@ -219,6 +230,7 @@ internal sealed class CustomTreeView : TreeView
                             canUse = false;
                             break;
                         }
+
                         if (canUse)
                             _ = comboBoxDropDown.Items.Add(new ToolStripButton(proxy + ".dll", null, (_, _) =>
                             {
@@ -226,9 +238,11 @@ internal sealed class CustomTreeView : TreeView
                                 selectForm.OnKoaloaderChanged();
                             }) { Font = comboBoxFont });
                     }
+
                     comboBoxDropDown.Show(this, PointToScreen(new(pair.Value.Left, pair.Value.Bottom - 1)));
                     break;
                 }
+
         foreach (KeyValuePair<Selection, Rectangle> pair in checkBoxBounds)
             if (!Selection.All.ContainsKey(pair.Key))
                 _ = checkBoxBounds.Remove(pair.Key);

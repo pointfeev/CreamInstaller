@@ -15,8 +15,10 @@ internal static partial class NativeImports
 
     [LibraryImport("kernel32.dll", SetLastError = true), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    internal static partial bool GetBinaryType([MarshalAs(UnmanagedType.LPStr)] string lpApplicationName, out BinaryType lpBinaryType);
+    internal static partial bool GetBinaryType([MarshalAs(UnmanagedType.LPStr)] string lpApplicationName,
+        out BinaryType lpBinaryType);
 
     [LibraryImport("user32.dll", SetLastError = true), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    internal static partial void SetWindowPos(nint hWnd, nint hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
+    internal static partial void SetWindowPos(nint hWnd, nint hWndInsertAfter, int x, int y, int cx, int cy,
+        uint uFlags);
 }

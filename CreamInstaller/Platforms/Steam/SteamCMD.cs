@@ -23,7 +23,8 @@ internal static class SteamCMD
 
     private static readonly string FilePath = DirectoryPath + @"\steamcmd.exe";
 
-    private static readonly ConcurrentDictionary<string, int> AttemptCount = new(); // the more app_updates, the longer SteamCMD should wait for app_info_print
+    private static readonly ConcurrentDictionary<string, int>
+        AttemptCount = new(); // the more app_updates, the longer SteamCMD should wait for app_info_print
 
     private static readonly int[] Locks = new int[ProcessLimit];
 
@@ -42,13 +43,13 @@ internal static class SteamCMD
     private static string GetArguments(string appId)
         => AttemptCount.TryGetValue(appId, out int attempts)
             ? $@"@ShutdownOnFailedCommand 0 +force_install_dir {DirectoryPath} +login anonymous +app_info_print {appId} "
-          + string.Concat(Enumerable.Repeat("+app_update 4 ", attempts)) + "+quit"
+              + string.Concat(Enumerable.Repeat("+app_update 4 ", attempts)) + "+quit"
             : $"+login anonymous +app_info_print {appId} +quit";
 
     private static async Task<string> Run(string appId)
         => await Task.Run(() =>
         {
-        wait_for_lock:
+            wait_for_lock:
             if (Program.Canceled)
                 return "";
             for (int i = 0; i < Locks.Length; i++)
@@ -62,13 +63,17 @@ internal static class SteamCMD
                     _ = AttemptCount.TryGetValue(appId, out int count);
                     AttemptCount[appId] = ++count;
                 }
+
                 if (Program.Canceled)
                     return "";
                 ProcessStartInfo processStartInfo = new()
                 {
-                    FileName = FilePath, RedirectStandardOutput = true, RedirectStandardInput = true, RedirectStandardError = true,
-                    UseShellExecute = false, Arguments = appId is null ? "+quit" : GetArguments(appId), CreateNoWindow = true,
-                    StandardInputEncoding = Encoding.UTF8, StandardOutputEncoding = Encoding.UTF8, StandardErrorEncoding = Encoding.UTF8
+                    FileName = FilePath, RedirectStandardOutput = true, RedirectStandardInput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false, Arguments = appId is null ? "+quit" : GetArguments(appId),
+                    CreateNoWindow = true,
+                    StandardInputEncoding = Encoding.UTF8, StandardOutputEncoding = Encoding.UTF8,
+                    StandardErrorEncoding = Encoding.UTF8
                 };
                 Process process = Process.Start(processStartInfo);
                 StringBuilder output = new();
@@ -83,6 +88,7 @@ internal static class SteamCMD
                         process.Close();
                         break;
                     }
+
                     int c = process.StandardOutput.Read();
                     if (c != -1)
                     {
@@ -92,13 +98,15 @@ internal static class SteamCMD
                             appInfoStarted = true;
                         _ = appInfoStarted ? appInfo.Append(ch) : output.Append(ch);
                     }
+
                     DateTime now = DateTime.UtcNow;
                     TimeSpan timeDiff = now - lastOutput;
                     if (!(timeDiff.TotalSeconds > 0.1))
                         continue;
                     process.Kill(true);
                     process.Close();
-                    if (appId != null && output.ToString().Contains($"No app info for AppID {appId} found, requesting..."))
+                    if (appId != null &&
+                        output.ToString().Contains($"No app info for AppID {appId} found, requesting..."))
                     {
                         AttemptCount[appId]++;
                         processStartInfo.Arguments = GetArguments(appId);
@@ -110,9 +118,11 @@ internal static class SteamCMD
                     else
                         break;
                 }
+
                 _ = Interlocked.Decrement(ref Locks[i]);
                 return appInfo.ToString();
             }
+
             Thread.Sleep(200);
             goto wait_for_lock;
         });
@@ -122,14 +132,16 @@ internal static class SteamCMD
         await Cleanup();
         if (!FilePath.FileExists())
         {
-        retryDownload:
+            retryDownload:
             HttpClient httpClient = HttpClientManager.HttpClient;
             if (httpClient is null)
                 return false;
             while (!Program.Canceled)
                 try
                 {
-                    byte[] file = await httpClient.GetByteArrayAsync(new Uri("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip"));
+                    byte[] file =
+                        await httpClient.GetByteArrayAsync(
+                            new Uri("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip"));
                     _ = file.WriteResource(ArchivePath);
                     ArchivePath.ExtractZip(DirectoryPath);
                     ArchivePath.DeleteFile();
@@ -142,9 +154,11 @@ internal static class SteamCMD
                     return false;
                 }
         }
+
         if (DllPath.FileExists())
             return true;
-        FileSystemWatcher watcher = new(DirectoryPath) { Filter = "*", IncludeSubdirectories = true, EnableRaisingEvents = true };
+        FileSystemWatcher watcher = new(DirectoryPath)
+            { Filter = "*", IncludeSubdirectories = true, EnableRaisingEvents = true };
         if (DllPath.FileExists())
             progress.Report(-15); // update (not used at the moment)
         else
@@ -176,7 +190,8 @@ internal static class SteamCMD
                     file.DeleteFile();
                 foreach (string file in DirectoryPath.EnumerateDirectory("*.ntfs_transaction_failed"))
                     file.DeleteFile();
-                AppCachePath.DeleteDirectory(); // this is definitely needed, so SteamCMD gets the latest information for us
+                AppCachePath
+                    .DeleteDirectory(); // this is definitely needed, so SteamCMD gets the latest information for us
                 DumpsPath.DeleteDirectory();
                 LogsPath.DeleteDirectory();
                 SteamAppsPath.DeleteDirectory(); // this is just a useless folder created from +app_update 4
@@ -196,10 +211,12 @@ internal static class SteamCMD
             if (attempts > 10)
             {
 #if DEBUG
-                DebugForm.Current.Log("Failed to query SteamCMD after 10 tries: " + appId + " (" + branch + ")", LogTextBox.Warning);
+                DebugForm.Current.Log("Failed to query SteamCMD after 10 tries: " + appId + " (" + branch + ")",
+                    LogTextBox.Warning);
 #endif
                 break;
             }
+
             string appUpdateFile = $@"{AppInfoPath}\{appId}.vdf";
             string output = appUpdateFile.ReadFile();
             if (output is null)
@@ -216,27 +233,34 @@ internal static class SteamCMD
                 else
                 {
 #if DEBUG
-                    DebugForm.Current.Log("SteamCMD query failed on attempt #" + attempts + " for " + appId + " (" + branch + "): Bad output",
+                    DebugForm.Current.Log(
+                        "SteamCMD query failed on attempt #" + attempts + " for " + appId + " (" + branch +
+                        "): Bad output",
                         LogTextBox.Warning);
 #endif
                     continue;
                 }
             }
+
             if (!ValveDataFile.TryDeserialize(output, out VProperty appInfo) || appInfo.Value is VValue)
             {
                 appUpdateFile.DeleteFile();
 #if DEBUG
-                DebugForm.Current.Log("SteamCMD query failed on attempt #" + attempts + " for " + appId + " (" + branch + "): Deserialization failed",
+                DebugForm.Current.Log(
+                    "SteamCMD query failed on attempt #" + attempts + " for " + appId + " (" + branch +
+                    "): Deserialization failed",
                     LogTextBox.Warning);
 #endif
                 continue;
             }
+
             if (!appInfo.Value.Children().Any())
                 return appInfo;
             VToken type = appInfo.Value.GetChild("common")?.GetChild("type");
             if (type is not null && type.ToString() != "Game")
                 return appInfo;
-            string buildid = appInfo.Value.GetChild("depots")?.GetChild("branches")?.GetChild(branch)?.GetChild("buildid")?.ToString();
+            string buildid = appInfo.Value.GetChild("depots")?.GetChild("branches")?.GetChild(branch)
+                ?.GetChild("buildid")?.ToString();
             if (buildid is null && type is not null)
                 return appInfo;
             if (type is not null && (!int.TryParse(buildid, out int gamebuildId) || gamebuildId >= buildId))
@@ -246,9 +270,12 @@ internal static class SteamCMD
                 dlcAppUpdateFile.DeleteFile();
             appUpdateFile.DeleteFile();
 #if DEBUG
-            DebugForm.Current.Log("SteamCMD query skipped on attempt #" + attempts + " for " + appId + " (" + branch + "): Outdated cache", LogTextBox.Warning);
+            DebugForm.Current.Log(
+                "SteamCMD query skipped on attempt #" + attempts + " for " + appId + " (" + branch +
+                "): Outdated cache", LogTextBox.Warning);
 #endif
         }
+
         return null;
     }
 
@@ -267,15 +294,18 @@ internal static class SteamCMD
                         if (int.TryParse(id, out int appId) && appId > 0)
                             _ = dlcIds.Add("" + appId);
                 }
+
             VToken depots = appInfo.Value.GetChild("depots");
             if (depots is null)
                 return dlcIds;
-            foreach (VToken vToken in depots.Where(p => p is VProperty property && int.TryParse(property.Key, out int _)))
+            foreach (VToken vToken in depots.Where(
+                         p => p is VProperty property && int.TryParse(property.Key, out int _)))
             {
                 VProperty property = (VProperty)vToken;
                 if (int.TryParse(property.Value.GetChild("dlcappid")?.ToString(), out int appId) && appId > 0)
                     _ = dlcIds.Add("" + appId);
             }
+
             return dlcIds;
         });
 

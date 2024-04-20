@@ -29,8 +29,10 @@ internal static class HttpClientManager
         try
         {
             using HttpRequestMessage request = new(HttpMethod.Get, url);
-            using HttpResponseMessage response = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-            if (response.StatusCode is HttpStatusCode.NotModified && HttpContentCache.TryGetValue(url, out string content))
+            using HttpResponseMessage response =
+                await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            if (response.StatusCode is HttpStatusCode.NotModified &&
+                HttpContentCache.TryGetValue(url, out string content))
                 return content;
             _ = response.EnsureSuccessStatusCode();
             content = await response.Content.ReadAsStringAsync();

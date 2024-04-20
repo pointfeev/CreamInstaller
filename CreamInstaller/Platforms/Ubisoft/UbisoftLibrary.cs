@@ -34,6 +34,7 @@ internal static class UbisoftLibrary
                 if (installDir is not null && games.All(g => g.gameId != gameId))
                     games.Add((gameId, new DirectoryInfo(installDir).Name, installDir));
             }
+
             return games;
         });
 }

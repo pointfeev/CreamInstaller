@@ -50,16 +50,21 @@ internal sealed partial class UpdateForm : CustomForm
         updateButton.Click -= OnUpdateCancel;
         progressLabel.Text = "Checking for updates . . .";
         changelogTreeView.Visible = false;
-        changelogTreeView.Location = progressLabel.Location with { Y = progressLabel.Location.Y + progressLabel.Size.Height + 13 };
+        changelogTreeView.Location = progressLabel.Location with
+        {
+            Y = progressLabel.Location.Y + progressLabel.Size.Height + 13
+        };
         Refresh();
 #if !DEBUG
         Version currentVersion = new(Program.Version);
 #endif
         List<ProgramRelease> releases = null;
-        string response = await HttpClientManager.EnsureGet($"https://api.github.com/repos/{Program.RepositoryOwner}/{Program.RepositoryName}/releases");
+        string response =
+            await HttpClientManager.EnsureGet(
+                $"https://api.github.com/repos/{Program.RepositoryOwner}/{Program.RepositoryName}/releases");
         if (response is not null)
             releases = JsonConvert.DeserializeObject<List<ProgramRelease>>(response)
-              ?.Where(release => !release.Draft && !release.Prerelease && release.Asset is not null).ToList();
+                ?.Where(release => !release.Draft && !release.Prerelease && release.Asset is not null).ToList();
         latestRelease = releases?.FirstOrDefault();
 #if DEBUG
         if (latestRelease?.Version is not { } latestVersion)
@@ -101,7 +106,7 @@ internal sealed partial class UpdateForm : CustomForm
 
     private void OnLoad(object sender, EventArgs _)
     {
-    retry:
+        retry:
         try
         {
             UpdaterPath.DeleteFile();
@@ -125,7 +130,8 @@ internal sealed partial class UpdateForm : CustomForm
         updateButton.Text = "Cancel";
         updateButton.Click -= OnUpdate;
         updateButton.Click += OnUpdateCancel;
-        changelogTreeView.Location = progressBar.Location with { Y = progressBar.Location.Y + progressBar.Size.Height + 6 };
+        changelogTreeView.Location =
+            progressBar.Location with { Y = progressBar.Location.Y + progressBar.Size.Height + 6 };
         Refresh();
         Progress<int> progress = new();
         IProgress<int> iProgress = progress;
@@ -144,7 +150,8 @@ internal sealed partial class UpdateForm : CustomForm
         {
             if (cancellation is null || Program.Canceled)
                 throw new TaskCanceledException();
-            using HttpResponseMessage response = await HttpClientManager.HttpClient.GetAsync(latestRelease.Asset.BrowserDownloadUrl,
+            using HttpResponseMessage response = await HttpClientManager.HttpClient.GetAsync(
+                latestRelease.Asset.BrowserDownloadUrl,
                 HttpCompletionOption.ResponseHeadersRead, cancellation.Token);
             _ = response.EnsureSuccessStatusCode();
             if (cancellation is null || Program.Canceled)
@@ -155,7 +162,8 @@ internal sealed partial class UpdateForm : CustomForm
             long bytesRead = 0;
             int newBytes;
             while (cancellation is not null && !Program.Canceled
-             && (newBytes = await download.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellation.Token)) != 0)
+                                            && (newBytes = await download.ReadAsync(buffer.AsMemory(0, buffer.Length),
+                                                cancellation.Token)) != 0)
             {
                 if (cancellation is null || Program.Canceled)
                     throw new TaskCanceledException();
@@ -166,6 +174,7 @@ internal sealed partial class UpdateForm : CustomForm
                     continue;
                 iProgress.Report(report);
             }
+
             iProgress.Report((int)(bytesRead / bytes * 100));
             if (cancellation is null || Program.Canceled)
                 throw new TaskCanceledException();
@@ -179,6 +188,7 @@ internal sealed partial class UpdateForm : CustomForm
             retry = ex.HandleException(this, Program.Name + " encountered an exception while updating");
             success = false;
         }
+
         cancellation?.Dispose();
         cancellation = null;
         await update.DisposeAsync();
@@ -209,13 +219,15 @@ internal sealed partial class UpdateForm : CustomForm
             Process process = new();
             ProcessStartInfo startInfo = new()
             {
-                WorkingDirectory = ProgramData.DirectoryPath, FileName = "cmd.exe", Arguments = $"/C START \"UPDATER\" /B {Path.GetFileName(UpdaterPath)}",
+                WorkingDirectory = ProgramData.DirectoryPath, FileName = "cmd.exe",
+                Arguments = $"/C START \"UPDATER\" /B {Path.GetFileName(UpdaterPath)}",
                 CreateNoWindow = true
             };
             process.StartInfo = startInfo;
             _ = process.Start();
             return;
         }
+
         if (!retry)
             StartProgram();
         else

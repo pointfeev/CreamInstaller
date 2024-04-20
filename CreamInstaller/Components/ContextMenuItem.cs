@@ -23,17 +23,20 @@ internal sealed class ContextMenuItem : ToolStripMenuItem
     internal ContextMenuItem(string text, string imageIdentifier, EventHandler onClick = null) : this(text, onClick)
         => _ = TryImageIdentifier(this, imageIdentifier);
 
-    internal ContextMenuItem(string text, (string id, string iconUrl) imageIdentifierInfo, EventHandler onClick = null) : this(text, onClick)
+    internal ContextMenuItem(string text, (string id, string iconUrl) imageIdentifierInfo, EventHandler onClick = null)
+        : this(text, onClick)
         => _ = TryImageIdentifierInfo(this, imageIdentifierInfo);
 
-    internal ContextMenuItem(string text, (string id, string iconUrl) imageIdentifierInfo, string imageIdentifierFallback, EventHandler onClick = null) :
+    internal ContextMenuItem(string text, (string id, string iconUrl) imageIdentifierInfo,
+        string imageIdentifierFallback, EventHandler onClick = null) :
         this(text, onClick)
     {
         async void OnFail() => await TryImageIdentifier(this, imageIdentifierFallback);
         _ = TryImageIdentifierInfo(this, imageIdentifierInfo, OnFail);
     }
 
-    internal ContextMenuItem(string text, (string id, string iconUrl) imageIdentifierInfo, (string id, string iconUrl) imageIdentifierInfoFallback,
+    internal ContextMenuItem(string text, (string id, string iconUrl) imageIdentifierInfo,
+        (string id, string iconUrl) imageIdentifierInfoFallback,
         EventHandler onClick = null) : this(text, onClick)
     {
         async void OnFail() => await TryImageIdentifierInfo(this, imageIdentifierInfoFallback);
@@ -56,6 +59,7 @@ internal sealed class ContextMenuItem : ToolStripMenuItem
                                 image = file.GetFileIconImage();
                                 break;
                             }
+
                         break;
                     case "Notepad":
                         image = IconGrabber.GetNotepadImage();
@@ -67,26 +71,33 @@ internal sealed class ContextMenuItem : ToolStripMenuItem
                         image = IconGrabber.GetFileExplorerImage();
                         break;
                     case "SteamDB":
-                        image = await HttpClientManager.GetImageFromUrl(IconGrabber.GetDomainFaviconUrl("steamdb.info"));
+                        image = await HttpClientManager.GetImageFromUrl(
+                            IconGrabber.GetDomainFaviconUrl("steamdb.info"));
                         break;
                     case "Steam Store":
-                        image = await HttpClientManager.GetImageFromUrl(IconGrabber.GetDomainFaviconUrl("store.steampowered.com"));
+                        image = await HttpClientManager.GetImageFromUrl(
+                            IconGrabber.GetDomainFaviconUrl("store.steampowered.com"));
                         break;
                     case "Steam Community":
-                        image = await HttpClientManager.GetImageFromUrl(IconGrabber.GetDomainFaviconUrl("steamcommunity.com"));
+                        image = await HttpClientManager.GetImageFromUrl(
+                            IconGrabber.GetDomainFaviconUrl("steamcommunity.com"));
                         break;
                     case "ScreamDB":
-                        image = await HttpClientManager.GetImageFromUrl(IconGrabber.GetDomainFaviconUrl("scream-db.web.app"));
+                        image = await HttpClientManager.GetImageFromUrl(
+                            IconGrabber.GetDomainFaviconUrl("scream-db.web.app"));
                         break;
                     case "Epic Games":
-                        image = await HttpClientManager.GetImageFromUrl(IconGrabber.GetDomainFaviconUrl("epicgames.com"));
+                        image = await HttpClientManager.GetImageFromUrl(
+                            IconGrabber.GetDomainFaviconUrl("epicgames.com"));
                         break;
                     case "Ubisoft Store":
-                        image = await HttpClientManager.GetImageFromUrl(IconGrabber.GetDomainFaviconUrl("store.ubi.com"));
+                        image = await HttpClientManager.GetImageFromUrl(
+                            IconGrabber.GetDomainFaviconUrl("store.ubi.com"));
                         break;
                     default:
                         return;
                 }
+
                 if (image is not null)
                 {
                     Images[imageIdentifier] = image;
@@ -95,7 +106,8 @@ internal sealed class ContextMenuItem : ToolStripMenuItem
             }
         });
 
-    private static async Task TryImageIdentifierInfo(ContextMenuItem item, (string id, string iconUrl) imageIdentifierInfo, Action onFail = null)
+    private static async Task TryImageIdentifierInfo(ContextMenuItem item,
+        (string id, string iconUrl) imageIdentifierInfo, Action onFail = null)
         => await Task.Run(async () =>
         {
             try

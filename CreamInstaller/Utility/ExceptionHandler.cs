@@ -30,20 +30,27 @@ internal static class ExceptionHandler
                     int ciNum = line.LastIndexOf(@"CreamInstaller\", StringComparison.Ordinal);
                     int lineNum = line.LastIndexOf(":line ", StringComparison.Ordinal);
                     if (atNum != -1)
-                        _ = output.Append("\n    " + (inNum != -1 ? line[atNum..(inNum - 1)] : line[atNum..]) + (inNum != -1
-                            ? "\n        " + (ciNum != -1
-                                ? "in " + (lineNum != -1 ? line[ciNum..lineNum] + "\n            on " + line[(lineNum + 1)..] : line[ciNum..])
-                                : line[inNum..])
-                            : null));
+                        _ = output.Append("\n    " + (inNum != -1 ? line[atNum..(inNum - 1)] : line[atNum..]) +
+                                          (inNum != -1
+                                              ? "\n        " + (ciNum != -1
+                                                  ? "in " + (lineNum != -1
+                                                      ? line[ciNum..lineNum] + "\n            on " +
+                                                        line[(lineNum + 1)..]
+                                                      : line[ciNum..])
+                                                  : line[inNum..])
+                                              : null));
                 }
             }
+
             e = e.InnerException;
             stackDepth++;
         }
+
         return output.ToString();
     }
 
-    internal static bool HandleException(this Exception e, Form form = null, string caption = null, string acceptButtonText = "Retry",
+    internal static bool HandleException(this Exception e, Form form = null, string caption = null,
+        string acceptButtonText = "Retry",
         string cancelButtonText = "Cancel")
     {
         caption ??= Program.Name + " encountered an exception";
@@ -51,12 +58,14 @@ internal static class ExceptionHandler
         if (string.IsNullOrWhiteSpace(outputString))
             outputString = e?.ToString() ?? "Unknown exception";
         using DialogForm dialogForm = new(form ?? Form.ActiveForm);
-        return dialogForm.Show(SystemIcons.Error, outputString, acceptButtonText, cancelButtonText, caption) is DialogResult.OK;
+        return dialogForm.Show(SystemIcons.Error, outputString, acceptButtonText, cancelButtonText, caption) is
+            DialogResult.OK;
     }
 
     internal static void HandleFatalException(this Exception e)
     {
-        e.HandleException(caption: Program.Name + " encountered a fatal exception", acceptButtonText: "OK", cancelButtonText: null);
+        e.HandleException(caption: Program.Name + " encountered a fatal exception", acceptButtonText: "OK",
+            cancelButtonText: null);
         Application.Exit();
     }
 }

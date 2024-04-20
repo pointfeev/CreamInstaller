@@ -17,6 +17,7 @@ internal static class ValveDataFile
         {
             // ignored
         }
+
         return false;
     }
 
@@ -30,6 +31,7 @@ internal static class ValveDataFile
         {
             // ignored
         }
+
         return null;
     }
 }

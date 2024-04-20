@@ -16,12 +16,14 @@ internal static class SteamLibrary
         get
         {
             installPath ??= Registry.GetValue(@"HKEY_CURRENT_USER\Software\Valve\Steam", "SteamPath", null) as string;
-            installPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam", "InstallPath", null) as string;
+            installPath ??=
+                Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam", "InstallPath", null) as string;
             return installPath.ResolvePath();
         }
     }
 
-    internal static async Task<List<(string appId, string name, string branch, int buildId, string gameDirectory)>> GetGames()
+    internal static async Task<List<(string appId, string name, string branch, int buildId, string gameDirectory)>>
+        GetGames()
         => await Task.Run(async () =>
         {
             List<(string appId, string name, string branch, int buildId, string gameDirectory)> games = new();
@@ -30,10 +32,12 @@ internal static class SteamLibrary
             {
                 if (Program.Canceled)
                     return games;
-                foreach ((string appId, string name, string branch, int buildId, string gameDirectory) game in (await GetGamesFromLibraryDirectory(
-                    libraryDirectory)).Where(game => games.All(_game => _game.appId != game.appId)))
+                foreach ((string appId, string name, string branch, int buildId, string gameDirectory) game in (await
+                             GetGamesFromLibraryDirectory(
+                                 libraryDirectory)).Where(game => games.All(_game => _game.appId != game.appId)))
                     games.Add(game);
             }
+
             return games;
         });
 
@@ -54,11 +58,13 @@ internal static class SteamLibrary
                 string installdir = result.Value.GetChild("installdir")?.ToString();
                 string name = result.Value.GetChild("name")?.ToString();
                 string buildId = result.Value.GetChild("buildid")?.ToString();
-                if (string.IsNullOrWhiteSpace(appId) || string.IsNullOrWhiteSpace(installdir) || string.IsNullOrWhiteSpace(name)
-                 || string.IsNullOrWhiteSpace(buildId))
+                if (string.IsNullOrWhiteSpace(appId) || string.IsNullOrWhiteSpace(installdir) ||
+                    string.IsNullOrWhiteSpace(name)
+                    || string.IsNullOrWhiteSpace(buildId))
                     continue;
                 string gameDirectory = (libraryDirectory + @"\common\" + installdir).ResolvePath();
-                if (gameDirectory is null || !int.TryParse(appId, out int _) || !int.TryParse(buildId, out int buildIdInt) || games.Any(g => g.appId == appId))
+                if (gameDirectory is null || !int.TryParse(appId, out int _) ||
+                    !int.TryParse(buildId, out int buildIdInt) || games.Any(g => g.appId == appId))
                     continue;
                 VToken userConfig = result.Value.GetChild("UserConfig");
                 string branch = userConfig?.GetChild("BetaKey")?.ToString();
@@ -69,10 +75,12 @@ internal static class SteamLibrary
                     branch = mountedConfig?.GetChild("BetaKey")?.ToString();
                     branch ??= mountedConfig?.GetChild("betakey")?.ToString();
                 }
+
                 if (string.IsNullOrWhiteSpace(branch))
                     branch = "public";
                 games.Add((appId, name, branch, buildIdInt, gameDirectory));
             }
+
             return games;
         });
 
@@ -90,9 +98,11 @@ internal static class SteamLibrary
                 return libraryDirectories;
             _ = libraryDirectories.Add(libraryFolder);
             string libraryFolders = libraryFolder + @"\libraryfolders.vdf";
-            if (!libraryFolders.FileExists() || !ValveDataFile.TryDeserialize(libraryFolders.ReadFile(), out VProperty result))
+            if (!libraryFolders.FileExists() ||
+                !ValveDataFile.TryDeserialize(libraryFolders.ReadFile(), out VProperty result))
                 return libraryDirectories;
-            foreach (VToken vToken in result.Value.Where(p => p is VProperty property && int.TryParse(property.Key, out int _)))
+            foreach (VToken vToken in result.Value.Where(p =>
+                         p is VProperty property && int.TryParse(property.Key, out int _)))
             {
                 VProperty property = (VProperty)vToken;
                 string path = property.Value.GetChild("path")?.ToString();
@@ -102,6 +112,7 @@ internal static class SteamLibrary
                 if (path.DirectoryExists())
                     _ = libraryDirectories.Add(path);
             }
+
             return libraryDirectories;
         });
 }

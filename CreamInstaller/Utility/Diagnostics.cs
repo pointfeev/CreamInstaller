@@ -34,13 +34,17 @@ internal static class Diagnostics
             OpenFileInWindowsNotepad(path);
     }
 
-    private static void OpenFileInNotepadPlusPlus(string npp, string path) => Process.Start(new ProcessStartInfo { FileName = npp, Arguments = path });
+    private static void OpenFileInNotepadPlusPlus(string npp, string path) =>
+        Process.Start(new ProcessStartInfo { FileName = npp, Arguments = path });
 
-    private static void OpenFileInWindowsNotepad(string path) => Process.Start(new ProcessStartInfo { FileName = "notepad.exe", Arguments = path });
+    private static void OpenFileInWindowsNotepad(string path) => Process.Start(new ProcessStartInfo
+        { FileName = "notepad.exe", Arguments = path });
 
-    internal static void OpenDirectoryInFileExplorer(string path) => Process.Start(new ProcessStartInfo { FileName = "explorer.exe", Arguments = path });
+    internal static void OpenDirectoryInFileExplorer(string path) => Process.Start(new ProcessStartInfo
+        { FileName = "explorer.exe", Arguments = path });
 
-    internal static void OpenUrlInInternetBrowser(string url) => Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+    internal static void OpenUrlInInternetBrowser(string url) =>
+        Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
 
     internal static string ResolvePath(this string path)
     {

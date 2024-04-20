@@ -7,8 +7,11 @@ namespace CreamInstaller;
 
 public enum DLCType
 {
-    None = 0, Steam, SteamHidden,
-    Epic, EpicEntitlement
+    None = 0,
+    Steam,
+    SteamHidden,
+    Epic,
+    EpicEntitlement
 }
 
 internal sealed class SelectionDLC : IEquatable<SelectionDLC>
@@ -32,7 +35,11 @@ internal sealed class SelectionDLC : IEquatable<SelectionDLC>
         TreeNode = new() { Tag = Type, Name = Id, Text = Name };
     }
 
-    internal bool Enabled { get => TreeNode.Checked; set => TreeNode.Checked = value; }
+    internal bool Enabled
+    {
+        get => TreeNode.Checked;
+        set => TreeNode.Checked = value;
+    }
 
     internal Selection Selection
     {
@@ -57,7 +64,8 @@ internal sealed class SelectionDLC : IEquatable<SelectionDLC>
     }
 
     public bool Equals(SelectionDLC other)
-        => other is not null && (ReferenceEquals(this, other) || Type == other.Type && Selection?.Id == other.Selection?.Id && Id == other.Id);
+        => other is not null && (ReferenceEquals(this, other) ||
+                                 Type == other.Type && Selection?.Id == other.Selection?.Id && Id == other.Id);
 
     internal static SelectionDLC GetOrCreate(DLCType type, string gameId, string id, string name)
         => FromId(type, gameId, id) ?? new SelectionDLC(type, id, name);

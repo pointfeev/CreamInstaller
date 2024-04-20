@@ -10,7 +10,8 @@ namespace CreamInstaller.Platforms.Epic.Heroic;
 internal static class HeroicLibrary
 {
     internal static readonly string HeroicLibraryPath
-        = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\heroic\store_cache\legendary_library.json";
+        = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
+          @"\heroic\store_cache\legendary_library.json";
 
     internal static async Task GetGames(List<Manifest> games)
         => await Task.Run(() =>
@@ -28,11 +29,13 @@ internal static class HeroicLibrary
                     try
                     {
                         HeroicAppData appData = token.ToObject<HeroicAppData>();
-                        if (appData is null || string.IsNullOrWhiteSpace(appData.Install.InstallPath = appData.Install.InstallPath.ResolvePath()))
+                        if (appData is null || string.IsNullOrWhiteSpace(appData.Install.InstallPath =
+                                appData.Install.InstallPath.ResolvePath()))
                             continue;
                         Manifest manifest = new()
                         {
-                            DisplayName = appData.Title, CatalogNamespace = appData.Namespace, InstallLocation = appData.Install.InstallPath
+                            DisplayName = appData.Title, CatalogNamespace = appData.Namespace,
+                            InstallLocation = appData.Install.InstallPath
                         };
                         if (games.All(g => g.CatalogNamespace != manifest.CatalogNamespace))
                             games.Add(manifest);

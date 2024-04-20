@@ -11,7 +11,8 @@ internal sealed partial class DialogForm : CustomForm
 {
     internal DialogForm(IWin32Window owner) : base(owner) => InitializeComponent();
 
-    internal DialogResult Show(Icon descriptionIcon, string descriptionText, string acceptButtonText = "OK", string cancelButtonText = null,
+    internal DialogResult Show(Icon descriptionIcon, string descriptionText, string acceptButtonText = "OK",
+        string cancelButtonText = null,
         string customFormText = null, Icon customFormIcon = null)
     {
         descriptionIcon ??= Icon;
@@ -33,6 +34,7 @@ internal sealed partial class DialogForm : CustomForm
                 descriptionText = descriptionText.Remove(i, linkRight + 1 - i).Insert(i, text);
                 links.Add(new(i, text.Length, link));
             }
+
         descriptionLabel.Text = descriptionText;
         acceptButton.Text = acceptButtonText;
         if (cancelButtonText is null)
@@ -42,6 +44,7 @@ internal sealed partial class DialogForm : CustomForm
         }
         else
             cancelButton.Text = cancelButtonText;
+
         if (customFormText is not null)
             Text = customFormText;
         else
@@ -49,6 +52,7 @@ internal sealed partial class DialogForm : CustomForm
             OnResize(null, null);
             Resize += OnResize;
         }
+
         if (customFormIcon is not null)
             Icon = customFormIcon;
         if (links.Count < 1)
@@ -65,6 +69,8 @@ internal sealed partial class DialogForm : CustomForm
 
     private void OnResize(object s, EventArgs e)
         => Text = TextRenderer.MeasureText(Program.ApplicationName, Font).Width > Size.Width - 100
-            ? TextRenderer.MeasureText(Program.ApplicationNameShort, Font).Width > Size.Width - 100 ? Program.Name : Program.ApplicationNameShort
+            ? TextRenderer.MeasureText(Program.ApplicationNameShort, Font).Width > Size.Width - 100
+                ? Program.Name
+                : Program.ApplicationNameShort
             : Program.ApplicationName;
 }

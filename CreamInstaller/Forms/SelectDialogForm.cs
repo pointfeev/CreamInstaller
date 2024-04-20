@@ -12,7 +12,8 @@ internal sealed partial class SelectDialogForm : CustomForm
     private readonly List<(Platform platform, string id, string name)> selected = new();
     internal SelectDialogForm(IWin32Window owner) : base(owner) => InitializeComponent();
 
-    internal DialogResult QueryUser(string groupBoxText, List<(Platform platform, string id, string name, bool alreadySelected)> potentialChoices,
+    internal DialogResult QueryUser(string groupBoxText,
+        List<(Platform platform, string id, string name, bool alreadySelected)> potentialChoices,
         out List<(Platform platform, string id, string name)> choices)
     {
         choices = null;
@@ -28,6 +29,7 @@ internal sealed partial class SelectDialogForm : CustomForm
             OnTreeNodeChecked(node);
             _ = selectionTreeView.Nodes.Add(node);
         }
+
         if (selected.Count < 1)
             OnLoad(null, null);
         allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
@@ -64,10 +66,13 @@ internal sealed partial class SelectDialogForm : CustomForm
     }
 
     private void OnResize(object s, EventArgs e)
-        => Text = TextRenderer.MeasureText(Program.ApplicationName, Font).Width > Size.Width - 100 ? Program.ApplicationNameShort : Program.ApplicationName;
+        => Text = TextRenderer.MeasureText(Program.ApplicationName, Font).Width > Size.Width - 100
+            ? Program.ApplicationNameShort
+            : Program.ApplicationName;
 
     private void OnSortCheckBoxChanged(object sender, EventArgs e)
-        => selectionTreeView.TreeViewNodeSorter = sortCheckBox.Checked ? PlatformIdComparer.NodeText : PlatformIdComparer.NodeName;
+        => selectionTreeView.TreeViewNodeSorter =
+            sortCheckBox.Checked ? PlatformIdComparer.NodeText : PlatformIdComparer.NodeName;
 
     private void OnAllCheckBoxChanged(object sender, EventArgs e)
     {
@@ -77,6 +82,7 @@ internal sealed partial class SelectDialogForm : CustomForm
             node.Checked = shouldCheck;
             OnTreeNodeChecked(node);
         }
+
         allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
         allCheckBox.Checked = shouldCheck;
         allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
@@ -96,7 +102,8 @@ internal sealed partial class SelectDialogForm : CustomForm
 
     private void OnSave(object sender, EventArgs e)
     {
-        ProgramData.WriteProgramChoices(selectionTreeView.Nodes.Cast<TreeNode>().Where(n => n.Checked).Select(node => ((Platform)node.Tag, node.Name)));
+        ProgramData.WriteProgramChoices(selectionTreeView.Nodes.Cast<TreeNode>().Where(n => n.Checked)
+            .Select(node => ((Platform)node.Tag, node.Name)));
         loadButton.Enabled = ProgramData.ReadProgramChoices() is not null;
     }
 }

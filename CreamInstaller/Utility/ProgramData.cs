@@ -10,8 +10,11 @@ namespace CreamInstaller.Utility;
 
 internal static class ProgramData
 {
-    private static readonly string DirectoryPathOld = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\CreamInstaller";
-    internal static readonly string DirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\CreamInstaller";
+    private static readonly string DirectoryPathOld =
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\CreamInstaller";
+
+    internal static readonly string DirectoryPath =
+        Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\CreamInstaller";
 
     internal static readonly string AppInfoPath = DirectoryPath + @"\appinfo";
     private static readonly string AppInfoVersionPath = AppInfoPath + @"\version.txt";
@@ -33,13 +36,17 @@ internal static class ProgramData
                 DirectoryPath.DeleteDirectory();
                 DirectoryPathOld.MoveDirectory(DirectoryPath, true, form);
             }
+
             DirectoryPath.CreateDirectory();
-            if (!AppInfoVersionPath.FileExists() || !Version.TryParse(AppInfoVersionPath.ReadFile(), out Version version) || version < MinimumAppInfoVersion)
+            if (!AppInfoVersionPath.FileExists() ||
+                !Version.TryParse(AppInfoVersionPath.ReadFile(), out Version version) ||
+                version < MinimumAppInfoVersion)
             {
                 AppInfoPath.DeleteDirectory();
                 AppInfoPath.CreateDirectory();
                 AppInfoVersionPath.WriteFile(Program.Version);
             }
+
             CooldownPath.CreateDirectory();
             if (OldProgramChoicesPath.FileExists())
                 OldProgramChoicesPath.DeleteFile();
@@ -71,6 +78,7 @@ internal static class ProgramData
         {
             // ignored
         }
+
         return null;
     }
 
@@ -93,7 +101,8 @@ internal static class ProgramData
         if (ProgramChoicesPath.FileExists())
             try
             {
-                if (JsonConvert.DeserializeObject(ProgramChoicesPath.ReadFile(), typeof(List<(Platform platform, string id)>)) is
+                if (JsonConvert.DeserializeObject(ProgramChoicesPath.ReadFile(),
+                        typeof(List<(Platform platform, string id)>)) is
                     List<(Platform platform, string id)> choices)
                     return choices;
             }
@@ -101,6 +110,7 @@ internal static class ProgramData
             {
                 // ignored
             }
+
         return Enumerable.Empty<(Platform platform, string id)>();
     }
 
@@ -124,7 +134,8 @@ internal static class ProgramData
         if (DlcChoicesPath.FileExists())
             try
             {
-                if (JsonConvert.DeserializeObject(DlcChoicesPath.ReadFile(), typeof(IEnumerable<(Platform platform, string gameId, string dlcId)>)) is
+                if (JsonConvert.DeserializeObject(DlcChoicesPath.ReadFile(),
+                        typeof(IEnumerable<(Platform platform, string gameId, string dlcId)>)) is
                     IEnumerable<(Platform platform, string gameId, string dlcId)> choices)
                     return choices;
             }
@@ -132,6 +143,7 @@ internal static class ProgramData
             {
                 // ignored
             }
+
         return Enumerable.Empty<(Platform platform, string gameId, string dlcId)>();
     }
 
@@ -164,10 +176,12 @@ internal static class ProgramData
             {
                 // ignored
             }
+
         return Enumerable.Empty<(Platform platform, string id, string proxy, bool enabled)>();
     }
 
-    internal static void WriteKoaloaderProxyChoices(IEnumerable<(Platform platform, string id, string proxy, bool enabled)> choices)
+    internal static void WriteKoaloaderProxyChoices(
+        IEnumerable<(Platform platform, string id, string proxy, bool enabled)> choices)
     {
         try
         {

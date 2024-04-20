@@ -26,12 +26,14 @@ internal static class SafeIO
             }
             catch (Exception e)
             {
-                if (!crucial || directoryPath.DirectoryExists() || directoryPath.IOWarn("Failed to create a crucial directory", e, form) is not DialogResult.OK)
+                if (!crucial || directoryPath.DirectoryExists() ||
+                    directoryPath.IOWarn("Failed to create a crucial directory", e, form) is not DialogResult.OK)
                     break;
             }
     }
 
-    internal static void MoveDirectory(this string directoryPath, string newDirectoryPath, bool crucial = false, Form form = null)
+    internal static void MoveDirectory(this string directoryPath, string newDirectoryPath, bool crucial = false,
+        Form form = null)
     {
         if (!directoryPath.DirectoryExists())
             return;
@@ -43,7 +45,8 @@ internal static class SafeIO
             }
             catch (Exception e)
             {
-                if (!crucial || !directoryPath.DirectoryExists() || directoryPath.IOWarn("Failed to move a crucial directory", e, form) is not DialogResult.OK)
+                if (!crucial || !directoryPath.DirectoryExists() ||
+                    directoryPath.IOWarn("Failed to move a crucial directory", e, form) is not DialogResult.OK)
                     break;
             }
     }
@@ -61,12 +64,14 @@ internal static class SafeIO
             catch (Exception e)
             {
                 if (!crucial || !directoryPath.DirectoryExists()
-                 || directoryPath.IOWarn("Failed to delete a crucial directory", e, form) is not DialogResult.OK)
+                             || directoryPath.IOWarn("Failed to delete a crucial directory", e, form) is not
+                                 DialogResult.OK)
                     break;
             }
     }
 
-    internal static IEnumerable<string> EnumerateDirectory(this string directoryPath, string filePattern, bool subdirectories = false, bool crucial = false,
+    internal static IEnumerable<string> EnumerateDirectory(this string directoryPath, string filePattern,
+        bool subdirectories = false, bool crucial = false,
         Form form = null)
     {
         if (!directoryPath.DirectoryExists())
@@ -75,19 +80,23 @@ internal static class SafeIO
             try
             {
                 return subdirectories
-                    ? Directory.EnumerateFiles(directoryPath, filePattern, new EnumerationOptions { RecurseSubdirectories = true })
+                    ? Directory.EnumerateFiles(directoryPath, filePattern,
+                        new EnumerationOptions { RecurseSubdirectories = true })
                     : Directory.EnumerateFiles(directoryPath, filePattern);
             }
             catch (Exception e)
             {
                 if (!crucial || !directoryPath.DirectoryExists()
-                 || directoryPath.IOWarn("Failed to enumerate a crucial directory's files", e, form) is not DialogResult.OK)
+                             || directoryPath.IOWarn("Failed to enumerate a crucial directory's files", e, form) is not
+                                 DialogResult.OK)
                     break;
             }
+
         return Enumerable.Empty<string>();
     }
 
-    internal static IEnumerable<string> EnumerateSubdirectories(this string directoryPath, string directoryPattern, bool subdirectories = false,
+    internal static IEnumerable<string> EnumerateSubdirectories(this string directoryPath, string directoryPattern,
+        bool subdirectories = false,
         bool crucial = false, Form form = null)
     {
         if (!directoryPath.DirectoryExists())
@@ -96,15 +105,18 @@ internal static class SafeIO
             try
             {
                 return subdirectories
-                    ? Directory.EnumerateDirectories(directoryPath, directoryPattern, new EnumerationOptions { RecurseSubdirectories = true })
+                    ? Directory.EnumerateDirectories(directoryPath, directoryPattern,
+                        new EnumerationOptions { RecurseSubdirectories = true })
                     : Directory.EnumerateDirectories(directoryPath, directoryPattern);
             }
             catch (Exception e)
             {
                 if (!crucial || !directoryPath.DirectoryExists()
-                 || directoryPath.IOWarn("Failed to enumerate a crucial directory's subdirectories", e, form) is not DialogResult.OK)
+                             || directoryPath.IOWarn("Failed to enumerate a crucial directory's subdirectories", e,
+                                 form) is not DialogResult.OK)
                     break;
             }
+
         return Enumerable.Empty<string>();
     }
 
@@ -122,6 +134,7 @@ internal static class SafeIO
                 if (!crucial || filePath.IOWarn("Failed to create a crucial file", e, form) is not DialogResult.OK)
                     break;
             }
+
         return null;
     }
 
@@ -137,7 +150,8 @@ internal static class SafeIO
             }
             catch (Exception e)
             {
-                if (!crucial || !filePath.FileExists() || filePath.IOWarn("Failed to move a crucial file", e, form) is not DialogResult.OK)
+                if (!crucial || !filePath.FileExists() ||
+                    filePath.IOWarn("Failed to move a crucial file", e, form) is not DialogResult.OK)
                     break;
             }
     }
@@ -154,7 +168,8 @@ internal static class SafeIO
             }
             catch (Exception e)
             {
-                if (!crucial || !filePath.FileExists() || filePath.IOWarn("Failed to delete a crucial file", e, form) is not DialogResult.OK)
+                if (!crucial || !filePath.FileExists() ||
+                    filePath.IOWarn("Failed to delete a crucial file", e, form) is not DialogResult.OK)
                     break;
             }
     }
@@ -170,9 +185,11 @@ internal static class SafeIO
             }
             catch (Exception e)
             {
-                if (!crucial || !filePath.FileExists() || filePath.IOWarn("Failed to read a crucial file", e, form) is not DialogResult.OK)
+                if (!crucial || !filePath.FileExists() ||
+                    filePath.IOWarn("Failed to read a crucial file", e, form) is not DialogResult.OK)
                     break;
             }
+
         return null;
     }
 
@@ -187,9 +204,11 @@ internal static class SafeIO
             }
             catch (Exception e)
             {
-                if (!crucial || !filePath.FileExists() || filePath.IOWarn("Failed to read a crucial file", e, form) is not DialogResult.OK)
+                if (!crucial || !filePath.FileExists() ||
+                    filePath.IOWarn("Failed to read a crucial file", e, form) is not DialogResult.OK)
                     break;
             }
+
         return null;
     }
 
@@ -208,7 +227,8 @@ internal static class SafeIO
             }
     }
 
-    internal static void ExtractZip(this string archivePath, string destinationPath, bool crucial = false, Form form = null)
+    internal static void ExtractZip(this string archivePath, string destinationPath, bool crucial = false,
+        Form form = null)
     {
         if (!archivePath.FileExists())
             return;
@@ -220,7 +240,8 @@ internal static class SafeIO
             }
             catch (Exception e)
             {
-                if (!crucial || !archivePath.FileExists() || archivePath.IOWarn("Failed to extract a crucial zip file", e, form) is not DialogResult.OK)
+                if (!crucial || !archivePath.FileExists() ||
+                    archivePath.IOWarn("Failed to extract a crucial zip file", e, form) is not DialogResult.OK)
                     break;
             }
     }
@@ -255,6 +276,7 @@ internal static class SafeIO
                 description += e.FormatException();
                 break;
         }
+
         DialogResult result = dialogForm.Show(SystemIcons.Warning, description, "Retry", "Cancel");
         if (result is not DialogResult.OK)
             Program.Canceled = true;

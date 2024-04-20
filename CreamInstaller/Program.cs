@@ -13,7 +13,11 @@ internal static class Program
 {
     internal static readonly string Name = Application.CompanyName;
     private static readonly string Description = Application.ProductName;
-    internal static readonly string Version = Application.ProductVersion[..(Application.ProductVersion.IndexOf('+') is var index && index != -1 ? index : Application.ProductVersion.Length)];
+
+    internal static readonly string Version = Application.ProductVersion[
+        ..(Application.ProductVersion.IndexOf('+') is var index && index != -1
+            ? index
+            : Application.ProductVersion.Length)];
 
     internal const string RepositoryOwner = "pointfeev";
     internal static readonly string RepositoryName = Name;
@@ -37,8 +41,9 @@ internal static class Program
     internal static readonly string[] ProtectedGameDirectoryExceptions = [];
 
     internal static bool IsGameBlocked(string name, string directory = null)
-        => BlockProtectedGames && (ProtectedGames.Contains(name) || directory is not null && !ProtectedGameDirectoryExceptions.Contains(name)
-         && ProtectedGameDirectories.Any(path => (directory + path).DirectoryExists()));
+        => BlockProtectedGames && (ProtectedGames.Contains(name) || directory is not null &&
+            !ProtectedGameDirectoryExceptions.Contains(name)
+            && ProtectedGameDirectories.Any(path => (directory + path).DirectoryExists()));
 
     [STAThread]
     private static void Main()
@@ -52,8 +57,9 @@ internal static class Program
             Application.ApplicationExit += OnApplicationExit;
             Application.ThreadException += (_, e) => e.Exception.HandleFatalException();
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-            AppDomain.CurrentDomain.UnhandledException += (_, e) => (e.ExceptionObject as Exception)?.HandleFatalException();
-        retry:
+            AppDomain.CurrentDomain.UnhandledException +=
+                (_, e) => (e.ExceptionObject as Exception)?.HandleFatalException();
+            retry:
             try
             {
                 HttpClientManager.Setup();
@@ -71,6 +77,7 @@ internal static class Program
                 return;
             }
         }
+
         mutex.Close();
     }
 

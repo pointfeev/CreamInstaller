@@ -11,7 +11,8 @@ namespace CreamInstaller.Resources;
 
 internal static class ScreamAPI
 {
-    internal static void GetScreamApiComponents(this string directory, out string api32, out string api32_o, out string api64, out string api64_o,
+    internal static void GetScreamApiComponents(this string directory, out string api32, out string api32_o,
+        out string api64, out string api64_o,
         out string config, out string log)
     {
         api32 = directory + @"\EOSSDK-Win32-Shipping.dll";
@@ -25,7 +26,8 @@ internal static class ScreamAPI
     internal static void CheckConfig(string directory, Selection selection, InstallForm installForm = null)
     {
         directory.GetScreamApiComponents(out _, out _, out _, out _, out string config, out _);
-        HashSet<SelectionDLC> overrideCatalogItems = selection.DLC.Where(dlc => dlc.Type is DLCType.Epic && !dlc.Enabled).ToHashSet();
+        HashSet<SelectionDLC> overrideCatalogItems =
+            selection.DLC.Where(dlc => dlc.Type is DLCType.Epic && !dlc.Enabled).ToHashSet();
         int entitlementCount = 0;
         HashSet<SelectionDLC> injectedEntitlements = [];
         foreach (SelectionDLC dlc in selection.DLC.Where(dlc => dlc.Type is DLCType.EpicEntitlement))
@@ -34,6 +36,7 @@ internal static class ScreamAPI
                 _ = injectedEntitlements.Add(dlc);
             entitlementCount++;
         }
+
         foreach (Selection extraSelection in selection.ExtraSelections)
         {
             foreach (SelectionDLC extraDlc in extraSelection.DLC.Where(dlc => dlc.Type is DLCType.Epic && !dlc.Enabled))
@@ -45,6 +48,7 @@ internal static class ScreamAPI
                 entitlementCount++;
             }
         }
+
         if (injectedEntitlements.Count == entitlementCount)
             injectedEntitlements.Clear();
         if (overrideCatalogItems.Count > 0 || injectedEntitlements.Count > 0)
@@ -53,15 +57,18 @@ internal static class ScreamAPI
                 installForm.UpdateUser("Generating ScreamAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);*/
             config.CreateFile(true, installForm)?.Close();
             StreamWriter writer = new(config, true, Encoding.UTF8);
-            WriteConfig(writer, new(overrideCatalogItems.ToDictionary(dlc => dlc.Id, dlc => dlc), PlatformIdComparer.String),
-                new(injectedEntitlements.ToDictionary(dlc => dlc.Id, dlc => dlc), PlatformIdComparer.String), installForm);
+            WriteConfig(writer,
+                new(overrideCatalogItems.ToDictionary(dlc => dlc.Id, dlc => dlc), PlatformIdComparer.String),
+                new(injectedEntitlements.ToDictionary(dlc => dlc.Id, dlc => dlc), PlatformIdComparer.String),
+                installForm);
             writer.Flush();
             writer.Close();
         }
         else if (config.FileExists())
         {
             config.DeleteFile();
-            installForm?.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", LogTextBox.Action, false);
+            installForm?.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", LogTextBox.Action,
+                false);
         }
     }
 
@@ -83,13 +90,17 @@ internal static class ScreamAPI
             {
                 SelectionDLC selectionDlc = pair.Value;
                 writer.WriteLine($"      \"{selectionDlc.Id}\"{(pair.Equals(lastOverrideCatalogItem) ? "" : ",")}");
-                installForm?.UpdateUser($"Added locked catalog item to ScreamAPI.json with id {selectionDlc.Id} ({selectionDlc.Name})", LogTextBox.Action,
+                installForm?.UpdateUser(
+                    $"Added locked catalog item to ScreamAPI.json with id {selectionDlc.Id} ({selectionDlc.Name})",
+                    LogTextBox.Action,
                     false);
             }
+
             writer.WriteLine("    ]");
         }
         else
             writer.WriteLine("    \"override\": []");
+
         writer.WriteLine("  },");
         writer.WriteLine("  \"entitlements\": {");
         if (injectedEntitlements.Count > 0)
@@ -102,9 +113,12 @@ internal static class ScreamAPI
             {
                 SelectionDLC selectionDlc = pair.Value;
                 writer.WriteLine($"      \"{selectionDlc.Id}\"{(pair.Equals(lastEntitlement) ? "" : ",")}");
-                installForm?.UpdateUser($"Added injected entitlement to ScreamAPI.json with id {selectionDlc.Id} ({selectionDlc.Name})", LogTextBox.Action,
+                installForm?.UpdateUser(
+                    $"Added injected entitlement to ScreamAPI.json with id {selectionDlc.Id} ({selectionDlc.Name})",
+                    LogTextBox.Action,
                     false);
             }
+
             writer.WriteLine("    ]");
         }
         else
@@ -113,6 +127,7 @@ internal static class ScreamAPI
             writer.WriteLine("    \"auto_inject\": true,");
             writer.WriteLine("    \"inject\": []");
         }
+
         writer.WriteLine("  }");
         writer.WriteLine("}");
     }
@@ -120,7 +135,8 @@ internal static class ScreamAPI
     internal static async Task Uninstall(string directory, InstallForm installForm = null, bool deleteOthers = true)
         => await Task.Run(() =>
         {
-            directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out string config, out string log);
+            directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o,
+                out string config, out string log);
             if (api32_o.FileExists())
             {
                 if (api32.FileExists())
@@ -128,9 +144,12 @@ internal static class ScreamAPI
                     api32.DeleteFile(true);
                     installForm?.UpdateUser($"Deleted ScreamAPI: {Path.GetFileName(api32)}", LogTextBox.Action, false);
                 }
+
                 api32_o.MoveFile(api32!);
-                installForm?.UpdateUser($"Restored EOS: {Path.GetFileName(api32_o)} -> {Path.GetFileName(api32)}", LogTextBox.Action, false);
+                installForm?.UpdateUser($"Restored EOS: {Path.GetFileName(api32_o)} -> {Path.GetFileName(api32)}",
+                    LogTextBox.Action, false);
             }
+
             if (api64_o.FileExists())
             {
                 if (api64.FileExists())
@@ -138,9 +157,12 @@ internal static class ScreamAPI
                     api64.DeleteFile(true);
                     installForm?.UpdateUser($"Deleted ScreamAPI: {Path.GetFileName(api64)}", LogTextBox.Action, false);
                 }
+
                 api64_o.MoveFile(api64!);
-                installForm?.UpdateUser($"Restored EOS: {Path.GetFileName(api64_o)} -> {Path.GetFileName(api64)}", LogTextBox.Action, false);
+                installForm?.UpdateUser($"Restored EOS: {Path.GetFileName(api64_o)} -> {Path.GetFileName(api64)}",
+                    LogTextBox.Action, false);
             }
+
             if (!deleteOthers)
                 return;
             if (config.FileExists())
@@ -148,6 +170,7 @@ internal static class ScreamAPI
                 config.DeleteFile();
                 installForm?.UpdateUser($"Deleted configuration: {Path.GetFileName(config)}", LogTextBox.Action, false);
             }
+
             if (log.FileExists())
             {
                 log.DeleteFile();
@@ -155,30 +178,38 @@ internal static class ScreamAPI
             }
         });
 
-    internal static async Task Install(string directory, Selection selection, InstallForm installForm = null, bool generateConfig = true)
+    internal static async Task Install(string directory, Selection selection, InstallForm installForm = null,
+        bool generateConfig = true)
         => await Task.Run(() =>
         {
-            directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o, out _, out _);
+            directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o,
+                out _, out _);
             if (api32.FileExists() && !api32_o.FileExists())
             {
                 api32.MoveFile(api32_o!, true);
-                installForm?.UpdateUser($"Renamed EOS: {Path.GetFileName(api32)} -> {Path.GetFileName(api32_o)}", LogTextBox.Action, false);
+                installForm?.UpdateUser($"Renamed EOS: {Path.GetFileName(api32)} -> {Path.GetFileName(api32_o)}",
+                    LogTextBox.Action, false);
             }
+
             if (api32_o.FileExists())
             {
                 "ScreamAPI.EOSSDK-Win32-Shipping.dll".WriteManifestResource(api32);
                 installForm?.UpdateUser($"Wrote ScreamAPI: {Path.GetFileName(api32)}", LogTextBox.Action, false);
             }
+
             if (api64.FileExists() && !api64_o.FileExists())
             {
                 api64.MoveFile(api64_o!, true);
-                installForm?.UpdateUser($"Renamed EOS: {Path.GetFileName(api64)} -> {Path.GetFileName(api64_o)}", LogTextBox.Action, false);
+                installForm?.UpdateUser($"Renamed EOS: {Path.GetFileName(api64)} -> {Path.GetFileName(api64_o)}",
+                    LogTextBox.Action, false);
             }
+
             if (api64_o.FileExists())
             {
                 "ScreamAPI.EOSSDK-Win64-Shipping.dll".WriteManifestResource(api64);
                 installForm?.UpdateUser($"Wrote ScreamAPI: {Path.GetFileName(api64)}", LogTextBox.Action, false);
             }
+
             if (generateConfig)
                 CheckConfig(directory, selection, installForm);
         });

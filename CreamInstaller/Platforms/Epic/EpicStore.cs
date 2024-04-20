@@ -14,7 +14,8 @@ internal static class EpicStore
 {
     private const int Cooldown = 600;
 
-    internal static async Task<List<(string id, string name, string product, string icon, string developer)>> QueryCatalog(string categoryNamespace)
+    internal static async Task<List<(string id, string name, string product, string icon, string developer)>>
+        QueryCatalog(string categoryNamespace)
     {
         List<(string id, string name, string product, string icon, string developer)> dlcIds = [];
         string cacheFile = ProgramData.AppInfoPath + @$"\{categoryNamespace}.json";
@@ -41,13 +42,16 @@ internal static class EpicStore
             {
                 cacheFile.DeleteFile();
             }
+
         if (response is null)
             return dlcIds;
         List<Element> searchStore = [..response.Data.Catalog.SearchStore.Elements];
         foreach (Element element in searchStore)
         {
             string title = element.Title;
-            string product = element.CatalogNs is not null && element.CatalogNs.Mappings.Length > 0 ? element.CatalogNs.Mappings.First().PageSlug : null;
+            string product = element.CatalogNs is not null && element.CatalogNs.Mappings.Length > 0
+                ? element.CatalogNs.Mappings.First().PageSlug
+                : null;
             string icon = null;
             for (int i = 0; i < element.KeyImages?.Length; i++)
             {
@@ -57,14 +61,18 @@ internal static class EpicStore
                 icon = keyImage.Url.ToString();
                 break;
             }
+
             foreach (Item item in element.Items)
                 dlcIds.Populate(item.Id, title, product, icon, null, element.Items.Length == 1);
         }
+
         List<Element> catalogOffers = [..response.Data.Catalog.CatalogOffers.Elements];
         foreach (Element element in catalogOffers)
         {
             string title = element.Title;
-            string product = element.CatalogNs is not null && element.CatalogNs.Mappings.Length > 0 ? element.CatalogNs.Mappings.First().PageSlug : null;
+            string product = element.CatalogNs is not null && element.CatalogNs.Mappings.Length > 0
+                ? element.CatalogNs.Mappings.First().PageSlug
+                : null;
             string icon = null;
             for (int i = 0; i < element.KeyImages?.Length; i++)
             {
@@ -74,13 +82,17 @@ internal static class EpicStore
                 icon = keyImage.Url.ToString();
                 break;
             }
+
             foreach (Item item in element.Items)
                 dlcIds.Populate(item.Id, title, product, icon, item.Developer, element.Items.Length == 1);
         }
+
         return dlcIds;
     }
 
-    private static void Populate(this List<(string id, string name, string product, string icon, string developer)> dlcIds, string id, string title,
+    private static void Populate(
+        this List<(string id, string name, string product, string icon, string developer)> dlcIds, string id,
+        string title,
         string product, string icon, string developer, bool canOverwrite = false)
     {
         if (id == null)
@@ -97,6 +109,7 @@ internal static class EpicStore
                 : (app.id, app.name ?? title, app.product ?? product, app.icon ?? icon, app.developer ?? developer);
             break;
         }
+
         if (!found)
             dlcIds.Add((id, title, product, icon, developer));
     }
@@ -113,7 +126,8 @@ internal static class EpicStore
             HttpClient client = HttpClientManager.HttpClient;
             if (client is null)
                 return null;
-            HttpResponseMessage httpResponse = await client.PostAsync(new Uri("https://graphql.epicgames.com/graphql"), content);
+            HttpResponseMessage httpResponse =
+                await client.PostAsync(new Uri("https://graphql.epicgames.com/graphql"), content);
             _ = httpResponse.EnsureSuccessStatusCode();
             string response = await httpResponse.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<Response>(response);

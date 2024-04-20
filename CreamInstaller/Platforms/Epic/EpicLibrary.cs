@@ -17,8 +17,11 @@ internal static class EpicLibrary
     {
         get
         {
-            epicManifestsPath ??= Registry.GetValue(@"HKEY_CURRENT_USER\Software\Epic Games\EOS", "ModSdkMetadataDir", null) as string;
-            epicManifestsPath ??= Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Epic Games\EpicGamesLauncher", "AppDataPath", null) as string;
+            epicManifestsPath ??=
+                Registry.GetValue(@"HKEY_CURRENT_USER\Software\Epic Games\EOS", "ModSdkMetadataDir", null) as string;
+            epicManifestsPath ??=
+                Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Epic Games\EpicGamesLauncher", "AppDataPath",
+                    null) as string;
             if (epicManifestsPath is not null && epicManifestsPath.EndsWith(@"\Data", StringComparison.Ordinal))
                 epicManifestsPath += @"\Manifests";
             return epicManifestsPath.ResolvePath();
@@ -39,8 +42,9 @@ internal static class EpicLibrary
                     try
                     {
                         Manifest manifest = JsonConvert.DeserializeObject<Manifest>(json);
-                        if (manifest is not null && (manifest.InstallLocation = manifest.InstallLocation.ResolvePath()) is not null
-                         && games.All(g => g.CatalogNamespace != manifest.CatalogNamespace))
+                        if (manifest is not null && (manifest.InstallLocation = manifest.InstallLocation.ResolvePath())
+                                                 is not null
+                                                 && games.All(g => g.CatalogNamespace != manifest.CatalogNamespace))
                             games.Add(manifest);
                     }
                     catch
@@ -48,6 +52,7 @@ internal static class EpicLibrary
                         // ignored
                     }
                 }
+
             if (Program.Canceled)
                 return games;
             await HeroicLibrary.GetGames(games);
