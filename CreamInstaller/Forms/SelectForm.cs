@@ -978,7 +978,7 @@ internal sealed partial class SelectForm : CustomForm
         List<(Platform platform, string gameId, string dlcId)> choices = ProgramData.ReadDlcChoices().ToList();
         foreach (SelectionDLC dlc in SelectionDLC.All.Keys)
         {
-            dlc.Enabled = choices.Any(c => c.platform == dlc.Selection.Platform && c.gameId == dlc.Selection.Id && c.dlcId == dlc.Id)
+            dlc.Enabled = choices.Any(c => c.platform == dlc.Selection?.Platform && c.gameId == dlc.Selection?.Id && c.dlcId == dlc.Id)
                 ? dlc.Name == "Unknown"
                 : dlc.Name != "Unknown";
             OnTreeViewNodeCheckedChanged(null, new(dlc.TreeNode, TreeViewAction.ByMouse));
