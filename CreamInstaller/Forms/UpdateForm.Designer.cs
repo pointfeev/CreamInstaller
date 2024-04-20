@@ -68,12 +68,10 @@ namespace CreamInstaller.Forms
             // 
             // changelogTreeView
             // 
-            changelogTreeView.DrawMode = TreeViewDrawMode.OwnerDrawAll;
             changelogTreeView.Location = new System.Drawing.Point(12, 70);
             changelogTreeView.Margin = new Padding(0, 0, 0, 12);
             changelogTreeView.Name = "changelogTreeView";
             changelogTreeView.Size = new System.Drawing.Size(380, 179);
-            changelogTreeView.Sorted = true;
             changelogTreeView.TabIndex = 5;
             // 
             // UpdateForm

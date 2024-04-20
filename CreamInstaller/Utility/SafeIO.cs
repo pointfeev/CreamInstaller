@@ -174,7 +174,8 @@ internal static class SafeIO
             }
     }
 
-    internal static string ReadFile(this string filePath, bool crucial = false, Form form = null, Encoding encoding = null)
+    internal static string ReadFile(this string filePath, bool crucial = false, Form form = null,
+        Encoding encoding = null)
     {
         if (!filePath.FileExists())
             return null;
@@ -212,7 +213,8 @@ internal static class SafeIO
         return null;
     }
 
-    internal static void WriteFile(this string filePath, string text, bool crucial = false, Form form = null, Encoding encoding = null)
+    internal static void WriteFile(this string filePath, string text, bool crucial = false, Form form = null,
+        Encoding encoding = null)
     {
         while (!Program.Canceled)
             try

@@ -181,13 +181,11 @@ namespace CreamInstaller.Forms
             selectionTreeView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             selectionTreeView.CheckBoxes = true;
             selectionTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
-            selectionTreeView.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawAll;
             selectionTreeView.Enabled = false;
             selectionTreeView.FullRowSelect = true;
             selectionTreeView.Location = new System.Drawing.Point(3, 19);
             selectionTreeView.Name = "selectionTreeView";
             selectionTreeView.Size = new System.Drawing.Size(554, 187);
-            selectionTreeView.Sorted = true;
             selectionTreeView.TabIndex = 1001;
             // 
             // allCheckBoxLayoutPanel

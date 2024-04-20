@@ -36,6 +36,7 @@ internal sealed partial class SelectForm : CustomForm
     private SelectForm()
     {
         InitializeComponent();
+        selectionTreeView.TreeViewNodeSorter = PlatformIdComparer.NodeName;
         Text = Program.ApplicationName;
     }
 

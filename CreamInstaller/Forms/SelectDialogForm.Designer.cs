@@ -70,14 +70,12 @@ namespace CreamInstaller.Forms
             selectionTreeView.BorderStyle = BorderStyle.None;
             selectionTreeView.CheckBoxes = true;
             selectionTreeView.Dock = DockStyle.Fill;
-            selectionTreeView.DrawMode = TreeViewDrawMode.OwnerDrawAll;
             selectionTreeView.Location = new System.Drawing.Point(3, 19);
             selectionTreeView.Name = "selectionTreeView";
             selectionTreeView.ShowLines = false;
             selectionTreeView.ShowPlusMinus = false;
             selectionTreeView.ShowRootLines = false;
             selectionTreeView.Size = new System.Drawing.Size(518, 203);
-            selectionTreeView.Sorted = true;
             selectionTreeView.TabIndex = 0;
             // 
             // allCheckBoxFlowPanel

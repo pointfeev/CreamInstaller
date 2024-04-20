@@ -10,7 +10,12 @@ namespace CreamInstaller.Forms;
 internal sealed partial class SelectDialogForm : CustomForm
 {
     private readonly List<(Platform platform, string id, string name)> selected = new();
-    internal SelectDialogForm(IWin32Window owner) : base(owner) => InitializeComponent();
+
+    internal SelectDialogForm(IWin32Window owner) : base(owner)
+    {
+        InitializeComponent();
+        selectionTreeView.TreeViewNodeSorter = PlatformIdComparer.NodeName;
+    }
 
     internal DialogResult QueryUser(string groupBoxText,
         List<(Platform platform, string id, string name, bool alreadySelected)> potentialChoices,

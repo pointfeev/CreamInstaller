@@ -79,7 +79,7 @@ internal sealed partial class UpdateForm : CustomForm
             updateButton.Enabled = true;
             updateButton.Click += OnUpdate;
             changelogTreeView.Visible = true;
-            for (int r = releases!.Count - 1; r >= 0; r--)
+            for (int r = 0; r < releases!.Count; r++)
             {
                 ProgramRelease release = releases[r];
 #if !DEBUG
@@ -88,17 +88,13 @@ internal sealed partial class UpdateForm : CustomForm
 #endif
                 TreeNode root = new(release.Name) { Name = release.Name };
                 changelogTreeView.Nodes.Add(root);
-                if (changelogTreeView.Nodes.Count > 0)
-                    changelogTreeView.Nodes[0].EnsureVisible();
-                for (int i = release.Changes.Length - 1; i >= 0; i--)
+                for (int c = 0; c < release.Changes.Length; c++)
                     Invoke(delegate
                     {
-                        string change = release.Changes[i];
+                        string change = release.Changes[c];
                         TreeNode changeNode = new() { Text = change };
                         root.Nodes.Add(changeNode);
                         root.Expand();
-                        if (changelogTreeView.Nodes.Count > 0)
-                            changelogTreeView.Nodes[0].EnsureVisible();
                     });
             }
         }

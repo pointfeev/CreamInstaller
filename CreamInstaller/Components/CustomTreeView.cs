@@ -35,9 +35,8 @@ internal sealed class CustomTreeView : TreeView
 
     internal CustomTreeView()
     {
-        DrawMode = TreeViewDrawMode.OwnerDrawText;
+        DrawMode = TreeViewDrawMode.OwnerDrawAll;
         DrawNode += DrawTreeNode;
-        TreeViewNodeSorter = PlatformIdComparer.NodeName;
         Disposed += OnDisposed;
     }
 
