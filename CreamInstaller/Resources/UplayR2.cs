@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CreamInstaller.Components;
 using CreamInstaller.Forms;
 using CreamInstaller.Utility;
+using static CreamInstaller.Resources.Resources;
 
 namespace CreamInstaller.Resources;
 
@@ -170,4 +171,18 @@ internal static class UplayR2
             if (generateConfig)
                 CheckConfig(directory, selection, installForm);
         });
+
+    internal static readonly Dictionary<ResourceIdentifier, HashSet<string>> ResourceMD5s = new()
+    {
+        [ResourceIdentifier.Upc32] =
+        [
+            "C14368BC4EE19FDE8DBAC07E31C67AE4", // Uplay R2 Unlocker v3.0.0
+            "DED3A3EA1876E3110D7D87B9A22946B0" // Uplay R2 Unlocker v3.0.1
+        ],
+        [ResourceIdentifier.Upc64] =
+        [
+            "7D9A4C12972BAABCB6C181920CC0F19B", // Uplay R2 Unlocker v3.0.0
+            "D7FDBFE0FC8D7600FEB8EC0A97713184" // Uplay R2 Unlocker v3.0.1
+        ]
+    };
 }

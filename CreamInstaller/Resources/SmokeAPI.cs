@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CreamInstaller.Components;
 using CreamInstaller.Forms;
 using CreamInstaller.Utility;
+using static CreamInstaller.Resources.Resources;
 
 namespace CreamInstaller.Resources;
 
@@ -292,4 +293,38 @@ internal static class SmokeAPI
             if (generateConfig)
                 CheckConfig(directory, selection, installForm);
         });
+
+    internal static readonly Dictionary<ResourceIdentifier, HashSet<string>> ResourceMD5s = new()
+    {
+        [ResourceIdentifier.Steamworks32] =
+        [
+            "B2434578957CBE38BDCE0A671C1262FC", // SmokeAPI v1.0.0
+            "973AB1632B747D4BF3B2666F32E34327", // SmokeAPI v1.0.1
+            "C7E41F569FC6A347D67D2BFB2BD10F25", // SmokeAPI v1.0.2
+            "F9E7D5B248B86D1C2F2F2905A9F37755", // SmokeAPI v1.0.3
+            "FD9032CCF73E3A4D7E187F35388BD569", // SmokeAPI v2.0.0-rc01
+            "129B68318E0F8F34588F390928DE644E", // SmokeAPI v2.0.0-rc02
+            "2A8E5E167BC46B9977BFA77403DDD27F", // SmokeAPI v2.0.0
+            "DBD3D6DE020E581BF76A700394D23E6A", // SmokeAPI v2.0.1
+            "C8E796DDD74F2C28996EE3F41938565C", // SmokeAPI v2.0.2
+            "8B075C6B272A172A014D5C9E60F13DF2", // SmokeAPI v2.0.3
+            "A3873569DECAD08962C46E88352E6DB1", // SmokeAPI v2.0.4
+            "4A1A823E5CF4FB861DD6BA94539D29C4" // SmokeAPI v2.0.5
+        ],
+        [ResourceIdentifier.Steamworks64] =
+        [
+            "08713035CAD6F52548FF324D0487B88D", // SmokeAPI v1.0.0
+            "D077737B9979D32458AC938A2978FA3C", // SmokeAPI v1.0.1
+            "49122A2E2E51CBB0AE5E1D59B280E4CD", // SmokeAPI v1.0.2
+            "13F3E9476116F7670E21365A400357AC", // SmokeAPI v1.0.3
+            "151D09637E54A6DF281EAC5A9C484616", // SmokeAPI v2.0.0-rc01
+            "5AF1282DD4EE194F40944424984BAE8D", // SmokeAPI v2.0.0-rc02
+            "88A8CE5F9EB181335BEEF658D73A04B4", // SmokeAPI v2.0.0
+            "6C813588FC7E0E3185F2A191615327AF", // SmokeAPI v2.0.1
+            "CF9DF2E2EBA002DB98FE37FB1FB08FA8", // SmokeAPI v2.0.2
+            "E4DC2AF2B8B77A0C9BF9BFBBAEA11CF7", // SmokeAPI v2.0.3
+            "C0DDB49C9BFD3E05CBC1C61D117E93F9", // SmokeAPI v2.0.4
+            "F7C3064D5E3C892B168F504C21AC4923" // SmokeAPI v2.0.5
+        ]
+    };
 }
