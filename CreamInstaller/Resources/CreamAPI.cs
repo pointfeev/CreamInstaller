@@ -46,7 +46,6 @@ internal static class CreamAPI
             // TODO
         });
 
-    // TODO: add all CreamAPI versions' MD5s
     internal static readonly Dictionary<ResourceIdentifier, HashSet<string>> ResourceMD5s = new()
     {
         [ResourceIdentifier.Steamworks32] =
