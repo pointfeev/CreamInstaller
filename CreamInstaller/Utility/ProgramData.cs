@@ -162,7 +162,7 @@ internal static class ProgramData
         }
     }
 
-    internal static IEnumerable<(Platform platform, string id, string proxy, bool enabled)> ReadKoaloaderChoices()
+    internal static IEnumerable<(Platform platform, string id, string proxy, bool enabled)> ReadProxyChoices()
     {
         if (KoaloaderProxyChoicesPath.FileExists())
             try
@@ -180,7 +180,7 @@ internal static class ProgramData
         return Enumerable.Empty<(Platform platform, string id, string proxy, bool enabled)>();
     }
 
-    internal static void WriteKoaloaderProxyChoices(
+    internal static void WriteProxyChoices(
         IEnumerable<(Platform platform, string id, string proxy, bool enabled)> choices)
     {
         try

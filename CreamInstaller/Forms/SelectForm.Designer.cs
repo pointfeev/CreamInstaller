@@ -22,8 +22,8 @@ namespace CreamInstaller.Forms
             installButton = new Button();
             cancelButton = new Button();
             programsGroupBox = new GroupBox();
-            koaloaderFlowPanel = new FlowLayoutPanel();
-            koaloaderAllCheckBox = new CheckBox();
+            proxyFlowPanel = new FlowLayoutPanel();
+            proxyAllCheckBox = new CheckBox();
             noneFoundLabel = new Label();
             blockedGamesFlowPanel = new FlowLayoutPanel();
             blockedGamesCheckBox = new CheckBox();
@@ -39,13 +39,13 @@ namespace CreamInstaller.Forms
             sortCheckBox = new CheckBox();
             saveButton = new Button();
             loadButton = new Button();
-            resetKoaloaderButton = new Button();
+            resetProxyButton = new Button();
             resetButton = new Button();
-            saveKoaloaderButton = new Button();
-            loadKoaloaderButton = new Button();
+            saveProxyButton = new Button();
+            loadProxyButton = new Button();
             selectionTreeView = new CustomTreeView();
             programsGroupBox.SuspendLayout();
-            koaloaderFlowPanel.SuspendLayout();
+            proxyFlowPanel.SuspendLayout();
             blockedGamesFlowPanel.SuspendLayout();
             allCheckBoxLayoutPanel.SuspendLayout();
             SuspendLayout();
@@ -82,7 +82,7 @@ namespace CreamInstaller.Forms
             // programsGroupBox
             // 
             programsGroupBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            programsGroupBox.Controls.Add(koaloaderFlowPanel);
+            programsGroupBox.Controls.Add(proxyFlowPanel);
             programsGroupBox.Controls.Add(noneFoundLabel);
             programsGroupBox.Controls.Add(blockedGamesFlowPanel);
             programsGroupBox.Controls.Add(allCheckBoxLayoutPanel);
@@ -94,33 +94,33 @@ namespace CreamInstaller.Forms
             programsGroupBox.TabStop = false;
             programsGroupBox.Text = "Programs / Games";
             // 
-            // koaloaderFlowPanel
+            // proxyFlowPanel
             // 
-            koaloaderFlowPanel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            koaloaderFlowPanel.AutoSize = true;
-            koaloaderFlowPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            koaloaderFlowPanel.Controls.Add(koaloaderAllCheckBox);
-            koaloaderFlowPanel.Location = new System.Drawing.Point(422, -1);
-            koaloaderFlowPanel.Margin = new Padding(0);
-            koaloaderFlowPanel.Name = "koaloaderFlowPanel";
-            koaloaderFlowPanel.Size = new System.Drawing.Size(81, 19);
-            koaloaderFlowPanel.TabIndex = 10005;
-            koaloaderFlowPanel.WrapContents = false;
+            proxyFlowPanel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            proxyFlowPanel.AutoSize = true;
+            proxyFlowPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            proxyFlowPanel.Controls.Add(proxyAllCheckBox);
+            proxyFlowPanel.Location = new System.Drawing.Point(422, -1);
+            proxyFlowPanel.Margin = new Padding(0);
+            proxyFlowPanel.Name = "proxyFlowPanel";
+            proxyFlowPanel.Size = new System.Drawing.Size(81, 19);
+            proxyFlowPanel.TabIndex = 10005;
+            proxyFlowPanel.WrapContents = false;
             // 
-            // koaloaderAllCheckBox
+            // proxyAllCheckBox
             // 
-            koaloaderAllCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            koaloaderAllCheckBox.AutoSize = true;
-            koaloaderAllCheckBox.Checked = true;
-            koaloaderAllCheckBox.CheckState = CheckState.Checked;
-            koaloaderAllCheckBox.Enabled = false;
-            koaloaderAllCheckBox.Location = new System.Drawing.Point(2, 0);
-            koaloaderAllCheckBox.Margin = new Padding(2, 0, 0, 0);
-            koaloaderAllCheckBox.Name = "koaloaderAllCheckBox";
-            koaloaderAllCheckBox.Size = new System.Drawing.Size(79, 19);
-            koaloaderAllCheckBox.TabIndex = 4;
-            koaloaderAllCheckBox.Text = "Koaloader";
-            koaloaderAllCheckBox.CheckedChanged += OnKoaloaderAllCheckBoxChanged;
+            proxyAllCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            proxyAllCheckBox.AutoSize = true;
+            proxyAllCheckBox.Checked = false;
+            proxyAllCheckBox.CheckState = CheckState.Checked;
+            proxyAllCheckBox.Enabled = false;
+            proxyAllCheckBox.Location = new System.Drawing.Point(2, 0);
+            proxyAllCheckBox.Margin = new Padding(2, 0, 0, 0);
+            proxyAllCheckBox.Name = "proxyAllCheckBox";
+            proxyAllCheckBox.Size = new System.Drawing.Size(79, 19);
+            proxyAllCheckBox.TabIndex = 4;
+            proxyAllCheckBox.Text = "Proxy All";
+            proxyAllCheckBox.CheckedChanged += OnProxyAllCheckBoxChanged;
             // 
             // noneFoundLabel
             // 
@@ -323,19 +323,19 @@ namespace CreamInstaller.Forms
             loadButton.UseVisualStyleBackColor = true;
             loadButton.Click += OnLoadDlc;
             // 
-            // resetKoaloaderButton
+            // resetProxyButton
             // 
-            resetKoaloaderButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            resetKoaloaderButton.AutoSize = true;
-            resetKoaloaderButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            resetKoaloaderButton.Enabled = false;
-            resetKoaloaderButton.Location = new System.Drawing.Point(12, 295);
-            resetKoaloaderButton.Name = "resetKoaloaderButton";
-            resetKoaloaderButton.Size = new System.Drawing.Size(101, 25);
-            resetKoaloaderButton.TabIndex = 10010;
-            resetKoaloaderButton.Text = "Reset Koaloader";
-            resetKoaloaderButton.UseVisualStyleBackColor = true;
-            resetKoaloaderButton.Click += OnResetKoaloader;
+            resetProxyButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            resetProxyButton.AutoSize = true;
+            resetProxyButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            resetProxyButton.Enabled = false;
+            resetProxyButton.Location = new System.Drawing.Point(12, 295);
+            resetProxyButton.Name = "resetProxyButton";
+            resetProxyButton.Size = new System.Drawing.Size(101, 25);
+            resetProxyButton.TabIndex = 10010;
+            resetProxyButton.Text = "Reset Proxy";
+            resetProxyButton.UseVisualStyleBackColor = true;
+            resetProxyButton.Click += OnResetProxy;
             // 
             // resetButton
             // 
@@ -351,33 +351,33 @@ namespace CreamInstaller.Forms
             resetButton.UseVisualStyleBackColor = true;
             resetButton.Click += OnResetDlc;
             // 
-            // saveKoaloaderButton
+            // saveProxyButton
             // 
-            saveKoaloaderButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            saveKoaloaderButton.AutoSize = true;
-            saveKoaloaderButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            saveKoaloaderButton.Enabled = false;
-            saveKoaloaderButton.Location = new System.Drawing.Point(119, 295);
-            saveKoaloaderButton.Name = "saveKoaloaderButton";
-            saveKoaloaderButton.Size = new System.Drawing.Size(97, 25);
-            saveKoaloaderButton.TabIndex = 10009;
-            saveKoaloaderButton.Text = "Save Koaloader";
-            saveKoaloaderButton.UseVisualStyleBackColor = true;
-            saveKoaloaderButton.Click += OnSaveKoaloader;
+            saveProxyButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            saveProxyButton.AutoSize = true;
+            saveProxyButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            saveProxyButton.Enabled = false;
+            saveProxyButton.Location = new System.Drawing.Point(119, 295);
+            saveProxyButton.Name = "saveProxyButton";
+            saveProxyButton.Size = new System.Drawing.Size(97, 25);
+            saveProxyButton.TabIndex = 10009;
+            saveProxyButton.Text = "Save Proxy";
+            saveProxyButton.UseVisualStyleBackColor = true;
+            saveProxyButton.Click += OnSaveProxy;
             // 
-            // loadKoaloaderButton
+            // loadProxyButton
             // 
-            loadKoaloaderButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            loadKoaloaderButton.AutoSize = true;
-            loadKoaloaderButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            loadKoaloaderButton.Enabled = false;
-            loadKoaloaderButton.Location = new System.Drawing.Point(222, 295);
-            loadKoaloaderButton.Name = "loadKoaloaderButton";
-            loadKoaloaderButton.Size = new System.Drawing.Size(99, 25);
-            loadKoaloaderButton.TabIndex = 10008;
-            loadKoaloaderButton.Text = "Load Koaloader";
-            loadKoaloaderButton.UseVisualStyleBackColor = true;
-            loadKoaloaderButton.Click += OnLoadKoaloader;
+            loadProxyButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            loadProxyButton.AutoSize = true;
+            loadProxyButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            loadProxyButton.Enabled = false;
+            loadProxyButton.Location = new System.Drawing.Point(222, 295);
+            loadProxyButton.Name = "loadProxyButton";
+            loadProxyButton.Size = new System.Drawing.Size(99, 25);
+            loadProxyButton.TabIndex = 10008;
+            loadProxyButton.Text = "Load Proxy";
+            loadProxyButton.UseVisualStyleBackColor = true;
+            loadProxyButton.Click += OnLoadProxy;
             // 
             // SelectForm
             // 
@@ -386,10 +386,10 @@ namespace CreamInstaller.Forms
             AutoSize = true;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
             ClientSize = new System.Drawing.Size(584, 361);
-            Controls.Add(loadKoaloaderButton);
-            Controls.Add(saveKoaloaderButton);
+            Controls.Add(loadProxyButton);
+            Controls.Add(saveProxyButton);
             Controls.Add(resetButton);
-            Controls.Add(resetKoaloaderButton);
+            Controls.Add(resetProxyButton);
             Controls.Add(loadButton);
             Controls.Add(saveButton);
             Controls.Add(sortCheckBox);
@@ -412,8 +412,8 @@ namespace CreamInstaller.Forms
             Load += OnLoad;
             programsGroupBox.ResumeLayout(false);
             programsGroupBox.PerformLayout();
-            koaloaderFlowPanel.ResumeLayout(false);
-            koaloaderFlowPanel.PerformLayout();
+            proxyFlowPanel.ResumeLayout(false);
+            proxyFlowPanel.PerformLayout();
             blockedGamesFlowPanel.ResumeLayout(false);
             blockedGamesFlowPanel.PerformLayout();
             allCheckBoxLayoutPanel.ResumeLayout(false);
@@ -441,14 +441,14 @@ namespace CreamInstaller.Forms
         private Label progressLabelGames;
         private Label progressLabelDLCs;
         private CheckBox sortCheckBox;
-        private FlowLayoutPanel koaloaderFlowPanel;
-        internal CheckBox koaloaderAllCheckBox;
+        private FlowLayoutPanel proxyFlowPanel;
+        internal CheckBox proxyAllCheckBox;
         private Button saveButton;
         private Button loadButton;
-        private Button resetKoaloaderButton;
+        private Button resetProxyButton;
         private Button resetButton;
-        private Button saveKoaloaderButton;
-        private Button loadKoaloaderButton;
+        private Button saveProxyButton;
+        private Button loadProxyButton;
     }
 }
 

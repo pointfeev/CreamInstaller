@@ -64,6 +64,8 @@ internal sealed partial class InstallForm : CustomForm
             _ = await Repair(this, selection);
         }
 
+        bool useKoaloader = selection.UseProxy && (Program.UseSmokeAPI || selection.Platform is not Platform.Steam);
+
         UpdateUser(
             $"{(uninstalling ? "Uninstalling" : "Installing")}" + $" {(uninstalling ? "from" : "for")} " +
             selection.Name
@@ -93,7 +95,7 @@ internal sealed partial class InstallForm : CustomForm
                 }
             }
 
-        if (uninstalling || !selection.Koaloader)
+        if (uninstalling || !useKoaloader)
             foreach ((string directory, BinaryType _) in selection.ExecutableDirectories)
             {
                 if (Program.Canceled)
@@ -111,7 +113,7 @@ internal sealed partial class InstallForm : CustomForm
                 }
             }
 
-        bool uninstallProxy = uninstalling || selection.Koaloader;
+        bool uninstallingForKoaloader = uninstalling || useKoaloader;
         int count = selection.DllDirectories.Count, cur = 0;
         foreach (string directory in selection.DllDirectories)
         {
@@ -119,23 +121,44 @@ internal sealed partial class InstallForm : CustomForm
                 return;
             if (selection.Platform is Platform.Steam or Platform.Paradox)
             {
-                directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64,
-                    out string api64_o, out string old_config,
-                    out string config, out string old_log, out string log, out string cache);
-                if (uninstallProxy
-                        ? api32_o.FileExists() || api64_o.FileExists() || old_config.FileExists() ||
-                          config.FileExists() || old_log.FileExists() || log.FileExists()
-                          || cache.FileExists()
-                        : api32.FileExists() || api64.FileExists())
+                if (Program.UseSmokeAPI)
                 {
-                    UpdateUser(
-                        $"{(uninstallProxy ? "Uninstalling" : "Installing")} SmokeAPI" +
-                        $" {(uninstallProxy ? "from" : "for")} " + selection.Name
-                        + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
-                    if (uninstallProxy)
-                        await SmokeAPI.Uninstall(directory, this);
-                    else
-                        await SmokeAPI.Install(directory, selection, this);
+                    directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64,
+                        out string api64_o, out string old_config,
+                        out string config, out string old_log, out string log, out string cache);
+                    if (uninstallingForKoaloader
+                            ? api32_o.FileExists() || api64_o.FileExists() || old_config.FileExists() ||
+                              config.FileExists() || old_log.FileExists() || log.FileExists()
+                              || cache.FileExists()
+                            : api32.FileExists() || api64.FileExists())
+                    {
+                        UpdateUser(
+                            $"{(uninstallingForKoaloader ? "Uninstalling" : "Installing")} SmokeAPI" +
+                            $" {(uninstallingForKoaloader ? "from" : "for")} " + selection.Name
+                            + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
+                        if (uninstallingForKoaloader)
+                            await SmokeAPI.Uninstall(directory, this);
+                        else
+                            await SmokeAPI.Install(directory, selection, this);
+                    }
+                }
+                else
+                {
+                    directory.GetCreamApiComponents(out string api32, out string api32_o, out string api64,
+                        out string api64_o, out string config);
+                    if (uninstalling
+                            ? api32_o.FileExists() || api64_o.FileExists() || config.FileExists()
+                            : api32.FileExists() || api64.FileExists())
+                    {
+                        UpdateUser(
+                            $"{(uninstalling ? "Uninstalling" : "Installing")} CreamAPI" +
+                            $" {(uninstalling ? "from" : "for")} " + selection.Name
+                            + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
+                        if (uninstalling)
+                            await CreamAPI.Uninstall(directory, this);
+                        else
+                            await CreamAPI.Install(directory, selection, this);
+                    }
                 }
             }
 
@@ -143,15 +166,15 @@ internal sealed partial class InstallForm : CustomForm
             {
                 directory.GetScreamApiComponents(out string api32, out string api32_o, out string api64,
                     out string api64_o, out string config, out string log);
-                if (uninstallProxy
+                if (uninstallingForKoaloader
                         ? api32_o.FileExists() || api64_o.FileExists() || config.FileExists() || log.FileExists()
                         : api32.FileExists() || api64.FileExists())
                 {
                     UpdateUser(
-                        $"{(uninstallProxy ? "Uninstalling" : "Installing")} ScreamAPI" +
-                        $" {(uninstallProxy ? "from" : "for")} " + selection.Name
+                        $"{(uninstallingForKoaloader ? "Uninstalling" : "Installing")} ScreamAPI" +
+                        $" {(uninstallingForKoaloader ? "from" : "for")} " + selection.Name
                         + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
-                    if (uninstallProxy)
+                    if (uninstallingForKoaloader)
                         await ScreamAPI.Uninstall(directory, this);
                     else
                         await ScreamAPI.Install(directory, selection, this);
@@ -162,15 +185,15 @@ internal sealed partial class InstallForm : CustomForm
             {
                 directory.GetUplayR1Components(out string api32, out string api32_o, out string api64,
                     out string api64_o, out string config, out string log);
-                if (uninstallProxy
+                if (uninstallingForKoaloader
                         ? api32_o.FileExists() || api64_o.FileExists() || config.FileExists() || log.FileExists()
                         : api32.FileExists() || api64.FileExists())
                 {
                     UpdateUser(
-                        $"{(uninstallProxy ? "Uninstalling" : "Installing")} Uplay R1 Unlocker" +
-                        $" {(uninstallProxy ? "from" : "for")} " + selection.Name
+                        $"{(uninstallingForKoaloader ? "Uninstalling" : "Installing")} Uplay R1 Unlocker" +
+                        $" {(uninstallingForKoaloader ? "from" : "for")} " + selection.Name
                         + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
-                    if (uninstallProxy)
+                    if (uninstallingForKoaloader)
                         await UplayR1.Uninstall(directory, this);
                     else
                         await UplayR1.Install(directory, selection, this);
@@ -178,15 +201,15 @@ internal sealed partial class InstallForm : CustomForm
 
                 directory.GetUplayR2Components(out string old_api32, out string old_api64, out api32, out api32_o,
                     out api64, out api64_o, out config, out log);
-                if (uninstallProxy
+                if (uninstallingForKoaloader
                         ? api32_o.FileExists() || api64_o.FileExists() || config.FileExists() || log.FileExists()
                         : old_api32.FileExists() || old_api64.FileExists() || api32.FileExists() || api64.FileExists())
                 {
                     UpdateUser(
-                        $"{(uninstallProxy ? "Uninstalling" : "Installing")} Uplay R2 Unlocker" +
-                        $" {(uninstallProxy ? "from" : "for")} " + selection.Name
+                        $"{(uninstallingForKoaloader ? "Uninstalling" : "Installing")} Uplay R2 Unlocker" +
+                        $" {(uninstallingForKoaloader ? "from" : "for")} " + selection.Name
                         + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);
-                    if (uninstallProxy)
+                    if (uninstallingForKoaloader)
                         await UplayR2.Uninstall(directory, this);
                     else
                         await UplayR2.Install(directory, selection, this);
@@ -196,7 +219,7 @@ internal sealed partial class InstallForm : CustomForm
             UpdateProgress(++cur / count * 100);
         }
 
-        if (selection.Koaloader && !uninstalling)
+        if (useKoaloader && !uninstalling)
             foreach ((string directory, BinaryType binaryType) in selection.ExecutableDirectories)
             {
                 if (Program.Canceled)

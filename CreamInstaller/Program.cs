@@ -35,6 +35,9 @@ internal static class Program
     internal static readonly string CurrentProcessFilePath = CurrentProcess.MainModule?.FileName;
     internal static readonly int CurrentProcessId = CurrentProcess.Id;
 
+    // this may forever be false, but who knows, maybe acidicoala makes it once again better than CreamAPI some day
+    internal static bool UseSmokeAPI = false;
+
     internal static bool BlockProtectedGames = true;
     internal static readonly string[] ProtectedGames = ["PAYDAY 2"];
     internal static readonly string[] ProtectedGameDirectories = [@"\EasyAntiCheat", @"\BattlEye"];

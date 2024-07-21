@@ -1,16 +1,21 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using CreamInstaller.Components;
 using CreamInstaller.Forms;
+using CreamInstaller.Utility;
 using static CreamInstaller.Resources.Resources;
 
 namespace CreamInstaller.Resources;
 
 internal static class CreamAPI
 {
+    // TODO: add proxy mode support
+
     internal static void GetCreamApiComponents(this string directory, out string api32, out string api32_o,
-        out string api64, out string api64_o,
-        out string config)
+        out string api64, out string api64_o, out string config)
     {
         api32 = directory + @"\steam_api.dll";
         api32_o = directory + @"\steam_api_o.dll";
@@ -22,28 +27,171 @@ internal static class CreamAPI
 
     internal static void CheckConfig(string directory, Selection selection, InstallForm installForm = null)
     {
-        // TODO
+        directory.GetCreamApiComponents(out _, out _, out _, out _, out string config);
+        HashSet<SelectionDLC> dlc = selection.DLC.Where(dlc => dlc.Enabled).ToHashSet();
+        foreach (SelectionDLC extraDlc in selection.ExtraSelections.SelectMany(extraSelection =>
+                     extraSelection.DLC.Where(_dlc => _dlc.Enabled)))
+            _ = dlc.Add(extraDlc);
+        if (dlc.Count > 0)
+        {
+            /*if (installForm is not null)
+                installForm.UpdateUser("Generating CreamAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);*/
+            config.CreateFile(true, installForm)?.Close();
+            StreamWriter writer = new(config, true, Encoding.UTF8);
+            WriteConfig(writer, selection.Name, selection.Id,
+                new(dlc.ToDictionary(_dlc => _dlc.Id, _dlc => _dlc.Name), PlatformIdComparer.String), installForm);
+            writer.Flush();
+            writer.Close();
+        }
+        else if (config.FileExists())
+        {
+            config.DeleteFile();
+            installForm?.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", LogTextBox.Action,
+                false);
+        }
     }
 
-    private static void WriteConfig(StreamWriter writer, string appId,
-        SortedList<string, (string name, SortedList<string, SelectionDLC> injectDlc)> extraApps,
-        SortedList<string, SelectionDLC> overrideDlc, SortedList<string, SelectionDLC> injectDlc,
-        InstallForm installForm = null)
+    private static void WriteConfig(StreamWriter writer, string name, string appId,
+        SortedList<string, string> dlc, InstallForm installForm = null)
     {
-        // TODO
+        writer.WriteLine($"; {name}");
+        writer.WriteLine("[steam]");
+        writer.WriteLine($"appid = {appId}");
+        // TODO: check if we should add these
+        // writer.WriteLine("unlockall = true");
+        // writer.WriteLine("extraprotection = true");
+        writer.WriteLine();
+        writer.WriteLine("[dlc]");
+        // installForm?.UpdateUser($"Added game to cream_api.ini with appid {appId} ({name})",
+        // LogTextBox.Action, false);
+        foreach ((string dlcId, string dlcName) in dlc)
+        {
+            writer.WriteLine($"{dlcId} = {dlcName}");
+            installForm?.UpdateUser($"Added DLC to cream_api.ini with appid {dlcId} ({dlcName})",
+                LogTextBox.Action, false);
+        }
+    }
+
+    private static void DeleteSmokeApiComponents(string directory, InstallForm installForm = null)
+    {
+        directory.GetSmokeApiComponents(out _, out _, out _, out _,
+            out string old_config, out string config, out string old_log, out string log, out string cache);
+        if (old_config.FileExists())
+        {
+            old_config.DeleteFile();
+            installForm?.UpdateUser($"Deleted old SmokeAPI configuration: {Path.GetFileName(old_config)}",
+                LogTextBox.Action, false);
+        }
+
+        if (config.FileExists())
+        {
+            config.DeleteFile();
+            installForm?.UpdateUser($"Deleted old SmokeAPI configuration: {Path.GetFileName(config)}",
+                LogTextBox.Action, false);
+        }
+
+        if (old_log.FileExists())
+        {
+            old_log.DeleteFile();
+            installForm?.UpdateUser($"Deleted old SmokeAPI log: {Path.GetFileName(old_log)}",
+                LogTextBox.Action, false);
+        }
+
+        if (log.FileExists())
+        {
+            log.DeleteFile();
+            installForm?.UpdateUser($"Deleted old SmokeAPI log: {Path.GetFileName(log)}",
+                LogTextBox.Action, false);
+        }
+
+        if (cache.FileExists())
+        {
+            cache.DeleteFile();
+            installForm?.UpdateUser($"Deleted old SmokeAPI cache: {Path.GetFileName(cache)}",
+                LogTextBox.Action, false);
+        }
     }
 
     internal static async Task Uninstall(string directory, InstallForm installForm = null, bool deleteOthers = true)
         => await Task.Run(() =>
         {
-            // TODO
+            DeleteSmokeApiComponents(directory, installForm);
+
+            directory.GetCreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o,
+                out string config);
+            if (api32_o.FileExists())
+            {
+                if (api32.FileExists())
+                {
+                    api32.DeleteFile(true);
+                    installForm?.UpdateUser($"Deleted CreamAPI: {Path.GetFileName(api32)}", LogTextBox.Action, false);
+                }
+
+                api32_o.MoveFile(api32!);
+                installForm?.UpdateUser(
+                    $"Restored Steamworks: {Path.GetFileName(api32_o)} -> {Path.GetFileName(api32)}", LogTextBox.Action,
+                    false);
+            }
+
+            if (api64_o.FileExists())
+            {
+                if (api64.FileExists())
+                {
+                    api64.DeleteFile(true);
+                    installForm?.UpdateUser($"Deleted CreamAPI: {Path.GetFileName(api64)}", LogTextBox.Action, false);
+                }
+
+                api64_o.MoveFile(api64!);
+                installForm?.UpdateUser(
+                    $"Restored Steamworks: {Path.GetFileName(api64_o)} -> {Path.GetFileName(api64)}", LogTextBox.Action,
+                    false);
+            }
+
+            if (!deleteOthers)
+                return;
+            if (config.FileExists())
+            {
+                config.DeleteFile();
+                installForm?.UpdateUser($"Deleted configuration: {Path.GetFileName(config)}", LogTextBox.Action, false);
+            }
         });
 
     internal static async Task Install(string directory, Selection selection, InstallForm installForm = null,
         bool generateConfig = true)
         => await Task.Run(() =>
         {
-            // TODO
+            DeleteSmokeApiComponents(directory, installForm);
+
+            directory.GetCreamApiComponents(out string api32, out string api32_o, out string api64, out string api64_o,
+                out _);
+            if (api32.FileExists() && !api32_o.FileExists())
+            {
+                api32.MoveFile(api32_o!, true);
+                installForm?.UpdateUser($"Renamed Steamworks: {Path.GetFileName(api32)} -> {Path.GetFileName(api32_o)}",
+                    LogTextBox.Action, false);
+            }
+
+            if (api32_o.FileExists())
+            {
+                "CreamAPI.steam_api.dll".WriteManifestResource(api32);
+                installForm?.UpdateUser($"Wrote CreamAPI: {Path.GetFileName(api32)}", LogTextBox.Action, false);
+            }
+
+            if (api64.FileExists() && !api64_o.FileExists())
+            {
+                api64.MoveFile(api64_o!, true);
+                installForm?.UpdateUser($"Renamed Steamworks: {Path.GetFileName(api64)} -> {Path.GetFileName(api64_o)}",
+                    LogTextBox.Action, false);
+            }
+
+            if (api64_o.FileExists())
+            {
+                "CreamAPI.steam_api64.dll".WriteManifestResource(api64);
+                installForm?.UpdateUser($"Wrote CreamAPI: {Path.GetFileName(api64)}", LogTextBox.Action, false);
+            }
+
+            if (generateConfig)
+                CheckConfig(directory, selection, installForm);
         });
 
     internal static readonly Dictionary<ResourceIdentifier, HashSet<string>> ResourceMD5s = new()
@@ -111,7 +259,11 @@ internal static class CreamAPI
             "23909B4B1C7A182A6596BD0FDF2BFC7C", // CreamAPI v5.0.0.0 Log build
             "E6DDF91F4419BE471FBE126A0966648B", // CreamAPI v5.0.0.0 Non-log build
             "B14007170E59B03D5DF844BD3457295B", // CreamAPI v5.1.0.0 Log build
-            "24C712826D939F5CEC9049D4B94FCBDB" // CreamAPI v5.1.0.0 Non-log build
+            "24C712826D939F5CEC9049D4B94FCBDB", // CreamAPI v5.1.0.0 Non-log build
+            "BAB060E3FB98BFAB60003089EFF3714B", // CreamAPI v5.2.0.0 Log build
+            "3DD6F774B64BA9F1C12A0CAAD801E4CB", // CreamAPI v5.2.0.0 Non-log build
+            "7B052096931080FDC7E10FB9BCE25177", // CreamAPI v5.3.0.0 Log build
+            "10638F7AC4E18DDBFA533EB6F307AE9E" // CreamAPI v5.3.0.0 Non-log build
         ],
         [ResourceIdentifier.Steamworks64] =
         [
@@ -176,7 +328,11 @@ internal static class CreamAPI
             "15D76C0CBB175AA94936200C5208611E", // CreamAPI v5.0.0.0 Log build
             "B7CF4BC4020C6419249E32EE126FF647", // CreamAPI v5.0.0.0 Non-log build
             "BE635705410B93A1075ED32AA97E3B5C", // CreamAPI v5.1.0.0 Log build
-            "1B14C913C0DF41CC0667993D9B37404D" // CreamAPI v5.1.0.0 Non-log build
+            "1B14C913C0DF41CC0667993D9B37404D", // CreamAPI v5.1.0.0 Non-log build
+            "218DC783A7E274494517F3A55FFCA225", // CreamAPI v5.2.0.0 Log build
+            "562F62C0AA6244397B92246C6C5A778F", // CreamAPI v5.2.0.0 Non-log build
+            "D719E3852BBA105B97F061630A08CA74", // CreamAPI v5.3.0.0 Log build
+            "87EA1775F0CEE3649DBB31043EB51FC0" // CreamAPI v5.3.0.0 Non-log build
         ]
     };
 }

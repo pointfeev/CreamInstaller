@@ -174,20 +174,24 @@ internal static class SmokeAPI
         writer.WriteLine("}");
     }
 
+    private static void DeleteCreamApiComponents(string directory, InstallForm installForm = null)
+    {
+        directory.GetCreamApiComponents(out _, out _, out _, out _, out string oldConfig);
+        if (oldConfig.FileExists())
+        {
+            oldConfig.DeleteFile();
+            installForm?.UpdateUser($"Deleted old CreamAPI configuration: {Path.GetFileName(oldConfig)}",
+                LogTextBox.Action, false);
+        }
+    }
+
     internal static async Task Uninstall(string directory, InstallForm installForm = null, bool deleteOthers = true)
         => await Task.Run(() =>
         {
-            directory.GetCreamApiComponents(out _, out _, out _, out _, out string oldConfig);
-            if (oldConfig.FileExists())
-            {
-                oldConfig.DeleteFile();
-                installForm?.UpdateUser($"Deleted old CreamAPI configuration: {Path.GetFileName(oldConfig)}",
-                    LogTextBox.Action, false);
-            }
+            DeleteCreamApiComponents(directory, installForm);
 
             directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o,
-                out string old_config,
-                out string config, out string old_log, out string log, out string cache);
+                out string old_config, out string config, out string old_log, out string log, out string cache);
             if (api32_o.FileExists())
             {
                 if (api32.FileExists())
@@ -254,13 +258,7 @@ internal static class SmokeAPI
         bool generateConfig = true)
         => await Task.Run(() =>
         {
-            directory.GetCreamApiComponents(out _, out _, out _, out _, out string oldConfig);
-            if (oldConfig.FileExists())
-            {
-                oldConfig.DeleteFile();
-                installForm?.UpdateUser($"Deleted old CreamAPI configuration: {Path.GetFileName(oldConfig)}",
-                    LogTextBox.Action, false);
-            }
+            DeleteCreamApiComponents(directory, installForm);
 
             directory.GetSmokeApiComponents(out string api32, out string api32_o, out string api64, out string api64_o,
                 out _, out _, out _, out _, out _);

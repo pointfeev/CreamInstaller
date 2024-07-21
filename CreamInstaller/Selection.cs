@@ -20,7 +20,10 @@ public enum Platform
 
 internal sealed class Selection : IEquatable<Selection>
 {
-    internal const string DefaultKoaloaderProxy = "version";
+    internal const string DefaultProxy = "version";
+
+    // TODO: add proxy mode support for CreamAPI and set this to true
+    internal bool CanUseProxy => Program.UseSmokeAPI || Platform is not Platform.Steam;
 
     internal static readonly ConcurrentDictionary<Selection, byte> All = new();
 
@@ -33,8 +36,8 @@ internal sealed class Selection : IEquatable<Selection>
     internal readonly string RootDirectory;
     internal readonly TreeNode TreeNode;
     internal string Icon;
-    internal bool Koaloader;
-    internal string KoaloaderProxy;
+    internal bool UseProxy;
+    internal string Proxy;
     internal string Product;
     internal string Publisher;
     internal string SubIcon;
@@ -55,7 +58,7 @@ internal sealed class Selection : IEquatable<Selection>
         if (selectForm is null)
             return;
         Enabled = selectForm.allCheckBox.Checked;
-        Koaloader = selectForm.koaloaderAllCheckBox.Checked;
+        UseProxy = selectForm.proxyAllCheckBox.Checked;
     }
 
     internal static IEnumerable<Selection> AllEnabled => All.Keys.Where(s => s.Enabled);

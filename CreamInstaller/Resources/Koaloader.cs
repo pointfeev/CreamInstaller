@@ -182,7 +182,7 @@ internal static class Koaloader
                 installForm?.UpdateUser($"Deleted configuration: {Path.GetFileName(config)}", LogTextBox.Action, false);
             }
 
-            await SmokeAPI.Uninstall(directory, installForm, deleteConfig);
+            if (Program.UseSmokeAPI) await SmokeAPI.Uninstall(directory, installForm, deleteConfig);
             await ScreamAPI.Uninstall(directory, installForm, deleteConfig);
             await UplayR1.Uninstall(directory, installForm, deleteConfig);
             await UplayR2.Uninstall(directory, installForm, deleteConfig);
@@ -195,7 +195,7 @@ internal static class Koaloader
         InstallForm installForm = null, bool generateConfig = true)
         => await Task.Run(() =>
         {
-            string proxy = selection.KoaloaderProxy ?? Selection.DefaultKoaloaderProxy;
+            string proxy = selection.Proxy ?? Selection.DefaultProxy;
             string path = directory + @"\" + proxy + ".dll";
             foreach (string _path in directory.GetKoaloaderProxies().Where(p =>
                          p != path && p.FileExists() && p.IsResourceFile(ResourceIdentifier.Koaloader)))
@@ -230,7 +230,7 @@ internal static class Koaloader
                         break;
                 }
 
-            if (selection.Platform is Platform.Steam or Platform.Paradox)
+            if (Program.UseSmokeAPI && selection.Platform is Platform.Steam or Platform.Paradox)
             {
                 if (bit32)
                 {

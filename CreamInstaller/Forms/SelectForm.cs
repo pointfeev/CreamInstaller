@@ -23,6 +23,9 @@ namespace CreamInstaller.Forms;
 
 internal sealed partial class SelectForm : CustomForm
 {
+    // TODO: fix the form display reset save load buttons for proxy
+    //       consolidate all reset save load functionality into only 3 buttons instead of 6?
+
     private const string HelpButtonListPrefix = "\n    •  ";
 
     private static SelectForm current;
@@ -562,16 +565,16 @@ internal sealed partial class SelectForm : CustomForm
         scanButton.Enabled = false;
         noneFoundLabel.Visible = false;
         allCheckBox.Enabled = false;
-        koaloaderAllCheckBox.Enabled = false;
+        proxyAllCheckBox.Enabled = false;
         installButton.Enabled = false;
         uninstallButton.Enabled = installButton.Enabled;
         selectionTreeView.Enabled = false;
         saveButton.Enabled = false;
         loadButton.Enabled = false;
         resetButton.Enabled = false;
-        saveKoaloaderButton.Enabled = false;
-        loadKoaloaderButton.Enabled = false;
-        resetKoaloaderButton.Enabled = false;
+        saveProxyButton.Enabled = false;
+        loadProxyButton.Enabled = false;
+        resetProxyButton.Enabled = false;
         progressLabel.Text = "Waiting for user to select which programs/games to scan . . .";
         ShowProgressBar();
         await ProgramData.Setup(this);
@@ -693,20 +696,20 @@ internal sealed partial class SelectForm : CustomForm
         }
 
         OnLoadDlc(null, null);
-        OnLoadKoaloader(null, null);
+        OnLoadProxy(null, null);
         HideProgressBar();
         selectionTreeView.Enabled = !Selection.All.IsEmpty;
         allCheckBox.Enabled = selectionTreeView.Enabled;
-        koaloaderAllCheckBox.Enabled = selectionTreeView.Enabled;
+        proxyAllCheckBox.Enabled = selectionTreeView.Enabled;
         noneFoundLabel.Visible = !selectionTreeView.Enabled;
         installButton.Enabled = Selection.AllEnabled.Any();
         uninstallButton.Enabled = installButton.Enabled;
         saveButton.Enabled = CanSaveDlc();
         loadButton.Enabled = CanLoadDlc();
         resetButton.Enabled = CanResetDlc();
-        saveKoaloaderButton.Enabled = CanSaveKoaloader();
-        loadKoaloaderButton.Enabled = CanLoadKoaloader();
-        resetKoaloaderButton.Enabled = CanResetKoaloader();
+        saveProxyButton.Enabled = CanSaveProxy();
+        loadProxyButton.Enabled = CanLoadProxy();
+        resetProxyButton.Enabled = CanResetProxy();
         cancelButton.Enabled = false;
         scanButton.Enabled = true;
         blockedGamesCheckBox.Enabled = true;
@@ -1043,16 +1046,16 @@ internal sealed partial class SelectForm : CustomForm
         allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
     }
 
-    private void OnKoaloaderAllCheckBoxChanged(object sender, EventArgs e)
+    private void OnProxyAllCheckBoxChanged(object sender, EventArgs e)
     {
-        bool shouldEnable = Selection.All.Keys.Any(selection => !selection.Koaloader);
+        bool shouldEnable = Selection.All.Keys.Any(selection => !selection.UseProxy);
         foreach (Selection selection in Selection.All.Keys)
-            selection.Koaloader = shouldEnable;
+            selection.UseProxy = shouldEnable;
         selectionTreeView.Invalidate();
-        koaloaderAllCheckBox.CheckedChanged -= OnKoaloaderAllCheckBoxChanged;
-        koaloaderAllCheckBox.Checked = shouldEnable;
-        koaloaderAllCheckBox.CheckedChanged += OnKoaloaderAllCheckBoxChanged;
-        resetKoaloaderButton.Enabled = CanResetKoaloader();
+        proxyAllCheckBox.CheckedChanged -= OnProxyAllCheckBoxChanged;
+        proxyAllCheckBox.Checked = shouldEnable;
+        proxyAllCheckBox.CheckedChanged += OnProxyAllCheckBoxChanged;
+        resetProxyButton.Enabled = CanResetProxy();
     }
 
     private bool AreSelectionsDefault()
@@ -1107,36 +1110,36 @@ internal sealed partial class SelectForm : CustomForm
         resetButton.Enabled = CanResetDlc();
     }
 
-    private static bool AreKoaloaderSelectionsDefault() =>
-        Selection.All.Keys.All(selection => selection.Koaloader && selection.KoaloaderProxy is null);
+    private static bool AreProxySelectionsDefault() =>
+        Selection.All.Keys.All(selection => !selection.UseProxy && selection.Proxy is null);
 
-    private static bool CanSaveKoaloader() =>
-        ProgramData.ReadKoaloaderChoices().Any() || !AreKoaloaderSelectionsDefault();
+    private static bool CanSaveProxy() =>
+        ProgramData.ReadProxyChoices().Any() || !AreProxySelectionsDefault();
 
-    private void OnSaveKoaloader(object sender, EventArgs e)
+    private void OnSaveProxy(object sender, EventArgs e)
     {
         List<(Platform platform, string id, string proxy, bool enabled)> choices =
-            ProgramData.ReadKoaloaderChoices().ToList();
+            ProgramData.ReadProxyChoices().ToList();
         foreach (Selection selection in Selection.All.Keys)
         {
             _ = choices.RemoveAll(c => c.platform == selection.Platform && c.id == selection.Id);
-            if (selection.KoaloaderProxy is not null and not Selection.DefaultKoaloaderProxy || !selection.Koaloader)
+            if (selection.Proxy is not null and not Selection.DefaultProxy || selection.UseProxy)
                 choices.Add((selection.Platform, selection.Id,
-                    selection.KoaloaderProxy == Selection.DefaultKoaloaderProxy ? null : selection.KoaloaderProxy,
-                    selection.Koaloader));
+                    selection.Proxy == Selection.DefaultProxy ? null : selection.Proxy,
+                    selection.UseProxy));
         }
 
-        ProgramData.WriteKoaloaderProxyChoices(choices);
-        saveKoaloaderButton.Enabled = CanSaveKoaloader();
-        loadKoaloaderButton.Enabled = CanLoadKoaloader();
+        ProgramData.WriteProxyChoices(choices);
+        saveProxyButton.Enabled = CanSaveProxy();
+        loadProxyButton.Enabled = CanLoadProxy();
     }
 
-    private static bool CanLoadKoaloader() => ProgramData.ReadKoaloaderChoices().Any();
+    private static bool CanLoadProxy() => ProgramData.ReadProxyChoices().Any();
 
-    private void OnLoadKoaloader(object sender, EventArgs e)
+    private void OnLoadProxy(object sender, EventArgs e)
     {
         List<(Platform platform, string id, string proxy, bool enabled)> choices =
-            ProgramData.ReadKoaloaderChoices().ToList();
+            ProgramData.ReadProxyChoices().ToList();
         foreach (Selection selection in Selection.All.Keys)
             if (choices.Any(c => c.platform == selection.Platform && c.id == selection.Id))
             {
@@ -1148,46 +1151,46 @@ internal sealed partial class SelectForm : CustomForm
                     proxy.GetProxyInfoFromIdentifier(out currentProxy, out _);
                 if (proxy != currentProxy && choices.Remove(choice)) // convert pre-v4.1.0.0 choices
                     choices.Add((platform, id, currentProxy, enabled));
-                if (currentProxy is null or Selection.DefaultKoaloaderProxy && enabled)
+                if (currentProxy is null or Selection.DefaultProxy && !enabled)
                     _ = choices.RemoveAll(c => c.platform == platform && c.id == id);
                 else
                 {
-                    selection.Koaloader = enabled;
-                    selection.KoaloaderProxy = currentProxy == Selection.DefaultKoaloaderProxy ? currentProxy : proxy;
+                    selection.UseProxy = enabled;
+                    selection.Proxy = currentProxy == Selection.DefaultProxy ? currentProxy : proxy;
                 }
             }
             else
             {
-                selection.Koaloader = true;
-                selection.KoaloaderProxy = null;
+                selection.UseProxy = false;
+                selection.Proxy = null;
             }
 
-        ProgramData.WriteKoaloaderProxyChoices(choices);
-        loadKoaloaderButton.Enabled = CanLoadKoaloader();
-        OnKoaloaderChanged();
+        ProgramData.WriteProxyChoices(choices);
+        loadProxyButton.Enabled = CanLoadProxy();
+        OnProxyChanged();
     }
 
-    private static bool CanResetKoaloader() => !AreKoaloaderSelectionsDefault();
+    private static bool CanResetProxy() => !AreProxySelectionsDefault();
 
-    private void OnResetKoaloader(object sender, EventArgs e)
+    private void OnResetProxy(object sender, EventArgs e)
     {
         foreach (Selection selection in Selection.All.Keys)
         {
-            selection.Koaloader = true;
-            selection.KoaloaderProxy = null;
+            selection.UseProxy = false;
+            selection.Proxy = null;
         }
 
-        OnKoaloaderChanged();
+        OnProxyChanged();
     }
 
-    internal void OnKoaloaderChanged()
+    internal void OnProxyChanged()
     {
         selectionTreeView.Invalidate();
-        saveKoaloaderButton.Enabled = CanSaveKoaloader();
-        resetKoaloaderButton.Enabled = CanResetKoaloader();
-        koaloaderAllCheckBox.CheckedChanged -= OnKoaloaderAllCheckBoxChanged;
-        koaloaderAllCheckBox.Checked = Selection.All.Keys.All(selection => selection.Koaloader);
-        koaloaderAllCheckBox.CheckedChanged += OnKoaloaderAllCheckBoxChanged;
+        saveProxyButton.Enabled = CanSaveProxy();
+        resetProxyButton.Enabled = CanResetProxy();
+        proxyAllCheckBox.CheckedChanged -= OnProxyAllCheckBoxChanged;
+        proxyAllCheckBox.Checked = Selection.All.Keys.All(selection => !selection.CanUseProxy || selection.UseProxy);
+        proxyAllCheckBox.CheckedChanged += OnProxyAllCheckBoxChanged;
     }
 
     private void OnBlockProtectedGamesCheckBoxChanged(object sender, EventArgs e)
