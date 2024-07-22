@@ -25,7 +25,6 @@ internal static class CreamAPI
         api64 = directory + @"\steam_api64.dll";
         api64_o = directory + @"\steam_api64_o.dll";
         config = directory + @"\cream_api.ini";
-        // TODO: account for log builds?
     }
 
     internal static void CheckConfig(string directory, Selection selection, InstallForm installForm = null)
@@ -60,9 +59,6 @@ internal static class CreamAPI
         writer.WriteLine($"; {name}");
         writer.WriteLine("[steam]");
         writer.WriteLine($"appid = {appId}");
-        // TODO: check if we should add these
-        // writer.WriteLine("unlockall = true");
-        // writer.WriteLine("extraprotection = true");
         writer.WriteLine();
         writer.WriteLine("[dlc]");
         // installForm?.UpdateUser($"Added game to cream_api.ini with appid {appId} ({name})",
