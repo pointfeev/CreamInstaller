@@ -13,7 +13,7 @@ internal static partial class SteamCMD
     private const int CooldownGame = 600;
     private const int CooldownDlc = 1200;
 
-    internal static async Task<CmdAppData> QueryWebAPI(string appId, bool isDlc = false, int attempts = 0)
+    private static async Task<CmdAppData> QueryWebAPI(string appId, bool isDlc = false, int attempts = 0)
     {
         while (!Program.Canceled)
         {

@@ -39,10 +39,7 @@ namespace CreamInstaller.Forms
             sortCheckBox = new CheckBox();
             saveButton = new Button();
             loadButton = new Button();
-            resetProxyButton = new Button();
             resetButton = new Button();
-            saveProxyButton = new Button();
-            loadProxyButton = new Button();
             selectionTreeView = new CustomTreeView();
             programsGroupBox.SuspendLayout();
             proxyFlowPanel.SuspendLayout();
@@ -305,9 +302,9 @@ namespace CreamInstaller.Forms
             saveButton.Name = "saveButton";
             saveButton.Size = new System.Drawing.Size(66, 25);
             saveButton.TabIndex = 10006;
-            saveButton.Text = "Save DLC";
+            saveButton.Text = "Save";
             saveButton.UseVisualStyleBackColor = true;
-            saveButton.Click += OnSaveDlc;
+            saveButton.Click += OnSaveSelections;
             // 
             // loadButton
             // 
@@ -319,23 +316,9 @@ namespace CreamInstaller.Forms
             loadButton.Name = "loadButton";
             loadButton.Size = new System.Drawing.Size(68, 25);
             loadButton.TabIndex = 10005;
-            loadButton.Text = "Load DLC";
+            loadButton.Text = "Load";
             loadButton.UseVisualStyleBackColor = true;
-            loadButton.Click += OnLoadDlc;
-            // 
-            // resetProxyButton
-            // 
-            resetProxyButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            resetProxyButton.AutoSize = true;
-            resetProxyButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            resetProxyButton.Enabled = false;
-            resetProxyButton.Location = new System.Drawing.Point(12, 295);
-            resetProxyButton.Name = "resetProxyButton";
-            resetProxyButton.Size = new System.Drawing.Size(101, 25);
-            resetProxyButton.TabIndex = 10010;
-            resetProxyButton.Text = "Reset Proxy";
-            resetProxyButton.UseVisualStyleBackColor = true;
-            resetProxyButton.Click += OnResetProxy;
+            loadButton.Click += OnLoadSelections;
             // 
             // resetButton
             // 
@@ -347,37 +330,9 @@ namespace CreamInstaller.Forms
             resetButton.Name = "resetButton";
             resetButton.Size = new System.Drawing.Size(70, 25);
             resetButton.TabIndex = 10007;
-            resetButton.Text = "Reset DLC";
+            resetButton.Text = "Reset";
             resetButton.UseVisualStyleBackColor = true;
-            resetButton.Click += OnResetDlc;
-            // 
-            // saveProxyButton
-            // 
-            saveProxyButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            saveProxyButton.AutoSize = true;
-            saveProxyButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            saveProxyButton.Enabled = false;
-            saveProxyButton.Location = new System.Drawing.Point(119, 295);
-            saveProxyButton.Name = "saveProxyButton";
-            saveProxyButton.Size = new System.Drawing.Size(97, 25);
-            saveProxyButton.TabIndex = 10009;
-            saveProxyButton.Text = "Save Proxy";
-            saveProxyButton.UseVisualStyleBackColor = true;
-            saveProxyButton.Click += OnSaveProxy;
-            // 
-            // loadProxyButton
-            // 
-            loadProxyButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            loadProxyButton.AutoSize = true;
-            loadProxyButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            loadProxyButton.Enabled = false;
-            loadProxyButton.Location = new System.Drawing.Point(222, 295);
-            loadProxyButton.Name = "loadProxyButton";
-            loadProxyButton.Size = new System.Drawing.Size(99, 25);
-            loadProxyButton.TabIndex = 10008;
-            loadProxyButton.Text = "Load Proxy";
-            loadProxyButton.UseVisualStyleBackColor = true;
-            loadProxyButton.Click += OnLoadProxy;
+            resetButton.Click += OnResetSelections;
             // 
             // SelectForm
             // 
@@ -386,10 +341,7 @@ namespace CreamInstaller.Forms
             AutoSize = true;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
             ClientSize = new System.Drawing.Size(584, 361);
-            Controls.Add(loadProxyButton);
-            Controls.Add(saveProxyButton);
             Controls.Add(resetButton);
-            Controls.Add(resetProxyButton);
             Controls.Add(loadButton);
             Controls.Add(saveButton);
             Controls.Add(sortCheckBox);
@@ -445,10 +397,7 @@ namespace CreamInstaller.Forms
         internal CheckBox proxyAllCheckBox;
         private Button saveButton;
         private Button loadButton;
-        private Button resetProxyButton;
         private Button resetButton;
-        private Button saveProxyButton;
-        private Button loadProxyButton;
     }
 }
 

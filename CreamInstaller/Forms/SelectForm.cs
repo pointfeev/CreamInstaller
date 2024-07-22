@@ -16,7 +16,6 @@ using CreamInstaller.Platforms.Steam;
 using CreamInstaller.Platforms.Ubisoft;
 using CreamInstaller.Resources;
 using CreamInstaller.Utility;
-using Gameloop.Vdf.Linq;
 using static CreamInstaller.Resources.Resources;
 
 namespace CreamInstaller.Forms;
@@ -563,9 +562,6 @@ internal sealed partial class SelectForm : CustomForm
         saveButton.Enabled = false;
         loadButton.Enabled = false;
         resetButton.Enabled = false;
-        saveProxyButton.Enabled = false;
-        loadProxyButton.Enabled = false;
-        resetProxyButton.Enabled = false;
         progressLabel.Text = "Waiting for user to select which programs/games to scan . . .";
         ShowProgressBar();
         await ProgramData.Setup(this);
@@ -686,8 +682,7 @@ internal sealed partial class SelectForm : CustomForm
             await SteamCMD.Cleanup();
         }
 
-        OnLoadDlc(null, null);
-        OnLoadProxy(null, null);
+        OnLoadSelections(null, null);
         HideProgressBar();
         selectionTreeView.Enabled = !Selection.All.IsEmpty;
         allCheckBox.Enabled = selectionTreeView.Enabled;
@@ -695,12 +690,9 @@ internal sealed partial class SelectForm : CustomForm
         noneFoundLabel.Visible = !selectionTreeView.Enabled;
         installButton.Enabled = Selection.AllEnabled.Any();
         uninstallButton.Enabled = installButton.Enabled;
-        saveButton.Enabled = CanSaveDlc();
-        loadButton.Enabled = CanLoadDlc();
-        resetButton.Enabled = CanResetDlc();
-        saveProxyButton.Enabled = CanSaveProxy();
-        loadProxyButton.Enabled = CanLoadProxy();
-        resetProxyButton.Enabled = CanResetProxy();
+        saveButton.Enabled = CanSaveSelections();
+        loadButton.Enabled = CanLoadSelections();
+        resetButton.Enabled = CanResetSelections();
         cancelButton.Enabled = false;
         scanButton.Enabled = true;
         blockedGamesCheckBox.Enabled = true;
@@ -722,8 +714,10 @@ internal sealed partial class SelectForm : CustomForm
         allCheckBox.CheckedChanged += OnAllCheckBoxChanged;
         installButton.Enabled = Selection.AllEnabled.Any();
         uninstallButton.Enabled = installButton.Enabled;
-        saveButton.Enabled = CanSaveDlc();
-        resetButton.Enabled = CanResetDlc();
+        if (sender is "OnLoadSelections" or "OnResetSelections")
+            return;
+        saveButton.Enabled = CanSaveSelections();
+        resetButton.Enabled = CanResetSelections();
     }
 
     private static void SyncNodeAncestors(TreeNode node)
@@ -1029,7 +1023,7 @@ internal sealed partial class SelectForm : CustomForm
         foreach (Selection selection in Selection.All.Keys.Where(s => s.Enabled != shouldEnable))
         {
             selection.Enabled = shouldEnable;
-            OnTreeViewNodeCheckedChanged(null, new(selection.TreeNode, TreeViewAction.ByMouse));
+            OnTreeViewNodeCheckedChanged("OnAllCheckBoxChanged", new(selection.TreeNode, TreeViewAction.ByMouse));
         }
 
         allCheckBox.CheckedChanged -= OnAllCheckBoxChanged;
@@ -1046,7 +1040,7 @@ internal sealed partial class SelectForm : CustomForm
         proxyAllCheckBox.CheckedChanged -= OnProxyAllCheckBoxChanged;
         proxyAllCheckBox.Checked = shouldEnable;
         proxyAllCheckBox.CheckedChanged += OnProxyAllCheckBoxChanged;
-        resetProxyButton.Enabled = CanResetProxy();
+        resetButton.Enabled = CanResetSelections();
     }
 
     private bool AreSelectionsDefault()
@@ -1054,96 +1048,79 @@ internal sealed partial class SelectForm : CustomForm
             => node.Parent is null || node.Tag is not Platform and not DLCType ||
                (node.Text == "Unknown" ? !node.Checked : node.Checked));
 
+    private static bool AreProxySelectionsDefault() => Selection.All.Keys.All(selection => !selection.UseProxy);
+
     private bool CanSaveDlc() =>
         installButton.Enabled && (ProgramData.ReadDlcChoices().Any() || !AreSelectionsDefault());
-
-    private void OnSaveDlc(object sender, EventArgs e)
-    {
-        List<(Platform platform, string gameId, string dlcId)> choices = ProgramData.ReadDlcChoices().ToList();
-        foreach (SelectionDLC dlc in SelectionDLC.All.Keys)
-            if ((dlc.Name == "Unknown" ? dlc.Enabled : !dlc.Enabled)
-                && !choices.Any(c =>
-                    c.platform == dlc.Selection.Platform && c.gameId == dlc.Selection.Id && c.dlcId == dlc.Id))
-                choices.Add((dlc.Selection.Platform, dlc.Selection.Id, dlc.Id));
-            else
-                _ = choices.RemoveAll(n =>
-                    n.platform == dlc.Selection.Platform && n.gameId == dlc.Selection.Id && n.dlcId == dlc.Id);
-        ProgramData.WriteDlcChoices(choices);
-        loadButton.Enabled = CanLoadDlc();
-        saveButton.Enabled = CanSaveDlc();
-    }
-
-    private static bool CanLoadDlc() => ProgramData.ReadDlcChoices().Any();
-
-    private void OnLoadDlc(object sender, EventArgs e)
-    {
-        List<(Platform platform, string gameId, string dlcId)> choices = ProgramData.ReadDlcChoices().ToList();
-        foreach (SelectionDLC dlc in SelectionDLC.All.Keys)
-        {
-            dlc.Enabled = choices.Any(c =>
-                c.platform == dlc.Selection?.Platform && c.gameId == dlc.Selection?.Id && c.dlcId == dlc.Id)
-                ? dlc.Name == "Unknown"
-                : dlc.Name != "Unknown";
-            OnTreeViewNodeCheckedChanged(null, new(dlc.TreeNode, TreeViewAction.ByMouse));
-        }
-    }
-
-    private bool CanResetDlc() => !AreSelectionsDefault();
-
-    private void OnResetDlc(object sender, EventArgs e)
-    {
-        foreach (SelectionDLC dlc in SelectionDLC.All.Keys)
-        {
-            dlc.Enabled = dlc.Name != "Unknown";
-            OnTreeViewNodeCheckedChanged(null, new(dlc.TreeNode, TreeViewAction.ByMouse));
-        }
-
-        resetButton.Enabled = CanResetDlc();
-    }
-
-    private static bool AreProxySelectionsDefault() =>
-        Selection.All.Keys.All(selection => !selection.UseProxy && selection.Proxy is null);
 
     private static bool CanSaveProxy() =>
         ProgramData.ReadProxyChoices().Any() || !AreProxySelectionsDefault();
 
-    private void OnSaveProxy(object sender, EventArgs e)
+    private bool CanSaveSelections() => CanSaveDlc() || CanSaveProxy();
+
+    private void OnSaveSelections(object sender, EventArgs e)
     {
-        List<(Platform platform, string id, string proxy, bool enabled)> choices =
+        List<(Platform platform, string gameId, string dlcId)> dlcChoices = ProgramData.ReadDlcChoices().ToList();
+        foreach (SelectionDLC dlc in SelectionDLC.All.Keys)
+        {
+            _ = dlcChoices.RemoveAll(n =>
+                n.platform == dlc.Selection.Platform && n.gameId == dlc.Selection.Id && n.dlcId == dlc.Id);
+            if (dlc.Name == "Unknown" ? dlc.Enabled : !dlc.Enabled)
+                dlcChoices.Add((dlc.Selection.Platform, dlc.Selection.Id, dlc.Id));
+        }
+
+        ProgramData.WriteDlcChoices(dlcChoices);
+
+        List<(Platform platform, string id, string proxy, bool enabled)> proxyChoices =
             ProgramData.ReadProxyChoices().ToList();
         foreach (Selection selection in Selection.All.Keys)
         {
-            _ = choices.RemoveAll(c => c.platform == selection.Platform && c.id == selection.Id);
-            if (selection.Proxy is not null and not Selection.DefaultProxy || selection.UseProxy)
-                choices.Add((selection.Platform, selection.Id,
+            _ = proxyChoices.RemoveAll(c => c.platform == selection.Platform && c.id == selection.Id);
+            if (selection.UseProxy)
+                proxyChoices.Add((selection.Platform, selection.Id,
                     selection.Proxy == Selection.DefaultProxy ? null : selection.Proxy,
                     selection.UseProxy));
         }
 
-        ProgramData.WriteProxyChoices(choices);
-        saveProxyButton.Enabled = CanSaveProxy();
-        loadProxyButton.Enabled = CanLoadProxy();
+        ProgramData.WriteProxyChoices(proxyChoices);
+
+        loadButton.Enabled = CanLoadSelections();
+        saveButton.Enabled = CanSaveSelections();
     }
+
+    private static bool CanLoadDlc() => ProgramData.ReadDlcChoices().Any();
 
     private static bool CanLoadProxy() => ProgramData.ReadProxyChoices().Any();
 
-    private void OnLoadProxy(object sender, EventArgs e)
+    private bool CanLoadSelections() => CanLoadDlc() || CanLoadProxy();
+
+    private void OnLoadSelections(object sender, EventArgs e)
     {
-        List<(Platform platform, string id, string proxy, bool enabled)> choices =
+        List<(Platform platform, string gameId, string dlcId)> dlcChoices = ProgramData.ReadDlcChoices().ToList();
+        foreach (SelectionDLC dlc in SelectionDLC.All.Keys)
+        {
+            dlc.Enabled = dlcChoices.Any(c =>
+                c.platform == dlc.Selection?.Platform && c.gameId == dlc.Selection?.Id && c.dlcId == dlc.Id)
+                ? dlc.Name == "Unknown"
+                : dlc.Name != "Unknown";
+            OnTreeViewNodeCheckedChanged("OnLoadSelections", new(dlc.TreeNode, TreeViewAction.ByMouse));
+        }
+
+        List<(Platform platform, string id, string proxy, bool enabled)> proxyChoices =
             ProgramData.ReadProxyChoices().ToList();
         foreach (Selection selection in Selection.All.Keys)
-            if (choices.Any(c => c.platform == selection.Platform && c.id == selection.Id))
+            if (proxyChoices.Any(c => c.platform == selection.Platform && c.id == selection.Id))
             {
                 (Platform platform, string id, string proxy, bool enabled)
-                    choice = choices.First(c => c.platform == selection.Platform && c.id == selection.Id);
+                    choice = proxyChoices.First(c => c.platform == selection.Platform && c.id == selection.Id);
                 (Platform platform, string id, string proxy, bool enabled) = choice;
                 string currentProxy = proxy;
                 if (proxy is not null && proxy.Contains('.')) // convert pre-v4.1.0.0 choices
                     proxy.GetProxyInfoFromIdentifier(out currentProxy, out _);
-                if (proxy != currentProxy && choices.Remove(choice)) // convert pre-v4.1.0.0 choices
-                    choices.Add((platform, id, currentProxy, enabled));
+                if (proxy != currentProxy && proxyChoices.Remove(choice)) // convert pre-v4.1.0.0 choices
+                    proxyChoices.Add((platform, id, currentProxy, enabled));
                 if (currentProxy is null or Selection.DefaultProxy && !enabled)
-                    _ = choices.RemoveAll(c => c.platform == platform && c.id == id);
+                    _ = proxyChoices.RemoveAll(c => c.platform == platform && c.id == id);
                 else
                 {
                     selection.UseProxy = enabled;
@@ -1156,15 +1133,26 @@ internal sealed partial class SelectForm : CustomForm
                 selection.Proxy = null;
             }
 
-        ProgramData.WriteProxyChoices(choices);
-        loadProxyButton.Enabled = CanLoadProxy();
+        ProgramData.WriteProxyChoices(proxyChoices);
+        loadButton.Enabled = CanLoadSelections();
+
         OnProxyChanged();
     }
 
+    private bool CanResetDlc() => !AreSelectionsDefault();
+
     private static bool CanResetProxy() => !AreProxySelectionsDefault();
 
-    private void OnResetProxy(object sender, EventArgs e)
+    private bool CanResetSelections() => CanResetDlc() || CanResetProxy();
+
+    private void OnResetSelections(object sender, EventArgs e)
     {
+        foreach (SelectionDLC dlc in SelectionDLC.All.Keys)
+        {
+            dlc.Enabled = dlc.Name != "Unknown";
+            OnTreeViewNodeCheckedChanged("OnResetSelections", new(dlc.TreeNode, TreeViewAction.ByMouse));
+        }
+
         foreach (Selection selection in Selection.All.Keys)
         {
             selection.UseProxy = false;
@@ -1177,8 +1165,8 @@ internal sealed partial class SelectForm : CustomForm
     internal void OnProxyChanged()
     {
         selectionTreeView.Invalidate();
-        saveProxyButton.Enabled = CanSaveProxy();
-        resetProxyButton.Enabled = CanResetProxy();
+        saveButton.Enabled = CanSaveSelections();
+        resetButton.Enabled = CanResetSelections();
         proxyAllCheckBox.CheckedChanged -= OnProxyAllCheckBoxChanged;
         proxyAllCheckBox.Checked = Selection.All.Keys.All(selection => !selection.CanUseProxy || selection.UseProxy);
         proxyAllCheckBox.CheckedChanged += OnProxyAllCheckBoxChanged;
