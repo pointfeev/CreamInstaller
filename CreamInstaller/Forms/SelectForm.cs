@@ -762,9 +762,8 @@ internal sealed partial class SelectForm : CustomForm
         progressBar.Visible = true;
         programsGroupBox.Size = programsGroupBox.Size with
         {
-            Height = programsGroupBox.Size.Height - 3 - progressLabel.Size.Height - progressLabelGames.Size.Height -
-                     progressLabelDLCs.Size.Height
-                     - progressBar.Size.Height
+            Height = programsGroupBox.Size.Height - progressLabel.Size.Height - progressLabelGames.Size.Height -
+                     progressLabelDLCs.Size.Height - progressBar.Size.Height - 6
         };
     }
 
@@ -777,9 +776,8 @@ internal sealed partial class SelectForm : CustomForm
         progressBar.Visible = false;
         programsGroupBox.Size = programsGroupBox.Size with
         {
-            Height = programsGroupBox.Size.Height + 3 + progressLabel.Size.Height + progressLabelGames.Size.Height +
-                     progressLabelDLCs.Size.Height
-                     + progressBar.Size.Height
+            Height = programsGroupBox.Size.Height + progressLabel.Size.Height + progressLabelGames.Size.Height +
+                     progressLabelDLCs.Size.Height + progressBar.Size.Height + 6
         };
     }
 
@@ -1041,6 +1039,7 @@ internal sealed partial class SelectForm : CustomForm
         proxyAllCheckBox.Checked = shouldEnable;
         proxyAllCheckBox.CheckedChanged += OnProxyAllCheckBoxChanged;
         resetButton.Enabled = CanResetSelections();
+        saveButton.Enabled = CanSaveSelections();
     }
 
     private bool AreSelectionsDefault()

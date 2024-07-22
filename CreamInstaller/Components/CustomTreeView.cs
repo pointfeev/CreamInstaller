@@ -24,10 +24,10 @@ internal sealed class CustomTreeView : TreeView
     private static readonly Color C7 = ColorTranslator.FromHtml("#006900");
     private static readonly Color C8 = ColorTranslator.FromHtml("#69AA69");
 
-    private readonly Dictionary<Selection, Rectangle> checkBoxBounds = new();
-    private readonly Dictionary<Selection, Rectangle> comboBoxBounds = new();
+    private readonly Dictionary<Selection, Rectangle> checkBoxBounds = [];
+    private readonly Dictionary<Selection, Rectangle> comboBoxBounds = [];
 
-    private readonly Dictionary<TreeNode, Rectangle> selectionBounds = new();
+    private readonly Dictionary<TreeNode, Rectangle> selectionBounds = [];
     private SolidBrush backBrush;
     private ToolStripDropDown comboBoxDropDown;
     private Font comboBoxFont;
@@ -36,6 +36,7 @@ internal sealed class CustomTreeView : TreeView
     internal CustomTreeView()
     {
         DrawMode = TreeViewDrawMode.OwnerDrawAll;
+        Invalidated += OnInvalidated;
         DrawNode += DrawTreeNode;
         Disposed += OnDisposed;
     }
@@ -57,6 +58,13 @@ internal sealed class CustomTreeView : TreeView
         comboBoxFont = null;
         comboBoxDropDown?.Dispose();
         comboBoxDropDown = null;
+    }
+
+    private void OnInvalidated(object sender, EventArgs e)
+    {
+        checkBoxBounds.Clear();
+        comboBoxBounds.Clear();
+        selectionBounds.Clear();
     }
 
     private void DrawTreeNode(object sender, DrawTreeNodeEventArgs e)
@@ -205,7 +213,7 @@ internal sealed class CustomTreeView : TreeView
             return;
         if (comboBoxBounds.Count > 0 && selectForm is not null)
             foreach (KeyValuePair<Selection, Rectangle> pair in comboBoxBounds)
-                if (!Selection.All.ContainsKey(pair.Key))
+                if (!Selection.All.ContainsKey(pair.Key) || !pair.Key.CanUseProxy)
                     _ = comboBoxBounds.Remove(pair.Key);
                 else if (pair.Value.Contains(clickPoint))
                 {
@@ -243,7 +251,7 @@ internal sealed class CustomTreeView : TreeView
                 }
 
         foreach (KeyValuePair<Selection, Rectangle> pair in checkBoxBounds)
-            if (!Selection.All.ContainsKey(pair.Key))
+            if (!Selection.All.ContainsKey(pair.Key) || !pair.Key.CanUseProxy)
                 _ = checkBoxBounds.Remove(pair.Key);
             else if (pair.Value.Contains(clickPoint))
             {
