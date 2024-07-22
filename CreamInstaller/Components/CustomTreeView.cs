@@ -133,7 +133,7 @@ internal sealed class CustomTreeView : TreeView
         if (form is SelectForm)
         {
             Selection selection = Selection.FromId(platform, id);
-            if (selection is not null && selection.CanUseProxy)
+            if (selection is not null)
             {
                 if (bounds == node.Bounds)
                 {
@@ -238,16 +238,11 @@ internal sealed class CustomTreeView : TreeView
 
         if (comboBoxBounds.Count > 0 && selectForm is not null)
             foreach (KeyValuePair<Selection, Rectangle> pair in comboBoxBounds)
-                if (!Selection.All.ContainsKey(pair.Key) || !pair.Key.CanUseProxy)
+                if (!Selection.All.ContainsKey(pair.Key))
                     _ = comboBoxBounds.Remove(pair.Key);
                 else if (pair.Value.Contains(clickPoint))
                 {
-                    HashSet<string> proxies = EmbeddedResources
-                        .Where(r => r.StartsWith("Koaloader", StringComparison.Ordinal)).Select(p =>
-                        {
-                            p.GetProxyInfoFromIdentifier(out string proxyName, out _);
-                            return proxyName;
-                        }).ToHashSet();
+                    IEnumerable<string> proxies = pair.Key.GetAvailableProxies();
                     comboBoxDropDown ??= new();
                     comboBoxDropDown.ShowItemToolTips = false;
                     comboBoxDropDown.Items.Clear();
@@ -257,7 +252,9 @@ internal sealed class CustomTreeView : TreeView
                         foreach ((string directory, BinaryType _) in pair.Key.ExecutableDirectories)
                         {
                             string path = directory + @"\" + proxy + ".dll";
-                            if (!path.FileExists() || path.IsResourceFile(ResourceIdentifier.Koaloader))
+                            if (!path.FileExists() || path.IsResourceFile(ResourceIdentifier.Koaloader) ||
+                                path.IsResourceFile(ResourceIdentifier.Steamworks32) ||
+                                path.IsResourceFile(ResourceIdentifier.Steamworks64))
                                 continue;
                             canUse = false;
                             break;
@@ -276,7 +273,7 @@ internal sealed class CustomTreeView : TreeView
                 }
 
         foreach (KeyValuePair<Selection, Rectangle> pair in checkBoxBounds)
-            if (!Selection.All.ContainsKey(pair.Key) || !pair.Key.CanUseProxy)
+            if (!Selection.All.ContainsKey(pair.Key))
                 _ = checkBoxBounds.Remove(pair.Key);
             else if (pair.Value.Contains(clickPoint))
             {

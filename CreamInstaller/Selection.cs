@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using CreamInstaller.Forms;
+using CreamInstaller.Resources;
 using CreamInstaller.Utility;
 using static CreamInstaller.Resources.Resources;
 
@@ -20,16 +21,13 @@ public enum Platform
 
 internal sealed class Selection : IEquatable<Selection>
 {
-    internal const string DefaultProxy = "version";
-
-    // TODO: add proxy mode support for CreamAPI and set this to true
-    internal bool CanUseProxy => Program.UseSmokeAPI || Platform is not Platform.Steam;
+    internal const string DefaultProxy = "winmm";
 
     internal static readonly ConcurrentDictionary<Selection, byte> All = new();
 
     internal readonly HashSet<string> DllDirectories;
     internal readonly List<(string directory, BinaryType binaryType)> ExecutableDirectories;
-    internal readonly HashSet<Selection> ExtraSelections = new();
+    internal readonly HashSet<Selection> ExtraSelections = [];
     internal readonly string Id;
     internal readonly string Name;
     internal readonly Platform Platform;
@@ -42,6 +40,17 @@ internal sealed class Selection : IEquatable<Selection>
     internal string Publisher;
     internal string SubIcon;
     internal string Website;
+
+    internal IEnumerable<string> GetAvailableProxies()
+    {
+        if (!Program.UseSmokeAPI && Platform is Platform.Steam or Platform.Paradox)
+            return CreamAPI.ProxyDLLs;
+        return EmbeddedResources.Where(r => r.StartsWith("Koaloader", StringComparison.Ordinal)).Select(p =>
+        {
+            p.GetProxyInfoFromIdentifier(out string proxyName, out _);
+            return proxyName;
+        }).ToHashSet();
+    }
 
     private Selection(Platform platform, string id, string name, string rootDirectory, HashSet<string> dllDirectories,
         List<(string directory, BinaryType binaryType)> executableDirectories)

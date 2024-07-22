@@ -186,7 +186,7 @@ internal static class SmokeAPI
     }
 
     internal static async Task Uninstall(string directory, InstallForm installForm = null, bool deleteOthers = true)
-        => await Task.Run(() =>
+        => await Task.Run(async () =>
         {
             DeleteCreamApiComponents(directory, installForm);
 
@@ -222,6 +222,7 @@ internal static class SmokeAPI
 
             if (!deleteOthers)
                 return;
+
             if (old_config.FileExists())
             {
                 old_config.DeleteFile();
@@ -252,6 +253,8 @@ internal static class SmokeAPI
                 log.DeleteFile();
                 installForm?.UpdateUser($"Deleted log: {Path.GetFileName(log)}", LogTextBox.Action, false);
             }
+
+            await CreamAPI.Uninstall(directory, installForm, false);
         });
 
     internal static async Task Install(string directory, Selection selection, InstallForm installForm = null,

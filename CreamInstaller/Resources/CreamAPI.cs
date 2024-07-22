@@ -12,7 +12,10 @@ namespace CreamInstaller.Resources;
 
 internal static class CreamAPI
 {
-    // TODO: add proxy mode support
+    internal static readonly List<string> ProxyDLLs = ["winmm", "winhttp", "version"];
+
+    internal static IEnumerable<string> GetCreamApiProxies(this string directory)
+        => from proxy in ProxyDLLs select directory + @"\" + proxy + ".dll";
 
     internal static void GetCreamApiComponents(this string directory, out string api32, out string api32_o,
         out string api64, out string api64_o, out string config)
@@ -113,7 +116,7 @@ internal static class CreamAPI
     }
 
     internal static async Task Uninstall(string directory, InstallForm installForm = null, bool deleteOthers = true)
-        => await Task.Run(() =>
+        => await Task.Run(async () =>
         {
             DeleteSmokeApiComponents(directory, installForm);
 
@@ -149,11 +152,14 @@ internal static class CreamAPI
 
             if (!deleteOthers)
                 return;
+
             if (config.FileExists())
             {
                 config.DeleteFile();
                 installForm?.UpdateUser($"Deleted configuration: {Path.GetFileName(config)}", LogTextBox.Action, false);
             }
+
+            await SmokeAPI.Uninstall(directory, installForm, false);
         });
 
     internal static async Task Install(string directory, Selection selection, InstallForm installForm = null,
@@ -189,6 +195,59 @@ internal static class CreamAPI
                 "CreamAPI.steam_api64.dll".WriteManifestResource(api64);
                 installForm?.UpdateUser($"Wrote CreamAPI: {Path.GetFileName(api64)}", LogTextBox.Action, false);
             }
+
+            if (generateConfig)
+                CheckConfig(directory, selection, installForm);
+        });
+
+    internal static async Task ProxyUninstall(string directory, InstallForm installForm = null,
+        bool deleteOthers = true)
+        => await Task.Run(() =>
+        {
+            foreach (string proxy in directory.GetCreamApiProxies().Where(proxy =>
+                         proxy.FileExists() && (proxy.IsResourceFile(ResourceIdentifier.Steamworks32) ||
+                                                proxy.IsResourceFile(ResourceIdentifier.Steamworks64))))
+            {
+                proxy.DeleteFile(true);
+                installForm?.UpdateUser($"Deleted CreamAPI: {Path.GetFileName(proxy)}", LogTextBox.Action, false);
+            }
+
+            if (!deleteOthers)
+                return;
+            directory.GetCreamApiComponents(out _, out _, out _, out _, out string config);
+            if (config.FileExists())
+            {
+                config.DeleteFile();
+                installForm?.UpdateUser($"Deleted configuration: {Path.GetFileName(config)}", LogTextBox.Action, false);
+            }
+        });
+
+    internal static async Task ProxyInstall(string directory, BinaryType binaryType, Selection selection,
+        InstallForm installForm = null, bool generateConfig = true)
+        => await Task.Run(async () =>
+        {
+            await Koaloader.Uninstall(directory, selection.RootDirectory, installForm);
+
+            string proxy = selection.Proxy ?? Selection.DefaultProxy;
+            string path = directory + @"\" + proxy + ".dll";
+            foreach (string _path in directory.GetCreamApiProxies().Where(p =>
+                         p != path && p.FileExists() && (p.IsResourceFile(ResourceIdentifier.Steamworks32) ||
+                                                         p.IsResourceFile(ResourceIdentifier.Steamworks64))))
+            {
+                _path.DeleteFile(true);
+                installForm?.UpdateUser($"Deleted CreamAPI: {Path.GetFileName(_path)}", LogTextBox.Action, false);
+            }
+
+            if (path.FileExists() && !path.IsResourceFile(ResourceIdentifier.Steamworks32) &&
+                !path.IsResourceFile(ResourceIdentifier.Steamworks64))
+                throw new CustomMessageException("A non-CreamAPI DLL named " + proxy +
+                                                 ".dll already exists in this directory!");
+            (binaryType == BinaryType.BIT32 ? "CreamAPI.steam_api.dll" : "CreamAPI.steam_api64.dll")
+                .WriteManifestResource(path);
+            installForm?.UpdateUser(
+                $"Wrote {(binaryType == BinaryType.BIT32 ? "32-bit" : "64-bit")} CreamAPI: {Path.GetFileName(path)}",
+                LogTextBox.Action,
+                false);
 
             if (generateConfig)
                 CheckConfig(directory, selection, installForm);

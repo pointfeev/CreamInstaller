@@ -22,9 +22,6 @@ namespace CreamInstaller.Forms;
 
 internal sealed partial class SelectForm : CustomForm
 {
-    // TODO: fix the form display reset save load buttons for proxy
-    //       consolidate all reset save load functionality into only 3 buttons instead of 6?
-
     private const string HelpButtonListPrefix = "\n    •  ";
 
     private static SelectForm current;
@@ -1167,7 +1164,7 @@ internal sealed partial class SelectForm : CustomForm
         saveButton.Enabled = CanSaveSelections();
         resetButton.Enabled = CanResetSelections();
         proxyAllCheckBox.CheckedChanged -= OnProxyAllCheckBoxChanged;
-        proxyAllCheckBox.Checked = Selection.All.Keys.All(selection => !selection.CanUseProxy || selection.UseProxy);
+        proxyAllCheckBox.Checked = Selection.All.Keys.All(selection => selection.UseProxy);
         proxyAllCheckBox.CheckedChanged += OnProxyAllCheckBoxChanged;
     }
 

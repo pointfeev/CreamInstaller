@@ -182,7 +182,7 @@ internal static class Koaloader
                 installForm?.UpdateUser($"Deleted configuration: {Path.GetFileName(config)}", LogTextBox.Action, false);
             }
 
-            if (Program.UseSmokeAPI) await SmokeAPI.Uninstall(directory, installForm, deleteConfig);
+            await SmokeAPI.Uninstall(directory, installForm, deleteConfig);
             await ScreamAPI.Uninstall(directory, installForm, deleteConfig);
             await UplayR1.Uninstall(directory, installForm, deleteConfig);
             await UplayR2.Uninstall(directory, installForm, deleteConfig);
@@ -193,8 +193,10 @@ internal static class Koaloader
     internal static async Task Install(string directory, BinaryType binaryType, Selection selection,
         string rootDirectory = null,
         InstallForm installForm = null, bool generateConfig = true)
-        => await Task.Run(() =>
+        => await Task.Run(async () =>
         {
+            await CreamAPI.ProxyUninstall(directory, installForm);
+
             string proxy = selection.Proxy ?? Selection.DefaultProxy;
             string path = directory + @"\" + proxy + ".dll";
             foreach (string _path in directory.GetKoaloaderProxies().Where(p =>
