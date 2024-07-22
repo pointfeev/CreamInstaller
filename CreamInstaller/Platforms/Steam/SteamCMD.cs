@@ -186,6 +186,10 @@ internal static partial class SteamCMD
 
     internal static async Task<CmdAppData> GetAppInfo(string appId, string branch = "public", int buildId = 0)
     {
+        CmdAppData data = await QueryWebAPI(appId);
+        if (data is not null)
+            return data;
+
         int attempts = 0;
         while (!Program.Canceled)
         {
