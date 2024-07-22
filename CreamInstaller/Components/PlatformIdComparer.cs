@@ -22,7 +22,7 @@ internal sealed class StringComparer : IComparer<string>
 {
     public int Compare(string a, string b)
         => !int.TryParse(a, out _) && !int.TryParse(b, out _)
-            ? string.Compare(a, b, StringComparison.Ordinal)
+            ? string.Compare(a, b, StringComparison.CurrentCulture)
             : !int.TryParse(a, out int A)
                 ? 1
                 : !int.TryParse(b, out int B)
