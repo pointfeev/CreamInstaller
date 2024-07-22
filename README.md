@@ -4,7 +4,7 @@
 
 ###### **NOTE:** This is simply a preview image; this is not a list of supported games nor configurations!
 
-##### The program utilizes the latest versions of [Koaloader](https://github.com/acidicoala/Koaloader), [SmokeAPI](https://github.com/acidicoala/SmokeAPI), [ScreamAPI](https://github.com/acidicoala/ScreamAPI), [Uplay R1 Unlocker](https://github.com/acidicoala/UplayR1Unlocker) and [Uplay R2 Unlocker](https://github.com/acidicoala/UplayR2Unlocker), all by the wonderful [acidicoala](https://github.com/acidicoala), and all downloaded from the posts above and embedded into the program itself; no further downloads necessary on your part!
+##### The program utilizes the latest version of [CreamAPI](https://cs.rin.ru/forum/viewtopic.php?f=29&t=70576) by [deadmau5](https://cs.rin.ru/forum/viewtopic.php?f=29&t=70576). It also utilizes the latest versions of [Koaloader](https://github.com/acidicoala/Koaloader), ~~[SmokeAPI](https://github.com/acidicoala/SmokeAPI)~~, [ScreamAPI](https://github.com/acidicoala/ScreamAPI), [Uplay R1 Unlocker](https://github.com/acidicoala/UplayR1Unlocker) and [Uplay R2 Unlocker](https://github.com/acidicoala/UplayR2Unlocker), all by [acidicoala](https://github.com/acidicoala). All unlockers are downloaded and embedded into the program itself; no further downloads necessary on your part!
 ---
 #### Description:
 Automatically finds all installed Steam, Epic and Ubisoft games with their respective DLC-related DLL locations on the user's computer,
