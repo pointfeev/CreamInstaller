@@ -18,20 +18,20 @@ internal static class SteamStore
     private const int CooldownGame = 600;
     private const int CooldownDlc = 1200;
 
-    internal static async Task<HashSet<string>> ParseDlcAppIds(AppData appData)
+    internal static async Task<HashSet<string>> ParseDlcAppIds(StoreAppData storeAppData)
         => await Task.Run(() =>
         {
             HashSet<string> dlcIds = new();
-            if (appData.DLC is null)
+            if (storeAppData.DLC is null)
                 return dlcIds;
-            foreach (string dlcId in from appId in appData.DLC
+            foreach (string dlcId in from appId in storeAppData.DLC
                      where appId > 0
                      select appId.ToString(CultureInfo.InvariantCulture))
                 _ = dlcIds.Add(dlcId);
             return dlcIds;
         });
 
-    internal static async Task<AppData> QueryStoreAPI(string appId, bool isDlc = false, int attempts = 0)
+    internal static async Task<StoreAppData> QueryStoreAPI(string appId, bool isDlc = false, int attempts = 0)
     {
         while (!Program.Canceled)
         {
@@ -50,11 +50,12 @@ internal static class SteamStore
                         foreach (KeyValuePair<string, JToken> app in apps)
                             try
                             {
-                                AppDetails appDetails = JsonConvert.DeserializeObject<AppDetails>(app.Value.ToString());
-                                if (appDetails is not null)
+                                StoreAppDetails storeAppDetails =
+                                    JsonConvert.DeserializeObject<StoreAppDetails>(app.Value.ToString());
+                                if (storeAppDetails is not null)
                                 {
-                                    AppData data = appDetails.Data;
-                                    if (!appDetails.Success)
+                                    StoreAppData data = storeAppDetails.Data;
+                                    if (!storeAppDetails.Success)
                                     {
 #if DEBUG
                                         DebugForm.Current.Log(
@@ -123,21 +124,19 @@ internal static class SteamStore
                                               + ": Response deserialization null");
 #endif
                 }
-                else
-                {
 #if DEBUG
+                else
                     DebugForm.Current.Log(
                         "Steam store query failed on attempt #" + attempts + " for " + appId + (isDlc ? " (DLC)" : "") +
                         ": Response null",
                         LogTextBox.Warning);
 #endif
-                }
             }
 
             if (cachedExists)
                 try
                 {
-                    return JsonConvert.DeserializeObject<AppData>(cacheFile.ReadFile());
+                    return JsonConvert.DeserializeObject<StoreAppData>(cacheFile.ReadFile());
                 }
                 catch
                 {

@@ -3,14 +3,14 @@ using Newtonsoft.Json;
 
 namespace CreamInstaller.Platforms.Steam;
 
-public class AppFullGame
+public class StoreAppFullGame
 {
     [JsonProperty(PropertyName = "appid")] public string AppId { get; set; }
 
     [JsonProperty(PropertyName = "name")] public string Name { get; set; }
 }
 
-public class AppData
+public class StoreAppData
 {
     [JsonProperty(PropertyName = "type")] public string Type { get; set; }
 
@@ -20,7 +20,7 @@ public class AppData
     public int SteamAppId { get; set; }
 
     [JsonProperty(PropertyName = "fullgame")]
-    public AppFullGame FullGame { get; set; }
+    public StoreAppFullGame FullGame { get; set; }
 
     [JsonProperty(PropertyName = "dlc")] public List<int> DLC { get; set; }
 
@@ -40,10 +40,10 @@ public class AppData
     public List<int> Packages { get; set; }
 }
 
-public class AppDetails
+public class StoreAppDetails
 {
     [JsonProperty(PropertyName = "success")]
     public bool Success { get; set; }
 
-    [JsonProperty(PropertyName = "data")] public AppData Data { get; set; }
+    [JsonProperty(PropertyName = "data")] public StoreAppData Data { get; set; }
 }

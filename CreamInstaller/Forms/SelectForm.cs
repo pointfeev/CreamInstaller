@@ -201,10 +201,10 @@ internal sealed partial class SelectForm : CustomForm
 
                     if (Program.Canceled)
                         return;
-                    AppData appData = await SteamStore.QueryStoreAPI(appId);
+                    StoreAppData storeAppData = await SteamStore.QueryStoreAPI(appId);
                     _ = Interlocked.Decrement(ref steamGamesToCheck);
-                    VProperty appInfo = await SteamCMD.GetAppInfo(appId, branch, buildId);
-                    if (appData is null && appInfo is null)
+                    CmdAppData cmdAppData = await SteamCMD.GetAppInfo(appId, branch, buildId);
+                    if (storeAppData is null && cmdAppData is null)
                     {
                         RemoveFromRemainingGames(name);
                         return;
@@ -213,13 +213,13 @@ internal sealed partial class SelectForm : CustomForm
                     if (Program.Canceled)
                         return;
                     ConcurrentDictionary<SelectionDLC, byte> dlc = new();
-                    List<Task> dlcTasks = new();
-                    HashSet<string> dlcIds = new();
-                    if (appData is not null)
-                        foreach (string dlcId in await SteamStore.ParseDlcAppIds(appData))
+                    List<Task> dlcTasks = [];
+                    HashSet<string> dlcIds = [];
+                    if (storeAppData is not null)
+                        foreach (string dlcId in await SteamStore.ParseDlcAppIds(storeAppData))
                             _ = dlcIds.Add(dlcId);
-                    if (appInfo is not null)
-                        foreach (string dlcId in await SteamCMD.ParseDlcAppIds(appInfo))
+                    if (cmdAppData is not null)
+                        foreach (string dlcId in await SteamCMD.ParseDlcAppIds(cmdAppData))
                             _ = dlcIds.Add(dlcId);
                     if (dlcIds.Count > 0)
                         foreach (string dlcAppId in dlcIds)
@@ -240,31 +240,27 @@ internal sealed partial class SelectForm : CustomForm
                                 string dlcName = null;
                                 string dlcIcon = null;
                                 bool onSteamStore = false;
-                                AppData dlcAppData = await SteamStore.QueryStoreAPI(dlcAppId, true);
-                                if (dlcAppData is not null)
+                                StoreAppData dlcStoreAppData = await SteamStore.QueryStoreAPI(dlcAppId, true);
+                                if (dlcStoreAppData is not null)
                                 {
-                                    dlcName = dlcAppData.Name;
-                                    dlcIcon = dlcAppData.HeaderImage;
+                                    dlcName = dlcStoreAppData.Name;
+                                    dlcIcon = dlcStoreAppData.HeaderImage;
                                     onSteamStore = true;
-                                    fullGameAppId = dlcAppData.FullGame?.AppId;
+                                    fullGameAppId = dlcStoreAppData.FullGame?.AppId;
                                 }
                                 else
                                 {
-                                    VProperty dlcAppInfo = await SteamCMD.GetAppInfo(dlcAppId);
-                                    if (dlcAppInfo is not null)
+                                    CmdAppData dlcCmdAppData = await SteamCMD.GetAppInfo(dlcAppId);
+                                    if (dlcCmdAppData is not null)
                                     {
-                                        dlcName = dlcAppInfo.Value.GetChild("common")?.GetChild("name")?.ToString();
-                                        string dlcIconStaticId = dlcAppInfo.Value.GetChild("common")?.GetChild("icon")
-                                            ?.ToString();
-                                        dlcIconStaticId ??= dlcAppInfo.Value.GetChild("common")?.GetChild("logo_small")
-                                            ?.ToString();
-                                        dlcIconStaticId ??= dlcAppInfo.Value.GetChild("common")?.GetChild("logo")
-                                            ?.ToString();
+                                        dlcName = dlcCmdAppData.Common?.Name;
+                                        string dlcIconStaticId = dlcCmdAppData.Common?.Icon;
+                                        dlcIconStaticId ??= dlcCmdAppData.Common?.LogoSmall;
+                                        dlcIconStaticId ??= dlcCmdAppData.Common?.Logo;
                                         if (dlcIconStaticId is not null)
                                             dlcIcon = IconGrabber.SteamAppImagesPath +
                                                       @$"\{dlcAppId}\{dlcIconStaticId}.jpg";
-                                        fullGameAppId = dlcAppInfo.Value.GetChild("common")?.GetChild("parent")
-                                            ?.ToString();
+                                        fullGameAppId = dlcCmdAppData.Common?.Parent;
                                     }
                                 }
 
@@ -273,26 +269,23 @@ internal sealed partial class SelectForm : CustomForm
                                     string fullGameName = null;
                                     string fullGameIcon = null;
                                     bool fullGameOnSteamStore = false;
-                                    AppData fullGameAppData = await SteamStore.QueryStoreAPI(fullGameAppId, true);
-                                    if (fullGameAppData is not null)
+                                    StoreAppData fullGameStoreAppData =
+                                        await SteamStore.QueryStoreAPI(fullGameAppId, true);
+                                    if (fullGameStoreAppData is not null)
                                     {
-                                        fullGameName = fullGameAppData.Name;
-                                        fullGameIcon = fullGameAppData.HeaderImage;
+                                        fullGameName = fullGameStoreAppData.Name;
+                                        fullGameIcon = fullGameStoreAppData.HeaderImage;
                                         fullGameOnSteamStore = true;
                                     }
                                     else
                                     {
-                                        VProperty fullGameAppInfo = await SteamCMD.GetAppInfo(fullGameAppId);
+                                        CmdAppData fullGameAppInfo = await SteamCMD.GetAppInfo(fullGameAppId);
                                         if (fullGameAppInfo is not null)
                                         {
-                                            fullGameName = fullGameAppInfo.Value.GetChild("common")?.GetChild("name")
-                                                ?.ToString();
-                                            string fullGameIconStaticId = fullGameAppInfo.Value.GetChild("common")
-                                                ?.GetChild("icon")?.ToString();
-                                            fullGameIconStaticId ??= fullGameAppInfo.Value.GetChild("common")
-                                                ?.GetChild("logo_small")?.ToString();
-                                            fullGameIconStaticId ??= fullGameAppInfo.Value.GetChild("common")
-                                                ?.GetChild("logo")?.ToString();
+                                            fullGameName = fullGameAppInfo.Common?.Name;
+                                            string fullGameIconStaticId = fullGameAppInfo.Common?.Icon;
+                                            fullGameIconStaticId ??= fullGameAppInfo.Common?.LogoSmall;
+                                            fullGameIconStaticId ??= fullGameAppInfo.Common?.Logo;
                                             if (fullGameIconStaticId is not null)
                                                 dlcIcon = IconGrabber.SteamAppImagesPath +
                                                           @$"\{fullGameAppId}\{fullGameIconStaticId}.jpg";
@@ -345,17 +338,15 @@ internal sealed partial class SelectForm : CustomForm
                         return;
                     }
 
-                    Selection selection = Selection.GetOrCreate(Platform.Steam, appId, appData?.Name ?? name,
+                    Selection selection = Selection.GetOrCreate(Platform.Steam, appId, storeAppData?.Name ?? name,
                         gameDirectory, dllDirectories,
                         await gameDirectory.GetExecutableDirectories(true));
                     selection.Product = "https://store.steampowered.com/app/" + appId;
-                    selection.Icon = IconGrabber.SteamAppImagesPath +
-                                     @$"\{appId}\{appInfo?.Value.GetChild("common")?.GetChild("icon")}.jpg";
-                    selection.SubIcon = appData?.HeaderImage ?? IconGrabber.SteamAppImagesPath
-                        + @$"\{appId}\{appInfo?.Value.GetChild("common")?.GetChild("clienticon")}.ico";
-                    selection.Publisher = appData?.Publishers[0] ??
-                                          appInfo?.Value.GetChild("extended")?.GetChild("publisher")?.ToString();
-                    selection.Website = appData?.Website;
+                    selection.Icon = IconGrabber.SteamAppImagesPath + @$"\{appId}\{cmdAppData?.Common?.Icon}.jpg";
+                    selection.SubIcon = storeAppData?.HeaderImage ?? IconGrabber.SteamAppImagesPath
+                        + @$"\{appId}\{cmdAppData?.Common?.ClientIcon}.ico";
+                    selection.Publisher = storeAppData?.Publishers[0] ?? cmdAppData?.Extended?.Publisher;
+                    selection.Website = storeAppData?.Website;
                     if (Program.Canceled)
                         return;
                     Invoke(delegate

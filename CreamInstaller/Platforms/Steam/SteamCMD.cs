@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CreamInstaller.Resources;
 using CreamInstaller.Utility;
+using Gameloop.Vdf.JsonConverter;
 using Gameloop.Vdf.Linq;
 #if DEBUG
 using CreamInstaller.Forms;
@@ -17,7 +18,7 @@ using CreamInstaller.Forms;
 
 namespace CreamInstaller.Platforms.Steam;
 
-internal static class SteamCMD
+internal static partial class SteamCMD
 {
     private const int ProcessLimit = 20;
 
@@ -32,10 +33,6 @@ internal static class SteamCMD
     private static readonly string DllPath = DirectoryPath + @"\steamclient.dll";
 
     private static readonly string AppCachePath = DirectoryPath + @"\appcache";
-    private static readonly string ConfigPath = DirectoryPath + @"\config";
-    private static readonly string DumpsPath = DirectoryPath + @"\dumps";
-    private static readonly string LogsPath = DirectoryPath + @"\logs";
-    private static readonly string SteamAppsPath = DirectoryPath + @"\steamapps";
 
     private static string DirectoryPath => ProgramData.DirectoryPath;
     internal static string AppInfoPath => ProgramData.AppInfoPath;
@@ -179,22 +176,7 @@ internal static class SteamCMD
             await Kill();
             try
             {
-                if (ConfigPath.DirectoryExists())
-                    foreach (string file in ConfigPath.EnumerateDirectory("*.tmp"))
-                        file.DeleteFile();
-                foreach (string file in DirectoryPath.EnumerateDirectory("*.old"))
-                    file.DeleteFile();
-                foreach (string file in DirectoryPath.EnumerateDirectory("*.delete"))
-                    file.DeleteFile();
-                foreach (string file in DirectoryPath.EnumerateDirectory("*.crash"))
-                    file.DeleteFile();
-                foreach (string file in DirectoryPath.EnumerateDirectory("*.ntfs_transaction_failed"))
-                    file.DeleteFile();
-                AppCachePath
-                    .DeleteDirectory(); // this is definitely needed, so SteamCMD gets the latest information for us
-                DumpsPath.DeleteDirectory();
-                LogsPath.DeleteDirectory();
-                SteamAppsPath.DeleteDirectory(); // this is just a useless folder created from +app_update 4
+                AppCachePath.DeleteDirectory();
             }
             catch
             {
@@ -202,7 +184,7 @@ internal static class SteamCMD
             }
         });
 
-    internal static async Task<VProperty> GetAppInfo(string appId, string branch = "public", int buildId = 0)
+    internal static async Task<CmdAppData> GetAppInfo(string appId, string branch = "public", int buildId = 0)
     {
         int attempts = 0;
         while (!Program.Canceled)
@@ -254,18 +236,49 @@ internal static class SteamCMD
                 continue;
             }
 
-            if (!appInfo.Value.Children().Any())
-                return appInfo;
-            VToken type = appInfo.Value.GetChild("common")?.GetChild("type");
-            if (type is not null && type.ToString() != "Game")
-                return appInfo;
-            string buildid = appInfo.Value.GetChild("depots")?.GetChild("branches")?.GetChild(branch)
-                ?.GetChild("buildid")?.ToString();
+            CmdAppData appData;
+            try
+            {
+                if (appInfo.ToJson().Value.ToObject<CmdAppData>() is not { } cmdAppData)
+                {
+                    appUpdateFile.DeleteFile();
+#if DEBUG
+                    DebugForm.Current.Log(
+                        "SteamCMD query failed on attempt #" + attempts + " for " + appId + " (" + branch +
+                        "): VDF-JSON conversion failed",
+                        LogTextBox.Warning);
+#endif
+                    continue;
+                }
+
+                appData = cmdAppData;
+            }
+            catch
+#if DEBUG
+                (Exception e)
+#endif
+            {
+                appUpdateFile.DeleteFile();
+#if DEBUG
+                DebugForm.Current.Log(
+                    "SteamCMD query failed on attempt #" + attempts + " for " + appId + " (" + branch +
+                    "): VDF-JSON conversion failed (" + e.Message + ")",
+                    LogTextBox.Warning);
+#endif
+                continue;
+            }
+
+            string type = appData.Common?.Type;
+            if (type is not null && type != "Game")
+                return appData;
+            if (appData.Depots is null || !appData.Depots.TryGetValue("branches", out dynamic appBranch))
+                return appData;
+            string buildid = appBranch?[branch]?.buildid;
             if (buildid is null && type is not null)
-                return appInfo;
+                return appData;
             if (type is not null && (!int.TryParse(buildid, out int gamebuildId) || gamebuildId >= buildId))
-                return appInfo;
-            HashSet<string> dlcAppIds = await ParseDlcAppIds(appInfo);
+                return appData;
+            HashSet<string> dlcAppIds = await ParseDlcAppIds(appData);
             foreach (string dlcAppUpdateFile in dlcAppIds.Select(id => $@"{AppInfoPath}\{id}.vdf"))
                 dlcAppUpdateFile.DeleteFile();
             appUpdateFile.DeleteFile();
@@ -279,30 +292,27 @@ internal static class SteamCMD
         return null;
     }
 
-    internal static async Task<HashSet<string>> ParseDlcAppIds(VProperty appInfo)
+    internal static async Task<HashSet<string>> ParseDlcAppIds(CmdAppData appData)
         => await Task.Run(() =>
         {
             HashSet<string> dlcIds = [];
-            if (Program.Canceled || appInfo is null)
+            if (Program.Canceled || appData is null)
                 return dlcIds;
-            VToken extended = appInfo.Value.GetChild("extended");
-            if (extended is not null)
-                foreach (VToken vToken in extended.Where(p => p is VProperty { Key: "listofdlc" }))
-                {
-                    VProperty property = (VProperty)vToken;
-                    foreach (string id in property.Value.ToString().Split(","))
-                        if (int.TryParse(id, out int appId) && appId > 0)
-                            _ = dlcIds.Add("" + appId);
-                }
 
-            VToken depots = appInfo.Value.GetChild("depots");
+            CmdAppExtended extended = appData.Extended;
+            if (extended?.Dlc != null)
+                foreach (string id in extended.Dlc.Split(","))
+                    if (int.TryParse(id, out int appId) && appId > 0)
+                        _ = dlcIds.Add("" + appId);
+
+            Dictionary<string, dynamic> depots = appData.Depots;
             if (depots is null)
                 return dlcIds;
-            foreach (VToken vToken in depots.Where(
-                         p => p is VProperty property && int.TryParse(property.Key, out int _)))
+
+            foreach ((_, dynamic depot) in depots.Where(p => int.TryParse(p.Key, out _)))
             {
-                VProperty property = (VProperty)vToken;
-                if (int.TryParse(property.Value.GetChild("dlcappid")?.ToString(), out int appId) && appId > 0)
+                string dlcAppId = depot.dlcappid;
+                if (dlcAppId is not null && int.TryParse(dlcAppId, out int appId) && appId > 0)
                     _ = dlcIds.Add("" + appId);
             }
 

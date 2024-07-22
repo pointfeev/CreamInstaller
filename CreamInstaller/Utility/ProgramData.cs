@@ -111,7 +111,7 @@ internal static class ProgramData
                 // ignored
             }
 
-        return Enumerable.Empty<(Platform platform, string id)>();
+        return [];
     }
 
     internal static void WriteProgramChoices(IEnumerable<(Platform platform, string id)> choices)
@@ -144,7 +144,7 @@ internal static class ProgramData
                 // ignored
             }
 
-        return Enumerable.Empty<(Platform platform, string gameId, string dlcId)>();
+        return [];
     }
 
     internal static void WriteDlcChoices(List<(Platform platform, string gameId, string dlcId)> choices)
@@ -177,7 +177,7 @@ internal static class ProgramData
                 // ignored
             }
 
-        return Enumerable.Empty<(Platform platform, string id, string proxy, bool enabled)>();
+        return [];
     }
 
     internal static void WriteProxyChoices(
