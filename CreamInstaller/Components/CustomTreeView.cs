@@ -73,6 +73,7 @@ internal sealed class CustomTreeView : TreeView
         TreeNode node = e.Node;
         if (node is not { IsVisible: true })
             return;
+
         bool highlighted = (e.State & TreeNodeStates.Selected) == TreeNodeStates.Selected && Focused;
         Graphics graphics = e.Graphics;
         backBrush ??= new(BackColor);
@@ -80,14 +81,17 @@ internal sealed class CustomTreeView : TreeView
         Brush brush = highlighted ? SystemBrushes.Highlight : backBrush;
         Rectangle bounds = node.Bounds;
         Rectangle selectionBounds = bounds;
+
         Form form = FindForm();
         if (form is not SelectForm and not SelectDialogForm)
             return;
+
         string id = node.Name;
         Platform platform = (node.Tag as Platform?).GetValueOrDefault(Platform.None);
         DLCType dlcType = (node.Tag as DLCType?).GetValueOrDefault(DLCType.None);
         if (string.IsNullOrWhiteSpace(id) || platform is Platform.None && dlcType is DLCType.None)
             return;
+
         Color color = highlighted
             ? C1
             : Enabled
@@ -99,8 +103,7 @@ internal sealed class CustomTreeView : TreeView
             SelectionDLC dlc = SelectionDLC.FromId(dlcType, node.Parent?.Name, id);
             text = dlc?.Selection != null ? dlc.Selection.Platform.ToString() : dlcType.ToString();
         }
-        else
-            text = platform.ToString();
+        else text = platform.ToString();
 
         Size size = TextRenderer.MeasureText(graphics, text, font);
         bounds = bounds with { X = bounds.X + bounds.Width, Width = size.Width };
@@ -108,6 +111,7 @@ internal sealed class CustomTreeView : TreeView
         graphics.FillRectangle(brush, bounds);
         Point point = new(bounds.Location.X - 1, bounds.Location.Y + 1);
         TextRenderer.DrawText(graphics, text, font, point, color, TextFormatFlags.Default);
+
         if (platform is not Platform.Paradox)
         {
             color = highlighted
@@ -126,7 +130,7 @@ internal sealed class CustomTreeView : TreeView
             TextRenderer.DrawText(graphics, text, font, point, color, TextFormatFlags.Default);
         }
 
-        if (form is SelectForm && ComboBoxRenderer.IsSupported)
+        if (form is SelectForm)
         {
             Selection selection = Selection.FromId(platform, id);
             if (selection is not null && selection.CanUseProxy)
@@ -150,6 +154,7 @@ internal sealed class CustomTreeView : TreeView
                 graphics.FillRectangle(backBrush, bounds);
                 point = new(bounds.Left, bounds.Top + bounds.Height / 2 - size.Height / 2 - 1);
                 CheckBoxRenderer.DrawCheckBox(graphics, point, checkBoxState);
+
                 text = ProxyToggleString;
                 size = TextRenderer.MeasureText(graphics, text, font);
                 int left = 1;
@@ -159,12 +164,16 @@ internal sealed class CustomTreeView : TreeView
                 graphics.FillRectangle(backBrush, bounds);
                 point = new(bounds.Location.X - 1 + left, bounds.Location.Y + 1);
                 TextRenderer.DrawText(graphics, text, font, point, Enabled ? C7 : C8, TextFormatFlags.Default);
+
                 this.checkBoxBounds[selection] = RectangleToClient(checkBoxBounds);
+
                 if (selection.UseProxy)
                 {
                     comboBoxFont ??= new(font.FontFamily, 6, font.Style, font.Unit, font.GdiCharSet,
                         font.GdiVerticalFont);
                     ComboBoxState comboBoxState = Enabled ? ComboBoxState.Normal : ComboBoxState.Disabled;
+                    ButtonState buttonState = Enabled ? ButtonState.Normal : ButtonState.Inactive;
+
                     text = (selection.Proxy ?? Selection.DefaultProxy) + ".dll";
                     size = TextRenderer.MeasureText(graphics, text, comboBoxFont) + new Size(6, 0);
                     const int padding = 2;
@@ -173,7 +182,18 @@ internal sealed class CustomTreeView : TreeView
                         selectionBounds.Size + bounds.Size with { Height = 0 });
                     Rectangle comboBoxBounds = bounds;
                     graphics.FillRectangle(backBrush, bounds);
-                    ComboBoxRenderer.DrawTextBox(graphics, bounds, text, comboBoxFont, comboBoxState);
+                    if (ComboBoxRenderer.IsSupported)
+                        ComboBoxRenderer.DrawTextBox(graphics, bounds, text, comboBoxFont, comboBoxState);
+                    else
+                    {
+                        graphics.FillRectangle(SystemBrushes.ControlText, bounds);
+                        ControlPaint.DrawButton(graphics, bounds, buttonState);
+                        point = new(bounds.Location.X + 3 + bounds.Width / 2 - size.Width / 2,
+                            bounds.Location.Y + bounds.Height / 2 - size.Height / 2);
+                        TextRenderer.DrawText(graphics, text, comboBoxFont, point,
+                            Enabled ? SystemColors.ControlText : SystemColors.GrayText, TextFormatFlags.Default);
+                    }
+
                     size = new(14, 0);
                     left = -1;
                     bounds = bounds with { X = bounds.X + bounds.Width + left, Width = size.Width };
@@ -181,7 +201,11 @@ internal sealed class CustomTreeView : TreeView
                         selectionBounds.Size + new Size(bounds.Size.Width + left, 0));
                     comboBoxBounds = new(comboBoxBounds.Location,
                         comboBoxBounds.Size + new Size(bounds.Size.Width + left, 0));
-                    ComboBoxRenderer.DrawDropDownButton(graphics, bounds, comboBoxState);
+                    if (ComboBoxRenderer.IsSupported)
+                        ComboBoxRenderer.DrawDropDownButton(graphics, bounds, comboBoxState);
+                    else
+                        ControlPaint.DrawComboButton(graphics, bounds, buttonState);
+
                     this.comboBoxBounds[selection] = RectangleToClient(comboBoxBounds);
                 }
                 else
@@ -211,6 +235,7 @@ internal sealed class CustomTreeView : TreeView
 
         if (e.Button is not MouseButtons.Left || !ComboBoxRenderer.IsSupported)
             return;
+
         if (comboBoxBounds.Count > 0 && selectForm is not null)
             foreach (KeyValuePair<Selection, Rectangle> pair in comboBoxBounds)
                 if (!Selection.All.ContainsKey(pair.Key) || !pair.Key.CanUseProxy)
