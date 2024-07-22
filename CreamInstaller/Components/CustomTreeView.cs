@@ -126,7 +126,7 @@ internal sealed class CustomTreeView : TreeView
             TextRenderer.DrawText(graphics, text, font, point, color, TextFormatFlags.Default);
         }
 
-        if (form is SelectForm)
+        if (form is SelectForm && ComboBoxRenderer.IsSupported)
         {
             Selection selection = Selection.FromId(platform, id);
             if (selection is not null && selection.CanUseProxy)
@@ -209,7 +209,7 @@ internal sealed class CustomTreeView : TreeView
                 break;
             }
 
-        if (e.Button is not MouseButtons.Left)
+        if (e.Button is not MouseButtons.Left || !ComboBoxRenderer.IsSupported)
             return;
         if (comboBoxBounds.Count > 0 && selectForm is not null)
             foreach (KeyValuePair<Selection, Rectangle> pair in comboBoxBounds)
