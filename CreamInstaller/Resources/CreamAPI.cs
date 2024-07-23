@@ -27,30 +27,78 @@ internal static class CreamAPI
         config = directory + @"\cream_api.ini";
     }
 
-    internal static void CheckConfig(string directory, Selection selection, InstallForm installForm = null)
+    private static void CheckConfigOld(string directory, Selection selection, InstallForm installForm = null)
+    {
+        directory.GetCreamApiComponents(out _, out _, out _, out _, out string config);
+        bool configExisted = config.FileExists();
+        if (configExisted)
+            config.DeleteFile();
+        StreamWriter writer = null;
+
+        HashSet<SelectionDLC> dlc = selection.DLC.Where(dlc => dlc.Enabled).ToHashSet();
+        if (dlc.Count > 0 && selection.Id != "PL")
+        {
+            config.CreateFile(true, installForm)?.Close();
+            writer = new(config, true, Encoding.Default);
+
+            WriteConfig(writer, selection.Name, selection.Id,
+                new(dlc.ToDictionary(_dlc => _dlc.Id, _dlc => _dlc.Name), PlatformIdComparer.String), installForm);
+        }
+
+        foreach (Selection extraSelection in selection.ExtraSelections)
+        {
+            HashSet<SelectionDLC> extraDlc = extraSelection.DLC.Where(dlc => dlc.Enabled).ToHashSet();
+            if (extraDlc.Count <= 0)
+                continue;
+
+            if (writer is not null)
+                writer.WriteLine();
+            else
+            {
+                config.CreateFile(true, installForm)?.Close();
+                writer = new(config, true, Encoding.Default);
+            }
+
+            WriteConfig(writer, extraSelection.Name, extraSelection.Id,
+                new(extraDlc.ToDictionary(_dlc => _dlc.Id, _dlc => _dlc.Name), PlatformIdComparer.String), installForm);
+        }
+
+        if (writer is not null)
+        {
+            writer.Flush();
+            writer.Close();
+            return;
+        }
+
+        if (!configExisted)
+            return;
+        installForm?.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", LogTextBox.Action,
+            false);
+    }
+
+    private static void CheckConfig(string directory, Selection selection, InstallForm installForm = null)
     {
         directory.GetCreamApiComponents(out _, out _, out _, out _, out string config);
         HashSet<SelectionDLC> dlc = selection.DLC.Where(dlc => dlc.Enabled).ToHashSet();
-        foreach (SelectionDLC extraDlc in selection.ExtraSelections.SelectMany(extraSelection =>
-                     extraSelection.DLC.Where(_dlc => _dlc.Enabled)))
+        foreach (SelectionDLC extraDlc in selection.ExtraSelections
+                     .Select(extraSelection => extraSelection.DLC.Where(_dlc => _dlc.Enabled).ToHashSet())
+                     .SelectMany(extraDlc => extraDlc))
             _ = dlc.Add(extraDlc);
+
+        config.DeleteFile();
         if (dlc.Count > 0)
         {
-            /*if (installForm is not null)
-                installForm.UpdateUser("Generating CreamAPI configuration for " + selection.Name + $" in directory \"{directory}\" . . . ", LogTextBox.Operation);*/
             config.CreateFile(true, installForm)?.Close();
-            StreamWriter writer = new(config, true, Encoding.UTF8);
-            WriteConfig(writer, selection.Name, selection.Id,
+            StreamWriter writer = new(config, true, Encoding.Default);
+            WriteConfig(writer, selection.Name, !int.TryParse(selection.Id, out _) ? "0" : selection.Id,
                 new(dlc.ToDictionary(_dlc => _dlc.Id, _dlc => _dlc.Name), PlatformIdComparer.String), installForm);
             writer.Flush();
             writer.Close();
+            return;
         }
-        else if (config.FileExists())
-        {
-            config.DeleteFile();
-            installForm?.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", LogTextBox.Action,
-                false);
-        }
+
+        installForm?.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", LogTextBox.Action,
+            false);
     }
 
     private static void WriteConfig(StreamWriter writer, string name, string appId,
@@ -59,10 +107,18 @@ internal static class CreamAPI
         writer.WriteLine($"; {name}");
         writer.WriteLine("[steam]");
         writer.WriteLine($"appid = {appId}");
+        installForm?.UpdateUser($"Added game to cream_api.ini with appid {appId} ({name})",
+            LogTextBox.Action, false);
+        writer.WriteLine("unlockall = false");
+        writer.WriteLine("orgapi = steam_api_o.dll");
+        writer.WriteLine("orgapi64 = steam_api64_o.dll");
+        writer.WriteLine("extraprotection = false"); // we may want to set this on by default?
+        writer.WriteLine("forceoffline = false");
+        writer.WriteLine();
+        writer.WriteLine("[steam_misc]"); // this line seems to be required in v5.3.0.0, or the config won't be read
+        writer.WriteLine("disableuserinterface = false");
         writer.WriteLine();
         writer.WriteLine("[dlc]");
-        // installForm?.UpdateUser($"Added game to cream_api.ini with appid {appId} ({name})",
-        // LogTextBox.Action, false);
         foreach ((string dlcId, string dlcName) in dlc)
         {
             writer.WriteLine($"{dlcId} = {dlcName}");
