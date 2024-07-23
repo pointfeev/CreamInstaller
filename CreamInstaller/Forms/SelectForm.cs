@@ -577,7 +577,7 @@ internal sealed partial class SelectForm : CustomForm
                     gameChoices.Add((Platform.Steam, appId, name,
                         programsToScan is not null &&
                         programsToScan.Any(p => p.platform is Platform.Steam && p.id == appId)));
-            if (EpicLibrary.EpicManifestsPath.DirectoryExists() || HeroicLibrary.HeroicLibraryPath.DirectoryExists())
+            if (EpicLibrary.EpicManifestsPath.DirectoryExists() || HeroicLibrary.HeroicLibraryPath.FileExists())
                 gameChoices.AddRange((await EpicLibrary.GetGames())
                     .Where(m => !Program.IsGameBlocked(m.DisplayName, m.InstallLocation)).Select(manifest
                         => (Platform.Epic, manifest.CatalogNamespace, manifest.DisplayName,
