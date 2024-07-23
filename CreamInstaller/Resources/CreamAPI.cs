@@ -27,55 +27,6 @@ internal static class CreamAPI
         config = directory + @"\cream_api.ini";
     }
 
-    private static void CheckConfigOld(string directory, Selection selection, InstallForm installForm = null)
-    {
-        directory.GetCreamApiComponents(out _, out _, out _, out _, out string config);
-        bool configExisted = config.FileExists();
-        if (configExisted)
-            config.DeleteFile();
-        StreamWriter writer = null;
-
-        HashSet<SelectionDLC> dlc = selection.DLC.Where(dlc => dlc.Enabled).ToHashSet();
-        if (dlc.Count > 0 && selection.Id != "PL")
-        {
-            config.CreateFile(true, installForm)?.Close();
-            writer = new(config, true, Encoding.Default);
-
-            WriteConfig(writer, selection.Name, selection.Id,
-                new(dlc.ToDictionary(_dlc => _dlc.Id, _dlc => _dlc.Name), PlatformIdComparer.String), installForm);
-        }
-
-        foreach (Selection extraSelection in selection.ExtraSelections)
-        {
-            HashSet<SelectionDLC> extraDlc = extraSelection.DLC.Where(dlc => dlc.Enabled).ToHashSet();
-            if (extraDlc.Count <= 0)
-                continue;
-
-            if (writer is not null)
-                writer.WriteLine();
-            else
-            {
-                config.CreateFile(true, installForm)?.Close();
-                writer = new(config, true, Encoding.Default);
-            }
-
-            WriteConfig(writer, extraSelection.Name, extraSelection.Id,
-                new(extraDlc.ToDictionary(_dlc => _dlc.Id, _dlc => _dlc.Name), PlatformIdComparer.String), installForm);
-        }
-
-        if (writer is not null)
-        {
-            writer.Flush();
-            writer.Close();
-            return;
-        }
-
-        if (!configExisted)
-            return;
-        installForm?.UpdateUser($"Deleted unnecessary configuration: {Path.GetFileName(config)}", LogTextBox.Action,
-            false);
-    }
-
     private static void CheckConfig(string directory, Selection selection, InstallForm installForm = null)
     {
         directory.GetCreamApiComponents(out _, out _, out _, out _, out string config);
