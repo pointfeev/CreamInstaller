@@ -1,6 +1,6 @@
 ### CreamInstaller: Automatic DLC Unlocker Installer & Configuration Generator
 
-![Program Preview Image](preview.png)
+![Program Preview Image](https://raw.githubusercontent.com/pointfeev/CreamInstaller/main/preview.png)
 
 ###### **NOTE:** This is simply a preview image; this is not a list of supported games nor configurations!
 
