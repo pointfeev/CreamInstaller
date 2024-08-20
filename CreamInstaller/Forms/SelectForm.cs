@@ -801,11 +801,12 @@ internal sealed partial class SelectForm : CustomForm
                     : new(node.Text, (id, dlc.Icon), (id, dlcParentSelection.Icon));
             _ = items.Add(header);
             string appInfoVDF = $@"{SteamCMD.AppInfoPath}\{id}.vdf";
+            string appInfoCmdJSON = $@"{SteamCMD.AppInfoPath}\{id}.cmd.json";
             string appInfoJSON = $@"{SteamCMD.AppInfoPath}\{id}.json";
             string cooldown = $@"{ProgramData.CooldownPath}\{id}.txt";
-            if (appInfoVDF.FileExists() || appInfoJSON.FileExists())
+            if (appInfoVDF.FileExists() || appInfoCmdJSON.FileExists() || appInfoJSON.FileExists())
             {
-                List<ContextMenuItem> queries = new();
+                List<ContextMenuItem> queries = [];
                 if (appInfoJSON.FileExists())
                 {
                     string platformString = selection is null || selection.Platform is Platform.Steam
@@ -817,9 +818,14 @@ internal sealed partial class SelectForm : CustomForm
                         (_, _) => Diagnostics.OpenFileInNotepad(appInfoJSON)));
                 }
 
+                if (appInfoCmdJSON.FileExists())
+                    queries.Add(new("Open SteamCMD.net Query", "Notepad",
+                        (_, _) => Diagnostics.OpenFileInNotepad(appInfoCmdJSON)));
+
                 if (appInfoVDF.FileExists())
                     queries.Add(new("Open SteamCMD Query", "Notepad",
                         (_, _) => Diagnostics.OpenFileInNotepad(appInfoVDF)));
+
                 if (queries.Count > 0)
                 {
                     _ = items.Add(new ToolStripSeparator());
@@ -828,6 +834,7 @@ internal sealed partial class SelectForm : CustomForm
                     _ = items.Add(new ContextMenuItem("Refresh Queries", "Command Prompt", (_, _) =>
                     {
                         appInfoVDF.DeleteFile();
+                        appInfoCmdJSON.DeleteFile();
                         appInfoJSON.DeleteFile();
                         cooldown.DeleteFile();
                         selection?.Remove();
