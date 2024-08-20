@@ -23,8 +23,8 @@ games and DLCs the user selects; however, through the use of **right-click conte
 #### Features:
 * Automatic download and installation of SteamCMD as necessary whenever a Steam game is chosen. *For gathering appinfo such as name, buildid, listofdlc, depots, etc.*
 * Automatic gathering and caching of information for all selected Steam and Epic games and **ALL** of their DLCs.
-* Automatic DLL installation and configuration generation for Koaloader, SmokeAPI, ScreamAPI, Uplay R1 Unlocker and Uplay R2 Unlocker.
-* Automatic uninstallation of DLLs and configurations for Koaloader, CreamAPI, SmokeAPI, ScreamAPI, Uplay R1 Unlocker and Uplay R2 Unlocker.
+* Automatic DLL installation and configuration generation for CreamAPI, Koaloader, ScreamAPI, Uplay R1 Unlocker and Uplay R2 Unlocker.
+* Automatic uninstallation of DLLs and configurations for CreamAPI, Koaloader, SmokeAPI, ScreamAPI, Uplay R1 Unlocker and Uplay R2 Unlocker.
 * Automatic reparation of the Paradox Launcher (and manually via the right-click context menu "Repair" option). *For when the launcher updates whilst you have CreamAPI, SmokeAPI or ScreamAPI installed to it.*
 
 ---
@@ -32,7 +32,7 @@ games and DLCs the user selects; however, through the use of **right-click conte
 1. Click [here](https://github.com/pointfeev/CreamInstaller/releases/latest/download/CreamInstaller.zip) to download the latest release from [GitHub](https://github.com/pointfeev/CreamInstaller).
 2. Extract the executable from the ZIP file to anywhere on your computer you want. *It's completely self-contained.*
 
-If the program doesn't seem to launch, try downloading and installing [.NET Desktop Runtime 8.0.7](https://download.visualstudio.microsoft.com/download/pr/bb581716-4cca-466e-9857-512e2371734b/5fe261422a7305171866fd7812d0976f/windowsdesktop-runtime-8.0.7-win-x64.exe) and restarting your computer. Note that the program currently only supports Windows 8+ 64-bit machines, as .NET 7+ no longer support Windows 7.
+If the program doesn't seem to launch, try downloading and installing [.NET Desktop Runtime 8.0.7](https://download.visualstudio.microsoft.com/download/pr/bb581716-4cca-466e-9857-512e2371734b/5fe261422a7305171866fd7812d0976f/windowsdesktop-runtime-8.0.7-win-x64.exe) and restarting your computer. Note that the program currently only supports Windows 10+ 64-bit machines as seen [here](https://github.com/dotnet/core/blob/main/release-notes/8.0/supported-os.md).
 
 ---
 #### Usage:
@@ -41,7 +41,7 @@ If the program doesn't seem to launch, try downloading and installing [.NET Desk
 3. Wait for the program to download and install SteamCMD (if you chose a Steam game). *Very fast, depends on internet speed.*
 4. Wait for the program to gather and cache the chosen games' information & DLCs. *May take a good amount of time on the first run, depends on how many games you chose and how many DLCs they have.*
 5. **CAREFULLY** select which games' DLCs you wish to unlock. *Obviously none of the DLC unlockers are tested for every single game!*
-6. Choose whether or not to install with Koaloader, and if so then also pick the proxy DLL to use. *If the default version.dll doesn't work, then see [here](https://cs.rin.ru/forum/viewtopic.php?p=2552172#p2552172) to find one that does.*
+6. Choose whether or not to install in Proxy mode, and if so then also pick the proxy DLL to use. *If the default winmm.dll doesn't work, then see [here](https://cs.rin.ru/forum/viewtopic.php?p=2552172#p2552172) to find one that does.*
 7. Click the **Generate and Install** button.
 8. Click the **OK** button to close the program.
 9. If any of the DLC unlockers cause problems with any of the games you installed them on, simply go back to step 5 and select what games you wish you **revert** changes to, and instead click the **Uninstall** button this time.
@@ -52,7 +52,7 @@ If the program doesn't seem to launch, try downloading and installing [.NET Desk
 #### FAQ / Common Issues:
 
 **Q:** The program is not launching.
-**A:** First and foremost, note that the program currently only supports Windows 8+ 64-bit machines, as .NET 7+ no longer support Windows 7. If that does not apply to you, then make sure you've extracted the executable from the ZIP file before you've launched it, resolved your anti-virus, and have tried downloading the .NET Desktop Runtime mentioned under [installation instructions](https://github.com/pointfeev/CreamInstaller#installation) above and restarting your computer. If none of the above work, then I simply cannot do anything about it, I do not control .NET. Either your system is not supported by the current version of .NET, or something is wrong/corrupted with your system.
+**A:** First and foremost, note that the program currently only supports Windows 10+ 64-bit machines as seen [here](https://github.com/dotnet/core/blob/main/release-notes/8.0/supported-os.md). If that does not apply to you, then make sure you've extracted the executable from the ZIP file before you've launched it, resolved your anti-virus, and have tried downloading the .NET Desktop Runtime mentioned under [installation instructions](https://github.com/pointfeev/CreamInstaller#installation) above and restarting your computer. If none of the above work, then I simply cannot do anything about it, I do not control .NET. Either your system is not supported by the current version of .NET, or something is wrong/corrupted with your system.
 
 **Q:** The game I installed the unlocker(s) to is not working/the DLCs are not unlocked.
 **A:** Make sure you've read the note under [Usage](https://github.com/pointfeev/CreamInstaller#usage) above! Assuming the program functioned as it was supposed to by properly installing DLC unlockers to your chosen games, this is not an issue I can do anything about and it's entirely up to you to seek the appropriate resources to fix it yourself (hint: https://cs.rin.ru/forum/viewforum.php?f=10).
